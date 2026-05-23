@@ -78,7 +78,9 @@ LANG_DATA = {
         'fun_welcome': "🚀 **Eğlence & Araçlar Menüsü**\n\nZar atmak için aşağıdaki butona basın:",
         'azr_welcome': "🔥 **AZRxGUARD Özel Menüsüne Hoş Geldiniz!**\n\nBot istatistiklerini canlı görmek için aşağıdaki butona tıklayın:",
         'force_join_text': "⚠️ **DURUN!** Botu kullanabilmek için önce resmi kanalımıza katılmanız gerekmektedir.\n\nKatıldıktan sonra bota tekrar `/start` yazabilir veya menüyü kullanabilirsiniz.",
-        'btn_join_now': "📢 Kanala Katıl"
+        'btn_join_now': "📢 Kanala Katıl",
+        'btn_meid': "🪪 Me ID",
+        'meid_title': "🪪 **Kullanıcı Bilgilerin**"
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -97,7 +99,9 @@ LANG_DATA = {
         'fun_welcome': "🚀 **Əyləncə & Alətlər Menyusu**\n\nZar atmaq üçün aşağıdakı düyməyə basın:",
         'azr_welcome': "🔥 **AZRxGUARD Özel Menyusuna Xoş Gəldiniz!**\n\nBot statistikasını canlı görmək üçün aşağıdakı düyməyə vurun:",
         'force_join_text': "⚠️ **DAYANIN!** Botdan istifadə edə bilmək üçün əvvəlcə rəsmi kanalımıza qoşulmalısınız.\n\nQoşulduqdan sonra bota yenidən `/start` yaza bilərsiniz.",
-        'btn_join_now': "📢 Kanala Qoşul"
+        'btn_join_now': "📢 Kanala Qoşul",
+        'btn_meid': "🪪 Me ID",
+        'meid_title': "🪪 **İstifadəçi Məlumatların**"
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -116,7 +120,9 @@ LANG_DATA = {
         'fun_welcome': "🚀 **Развлекательное меню**\n\nНажмите кнопку ниже, чтобы бросить кубик:",
         'azr_welcome': "🔥 **Специальное меню AZRxGUARD!**\n\nНажмите кнопку ниже, чтобы увидеть статистику бота:",
         'force_join_text': "⚠️ **ВНИМАНИЕ!** Чтобы использовать бота, вы должны сначала подписаться на наш официальный канал.\n\nПосле подписки отправьте `/start` снова.",
-        'btn_join_now': "📢 Подписаться на канал"
+        'btn_join_now': "📢 Подписаться на канал",
+        'btn_meid': "🪪 Me ID",
+        'meid_title': "🪪 **Информация о тебе**"
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -135,7 +141,9 @@ LANG_DATA = {
         'fun_welcome': "🚀 **Entertainment & Tools Menu**\n\nPress the button below to roll the dice:",
         'azr_welcome': "🔥 **Welcome to AZRxGUARD Special Menu!**\n\nClick the button below to view live bot statistics:",
         'force_join_text': "⚠️ **ATTENTION!** To use this bot, you must first join our official channel.\n\nAfter joining, please send `/start` again to unlock.",
-        'btn_join_now': "📢 Join Channel"
+        'btn_join_now': "📢 Join Channel",
+        'btn_meid': "🪪 Me ID",
+        'meid_title': "🪪 **Your Information**"
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -154,7 +162,9 @@ LANG_DATA = {
         'fun_welcome': "🚀 **Unterhaltungs- & Tools-Menü**\n\nDrücken Sie die Taste unten, um zu würfeln:",
         'azr_welcome': "🔥 **Willkommen im AZRxGUARD Spezialmenü!**\n\nKlicken Sie auf die Schaltfläche unten, um die Live-Bot-Statistiken anzuzeigen:",
         'force_join_text': "⚠️ **ACHTUNG!** Um diesen Bot nutzen zu können, müssen Sie zuerst unserem offiziellen Kanal beitreten.\n\nNach dem Beitritt senden Sie bitte erneut `/start`.",
-        'btn_join_now': "📢 Kanal beitreten"
+        'btn_join_now': "📢 Kanal beitreten",
+        'btn_meid': "🪪 Me ID",
+        'meid_title': "🪪 **Deine Informationen**"
     }
 }
 
@@ -301,6 +311,70 @@ async def stats_komut_tetikleyici(update: Update, context: ContextTypes.DEFAULT_
     rapor = istatistik_raporu_hazirla(context)
     await update.message.reply_text(rapor, parse_mode='Markdown')
 
+# --- 🪪 ME ID KOMUTU ---
+def meid_bilgisi_olustur(update: Update, context: ContextTypes.DEFAULT_TYPE, lang: str) -> str:
+    from datetime import datetime, timezone
+    user = update.effective_user
+    chat = update.effective_chat
+    msg = update.effective_message
+
+    ad = html.escape(user.first_name) if user.first_name else "—"
+    soyad = html.escape(user.last_name) if user.last_name else "—"
+    tam_ad = f"{ad} {soyad}".strip() if user.last_name else ad
+    kullanici_adi = f"@{user.username}" if user.username else "—"
+    bot_dili_map = {'tr': '🇹🇷 Türkçe', 'az': '🇦🇿 Azərbaycanca', 'ru': '🇷🇺 Русский', 'en': '🇬🇧 English', 'de': '🇩🇪 Deutsch'}
+    bot_dili = bot_dili_map.get(lang, lang)
+    tg_dili = user.language_code.upper() if user.language_code else "—"
+    premium = "✅ Evet" if getattr(user, 'is_premium', False) else "❌ Hayır"
+
+    chat_turu_map = {
+        'private': '💬 Özel Mesaj (DM)',
+        'group': '👥 Grup',
+        'supergroup': '👥 Süper Grup',
+        'channel': '📢 Kanal'
+    }
+    chat_turu = chat_turu_map.get(chat.type, chat.type) if chat else "—"
+    chat_id = str(chat.id) if chat else "—"
+    chat_adi = html.escape(chat.title) if chat and chat.title else "—"
+
+    mesaj_zamani = "—"
+    if msg and msg.date:
+        mesaj_zamani = msg.date.strftime("%d.%m.%Y %H:%M:%S UTC")
+
+    toplam_uyeler = uyeleri_getir()
+    kayitli = "✅ Evet" if user.id in toplam_uyeler else "❌ Hayır"
+
+    title = LANG_DATA[lang].get('meid_title', '🪪 **Kullanıcı Bilgilerin**')
+
+    return (
+        f"{title}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"👤 **Ad Soyad:** `{tam_ad}`\n"
+        f"🏷️ **Kullanıcı Adı:** `{kullanici_adi}`\n"
+        f"🆔 **Kullanıcı ID:** `{user.id}`\n\n"
+        f"🌍 **Bot Dili:** {bot_dili}\n"
+        f"📱 **Telegram Dili:** `{tg_dili}`\n"
+        f"💎 **Telegram Premium:** {premium}\n\n"
+        f"💬 **Sohbet Türü:** {chat_turu}\n"
+        f"🏠 **Sohbet Adı:** `{chat_adi}`\n"
+        f"📌 **Sohbet ID:** `{chat_id}`\n\n"
+        f"🕒 **Mesaj Zamanı:** `{mesaj_zamani}`\n"
+        f"📋 **Bot'a Kayıtlı:** {kayitli}\n\n"
+        f"🤖 _AZRxGUARD tarafından oluşturuldu_"
+    )
+
+async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.effective_user:
+        return
+    user_id = update.effective_user.id
+    lang = get_lang(context, user_id)
+    strings = LANG_DATA[lang]
+    bilgi = meid_bilgisi_olustur(update, context, lang)
+    geri_klavye = None
+    if update.effective_chat and update.effective_chat.type == 'private':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+    await update.effective_message.reply_text(bilgi, parse_mode='Markdown', reply_markup=geri_klavye)
+
 # --- YÖNETİM KANALINDAN ÜYELERE KOPYALAMA SİSTEMİ ---
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.channel_post:
@@ -435,6 +509,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_azr_special':
         azr_klavye = [
             [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
+            [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['azr_welcome'], reply_markup=InlineKeyboardMarkup(azr_klavye), parse_mode='Markdown')
@@ -442,6 +517,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rapor_metni = istatistik_raporu_hazirla(context)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=rapor_metni, reply_markup=geri_klavye, parse_mode='Markdown')
+    elif query.data == 'show_meid':
+        bilgi = meid_bilgisi_olustur(update, context, lang)
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+        await query.edit_message_text(text=bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'roll_dice':
         await query.message.delete()
         await query.message.chat.send_dice(emoji='🎲')
@@ -489,6 +568,7 @@ def main():
 
     application.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("stats", stats_komut_tetikleyici, filters=filters.ChatType.PRIVATE))
+    application.add_handler(CommandHandler("meid", meid_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
