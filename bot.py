@@ -6,7 +6,7 @@ from threading import Thread
 import html
 import os
 import pickle
-import google.generativeai as genai
+from google import genai as google_genai
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
@@ -44,46 +44,60 @@ YONETIM_KANAL_ID = -1003918825511
 
 # --- GEMINI AI KURULUMU ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-gemini_model = None
+gemini_client = None
 if GEMINI_API_KEY:
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        gemini_model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            system_instruction=(
-                "Sen AZRxGUARD botunun yapay zeka asistanısın. "
-                "Türkçe, Azerbaycanca, Rusça, İngilizce ve Almanca konuşabilirsin. "
-                "Kullanıcının dilinde kısa, net ve yardımcı cevaplar ver. "
-                "Zararlı, yasadışı veya uygunsuz içerik üretme."
-            )
-        )
+        gemini_client = google_genai.Client(api_key=GEMINI_API_KEY)
         logger.info("Gemini AI başarıyla yüklendi.")
     except Exception as e:
         logger.error(f"Gemini AI yükleme hatası: {e}")
 
 # --- KÜFÜR FİLTRESİ LİSTESİ ---
-KUFUR_LISTESI = [
+# \b yerine boşluk/satır başı/sonu kontrolü — Türkçe/Rusça özel karakterlerle çalışır
+KUFUR_KELIMELER = [
     # Türkçe
-    r'\borospu\b', r'\borospu\s*[çc]oc[uü][ğg]u\b', r'\bpi[çc]\b', r'\bsik\b', r'\bsikiş\b',
-    r'\bsiktiir\b', r'\bsiktir\b', r'\bamk\b', r'\bamına\b', r'\bamını\b', r'\bamın\b',
-    r'\b[gğ][oö]t\b', r'\bibne\b', r'\bok[çc]u\b', r'\boç\b', r'\bbok\b', r'\bgerize\s*kal[iı]\b',
-    r'\bserefsiz\b', r'\bşerefsiz\b', r'\bkaltaklık\b', r'\bkaltakl[iı]k\b', r'\bkaltaklar\b', r'\bkaltak\b',
-    r'\bnasipse\b', r'\borg\b',
+    'orospu', 'orospuçocuğu', 'orospu çocuğu', 'orospu cocugu',
+    'piç', 'pic', 'sik', 'siktiir', 'siktir', 'sikiş', 'sikis',
+    'amk', 'amına', 'amını', 'amın', 'aminakoyim', 'oç', 'oc',
+    'göt', 'got', 'ibne', 'orospu', 'bok', 'boktan',
+    'gerizekalı', 'gerzek', 'şerefsiz', 'serefsiz',
+    'kaltak', 'kaltaklar', 'kaltaklık', 'kahpe', 'sürtük', 'surtuk',
+    'pezevenk', 'bok', 'boktan', 'boklu', 'salak', 'aptal',
+    'dangalak', 'haysiyetsiz', 'namussuz', 'puşt', 'pusht',
+    'götveren', 'liboş', 'libos', 'götoğlanı', 'ananı', 'ananı',
+    'sıçtım', 'sıçayım', 'sıç', 'sic', 'yarrak', 'yarak',
     # Azerbaycanca
-    r'\bsikin\b', r'\bsikib\b', r'\banasin[iı]\b', r'\banasin\b', r'\bgotveren\b',
-    r'\bitin\b', r'\bes[şs]e[kğg]\b', r'\bnaxuy\b', r'\bsürt\b',
+    'sikin', 'sikib', 'anasını', 'anasini', 'götver', 'gotveren',
+    'sürün', 'surun', 'it heyvan', 'eşşek', 'essek', 'naxuy',
+    'götünə', 'soxum', 'sikdir', 'ananı sikım', 'sik get',
     # Rusça
-    r'\bблядь\b', r'\bбля\b', r'\bхуй\b', r'\bхуйня\b', r'\bпизда\b', r'\bпиздец\b',
-    r'\bёбаный\b', r'\bёб\b', r'\bеб[аеёи]\b', r'\bсука\b', r'\bмудак\b', r'\bублюдок\b',
-    r'\bнахуй\b', r'\bзаткнись\b', r'\bпидор\b', r'\bпидр\b', r'\bкурва\b',
+    'блядь', 'бля', 'блять', 'хуй', 'хуйня', 'хуйло',
+    'пизда', 'пиздец', 'пиздёж', 'ёбаный', 'ёб', 'ёбать',
+    'еба', 'ебать', 'ебло', 'ёблан', 'сука', 'суки',
+    'мудак', 'мудила', 'ублюдок', 'нахуй', 'нахер',
+    'пидор', 'пидр', 'пидрила', 'курва', 'залупа',
+    'шлюха', 'ёбтвоюмать', 'твоюмать', 'бляха',
     # İngilizce
-    r'\bfuck\b', r'\bfucking\b', r'\bfucker\b', r'\bfucked\b', r'\bshit\b', r'\bshitty\b',
-    r'\bbitch\b', r'\basshole\b', r'\bbastard\b', r'\bcunt\b', r'\bdick\b', r'\bpussy\b',
-    r'\bwhore\b', r'\bslut\b', r'\bmotherfucker\b', r'\bfaggot\b', r'\bretard\b',
-    # Yaygın kısaltmalar / yıldızlı yazılış
-    r'\bf\*ck\b', r'\bs\*it\b', r'\bb\*tch\b', r'\bwtf\b', r'\bstfu\b',
+    'fuck', 'fucking', 'fucker', 'fucked', 'fck', 'f*ck',
+    'shit', 'shitty', 'sh*t', 'bitch', 'b*tch', 'btch',
+    'asshole', 'bastard', 'cunt', 'dick', 'pussy',
+    'whore', 'slut', 'motherfucker', 'mf', 'faggot', 'fag',
+    'nigga', 'nigger', 'retard', 'stfu', 'wtf',
+    # Yıldızlı / gizlenmiş yazılış
+    's*k', 'f**k', 's**t', 'b**ch', 'a**hole',
 ]
-KUFUR_REGEX = re.compile('|'.join(KUFUR_LISTESI), re.IGNORECASE | re.UNICODE)
+
+def kufur_var_mi(metin: str) -> bool:
+    metin_kucuk = metin.lower()
+    metin_temiz = re.sub(r'[\s\-_\.\*]+', '', metin_kucuk)
+    for kelime in KUFUR_KELIMELER:
+        k = kelime.lower()
+        if k in metin_kucuk:
+            return True
+        k_temiz = re.sub(r'[\s\-_\.\*]+', '', k)
+        if k_temiz and k_temiz in metin_temiz:
+            return True
+    return False
 
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
@@ -457,7 +471,7 @@ async def kufur_filtre_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     msg = update.effective_message
     if not msg or not msg.text:
         return
-    if not KUFUR_REGEX.search(msg.text):
+    if not kufur_var_mi(msg.text):
         return
     user = update.effective_user
     if not user:
@@ -476,8 +490,15 @@ async def kufur_filtre_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.error(f"Küfür filtresi hatası: {e}")
 
 # --- 🤖 GEMİNİ AI YANIT ---
+GEMINI_SISTEM = (
+    "Sen AZRxGUARD botunun yapay zeka asistanısın. "
+    "Türkçe, Azerbaycanca, Rusça, İngilizce ve Almanca konuşabilirsin. "
+    "Kullanıcının dilinde kısa, net ve yardımcı cevaplar ver. "
+    "Zararlı, yasadışı veya uygunsuz içerik üretme."
+)
+
 async def gemini_ai_yanit(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not gemini_model:
+    if not gemini_client:
         return
     msg = update.effective_message
     if not msg or not msg.text:
@@ -485,18 +506,27 @@ async def gemini_ai_yanit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = msg.text.strip()
     if not user_text:
         return
+    bekle = None
     try:
         bekle = await msg.reply_text("🤖 _Düşünüyorum..._", parse_mode='Markdown')
         yanit = await asyncio.to_thread(
-            lambda: gemini_model.generate_content(user_text).text
+            lambda: gemini_client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=user_text,
+                config=google_genai.types.GenerateContentConfig(
+                    system_instruction=GEMINI_SISTEM,
+                    temperature=0.7,
+                )
+            ).text
         )
         await bekle.edit_text(f"🤖 {yanit}")
     except Exception as e:
         logger.error(f"Gemini AI hatası: {e}")
-        try:
-            await bekle.edit_text("⚠️ Yapay zeka şu an yanıt veremiyor, lütfen tekrar dene.")
-        except Exception:
-            pass
+        if bekle:
+            try:
+                await bekle.edit_text("⚠️ Yapay zeka şu an yanıt veremiyor, lütfen tekrar dene.")
+            except Exception:
+                pass
 
 # --- YÖNETİM KANALINDAN ÜYELERE KOPYALAMA SİSTEMİ ---
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
