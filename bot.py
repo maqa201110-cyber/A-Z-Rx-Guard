@@ -420,6 +420,71 @@ async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         await update.effective_message.reply_text(bilgi, reply_markup=geri_klavye)
 
+# --- 🌐 IP BASİT SORGULAMA ---
+def _ipapi_basit_getir(ip: str) -> dict:
+    try:
+        r = http_requests.get(
+            f"http://ip-api.com/json/{ip}?fields=status,message,country,countryCode,"
+            f"regionName,city,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting,query",
+            timeout=8
+        )
+        return r.json()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def ip_basit_rapor(veri: dict, aranan_ip: str) -> str:
+    if veri.get("status") != "success":
+        hata = veri.get("message", "Bilinmeyen hata")
+        return f"❌ **IP sorgulanamadı:** `{hata}`\n\nGirilen değer: `{aranan_ip}`"
+
+    lat = veri.get('lat', '')
+    lon = veri.get('lon', '')
+    harita = f"https://maps.google.com/?q={lat},{lon}" if lat and lon else None
+
+    rozetler = []
+    if veri.get('proxy'):   rozetler.append("🔴 Proxy/VPN")
+    if veri.get('hosting'): rozetler.append("🟠 Hosting/Sunucu")
+    if veri.get('mobile'):  rozetler.append("📱 Mobil Hat")
+    rozet_str = " · ".join(rozetler) if rozetler else "✅ Temiz (Normal Kullanıcı)"
+
+    return (
+        f"🌐 **IP Sorgulama — AZRxGUARD**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔍 **Sorgulan IP:** `{veri.get('query', aranan_ip)}`\n\n"
+        f"🏳️ **Ülke:** {veri.get('country', '—')} ({veri.get('countryCode', '—')})\n"
+        f"🏙️ **Bölge:** {veri.get('regionName', '—')} / {veri.get('city', '—')}\n"
+        f"📮 **Posta Kodu:** {veri.get('zip', '—')}\n"
+        f"🕐 **Saat Dilimi:** `{veri.get('timezone', '—')}`\n\n"
+        f"📍 **Koordinat:** {lat}, {lon}\n"
+        + (f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n\n" if harita else "\n")
+        + f"🏢 **ISP:** {veri.get('isp', '—')}\n"
+        f"🏛️ **Organizasyon:** {veri.get('org', '—')}\n"
+        f"📡 **AS:** {veri.get('as', '—')}\n"
+        f"🔤 **AS Adı:** {veri.get('asname', '—')}\n\n"
+        f"🛡️ **IP Türü:** {rozet_str}\n\n"
+        f"🤖 _AZRxGUARD tarafından sorgulandı_"
+    )
+
+async def ip_basit_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.effective_message.reply_text(
+            "🌐 **IP Sorgulama**\n\nKullanım: `/ip <IP adresi>`\nÖrnek: `/ip 8.8.8.8`",
+            parse_mode='Markdown'
+        )
+        return
+    ip_adresi = context.args[0].strip()
+    if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
+        await update.effective_message.reply_text("❌ Geçersiz IP formatı. Örnek: `/ip 8.8.8.8`", parse_mode='Markdown')
+        return
+    bekle = await update.effective_message.reply_text(f"🔍 `{ip_adresi}` sorgulanıyor...", parse_mode='Markdown')
+    try:
+        veri = await asyncio.to_thread(_ipapi_basit_getir, ip_adresi)
+        rapor = ip_basit_rapor(veri, ip_adresi)
+        await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
+    except Exception as e:
+        logger.error(f"IP basit hatası: {e}")
+        await bekle.edit_text("❌ Sorgulama sırasında bir hata oluştu.")
+
 # --- 🛡️ IP GELİŞMİŞ GÜVENLİK ANALİZİ ---
 
 PORT_ADLARI = {
@@ -562,23 +627,17 @@ async def ip_tam_analiz_yap(ip_adresi: str) -> str:
     )
 
 async def ip_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    yardim = (
-        "🛡️ **IP Güvenlik Analizi**\n\n"
-        "Kullanım: `/ip <IP adresi>`\n\n"
-        "Örnek:\n`/ip 8.8.8.8`\n`/ip 185.220.101.1`\n\n"
-        "_Ülke, bölge, ISP, ASN, VPN/Proxy/Tor tespiti, tehdit skoru ve açık portlar gösterilir._"
-    )
     if not context.args:
-        await update.effective_message.reply_text(yardim, parse_mode='Markdown')
-        return
-
-    ip_adresi = context.args[0].strip()
-    if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
         await update.effective_message.reply_text(
-            "❌ Geçersiz IP formatı. Örnek: `/ip 8.8.8.8`", parse_mode='Markdown'
+            "🛡️ **IP Güvenlik Analizi**\n\nKullanım: `/ip_analiz <IP adresi>`\nÖrnek: `/ip_analiz 8.8.8.8`\n\n"
+            "_VPN/Proxy/Tor tespiti, tehdit skoru, açık portlar ve daha fazlası._",
+            parse_mode='Markdown'
         )
         return
-
+    ip_adresi = context.args[0].strip()
+    if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
+        await update.effective_message.reply_text("❌ Geçersiz IP formatı. Örnek: `/ip_analiz 8.8.8.8`", parse_mode='Markdown')
+        return
     bekle = await update.effective_message.reply_text(
         f"🔍 `{ip_adresi}` analiz ediliyor...\n_Bu işlem birkaç saniye sürebilir._",
         parse_mode='Markdown'
@@ -587,7 +646,7 @@ async def ip_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rapor = await ip_tam_analiz_yap(ip_adresi)
         await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
     except Exception as e:
-        logger.error(f"IP komutu hatası: {e}")
+        logger.error(f"IP analiz hatası: {e}")
         await bekle.edit_text("❌ Analiz sırasında bir hata oluştu. Lütfen tekrar dene.")
 
 # --- YÖNETİM KANALINDAN ÜYELERE KOPYALAMA SİSTEMİ ---
@@ -725,7 +784,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         azr_klavye = [
             [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
             [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
-            [InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip')],
+            [
+                InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
+                InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
+            ],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['azr_welcome'], reply_markup=InlineKeyboardMarkup(azr_klavye), parse_mode='Markdown')
@@ -740,7 +802,17 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_ip':
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         context.user_data['durum'] = 'ip_bekliyor'
-        await query.edit_message_text(strings.get('ip_ask', '🌐 Sorgulamak istediğiniz IP adresini yazın:'), reply_markup=geri_klavye, parse_mode='Markdown')
+        await query.edit_message_text(
+            strings.get('ip_ask', '🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`'),
+            reply_markup=geri_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_ip_analiz':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+        context.user_data['durum'] = 'ip_analiz_bekliyor'
+        await query.edit_message_text(
+            "🛡️ **IP Güvenlik Analizi**\n\nAnaliz etmek istediğiniz IP adresini yazın:\nÖrnek: `185.220.101.1`",
+            reply_markup=geri_klavye, parse_mode='Markdown'
+        )
     elif query.data == 'roll_dice':
         await query.message.delete()
         await query.message.chat.send_dice(emoji='🎲')
@@ -791,12 +863,30 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             return
         bekle = await update.message.reply_text(f"🔍 `{ip_adresi}` sorgulanıyor...", parse_mode='Markdown')
         try:
-            veri = await asyncio.to_thread(ip_bilgisi_getir, ip_adresi)
-            rapor = ip_raporu_olustur(veri, ip_adresi)
+            veri = await asyncio.to_thread(_ipapi_basit_getir, ip_adresi)
+            rapor = ip_basit_rapor(veri, ip_adresi)
             await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
         except Exception as e:
             logger.error(f"IP menü hatası: {e}")
             await bekle.edit_text("❌ Sorgulama sırasında bir hata oluştu.")
+        return
+
+    if context.user_data.get('durum') == 'ip_analiz_bekliyor':
+        context.user_data['durum'] = None
+        ip_adresi = update.message.text.strip()
+        if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
+            await update.message.reply_text("❌ Geçersiz IP formatı. Örnek: `185.220.101.1`", parse_mode='Markdown')
+            return
+        bekle = await update.message.reply_text(
+            f"🔍 `{ip_adresi}` analiz ediliyor...\n_Bu işlem birkaç saniye sürebilir._",
+            parse_mode='Markdown'
+        )
+        try:
+            rapor = await ip_tam_analiz_yap(ip_adresi)
+            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
+        except Exception as e:
+            logger.error(f"IP analiz menü hatası: {e}")
+            await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
         return
 
 def main():
@@ -806,7 +896,7 @@ def main():
     application.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("stats", stats_komut_tetikleyici, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("meid", meid_komutu))
-    application.add_handler(CommandHandler("ip", ip_komutu))
+    application.add_handler(CommandHandler("ip", ip_basit_komutu))
     application.add_handler(CommandHandler("ip_analiz", ip_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
