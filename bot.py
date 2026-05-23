@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import re
+import socket as _socket
 import requests as http_requests
 from flask import Flask
 from threading import Thread
@@ -41,121 +42,6 @@ MY_ID = 74210240
 KANAL_ID = -1003930940829
 KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
-
-# --- KÜFÜR FİLTRESİ LİSTESİ ---
-# \b yerine boşluk/satır başı/sonu kontrolü — Türkçe/Rusça özel karakterlerle çalışır
-KUFUR_KELIMELER = [
-    # ── TÜRKÇE ──────────────────────────────────────────────
-    'orospu', 'orospuçocuğu', 'orospu çocuğu', 'orospu cocugu', 'orospu cocu',
-    'piç', 'pic', 'piçlik', 'piclik',
-    'sik', 'siktiir', 'siktir', 'sikiş', 'sikis', 'sikiyor', 'siker',
-    'sikeyim', 'sikerim', 'sikim', 'sikilmiş', 'sikilmiş',
-    'amk', 'amına', 'amını', 'amın', 'am', 'aminakoyim', 'amq',
-    'oç', 'oc',
-    'göt', 'got', 'göte', 'götü', 'götlek',
-    'ibne', 'ibneler',
-    'bok', 'boktan', 'boklu', 'bokhead',
-    'gerizekalı', 'geri zekalı', 'gerizekal', 'gerzek',
-    'şerefsiz', 'serefsiz', 'şerefsizler',
-    'kaltak', 'kaltaklar', 'kaltaklık', 'kaltaklık',
-    'kahpe', 'kahpeler', 'kahpelik',
-    'sürtük', 'surtuk', 'sürtükler',
-    'pezevenk', 'pezevengi',
-    'haysiyetsiz', 'namussuz', 'namussuzluk',
-    'puşt', 'pusht',
-    'götveren', 'liboş', 'libos',
-    'sıçtım', 'sıçayım', 'sıç', 'siç',
-    'yarrak', 'yarak', 'yarrağını', 'yarrağım',
-    'götoğlanı', 'ananı', 'ananızı', 'ananı sikim',
-    'gavat', 'gavatlık',
-    'oğlak', 'salak', 'dangalak', 'aptal', 'mal',
-    'mk', 'mq', 'amq', 'oçpu', 'pic',
-    'orosbuçocuğu', 'orospuçoc', 'hareket',
-    'döl', 'dol',
-    # ── AZERBAYCANCA ────────────────────────────────────────
-    'sikin', 'sikib', 'sikdim', 'sikim', 'sikirem', 'sikişmek',
-    'anasını', 'anasini', 'ananı', 'ananızı',
-    'götver', 'gotveren', 'götünü', 'gotunu',
-    'sürün', 'surun',
-    'eşşek', 'essek', 'eşşəyin',
-    'naxuy', 'naxuya',
-    'soxum', 'soxar',
-    'sikdir', 'sik get', 'sik başını',
-    'it oğlu', 'it uşağı', 'köpəkoğlu', 'kopekoğlu',
-    'qaltaq', 'qaltaqlıq', 'fahişə', 'fahise',
-    'oğraş', 'ogras', 'ograsın',
-    'cəhənnəm', 'defolsun',
-    # ── RUSÇA ───────────────────────────────────────────────
-    'блядь', 'бля', 'блять', 'блядина', 'блядища',
-    'хуй', 'хуйня', 'хуйло', 'хуила', 'хуев', 'хуевый',
-    'пизда', 'пиздец', 'пиздёж', 'пиздить', 'пиздатый',
-    'ёбаный', 'ёб', 'ёбать', 'ёбля', 'ёблан', 'ёбнуть',
-    'еба', 'ебать', 'ебло', 'ебало', 'ебанутый', 'ебаный',
-    'сука', 'суки', 'сукин',
-    'мудак', 'мудила', 'мудак',
-    'ублюдок', 'ублюдки',
-    'нахуй', 'нахер',
-    'пидор', 'пидр', 'пидрила', 'педик', 'педераст',
-    'курва', 'курвы',
-    'залупа', 'залупин',
-    'шлюха', 'шлюхи',
-    'ёбтвоюмать', 'твоюмать', 'бляха',
-    'пиздануть', 'ёбнуться', 'съёбывай', 'захлопнись',
-    'уёбок', 'уёбки', 'ёбаный в рот',
-    'хуесос', 'мудозвон', 'долбоёб', 'долбаёб',
-    'пиздюк', 'пиздюки', 'ёбушки',
-    # ── İNGİLİZCE ───────────────────────────────────────────
-    'fuck', 'fucking', 'fucker', 'fucked', 'fucks', 'fuckup', 'fck', 'fuk',
-    'f*ck', 'f**k', 'fu**', 'f u c k',
-    'shit', 'shitty', 'shitter', 'bullshit', 'horseshit', 'sh*t', 'sht',
-    'bitch', 'bitches', 'bitchy', 'b*tch', 'b1tch', 'biatch',
-    'asshole', 'ass', 'arse', 'a**hole', 'a-hole',
-    'bastard', 'bastards',
-    'cunt', 'c*nt',
-    'dick', 'dicks', 'dickhead', 'd*ck',
-    'pussy', 'pussies',
-    'whore', 'whores', 'wh*re',
-    'slut', 'sl*t', 'slutty',
-    'motherfucker', 'motherf*cker', 'mf', 'mfer',
-    'faggot', 'fag', 'f*ggot',
-    'nigga', 'nigger', 'n*gga', 'n*gger',
-    'retard', 'retarded',
-    'cock', 'c*ck', 'cocksucker',
-    'prick', 'pr*ck',
-    'twat', 'tw*t',
-    'wanker', 'w*nker',
-    'jackass', 'dumbass', 'smartass', 'badass',
-    'dipshit', 'douchebag', 'douche',
-    'scumbag', 'scum',
-    'stfu', 'wtf', 'gtfo',
-    'idiot', 'moron', 'imbecile',
-    # ── ALMANCA ─────────────────────────────────────────────
-    'scheiße', 'scheisse', 'scheiß', 'scheis',
-    'fick', 'ficken', 'gefickt', 'verpiss',
-    'arschloch', 'arsch', 'ar*ch',
-    'hurensohn', 'hure', 'nutte',
-    'wichser', 'wichse',
-    'idiot', 'vollidiot', 'volldepp',
-    'verdammt', 'verflucht',
-    'schlampe', 'dreckige',
-    'kotze', 'kacke', 'kack',
-    # ── YILDIZLI / GİZLENMİŞ YAZILIŞ ───────────────────────
-    's*k', 'f**k', 's**t', 'b**ch', 'a**hole',
-    'f@ck', 'sh!t', 'b!tch', 'a$$', '@ss',
-    's1k', 'f4ck', 'sh1t', 'b1tch',
-]
-
-def kufur_var_mi(metin: str) -> bool:
-    metin_kucuk = metin.lower()
-    metin_temiz = re.sub(r'[\s\-_\.\*]+', '', metin_kucuk)
-    for kelime in KUFUR_KELIMELER:
-        k = kelime.lower()
-        if k in metin_kucuk:
-            return True
-        k_temiz = re.sub(r'[\s\-_\.\*]+', '', k)
-        if k_temiz and k_temiz in metin_temiz:
-            return True
-    return False
 
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
@@ -534,99 +420,175 @@ async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         await update.effective_message.reply_text(bilgi, reply_markup=geri_klavye)
 
-# --- 🚫 KÜFÜR FİLTRESİ ---
-async def kufur_filtre_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.effective_message
-    if not msg or not msg.text:
-        return
-    if not kufur_var_mi(msg.text):
-        return
-    user = update.effective_user
-    if not user:
-        return
+# --- 🛡️ IP GELİŞMİŞ GÜVENLİK ANALİZİ ---
 
-    guvenli_isim = html.escape(user.first_name) if user.first_name else "Kullanıcı"
-    uyari_metni = (
-        f"⚠️ [{guvenli_isim}](tg://user?id={user.id}), **uygunsuz dil kullandın!**\n\n"
-        f"Bu tür ifadeler yasaktır. Lütfen saygılı ol. 🔇\n"
-        f"_Bu mesaj 5 saniye içinde silinecek._"
-    )
-    try:
-        uyari = await msg.reply_text(uyari_metni, parse_mode='Markdown')
-        asyncio.create_task(mesajlari_5s_sonra_sil(context, msg.chat_id, uyari.message_id, msg.message_id))
-    except Exception as e:
-        logger.error(f"Küfür filtresi hatası: {e}")
+PORT_ADLARI = {
+    21: 'FTP', 22: 'SSH', 23: 'Telnet', 25: 'SMTP', 53: 'DNS',
+    80: 'HTTP', 110: 'POP3', 143: 'IMAP', 443: 'HTTPS', 445: 'SMB',
+    1433: 'MSSQL', 3306: 'MySQL', 3389: 'RDP', 5432: 'PostgreSQL',
+    6379: 'Redis', 8080: 'HTTP-Alt', 8443: 'HTTPS-Alt', 27017: 'MongoDB'
+}
+TARANACAK_PORTLAR = list(PORT_ADLARI.keys())
 
-# --- 🌐 IP SORGULAMA KOMUTU ---
-def ip_bilgisi_getir(ip_adresi: str) -> dict:
+async def _port_tara(ip: str, port: int, timeout: float = 1.2) -> bool:
     try:
-        r = http_requests.get(f"http://ip-api.com/json/{ip_adresi}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting,query", timeout=8)
+        _, writer = await asyncio.wait_for(asyncio.open_connection(ip, port), timeout=timeout)
+        writer.close()
+        try:
+            await writer.wait_closed()
+        except Exception:
+            pass
+        return True
+    except Exception:
+        return False
+
+async def _acik_portlari_bul(ip: str) -> list:
+    sonuclar = await asyncio.gather(*[_port_tara(ip, p) for p in TARANACAK_PORTLAR])
+    return [TARANACAK_PORTLAR[i] for i, acik in enumerate(sonuclar) if acik]
+
+def _ptr_getir(ip: str) -> str:
+    try:
+        return _socket.gethostbyaddr(ip)[0]
+    except Exception:
+        return "—"
+
+def _ipapi_getir(ip: str) -> dict:
+    try:
+        r = http_requests.get(
+            f"http://ip-api.com/json/{ip}?fields=status,message,country,countryCode,"
+            f"regionName,city,timezone,isp,org,as,asname,mobile,proxy,hosting,query",
+            timeout=8
+        )
         return r.json()
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def ip_raporu_olustur(veri: dict, aranan_ip: str) -> str:
-    if veri.get("status") != "success":
-        hata = veri.get("message", "Bilinmeyen hata")
-        return f"❌ **IP sorgulanamadı:** `{hata}`\n\nGirilen değer: `{aranan_ip}`"
+def _proxycheck_getir(ip: str) -> dict:
+    try:
+        r = http_requests.get(
+            f"http://proxycheck.io/v2/{ip}?vpn=1&asn=1&risk=1&port=1&seen=1&days=7",
+            timeout=8
+        )
+        data = r.json()
+        if data.get("status") == "ok" and ip in data:
+            return data[ip]
+        return {}
+    except Exception:
+        return {}
 
-    # Harita linki
-    lat = veri.get('lat', '')
-    lon = veri.get('lon', '')
-    harita = f"https://maps.google.com/?q={lat},{lon}" if lat and lon else None
+async def ip_tam_analiz_yap(ip_adresi: str) -> str:
+    ipapi, proxycheck, ptr, acik_portlar = await asyncio.gather(
+        asyncio.to_thread(_ipapi_getir, ip_adresi),
+        asyncio.to_thread(_proxycheck_getir, ip_adresi),
+        asyncio.to_thread(_ptr_getir, ip_adresi),
+        _acik_portlari_bul(ip_adresi),
+    )
 
-    # Proxy / VPN / Hosting rozetleri
-    rozetler = []
-    if veri.get('proxy'): rozetler.append("🔴 Proxy/VPN")
-    if veri.get('hosting'): rozetler.append("🟠 Hosting/Sunucu")
-    if veri.get('mobile'): rozetler.append("📱 Mobil Hat")
-    rozet_str = " · ".join(rozetler) if rozetler else "✅ Temiz (Normal Kullanıcı)"
+    if ipapi.get("status") != "success":
+        hata = ipapi.get("message", "Bilinmeyen hata")
+        return f"❌ **IP sorgulanamadı:** `{hata}`\n\nGirilen IP: `{ip_adresi}`"
+
+    gercek_ip  = ipapi.get('query', ip_adresi)
+    ulke       = f"{ipapi.get('country', '—')} ({ipapi.get('countryCode', '—')})"
+    bolge      = f"{ipapi.get('regionName', '—')} / {ipapi.get('city', '—')}"
+    saat_dilimi = ipapi.get('timezone', '—')
+    isp        = ipapi.get('isp', '—')
+    org        = ipapi.get('org', '—')
+    asn_raw    = ipapi.get('as', '—')
+    asn_adi    = ipapi.get('asname', '—')
+    hosting    = ipapi.get('hosting', False)
+    mobil      = "📱 Evet" if ipapi.get('mobile', False) else "❌ Hayır"
+
+    # Veri merkezi uyarısı
+    dc_uyari = "  ⚠️ *[VERİ MERKEZİ IP'si!]*" if hosting else ""
+    asn_str  = f"`{asn_raw}` ({asn_adi}){dc_uyari}"
+
+    # Gizlilik — proxycheck.io + ip-api.com
+    pc_type   = str(proxycheck.get('type', '')).lower()
+    pc_vpn    = str(proxycheck.get('vpn', 'no')).lower() in ('yes', 'true', '1')
+    pc_risk   = proxycheck.get('risk', None)
+    is_vpn    = pc_vpn or (ipapi.get('proxy', False) and 'datacenter' not in pc_type)
+    is_proxy  = 'proxy' in pc_type
+    is_tor    = 'tor' in pc_type
+
+    vpn_str   = "✅ Evet" if is_vpn   else "❌ Hayır"
+    proxy_str = "✅ Evet" if is_proxy else "❌ Hayır"
+    tor_str   = "✅ Evet" if is_tor   else "❌ Hayır"
+
+    # Tehdit skoru
+    if pc_risk is not None:
+        risk_sayi = int(pc_risk)
+    else:
+        risk_sayi = 0
+        if is_vpn:    risk_sayi += 40
+        if is_proxy:  risk_sayi += 35
+        if is_tor:    risk_sayi += 65
+        if hosting:   risk_sayi += 20
+        risk_sayi = min(100, risk_sayi)
+
+    if risk_sayi >= 70:
+        risk_str = f"🔴 %{risk_sayi} (Yüksek Risk)"
+    elif risk_sayi >= 40:
+        risk_str = f"🟡 %{risk_sayi} (Orta Risk)"
+    else:
+        risk_str = f"🟢 %{risk_sayi} (Düşük Risk)"
+
+    # Portlar
+    if acik_portlar:
+        port_str = ", ".join([f"{p} ({PORT_ADLARI[p]})" for p in acik_portlar])
+    else:
+        port_str = "Açık port bulunamadı"
 
     return (
-        f"🌐 **IP Sorgulama — AZRxGUARD**\n"
+        f"🛡️ **IP Detaylı Güvenlik Analizi**\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🔍 **Sorgulan IP:** `{veri.get('query', aranan_ip)}`\n\n"
-        f"🏳️ **Ülke:** {veri.get('country', '—')} `({veri.get('countryCode', '—')})`\n"
-        f"🏙️ **Bölge:** {veri.get('regionName', '—')} / {veri.get('city', '—')}\n"
-        f"📮 **Posta Kodu:** `{veri.get('zip', '—')}`\n"
-        f"🕐 **Saat Dilimi:** `{veri.get('timezone', '—')}`\n\n"
-        f"📍 **Koordinat:** `{lat}, {lon}`\n"
-        + (f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n\n" if harita else "\n")
-        + f"🏢 **ISP:** {veri.get('isp', '—')}\n"
-        f"🏛️ **Organizasyon:** {veri.get('org', '—')}\n"
-        f"📡 **AS:** `{veri.get('as', '—')}`\n"
-        f"🔤 **AS Adı:** {veri.get('asname', '—')}\n\n"
-        f"🛡️ **IP Türü:** {rozet_str}\n\n"
-        f"🤖 _AZRxGUARD tarafından sorgulandı_"
+        f"🔍 **Sorgu:** `{gercek_ip}`\n\n"
+        f"📍 **Konum Bilgisi**\n"
+        f"🏳️ **Ülke:** {ulke}\n"
+        f"🏙️ **Bölge:** {bolge}\n"
+        f"🕐 **Saat Dilimi:** `{saat_dilimi}`\n\n"
+        f"🔌 **Ağ Bilgisi**\n"
+        f"🌐 **İnternet IP:** `{gercek_ip}`\n"
+        f"🏢 **İnternet İsmi (ISP):** {isp}\n"
+        f"🏛️ **Organizasyon:** {org}\n"
+        f"📡 **Altyapı (ASN):** {asn_str}\n"
+        f"📱 **Mobil Hat:** {mobil}\n"
+        f"🏷️ **Ters DNS (PTR):** `{ptr}`\n\n"
+        f"🕵️ **Gizlilik & Tehdit Durumu**\n"
+        f"VPN: {vpn_str}  |  Proxy: {proxy_str}  |  Tor: {tor_str}\n"
+        f"⚠️ **Tehdit Skoru:** {risk_str}\n\n"
+        f"🔓 **Açık Portlar:** `{port_str}`\n\n"
+        f"🤖 _AZRxGUARD Güvenlik Analizi_"
     )
 
 async def ip_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    yardim = (
+        "🛡️ **IP Güvenlik Analizi**\n\n"
+        "Kullanım: `/ip <IP adresi>`\n\n"
+        "Örnek:\n`/ip 8.8.8.8`\n`/ip 185.220.101.1`\n\n"
+        "_Ülke, bölge, ISP, ASN, VPN/Proxy/Tor tespiti, tehdit skoru ve açık portlar gösterilir._"
+    )
     if not context.args:
-        await update.effective_message.reply_text(
-            "🌐 **IP Sorgulama**\n\n"
-            "Kullanım: `/ip <IP adresi>`\n\n"
-            "Örnek:\n`/ip 8.8.8.8`\n`/ip 1.1.1.1`",
-            parse_mode='Markdown'
-        )
+        await update.effective_message.reply_text(yardim, parse_mode='Markdown')
         return
 
     ip_adresi = context.args[0].strip()
-
-    # Basit format kontrolü
     if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
         await update.effective_message.reply_text(
             "❌ Geçersiz IP formatı. Örnek: `/ip 8.8.8.8`", parse_mode='Markdown'
         )
         return
 
-    bekle = await update.effective_message.reply_text(f"🔍 `{ip_adresi}` sorgulanıyor...", parse_mode='Markdown')
+    bekle = await update.effective_message.reply_text(
+        f"🔍 `{ip_adresi}` analiz ediliyor...\n_Bu işlem birkaç saniye sürebilir._",
+        parse_mode='Markdown'
+    )
     try:
-        veri = await asyncio.to_thread(ip_bilgisi_getir, ip_adresi)
-        rapor = ip_raporu_olustur(veri, ip_adresi)
+        rapor = await ip_tam_analiz_yap(ip_adresi)
         await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
     except Exception as e:
         logger.error(f"IP komutu hatası: {e}")
-        await bekle.edit_text("❌ Sorgulama sırasında bir hata oluştu. Lütfen tekrar dene.")
+        await bekle.edit_text("❌ Analiz sırasında bir hata oluştu. Lütfen tekrar dene.")
 
 # --- YÖNETİM KANALINDAN ÜYELERE KOPYALAMA SİSTEMİ ---
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -845,15 +807,11 @@ def main():
     application.add_handler(CommandHandler("stats", stats_komut_tetikleyici, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("meid", meid_komutu))
     application.add_handler(CommandHandler("ip", ip_komutu))
+    application.add_handler(CommandHandler("ip_analiz", ip_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
-    # Küfür filtresi — tüm chatlerde ayrı grupta çalışır (grup 1)
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, kufur_filtre_handler),
-        group=1
-    )
 
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
     application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"])
