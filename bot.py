@@ -1,10 +1,12 @@
 import logging
 import asyncio
+import re
 from flask import Flask
 from threading import Thread
 import html
 import os
 import pickle
+import google.generativeai as genai
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
@@ -39,6 +41,49 @@ MY_ID = 74210240
 KANAL_ID = -1003930940829
 KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
+
+# --- GEMINI AI KURULUMU ---
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+gemini_model = None
+if GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        gemini_model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            system_instruction=(
+                "Sen AZRxGUARD botunun yapay zeka asistanısın. "
+                "Türkçe, Azerbaycanca, Rusça, İngilizce ve Almanca konuşabilirsin. "
+                "Kullanıcının dilinde kısa, net ve yardımcı cevaplar ver. "
+                "Zararlı, yasadışı veya uygunsuz içerik üretme."
+            )
+        )
+        logger.info("Gemini AI başarıyla yüklendi.")
+    except Exception as e:
+        logger.error(f"Gemini AI yükleme hatası: {e}")
+
+# --- KÜFÜR FİLTRESİ LİSTESİ ---
+KUFUR_LISTESI = [
+    # Türkçe
+    r'\borospu\b', r'\borospu\s*[çc]oc[uü][ğg]u\b', r'\bpi[çc]\b', r'\bsik\b', r'\bsikiş\b',
+    r'\bsiktiir\b', r'\bsiktir\b', r'\bamk\b', r'\bamına\b', r'\bamını\b', r'\bamın\b',
+    r'\b[gğ][oö]t\b', r'\bibne\b', r'\bok[çc]u\b', r'\boç\b', r'\bbok\b', r'\bgerize\s*kal[iı]\b',
+    r'\bserefsiz\b', r'\bşerefsiz\b', r'\bkaltaklık\b', r'\bkaltakl[iı]k\b', r'\bkaltaklar\b', r'\bkaltak\b',
+    r'\bnasipse\b', r'\borg\b',
+    # Azerbaycanca
+    r'\bsikin\b', r'\bsikib\b', r'\banasin[iı]\b', r'\banasin\b', r'\bgotveren\b',
+    r'\bitin\b', r'\bes[şs]e[kğg]\b', r'\bnaxuy\b', r'\bsürt\b',
+    # Rusça
+    r'\bблядь\b', r'\bбля\b', r'\bхуй\b', r'\bхуйня\b', r'\bпизда\b', r'\bпиздец\b',
+    r'\bёбаный\b', r'\bёб\b', r'\bеб[аеёи]\b', r'\bсука\b', r'\bмудак\b', r'\bублюдок\b',
+    r'\bнахуй\b', r'\bзаткнись\b', r'\bпидор\b', r'\bпидр\b', r'\bкурва\b',
+    # İngilizce
+    r'\bfuck\b', r'\bfucking\b', r'\bfucker\b', r'\bfucked\b', r'\bshit\b', r'\bshitty\b',
+    r'\bbitch\b', r'\basshole\b', r'\bbastard\b', r'\bcunt\b', r'\bdick\b', r'\bpussy\b',
+    r'\bwhore\b', r'\bslut\b', r'\bmotherfucker\b', r'\bfaggot\b', r'\bretard\b',
+    # Yaygın kısaltmalar / yıldızlı yazılış
+    r'\bf\*ck\b', r'\bs\*it\b', r'\bb\*tch\b', r'\bwtf\b', r'\bstfu\b',
+]
+KUFUR_REGEX = re.compile('|'.join(KUFUR_LISTESI), re.IGNORECASE | re.UNICODE)
 
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
@@ -318,15 +363,21 @@ def meid_bilgisi_olustur(update: Update, context: ContextTypes.DEFAULT_TYPE, lan
     chat = update.effective_chat
     msg = update.effective_message
 
+    # — Kullanıcı bilgileri —
     ad = html.escape(user.first_name) if user.first_name else "—"
     soyad = html.escape(user.last_name) if user.last_name else "—"
     tam_ad = f"{ad} {soyad}".strip() if user.last_name else ad
     kullanici_adi = f"@{user.username}" if user.username else "—"
+    tiklanabilir = f"[{html.escape(tam_ad)}](tg://user?id={user.id})"
     bot_dili_map = {'tr': '🇹🇷 Türkçe', 'az': '🇦🇿 Azərbaycanca', 'ru': '🇷🇺 Русский', 'en': '🇬🇧 English', 'de': '🇩🇪 Deutsch'}
     bot_dili = bot_dili_map.get(lang, lang)
     tg_dili = user.language_code.upper() if user.language_code else "—"
     premium = "✅ Evet" if getattr(user, 'is_premium', False) else "❌ Hayır"
+    dogrulandi = "✅ Evet" if getattr(user, 'is_verified', False) else "❌ Hayır"
+    kisitlandi = "⚠️ Evet" if getattr(user, 'is_restricted', False) else "✅ Hayır"
+    hesap_turu = "🤖 Bot" if user.is_bot else "👤 Normal Kullanıcı"
 
+    # — Sohbet bilgileri —
     chat_turu_map = {
         'private': '💬 Özel Mesaj (DM)',
         'group': '👥 Grup',
@@ -337,29 +388,52 @@ def meid_bilgisi_olustur(update: Update, context: ContextTypes.DEFAULT_TYPE, lan
     chat_id = str(chat.id) if chat else "—"
     chat_adi = html.escape(chat.title) if chat and chat.title else "—"
 
+    # — Mesaj bilgileri —
+    mesaj_id = str(msg.message_id) if msg else "—"
     mesaj_zamani = "—"
     if msg and msg.date:
         mesaj_zamani = msg.date.strftime("%d.%m.%Y %H:%M:%S UTC")
 
+    yanit_mi = "✅ Evet" if msg and msg.reply_to_message else "❌ Hayır"
+    medya_turu = "—"
+    if msg:
+        if msg.photo: medya_turu = "🖼️ Fotoğraf"
+        elif msg.video: medya_turu = "🎥 Video"
+        elif msg.voice: medya_turu = "🎙️ Sesli Mesaj"
+        elif msg.document: medya_turu = "📄 Dosya"
+        elif msg.sticker: medya_turu = "🎭 Sticker"
+        elif msg.animation: medya_turu = "🎬 GIF"
+        elif msg.text: medya_turu = "💬 Metin"
+
+    # — Bot kayıt durumu —
     toplam_uyeler = uyeleri_getir()
     kayitli = "✅ Evet" if user.id in toplam_uyeler else "❌ Hayır"
+    toplam_uye_sayisi = len(toplam_uyeler)
 
     title = LANG_DATA[lang].get('meid_title', '🪪 **Kullanıcı Bilgilerin**')
 
     return (
         f"{title}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"👤 **Ad Soyad:** `{tam_ad}`\n"
+        f"👤 **Ad Soyad:** {tiklanabilir}\n"
         f"🏷️ **Kullanıcı Adı:** `{kullanici_adi}`\n"
-        f"🆔 **Kullanıcı ID:** `{user.id}`\n\n"
+        f"🆔 **Kullanıcı ID:** `{user.id}`\n"
+        f"🧩 **Hesap Türü:** {hesap_turu}\n\n"
         f"🌍 **Bot Dili:** {bot_dili}\n"
         f"📱 **Telegram Dili:** `{tg_dili}`\n"
-        f"💎 **Telegram Premium:** {premium}\n\n"
+        f"💎 **Telegram Premium:** {premium}\n"
+        f"✅ **Doğrulanmış Hesap:** {dogrulandi}\n"
+        f"🚫 **Kısıtlanmış:** {kisitlandi}\n\n"
         f"💬 **Sohbet Türü:** {chat_turu}\n"
         f"🏠 **Sohbet Adı:** `{chat_adi}`\n"
         f"📌 **Sohbet ID:** `{chat_id}`\n\n"
-        f"🕒 **Mesaj Zamanı:** `{mesaj_zamani}`\n"
-        f"📋 **Bot'a Kayıtlı:** {kayitli}\n\n"
+        f"📨 **Mesaj ID:** `{mesaj_id}`\n"
+        f"📎 **İçerik Türü:** {medya_turu}\n"
+        f"↩️ **Yanıt mı?:** {yanit_mi}\n"
+        f"🕒 **Mesaj Zamanı:** `{mesaj_zamani}`\n\n"
+        f"📋 **Bot'a Kayıtlı:** {kayitli}\n"
+        f"👥 **Toplam Bot Üyesi:** `{toplam_uye_sayisi}`\n\n"
+        f"🔗 **Profil Linki:** tg://user?id={user.id}\n\n"
         f"🤖 _AZRxGUARD tarafından oluşturuldu_"
     )
 
@@ -373,7 +447,56 @@ async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     geri_klavye = None
     if update.effective_chat and update.effective_chat.type == 'private':
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
-    await update.effective_message.reply_text(bilgi, parse_mode='Markdown', reply_markup=geri_klavye)
+    try:
+        await update.effective_message.reply_text(bilgi, parse_mode='Markdown', reply_markup=geri_klavye)
+    except Exception:
+        await update.effective_message.reply_text(bilgi, reply_markup=geri_klavye)
+
+# --- 🚫 KÜFÜR FİLTRESİ ---
+async def kufur_filtre_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.effective_message
+    if not msg or not msg.text:
+        return
+    if not KUFUR_REGEX.search(msg.text):
+        return
+    user = update.effective_user
+    if not user:
+        return
+
+    guvenli_isim = html.escape(user.first_name) if user.first_name else "Kullanıcı"
+    uyari_metni = (
+        f"⚠️ [{guvenli_isim}](tg://user?id={user.id}), **uygunsuz dil kullandın!**\n\n"
+        f"Bu tür ifadeler yasaktır. Lütfen saygılı ol. 🔇\n"
+        f"_Bu mesaj 5 saniye içinde silinecek._"
+    )
+    try:
+        uyari = await msg.reply_text(uyari_metni, parse_mode='Markdown')
+        asyncio.create_task(mesajlari_5s_sonra_sil(context, msg.chat_id, uyari.message_id, msg.message_id))
+    except Exception as e:
+        logger.error(f"Küfür filtresi hatası: {e}")
+
+# --- 🤖 GEMİNİ AI YANIT ---
+async def gemini_ai_yanit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not gemini_model:
+        return
+    msg = update.effective_message
+    if not msg or not msg.text:
+        return
+    user_text = msg.text.strip()
+    if not user_text:
+        return
+    try:
+        bekle = await msg.reply_text("🤖 _Düşünüyorum..._", parse_mode='Markdown')
+        yanit = await asyncio.to_thread(
+            lambda: gemini_model.generate_content(user_text).text
+        )
+        await bekle.edit_text(f"🤖 {yanit}")
+    except Exception as e:
+        logger.error(f"Gemini AI hatası: {e}")
+        try:
+            await bekle.edit_text("⚠️ Yapay zeka şu an yanıt veremiyor, lütfen tekrar dene.")
+        except Exception:
+            pass
 
 # --- YÖNETİM KANALINDAN ÜYELERE KOPYALAMA SİSTEMİ ---
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -561,6 +684,10 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"Cevap iletme hatası: {e}")
         context.user_data['durum'] = None
+        return
+
+    # Admin bekleme durumunda değilse → Gemini AI yanıtla
+    await gemini_ai_yanit(update, context)
 
 def main():
     uyanik_tut()
@@ -573,6 +700,11 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
+    # Küfür filtresi — tüm chatlerde ayrı grupta çalışır (grup 1)
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, kufur_filtre_handler),
+        group=1
+    )
 
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
     application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"])
