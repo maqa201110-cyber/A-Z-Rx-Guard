@@ -1,12 +1,12 @@
 import logging
 import asyncio
 import re
+import requests as http_requests
 from flask import Flask
 from threading import Thread
 import html
 import os
 import pickle
-from google import genai as google_genai
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
@@ -42,49 +42,107 @@ KANAL_ID = -1003930940829
 KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
 
-# --- GEMINI AI KURULUMU ---
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-gemini_client = None
-if GEMINI_API_KEY:
-    try:
-        gemini_client = google_genai.Client(api_key=GEMINI_API_KEY)
-        logger.info("Gemini AI başarıyla yüklendi.")
-    except Exception as e:
-        logger.error(f"Gemini AI yükleme hatası: {e}")
-
 # --- KÜFÜR FİLTRESİ LİSTESİ ---
 # \b yerine boşluk/satır başı/sonu kontrolü — Türkçe/Rusça özel karakterlerle çalışır
 KUFUR_KELIMELER = [
-    # Türkçe
-    'orospu', 'orospuçocuğu', 'orospu çocuğu', 'orospu cocugu',
-    'piç', 'pic', 'sik', 'siktiir', 'siktir', 'sikiş', 'sikis',
-    'amk', 'amına', 'amını', 'amın', 'aminakoyim', 'oç', 'oc',
-    'göt', 'got', 'ibne', 'orospu', 'bok', 'boktan',
-    'gerizekalı', 'gerzek', 'şerefsiz', 'serefsiz',
-    'kaltak', 'kaltaklar', 'kaltaklık', 'kahpe', 'sürtük', 'surtuk',
-    'pezevenk', 'bok', 'boktan', 'boklu', 'salak', 'aptal',
-    'dangalak', 'haysiyetsiz', 'namussuz', 'puşt', 'pusht',
-    'götveren', 'liboş', 'libos', 'götoğlanı', 'ananı', 'ananı',
-    'sıçtım', 'sıçayım', 'sıç', 'sic', 'yarrak', 'yarak',
-    # Azerbaycanca
-    'sikin', 'sikib', 'anasını', 'anasini', 'götver', 'gotveren',
-    'sürün', 'surun', 'it heyvan', 'eşşek', 'essek', 'naxuy',
-    'götünə', 'soxum', 'sikdir', 'ananı sikım', 'sik get',
-    # Rusça
-    'блядь', 'бля', 'блять', 'хуй', 'хуйня', 'хуйло',
-    'пизда', 'пиздец', 'пиздёж', 'ёбаный', 'ёб', 'ёбать',
-    'еба', 'ебать', 'ебло', 'ёблан', 'сука', 'суки',
-    'мудак', 'мудила', 'ублюдок', 'нахуй', 'нахер',
-    'пидор', 'пидр', 'пидрила', 'курва', 'залупа',
-    'шлюха', 'ёбтвоюмать', 'твоюмать', 'бляха',
-    # İngilizce
-    'fuck', 'fucking', 'fucker', 'fucked', 'fck', 'f*ck',
-    'shit', 'shitty', 'sh*t', 'bitch', 'b*tch', 'btch',
-    'asshole', 'bastard', 'cunt', 'dick', 'pussy',
-    'whore', 'slut', 'motherfucker', 'mf', 'faggot', 'fag',
-    'nigga', 'nigger', 'retard', 'stfu', 'wtf',
-    # Yıldızlı / gizlenmiş yazılış
+    # ── TÜRKÇE ──────────────────────────────────────────────
+    'orospu', 'orospuçocuğu', 'orospu çocuğu', 'orospu cocugu', 'orospu cocu',
+    'piç', 'pic', 'piçlik', 'piclik',
+    'sik', 'siktiir', 'siktir', 'sikiş', 'sikis', 'sikiyor', 'siker',
+    'sikeyim', 'sikerim', 'sikim', 'sikilmiş', 'sikilmiş',
+    'amk', 'amına', 'amını', 'amın', 'am', 'aminakoyim', 'amq',
+    'oç', 'oc',
+    'göt', 'got', 'göte', 'götü', 'götlek',
+    'ibne', 'ibneler',
+    'bok', 'boktan', 'boklu', 'bokhead',
+    'gerizekalı', 'geri zekalı', 'gerizekal', 'gerzek',
+    'şerefsiz', 'serefsiz', 'şerefsizler',
+    'kaltak', 'kaltaklar', 'kaltaklık', 'kaltaklık',
+    'kahpe', 'kahpeler', 'kahpelik',
+    'sürtük', 'surtuk', 'sürtükler',
+    'pezevenk', 'pezevengi',
+    'haysiyetsiz', 'namussuz', 'namussuzluk',
+    'puşt', 'pusht',
+    'götveren', 'liboş', 'libos',
+    'sıçtım', 'sıçayım', 'sıç', 'siç',
+    'yarrak', 'yarak', 'yarrağını', 'yarrağım',
+    'götoğlanı', 'ananı', 'ananızı', 'ananı sikim',
+    'gavat', 'gavatlık',
+    'oğlak', 'salak', 'dangalak', 'aptal', 'mal',
+    'mk', 'mq', 'amq', 'oçpu', 'pic',
+    'orosbuçocuğu', 'orospuçoc', 'hareket',
+    'döl', 'dol',
+    # ── AZERBAYCANCA ────────────────────────────────────────
+    'sikin', 'sikib', 'sikdim', 'sikim', 'sikirem', 'sikişmek',
+    'anasını', 'anasini', 'ananı', 'ananızı',
+    'götver', 'gotveren', 'götünü', 'gotunu',
+    'sürün', 'surun',
+    'eşşek', 'essek', 'eşşəyin',
+    'naxuy', 'naxuya',
+    'soxum', 'soxar',
+    'sikdir', 'sik get', 'sik başını',
+    'it oğlu', 'it uşağı', 'köpəkoğlu', 'kopekoğlu',
+    'qaltaq', 'qaltaqlıq', 'fahişə', 'fahise',
+    'oğraş', 'ogras', 'ograsın',
+    'cəhənnəm', 'defolsun',
+    # ── RUSÇA ───────────────────────────────────────────────
+    'блядь', 'бля', 'блять', 'блядина', 'блядища',
+    'хуй', 'хуйня', 'хуйло', 'хуила', 'хуев', 'хуевый',
+    'пизда', 'пиздец', 'пиздёж', 'пиздить', 'пиздатый',
+    'ёбаный', 'ёб', 'ёбать', 'ёбля', 'ёблан', 'ёбнуть',
+    'еба', 'ебать', 'ебло', 'ебало', 'ебанутый', 'ебаный',
+    'сука', 'суки', 'сукин',
+    'мудак', 'мудила', 'мудак',
+    'ублюдок', 'ублюдки',
+    'нахуй', 'нахер',
+    'пидор', 'пидр', 'пидрила', 'педик', 'педераст',
+    'курва', 'курвы',
+    'залупа', 'залупин',
+    'шлюха', 'шлюхи',
+    'ёбтвоюмать', 'твоюмать', 'бляха',
+    'пиздануть', 'ёбнуться', 'съёбывай', 'захлопнись',
+    'уёбок', 'уёбки', 'ёбаный в рот',
+    'хуесос', 'мудозвон', 'долбоёб', 'долбаёб',
+    'пиздюк', 'пиздюки', 'ёбушки',
+    # ── İNGİLİZCE ───────────────────────────────────────────
+    'fuck', 'fucking', 'fucker', 'fucked', 'fucks', 'fuckup', 'fck', 'fuk',
+    'f*ck', 'f**k', 'fu**', 'f u c k',
+    'shit', 'shitty', 'shitter', 'bullshit', 'horseshit', 'sh*t', 'sht',
+    'bitch', 'bitches', 'bitchy', 'b*tch', 'b1tch', 'biatch',
+    'asshole', 'ass', 'arse', 'a**hole', 'a-hole',
+    'bastard', 'bastards',
+    'cunt', 'c*nt',
+    'dick', 'dicks', 'dickhead', 'd*ck',
+    'pussy', 'pussies',
+    'whore', 'whores', 'wh*re',
+    'slut', 'sl*t', 'slutty',
+    'motherfucker', 'motherf*cker', 'mf', 'mfer',
+    'faggot', 'fag', 'f*ggot',
+    'nigga', 'nigger', 'n*gga', 'n*gger',
+    'retard', 'retarded',
+    'cock', 'c*ck', 'cocksucker',
+    'prick', 'pr*ck',
+    'twat', 'tw*t',
+    'wanker', 'w*nker',
+    'jackass', 'dumbass', 'smartass', 'badass',
+    'dipshit', 'douchebag', 'douche',
+    'scumbag', 'scum',
+    'stfu', 'wtf', 'gtfo',
+    'idiot', 'moron', 'imbecile',
+    # ── ALMANCA ─────────────────────────────────────────────
+    'scheiße', 'scheisse', 'scheiß', 'scheis',
+    'fick', 'ficken', 'gefickt', 'verpiss',
+    'arschloch', 'arsch', 'ar*ch',
+    'hurensohn', 'hure', 'nutte',
+    'wichser', 'wichse',
+    'idiot', 'vollidiot', 'volldepp',
+    'verdammt', 'verflucht',
+    'schlampe', 'dreckige',
+    'kotze', 'kacke', 'kack',
+    # ── YILDIZLI / GİZLENMİŞ YAZILIŞ ───────────────────────
     's*k', 'f**k', 's**t', 'b**ch', 'a**hole',
+    'f@ck', 'sh!t', 'b!tch', 'a$$', '@ss',
+    's1k', 'f4ck', 'sh1t', 'b1tch',
 ]
 
 def kufur_var_mi(metin: str) -> bool:
@@ -132,6 +190,8 @@ LANG_DATA = {
         'btn_stats': "📊 İstatistik",
         'btn_roll_dice': "🎲 Zar At",
         'btn_back': "⬅️ Geri",
+        'btn_ip': "🌐 IP Sorgula",
+        'ip_ask': "🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`",
         'ask_admin_msg': "📝 Lütfen iletmek istediğiniz şeyi yazın:",
         'msg_sent': "✅ Mesaj başarıyla iletildi!",
         'fun_welcome': "🚀 **Eğlence & Araçlar Menüsü**\n\nZar atmak için aşağıdaki butona basın:",
@@ -153,6 +213,8 @@ LANG_DATA = {
         'btn_stats': "📊 Statistika",
         'btn_roll_dice': "🎲 Zar At",
         'btn_back': "⬅️ Geri",
+        'btn_ip': "🌐 IP Sorğu",
+        'ip_ask': "🌐 **IP Sorğulama**\n\nSorğulamaq istədiyiniz IP ünvanını yazın:\nNümunə: `8.8.8.8`",
         'ask_admin_msg': "📝 Xahiş edirik çatdırmaq istədiyiniz şeyi yazın:",
         'msg_sent': "✅ Mesaj uğurla göndərildi!",
         'fun_welcome': "🚀 **Əyləncə & Alətlər Menyusu**\n\nZar atmaq üçün aşağıdakı düyməyə basın:",
@@ -174,6 +236,8 @@ LANG_DATA = {
         'btn_stats': "📊 Статистика",
         'btn_roll_dice': "🎲 Бросить кубик",
         'btn_back': "⬅️ Назад",
+        'btn_ip': "🌐 IP Запрос",
+        'ip_ask': "🌐 **IP Запрос**\n\nВведите IP-адрес для проверки:\nПример: `8.8.8.8`",
         'ask_admin_msg': "📝 Пожалуйста, напишите то, что вы хотите передать:",
         'msg_sent': "✅ Сообщение успешно отправлено!",
         'fun_welcome': "🚀 **Развлекательное меню**\n\nНажмите кнопку ниже, чтобы бросить кубик:",
@@ -195,6 +259,8 @@ LANG_DATA = {
         'btn_stats': "📊 Statistics",
         'btn_roll_dice': "🎲 Roll Dice",
         'btn_back': "⬅️ Back",
+        'btn_ip': "🌐 IP Lookup",
+        'ip_ask': "🌐 **IP Lookup**\n\nEnter the IP address to query:\nExample: `8.8.8.8`",
         'ask_admin_msg': "📝 Please write what you want to convey:",
         'msg_sent': "✅ Message successfully sent!",
         'fun_welcome': "🚀 **Entertainment & Tools Menu**\n\nPress the button below to roll the dice:",
@@ -216,6 +282,8 @@ LANG_DATA = {
         'btn_stats': "📊 Statistiken",
         'btn_roll_dice': "🎲 Würfel werfen",
         'btn_back': "⬅️ Zurück",
+        'btn_ip': "🌐 IP Abfrage",
+        'ip_ask': "🌐 **IP Abfrage**\n\nGeben Sie die IP-Adresse ein:\nBeispiel: `8.8.8.8`",
         'ask_admin_msg': "📝 Bitte schreiben Sie, was Sie übermitteln möchten:",
         'msg_sent': "✅ Nachricht erfolgreich gesendet!",
         'fun_welcome': "🚀 **Unterhaltungs- & Tools-Menü**\n\nDrücken Sie die Taste unten, um zu würfeln:",
@@ -489,44 +557,76 @@ async def kufur_filtre_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     except Exception as e:
         logger.error(f"Küfür filtresi hatası: {e}")
 
-# --- 🤖 GEMİNİ AI YANIT ---
-GEMINI_SISTEM = (
-    "Sen AZRxGUARD botunun yapay zeka asistanısın. "
-    "Türkçe, Azerbaycanca, Rusça, İngilizce ve Almanca konuşabilirsin. "
-    "Kullanıcının dilinde kısa, net ve yardımcı cevaplar ver. "
-    "Zararlı, yasadışı veya uygunsuz içerik üretme."
-)
-
-async def gemini_ai_yanit(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not gemini_client:
-        return
-    msg = update.effective_message
-    if not msg or not msg.text:
-        return
-    user_text = msg.text.strip()
-    if not user_text:
-        return
-    bekle = None
+# --- 🌐 IP SORGULAMA KOMUTU ---
+def ip_bilgisi_getir(ip_adresi: str) -> dict:
     try:
-        bekle = await msg.reply_text("🤖 _Düşünüyorum..._", parse_mode='Markdown')
-        yanit = await asyncio.to_thread(
-            lambda: gemini_client.models.generate_content(
-                model='gemini-2.0-flash',
-                contents=user_text,
-                config=google_genai.types.GenerateContentConfig(
-                    system_instruction=GEMINI_SISTEM,
-                    temperature=0.7,
-                )
-            ).text
-        )
-        await bekle.edit_text(f"🤖 {yanit}")
+        r = http_requests.get(f"http://ip-api.com/json/{ip_adresi}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting,query", timeout=8)
+        return r.json()
     except Exception as e:
-        logger.error(f"Gemini AI hatası: {e}")
-        if bekle:
-            try:
-                await bekle.edit_text("⚠️ Yapay zeka şu an yanıt veremiyor, lütfen tekrar dene.")
-            except Exception:
-                pass
+        return {"status": "error", "message": str(e)}
+
+def ip_raporu_olustur(veri: dict, aranan_ip: str) -> str:
+    if veri.get("status") != "success":
+        hata = veri.get("message", "Bilinmeyen hata")
+        return f"❌ **IP sorgulanamadı:** `{hata}`\n\nGirilen değer: `{aranan_ip}`"
+
+    # Harita linki
+    lat = veri.get('lat', '')
+    lon = veri.get('lon', '')
+    harita = f"https://maps.google.com/?q={lat},{lon}" if lat and lon else None
+
+    # Proxy / VPN / Hosting rozetleri
+    rozetler = []
+    if veri.get('proxy'): rozetler.append("🔴 Proxy/VPN")
+    if veri.get('hosting'): rozetler.append("🟠 Hosting/Sunucu")
+    if veri.get('mobile'): rozetler.append("📱 Mobil Hat")
+    rozet_str = " · ".join(rozetler) if rozetler else "✅ Temiz (Normal Kullanıcı)"
+
+    return (
+        f"🌐 **IP Sorgulama — AZRxGUARD**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔍 **Sorgulan IP:** `{veri.get('query', aranan_ip)}`\n\n"
+        f"🏳️ **Ülke:** {veri.get('country', '—')} `({veri.get('countryCode', '—')})`\n"
+        f"🏙️ **Bölge:** {veri.get('regionName', '—')} / {veri.get('city', '—')}\n"
+        f"📮 **Posta Kodu:** `{veri.get('zip', '—')}`\n"
+        f"🕐 **Saat Dilimi:** `{veri.get('timezone', '—')}`\n\n"
+        f"📍 **Koordinat:** `{lat}, {lon}`\n"
+        + (f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n\n" if harita else "\n")
+        + f"🏢 **ISP:** {veri.get('isp', '—')}\n"
+        f"🏛️ **Organizasyon:** {veri.get('org', '—')}\n"
+        f"📡 **AS:** `{veri.get('as', '—')}`\n"
+        f"🔤 **AS Adı:** {veri.get('asname', '—')}\n\n"
+        f"🛡️ **IP Türü:** {rozet_str}\n\n"
+        f"🤖 _AZRxGUARD tarafından sorgulandı_"
+    )
+
+async def ip_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.effective_message.reply_text(
+            "🌐 **IP Sorgulama**\n\n"
+            "Kullanım: `/ip <IP adresi>`\n\n"
+            "Örnek:\n`/ip 8.8.8.8`\n`/ip 1.1.1.1`",
+            parse_mode='Markdown'
+        )
+        return
+
+    ip_adresi = context.args[0].strip()
+
+    # Basit format kontrolü
+    if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
+        await update.effective_message.reply_text(
+            "❌ Geçersiz IP formatı. Örnek: `/ip 8.8.8.8`", parse_mode='Markdown'
+        )
+        return
+
+    bekle = await update.effective_message.reply_text(f"🔍 `{ip_adresi}` sorgulanıyor...", parse_mode='Markdown')
+    try:
+        veri = await asyncio.to_thread(ip_bilgisi_getir, ip_adresi)
+        rapor = ip_raporu_olustur(veri, ip_adresi)
+        await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
+    except Exception as e:
+        logger.error(f"IP komutu hatası: {e}")
+        await bekle.edit_text("❌ Sorgulama sırasında bir hata oluştu. Lütfen tekrar dene.")
 
 # --- YÖNETİM KANALINDAN ÜYELERE KOPYALAMA SİSTEMİ ---
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -663,6 +763,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         azr_klavye = [
             [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
             [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
+            [InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['azr_welcome'], reply_markup=InlineKeyboardMarkup(azr_klavye), parse_mode='Markdown')
@@ -674,6 +775,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bilgi = meid_bilgisi_olustur(update, context, lang)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
+    elif query.data == 'menu_ip':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+        context.user_data['durum'] = 'ip_bekliyor'
+        await query.edit_message_text(strings.get('ip_ask', '🌐 Sorgulamak istediğiniz IP adresini yazın:'), reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'roll_dice':
         await query.message.delete()
         await query.message.chat.send_dice(emoji='🎲')
@@ -716,8 +821,21 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         context.user_data['durum'] = None
         return
 
-    # Admin bekleme durumunda değilse → Gemini AI yanıtla
-    await gemini_ai_yanit(update, context)
+    if context.user_data.get('durum') == 'ip_bekliyor':
+        context.user_data['durum'] = None
+        ip_adresi = update.message.text.strip()
+        if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
+            await update.message.reply_text("❌ Geçersiz IP formatı. Örnek: `8.8.8.8`", parse_mode='Markdown')
+            return
+        bekle = await update.message.reply_text(f"🔍 `{ip_adresi}` sorgulanıyor...", parse_mode='Markdown')
+        try:
+            veri = await asyncio.to_thread(ip_bilgisi_getir, ip_adresi)
+            rapor = ip_raporu_olustur(veri, ip_adresi)
+            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
+        except Exception as e:
+            logger.error(f"IP menü hatası: {e}")
+            await bekle.edit_text("❌ Sorgulama sırasında bir hata oluştu.")
+        return
 
 def main():
     uyanik_tut()
@@ -726,6 +844,7 @@ def main():
     application.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("stats", stats_komut_tetikleyici, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("meid", meid_komutu))
+    application.add_handler(CommandHandler("ip", ip_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
