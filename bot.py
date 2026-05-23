@@ -16,7 +16,7 @@ def home():
     return "AZRxGUARD Çok Dilli Bot Aktif!"
 
 def run():
-    server.run(host='0.0.0.0', port=8080)
+    server.run(host='0.0.0.0', port=6000)
 
 def uyanik_tut():
     t = Thread(target=run)
