@@ -940,7 +940,8 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
-FILIGRAN_KANALLARI = {-1003775055611, -1003930940829, -1003761203008}
+FILIGRAN_KANALLARI = {-1003775055611, -1003930940829}
+FILIGRAN_KANAL_LINK = "https://t.me/c/1003761203008"
 
 async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mesaj = update.effective_message
@@ -955,19 +956,23 @@ async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     logger.info(f"Filigran tetiklendi: chat_id={chat_id}, kanal_post={kanal_post}, user={getattr(gonderen, 'id', None)}")
 
+    filigran_klavye = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📢 Kanala Git", url=FILIGRAN_KANAL_LINK)]
+    ])
+
     if kanal_post:
         if chat_id not in FILIGRAN_KANALLARI:
             logger.info(f"Filigran: kanal {chat_id} listede yok, atlanıyor.")
             return
         try:
-            await context.bot.send_message(chat_id=chat_id, text=FILIGRAN_METNI)
+            await context.bot.send_message(chat_id=chat_id, text=FILIGRAN_METNI, reply_markup=filigran_klavye)
         except Exception as e:
             logger.error(f"Filigran (kanal) gönderilemedi: {e}")
     else:
         if gonderen is None or gonderen.id != MY_ID:
             return
         try:
-            await mesaj.reply_text(FILIGRAN_METNI)
+            await mesaj.reply_text(FILIGRAN_METNI, reply_markup=filigran_klavye)
         except Exception as e:
             logger.error(f"Filigran (DM/grup) eklenemedi: {e}")
 
