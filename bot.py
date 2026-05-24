@@ -964,10 +964,17 @@ async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if chat_id not in FILIGRAN_KANALLARI:
             logger.info(f"Filigran: kanal {chat_id} listede yok, atlanıyor.")
             return
+        hedef = chat_id if chat_id != -1003775055611 else chat_id
         try:
-            await context.bot.send_message(chat_id=chat_id, text=FILIGRAN_METNI, reply_markup=filigran_klavye)
+            await context.bot.send_message(chat_id=hedef, text=FILIGRAN_METNI, reply_markup=filigran_klavye)
+            logger.info(f"Filigran gönderildi: {hedef}")
         except Exception as e:
-            logger.error(f"Filigran (kanal) gönderilemedi: {e}")
+            logger.warning(f"Filigran ID ile gönderilemedi ({hedef}): {e} — @AZRxMAQAsohbet deneniyor")
+            try:
+                await context.bot.send_message(chat_id="@AZRxMAQAsohbet", text=FILIGRAN_METNI, reply_markup=filigran_klavye)
+                logger.info("Filigran @AZRxMAQAsohbet ile gönderildi.")
+            except Exception as e2:
+                logger.error(f"Filigran @AZRxMAQAsohbet ile de gönderilemedi: {e2}")
     else:
         if gonderen is None or gonderen.id != MY_ID:
             return
