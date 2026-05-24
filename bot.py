@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import re
+import datetime
 import socket as _socket
 import requests as http_requests
 from flask import Flask
@@ -8,7 +9,7 @@ from threading import Thread
 import html
 import os
 import pickle
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 # --- 7/24 UYANIK TUTMA SİSTEMİ ---
@@ -42,6 +43,8 @@ MY_ID = 74210240
 KANAL_ID = -1003930940829
 KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
+ZAMANLI_KANAL_ID = -1003775055611
+TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))
 
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
@@ -889,6 +892,100 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
         return
 
+# --- ⏰ ZAMANLI GÖREV FONKSİYONLARI ---
+
+async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
+    try:
+        await context.bot.send_message(
+            chat_id=ZAMANLI_KANAL_ID,
+            text=(
+                "⚠️ *Gece Modu Uyarısı*\n\n"
+                "🌒 Birazdan *Gece Modu* başlıyor\\!\n"
+                "Saat *22:00* itibarıyla grup mesajlara kapatılacak\\.\n"
+                "Tekrar açılış: sabah *08:00*\\. 💤"
+            ),
+            parse_mode='MarkdownV2'
+        )
+    except Exception as e:
+        logger.error(f"Gece modu uyarı hatası: {e}")
+
+async def gece_modu_baslat_job(context: ContextTypes.DEFAULT_TYPE):
+    try:
+        await context.bot.set_chat_permissions(
+            chat_id=ZAMANLI_KANAL_ID,
+            permissions=ChatPermissions(can_send_messages=False)
+        )
+        await context.bot.send_message(
+            chat_id=ZAMANLI_KANAL_ID,
+            text=(
+                "🌒 *Gece Modu Başladı*\n\n"
+                "Grup şu an mesajlara kapalı\\.\n"
+                "Yarın sabah *08:00*'e kadar kimse mesaj atamayacak\\. 🔇\n\n"
+                "_İyi geceler\\! 🌙_"
+            ),
+            parse_mode='MarkdownV2'
+        )
+    except Exception as e:
+        logger.error(f"Gece modu başlatma hatası: {e}")
+
+async def gece_modu_bitir_job(context: ContextTypes.DEFAULT_TYPE):
+    try:
+        await context.bot.set_chat_permissions(
+            chat_id=ZAMANLI_KANAL_ID,
+            permissions=ChatPermissions(
+                can_send_messages=True,
+                can_send_audios=True,
+                can_send_documents=True,
+                can_send_photos=True,
+                can_send_videos=True,
+                can_send_video_notes=True,
+                can_send_voice_notes=True,
+                can_send_polls=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+                can_invite_users=True
+            )
+        )
+        await context.bot.send_message(
+            chat_id=ZAMANLI_KANAL_ID,
+            text=(
+                "🌅 *Gece Modu Sona Erdi*\n\n"
+                "☀️ Günaydın\\! Artık herkes sohbete mesaj yazabilir\\.\n"
+                "_Güzel bir gün dileriz\\! 😊_"
+            ),
+            parse_mode='MarkdownV2'
+        )
+    except Exception as e:
+        logger.error(f"Gece modu bitirme hatası: {e}")
+
+async def oglen_uyari_job(context: ContextTypes.DEFAULT_TYPE):
+    try:
+        await context.bot.send_message(
+            chat_id=ZAMANLI_KANAL_ID,
+            text=(
+                "🍽️ *Öğle Yemeği Yaklaşıyor\\!*\n\n"
+                "Saat 12:00 oldu, birazdan yemek zamanı\\! 😋\n"
+                "_Afiyet şimdiden olsun\\! 🥗_"
+            ),
+            parse_mode='MarkdownV2'
+        )
+    except Exception as e:
+        logger.error(f"Öğle uyarı hatası: {e}")
+
+async def oglen_yemek_job(context: ContextTypes.DEFAULT_TYPE):
+    try:
+        await context.bot.send_message(
+            chat_id=ZAMANLI_KANAL_ID,
+            text=(
+                "🍴 *Yemek Saati\\!*\n\n"
+                "Saat 13:00 — Hadi herkes yemeye\\! 🥘\n"
+                "_Afiyet olsun\\! 😄_"
+            ),
+            parse_mode='MarkdownV2'
+        )
+    except Exception as e:
+        logger.error(f"Öğle yemek hatası: {e}")
+
 def main():
     uyanik_tut()
     application = Application.builder().token(TOKEN).build()
@@ -902,6 +999,40 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
+
+    # --- ZAMANLI GÖREVLER ---
+    jq = application.job_queue
+
+    # 21:00 — Gece modu uyarısı
+    jq.run_daily(
+        callback=gece_modu_uyari_job,
+        time=datetime.time(hour=21, minute=0, second=0, tzinfo=TR_SAAT),
+        name="gece_modu_uyari"
+    )
+    # 22:00 — Gece modu başlar (grup kilitlenir)
+    jq.run_daily(
+        callback=gece_modu_baslat_job,
+        time=datetime.time(hour=22, minute=0, second=0, tzinfo=TR_SAAT),
+        name="gece_modu_baslat"
+    )
+    # 08:00 — Gece modu biter (grup açılır)
+    jq.run_daily(
+        callback=gece_modu_bitir_job,
+        time=datetime.time(hour=8, minute=0, second=0, tzinfo=TR_SAAT),
+        name="gece_modu_bitir"
+    )
+    # 12:00 — Öğle yemeği uyarısı
+    jq.run_daily(
+        callback=oglen_uyari_job,
+        time=datetime.time(hour=12, minute=0, second=0, tzinfo=TR_SAAT),
+        name="oglen_uyari"
+    )
+    # 13:00 — Yemek saati
+    jq.run_daily(
+        callback=oglen_yemek_job,
+        time=datetime.time(hour=13, minute=0, second=0, tzinfo=TR_SAAT),
+        name="oglen_yemek"
+    )
 
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
     application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"])
