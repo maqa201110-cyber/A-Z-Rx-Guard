@@ -47,6 +47,16 @@ ZAMANLI_KANAL_ID = -1003775055611
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))
 
+FILIGRAN_METNI = (
+    "__________________________________\n"
+    "|\n"
+    "|⚡ 𝑴𝑨𝑫𝑬 𝑩𝒀  ➣ M̶A̶Q̶A̶💎 | 𝑶𝑾𝑵𝑬𝑹\n"
+    "|__________________________________\n"
+    "|\n"
+    "|𝑪𝑯𝑨𝑵𝑵𝑬𝑳 ➣ 𝐚𝐳𝐫𝐗𝐦𝐚𝐪𝐚 \n"
+    "|__________________________________"
+)
+
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
 
@@ -929,6 +939,25 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
         return
 
+# --- 🖼️ FİLİGRAN SİSTEMİ ---
+async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    mesaj = update.effective_message
+    if mesaj is None:
+        return
+    if not (mesaj.photo or mesaj.video):
+        return
+
+    gonderen = update.effective_user
+    kanal_post = update.channel_post is not None
+
+    if not kanal_post and (gonderen is None or gonderen.id != MY_ID):
+        return
+
+    try:
+        await mesaj.reply_text(FILIGRAN_METNI)
+    except Exception as e:
+        logger.error(f"Filigran eklenemedi: {e}")
+
 # --- ⏰ KİŞİSEL HATIRLATICI ---
 
 async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1137,6 +1166,7 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
+    application.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, filigran_ekle), group=-1)
 
     # --- ZAMANLI GÖREVLER ---
     jq = application.job_queue
