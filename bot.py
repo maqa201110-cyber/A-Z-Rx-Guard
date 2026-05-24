@@ -941,7 +941,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
 FILIGRAN_KANALLARI = {-1003775055611, -1003930940829}
-FILIGRAN_KANAL_LINK = "https://t.me/c/1003761203008"
+FILIGRAN_KANAL_LINK = "https://t.me/azrXmaqa"
 
 async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mesaj = update.effective_message
