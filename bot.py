@@ -900,9 +900,11 @@ async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
             chat_id=ZAMANLI_KANAL_ID,
             text=(
                 "⚠️ *Gece Modu Uyarısı*\n\n"
-                "🌒 Birazdan *Gece Modu* başlıyor\\!\n"
-                "Saat *22:00* itibarıyla grup mesajlara kapatılacak\\.\n"
-                "Tekrar açılış: sabah *08:00*\\. 💤"
+                "🌒 Birazdan *Gece Modu* başlıyor\\!\n\n"
+                "🇹🇷 Türkiye: saat *22:00*'de grup kapanacak\n"
+                "🇦🇿 Azərbaycan: saat *23:00*\\-da qrup bağlanacaq\n\n"
+                "Tekrar açılış / Yenidən açılış:\n"
+                "🇹🇷 *08:00* \\| 🇦🇿 *09:00* 💤"
             ),
             parse_mode='MarkdownV2'
         )
@@ -918,10 +920,11 @@ async def gece_modu_baslat_job(context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
             text=(
-                "🌒 *Gece Modu Başladı*\n\n"
-                "Grup şu an mesajlara kapalı\\.\n"
-                "Yarın sabah *08:00*'e kadar kimse mesaj atamayacak\\. 🔇\n\n"
-                "_İyi geceler\\! 🌙_"
+                "🌒 *Gece Modu Başladı / Gecə Rejimi Başladı*\n\n"
+                "Grup şu an mesajlara kapalı\\. Qrup hazırda mesajlara bağlıdır\\.\n\n"
+                "🇹🇷 Sabah *08:00*'e kadar kimse mesaj atamaz\n"
+                "🇦🇿 Sabah *09:00*\\-a qədər heç kim mesaj yaza bilməz\n\n"
+                "_🌙 İyi geceler\\! / Yaxşı gecələr\\!_"
             ),
             parse_mode='MarkdownV2'
         )
@@ -949,9 +952,10 @@ async def gece_modu_bitir_job(context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
             text=(
-                "🌅 *Gece Modu Sona Erdi*\n\n"
-                "☀️ Günaydın\\! Artık herkes sohbete mesaj yazabilir\\.\n"
-                "_Güzel bir gün dileriz\\! 😊_"
+                "🌅 *Gece Modu Sona Erdi / Gecə Rejimi Bitti*\n\n"
+                "🇹🇷 ☀️ Günaydın\\! Artık herkes sohbete mesaj yazabilir\\.\n"
+                "🇦🇿 ☀️ Sabahınız xeyir\\! Artıq hamı qrupa mesaj yaza bilər\\.\n\n"
+                "_Güzel bir gün\\! / Xoş bir gün\\! 😊_"
             ),
             parse_mode='MarkdownV2'
         )
@@ -964,8 +968,9 @@ async def oglen_uyari_job(context: ContextTypes.DEFAULT_TYPE):
             chat_id=ZAMANLI_KANAL_ID,
             text=(
                 "🍽️ *Öğle Yemeği Yaklaşıyor\\!*\n\n"
-                "Saat 12:00 oldu, birazdan yemek zamanı\\! 😋\n"
-                "_Afiyet şimdiden olsun\\! 🥗_"
+                "🇹🇷 Saat *12:00* — birazdan yemek zamanı\\! 😋\n"
+                "🇦🇿 Saat *13:00* — az sonra nahar vaxtıdır\\! 😋\n\n"
+                "_🥗 Afiyet olsun\\! / Nuş olsun\\!_"
             ),
             parse_mode='MarkdownV2'
         )
@@ -977,9 +982,10 @@ async def oglen_yemek_job(context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
             text=(
-                "🍴 *Yemek Saati\\!*\n\n"
-                "Saat 13:00 — Hadi herkes yemeye\\! 🥘\n"
-                "_Afiyet olsun\\! 😄_"
+                "🍴 *Yemek Saati / Nahar Vaxtı\\!*\n\n"
+                "🇹🇷 Saat *13:00* — Hadi herkes yemeye\\! 🥘\n"
+                "🇦🇿 Saat *14:00* — Hamı nahara\\! 🥘\n\n"
+                "_Afiyet olsun\\! / Nuş olsun\\! 😄_"
             ),
             parse_mode='MarkdownV2'
         )
