@@ -45,6 +45,7 @@ KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))
+AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))
 
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
@@ -832,12 +833,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_hatirlat':
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(
-            "⏰ **Kişisel Hatırlatıcı**\n\n"
-            "DM'den aşağıdaki formatlarla hatırlatıcı kur:\n\n"
-            "🕐 *Bugün belirli saatte:*\n`/hatirlat 21:30 Ödev teslimi var`\n\n"
-            "📅 *Belirli tarih ve saatte:*\n`/hatirlat 25.05.2026 09:00 Toplantı`\n\n"
-            "📆 *Belirli tarihte (saat 09:00):*\n`/hatirlat 25.05.2026 Sunucu yedeği`\n\n"
-            "_Ayarlanan saat geldiğinde seni etiketleyerek hatırlatırım!_ 🔔",
+            "⏰ **Hatırlatıcı**\n\n"
+            "Örnek: `/hatirlat 21:20 Ödev`\n"
+            "Örnek: `/hatirlat 25.05.2026 09:00 Toplantı`\n\n"
+            "_Saat Azerbaycan saatiyle çalışır_ 🇦🇿",
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'menu_ip':
@@ -934,14 +933,9 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
 
 async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     yardim = (
-        "⏰ **Kişisel Hatırlatıcı**\n\n"
-        "Bugün belirli bir saatte:\n"
-        "`/hatirlat 21:30 Ödev teslimi var`\n\n"
-        "Belirli tarih ve saatte:\n"
-        "`/hatirlat 25.05.2026 09:00 Sunucu yedeği`\n\n"
-        "Belirli tarihte (varsayılan 09:00):\n"
-        "`/hatirlat 25.05.2026 Toplantı hatırlatma`\n\n"
-        "_Ayarlanan saat geldiğinde seni etiketleyerek hatırlatırım!_ 🔔"
+        "⏰ **Hatırlatıcı**\n\n"
+        "Örnek: `/hatirlat 21:20 Ödev`\n"
+        "Örnek: `/hatirlat 25.05.2026 09:00 Toplantı`"
     )
     if not context.args:
         await update.effective_message.reply_text(yardim, parse_mode='Markdown')
@@ -951,7 +945,7 @@ async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = user.id
     chat_id = update.effective_chat.id
     args = context.args
-    simdi = datetime.datetime.now(TR_SAAT)
+    simdi = datetime.datetime.now(AZ_SAAT)
     hedef_zaman = None
     mesaj_parcalari = []
 
@@ -960,7 +954,7 @@ async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             tarih = datetime.datetime.strptime(args[0], '%d.%m.%Y').date()
             s, m = int(args[1].split(':')[0]), int(args[1].split(':')[1])
-            hedef_zaman = datetime.datetime(tarih.year, tarih.month, tarih.day, s, m, 0, tzinfo=TR_SAAT)
+            hedef_zaman = datetime.datetime(tarih.year, tarih.month, tarih.day, s, m, 0, tzinfo=AZ_SAAT)
             mesaj_parcalari = args[2:]
         except ValueError:
             pass
@@ -969,7 +963,7 @@ async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if hedef_zaman is None and re.match(r'^\d{2}\.\d{2}\.\d{4}$', args[0]):
         try:
             tarih = datetime.datetime.strptime(args[0], '%d.%m.%Y').date()
-            hedef_zaman = datetime.datetime(tarih.year, tarih.month, tarih.day, 9, 0, 0, tzinfo=TR_SAAT)
+            hedef_zaman = datetime.datetime(tarih.year, tarih.month, tarih.day, 9, 0, 0, tzinfo=AZ_SAAT)
             mesaj_parcalari = args[1:]
         except ValueError:
             pass
@@ -1008,7 +1002,7 @@ async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"🔔 **HATIRLATICI!**\n\n"
                     f"👤 [{isim}](tg://user?id={user_id}), hatırlatıcın geldi!\n\n"
                     f"📝 **Not:** {hatirlat_metni}\n\n"
-                    f"🕐 **Ayarlanan Saat:** `{hedef_zaman.strftime('%d.%m.%Y %H:%M')}` 🇹🇷"
+                    f"🕐 **Ayarlanan Saat:** `{hedef_zaman.strftime('%d.%m.%Y %H:%M')}` 🇦🇿"
                 ),
                 parse_mode='Markdown'
             )
@@ -1023,7 +1017,7 @@ async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.effective_message.reply_text(
         f"✅ **Hatırlatıcı Kuruldu!**\n\n"
-        f"📅 **Zaman:** `{hedef_zaman.strftime('%d.%m.%Y saat %H:%M')}` 🇹🇷\n"
+        f"📅 **Zaman:** `{hedef_zaman.strftime('%d.%m.%Y saat %H:%M')}` 🇦🇿\n"
         f"📝 **Not:** {hatirlat_metni}\n\n"
         f"_O an geldiğinde seni burada etiketleyeceğim!_ ⏰",
         parse_mode='Markdown'
