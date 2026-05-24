@@ -951,18 +951,25 @@ async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     gonderen = update.effective_user
     kanal_post = update.channel_post is not None
+    chat_id = mesaj.chat_id
+
+    logger.info(f"Filigran tetiklendi: chat_id={chat_id}, kanal_post={kanal_post}, user={getattr(gonderen, 'id', None)}")
 
     if kanal_post:
-        if update.channel_post.chat.id not in FILIGRAN_KANALLARI:
+        if chat_id not in FILIGRAN_KANALLARI:
+            logger.info(f"Filigran: kanal {chat_id} listede yok, atlanıyor.")
             return
+        try:
+            await context.bot.send_message(chat_id=chat_id, text=FILIGRAN_METNI)
+        except Exception as e:
+            logger.error(f"Filigran (kanal) gönderilemedi: {e}")
     else:
         if gonderen is None or gonderen.id != MY_ID:
             return
-
-    try:
-        await mesaj.reply_text(FILIGRAN_METNI)
-    except Exception as e:
-        logger.error(f"Filigran eklenemedi: {e}")
+        try:
+            await mesaj.reply_text(FILIGRAN_METNI)
+        except Exception as e:
+            logger.error(f"Filigran (DM/grup) eklenemedi: {e}")
 
 # --- ⏰ KİŞİSEL HATIRLATICI ---
 
