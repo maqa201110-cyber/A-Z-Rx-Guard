@@ -940,6 +940,8 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
+FILIGRAN_KANALLARI = {-1003775055611, -1003930940829, -1003761203008}
+
 async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mesaj = update.effective_message
     if mesaj is None:
@@ -950,8 +952,12 @@ async def filigran_ekle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     gonderen = update.effective_user
     kanal_post = update.channel_post is not None
 
-    if not kanal_post and (gonderen is None or gonderen.id != MY_ID):
-        return
+    if kanal_post:
+        if update.channel_post.chat.id not in FILIGRAN_KANALLARI:
+            return
+    else:
+        if gonderen is None or gonderen.id != MY_ID:
+            return
 
     try:
         await mesaj.reply_text(FILIGRAN_METNI)
