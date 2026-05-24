@@ -80,7 +80,10 @@ LANG_DATA = {
         'btn_roll_dice': "🎲 Zar At",
         'btn_back': "⬅️ Geri",
         'btn_ip': "🌐 IP Sorgula",
+        'btn_ip_sorgu': "🌐 IP Sorgu",
+        'btn_hatirlat': "⏰ Hatırlatıcı",
         'ip_ask': "🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`",
+        'ip_sorgu_welcome': "🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:",
         'ask_admin_msg': "📝 Lütfen iletmek istediğiniz şeyi yazın:",
         'msg_sent': "✅ Mesaj başarıyla iletildi!",
         'fun_welcome': "🚀 **Eğlence & Araçlar Menüsü**\n\nZar atmak için aşağıdaki butona basın:",
@@ -103,7 +106,10 @@ LANG_DATA = {
         'btn_roll_dice': "🎲 Zar At",
         'btn_back': "⬅️ Geri",
         'btn_ip': "🌐 IP Sorğu",
+        'btn_ip_sorgu': "🌐 IP Sorğu",
+        'btn_hatirlat': "⏰ Xatırladıcı",
         'ip_ask': "🌐 **IP Sorğulama**\n\nSorğulamaq istədiyiniz IP ünvanını yazın:\nNümunə: `8.8.8.8`",
+        'ip_sorgu_welcome': "🌐 **IP Sorğu Menyusu**\n\nAşağıdan sorğu növünü seçin:",
         'ask_admin_msg': "📝 Xahiş edirik çatdırmaq istədiyiniz şeyi yazın:",
         'msg_sent': "✅ Mesaj uğurla göndərildi!",
         'fun_welcome': "🚀 **Əyləncə & Alətlər Menyusu**\n\nZar atmaq üçün aşağıdakı düyməyə basın:",
@@ -126,7 +132,10 @@ LANG_DATA = {
         'btn_roll_dice': "🎲 Бросить кубик",
         'btn_back': "⬅️ Назад",
         'btn_ip': "🌐 IP Запрос",
+        'btn_ip_sorgu': "🌐 IP Запрос",
+        'btn_hatirlat': "⏰ Напоминание",
         'ip_ask': "🌐 **IP Запрос**\n\nВведите IP-адрес для проверки:\nПример: `8.8.8.8`",
+        'ip_sorgu_welcome': "🌐 **Меню IP Запроса**\n\nВыберите тип запроса:",
         'ask_admin_msg': "📝 Пожалуйста, напишите то, что вы хотите передать:",
         'msg_sent': "✅ Сообщение успешно отправлено!",
         'fun_welcome': "🚀 **Развлекательное меню**\n\nНажмите кнопку ниже, чтобы бросить кубик:",
@@ -149,7 +158,10 @@ LANG_DATA = {
         'btn_roll_dice': "🎲 Roll Dice",
         'btn_back': "⬅️ Back",
         'btn_ip': "🌐 IP Lookup",
+        'btn_ip_sorgu': "🌐 IP Query",
+        'btn_hatirlat': "⏰ Reminder",
         'ip_ask': "🌐 **IP Lookup**\n\nEnter the IP address to query:\nExample: `8.8.8.8`",
+        'ip_sorgu_welcome': "🌐 **IP Query Menu**\n\nSelect a query type below:",
         'ask_admin_msg': "📝 Please write what you want to convey:",
         'msg_sent': "✅ Message successfully sent!",
         'fun_welcome': "🚀 **Entertainment & Tools Menu**\n\nPress the button below to roll the dice:",
@@ -172,7 +184,10 @@ LANG_DATA = {
         'btn_roll_dice': "🎲 Würfel werfen",
         'btn_back': "⬅️ Zurück",
         'btn_ip': "🌐 IP Abfrage",
+        'btn_ip_sorgu': "🌐 IP Abfrage",
+        'btn_hatirlat': "⏰ Erinnerung",
         'ip_ask': "🌐 **IP Abfrage**\n\nGeben Sie die IP-Adresse ein:\nBeispiel: `8.8.8.8`",
+        'ip_sorgu_welcome': "🌐 **IP Abfrage-Menü**\n\nWählen Sie unten einen Abfragetyp:",
         'ask_admin_msg': "📝 Bitte schreiben Sie, was Sie übermitteln möchten:",
         'msg_sent': "✅ Nachricht erfolgreich gesendet!",
         'fun_welcome': "🚀 **Unterhaltungs- & Tools-Menü**\n\nDrücken Sie die Taste unten, um zu würfeln:",
@@ -200,6 +215,9 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(strings['btn_fun'], callback_data='menu_fun'),
             InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
+        ],
+        [
+            InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu')
         ],
         [
             InlineKeyboardButton(strings['btn_azr_special'], callback_data='menu_azr_special')
@@ -783,14 +801,23 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['fun_welcome'], reply_markup=InlineKeyboardMarkup(fun_klavye), parse_mode='Markdown')
-    elif query.data == 'menu_azr_special':
-        azr_klavye = [
-            [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
-            [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
+    elif query.data == 'menu_ip_sorgu':
+        ip_klavye = [
             [
                 InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
                 InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
             ],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ]
+        await query.edit_message_text(
+            strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
+            reply_markup=InlineKeyboardMarkup(ip_klavye), parse_mode='Markdown'
+        )
+    elif query.data == 'menu_azr_special':
+        azr_klavye = [
+            [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
+            [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
+            [InlineKeyboardButton(strings.get('btn_hatirlat', '⏰ Hatırlatıcı'), callback_data='menu_hatirlat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['azr_welcome'], reply_markup=InlineKeyboardMarkup(azr_klavye), parse_mode='Markdown')
@@ -802,15 +829,26 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bilgi = meid_bilgisi_olustur(update, context, lang)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
-    elif query.data == 'menu_ip':
+    elif query.data == 'menu_hatirlat':
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+        await query.edit_message_text(
+            "⏰ **Kişisel Hatırlatıcı**\n\n"
+            "DM'den aşağıdaki formatlarla hatırlatıcı kur:\n\n"
+            "🕐 *Bugün belirli saatte:*\n`/hatirlat 21:30 Ödev teslimi var`\n\n"
+            "📅 *Belirli tarih ve saatte:*\n`/hatirlat 25.05.2026 09:00 Toplantı`\n\n"
+            "📆 *Belirli tarihte (saat 09:00):*\n`/hatirlat 25.05.2026 Sunucu yedeği`\n\n"
+            "_Ayarlanan saat geldiğinde seni etiketleyerek hatırlatırım!_ 🔔",
+            reply_markup=geri_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_ip':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
         context.user_data['durum'] = 'ip_bekliyor'
         await query.edit_message_text(
             strings.get('ip_ask', '🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`'),
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'menu_ip_analiz':
-        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
         context.user_data['durum'] = 'ip_analiz_bekliyor'
         await query.edit_message_text(
             "🛡️ **IP Güvenlik Analizi**\n\nAnaliz etmek istediğiniz IP adresini yazın:\nÖrnek: `185.220.101.1`",
@@ -891,6 +929,105 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             logger.error(f"IP analiz menü hatası: {e}")
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
         return
+
+# --- ⏰ KİŞİSEL HATIRLATICI ---
+
+async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    yardim = (
+        "⏰ **Kişisel Hatırlatıcı**\n\n"
+        "Bugün belirli bir saatte:\n"
+        "`/hatirlat 21:30 Ödev teslimi var`\n\n"
+        "Belirli tarih ve saatte:\n"
+        "`/hatirlat 25.05.2026 09:00 Sunucu yedeği`\n\n"
+        "Belirli tarihte (varsayılan 09:00):\n"
+        "`/hatirlat 25.05.2026 Toplantı hatırlatma`\n\n"
+        "_Ayarlanan saat geldiğinde seni etiketleyerek hatırlatırım!_ 🔔"
+    )
+    if not context.args:
+        await update.effective_message.reply_text(yardim, parse_mode='Markdown')
+        return
+
+    user = update.effective_user
+    user_id = user.id
+    chat_id = update.effective_chat.id
+    args = context.args
+    simdi = datetime.datetime.now(TR_SAAT)
+    hedef_zaman = None
+    mesaj_parcalari = []
+
+    # Format: GG.AA.YYYY HH:MM mesaj
+    if len(args) >= 2 and re.match(r'^\d{2}\.\d{2}\.\d{4}$', args[0]) and re.match(r'^\d{2}:\d{2}$', args[1]):
+        try:
+            tarih = datetime.datetime.strptime(args[0], '%d.%m.%Y').date()
+            s, m = int(args[1].split(':')[0]), int(args[1].split(':')[1])
+            hedef_zaman = datetime.datetime(tarih.year, tarih.month, tarih.day, s, m, 0, tzinfo=TR_SAAT)
+            mesaj_parcalari = args[2:]
+        except ValueError:
+            pass
+
+    # Format: GG.AA.YYYY mesaj (saat yok → 09:00)
+    if hedef_zaman is None and re.match(r'^\d{2}\.\d{2}\.\d{4}$', args[0]):
+        try:
+            tarih = datetime.datetime.strptime(args[0], '%d.%m.%Y').date()
+            hedef_zaman = datetime.datetime(tarih.year, tarih.month, tarih.day, 9, 0, 0, tzinfo=TR_SAAT)
+            mesaj_parcalari = args[1:]
+        except ValueError:
+            pass
+
+    # Format: HH:MM mesaj (bugün)
+    if hedef_zaman is None and re.match(r'^\d{2}:\d{2}$', args[0]):
+        try:
+            s, m = int(args[0].split(':')[0]), int(args[0].split(':')[1])
+            hedef_zaman = simdi.replace(hour=s, minute=m, second=0, microsecond=0)
+            mesaj_parcalari = args[1:]
+        except ValueError:
+            pass
+
+    if hedef_zaman is None:
+        await update.effective_message.reply_text(
+            "❌ **Geçersiz format!**\n\n" + yardim, parse_mode='Markdown'
+        )
+        return
+
+    if hedef_zaman <= simdi:
+        await update.effective_message.reply_text(
+            "❌ Belirtilen saat zaten geçmiş! Lütfen gelecekteki bir zaman girin.",
+            parse_mode='Markdown'
+        )
+        return
+
+    hatirlat_metni = " ".join(mesaj_parcalari).strip() if mesaj_parcalari else "⏰ Hatırlatıcı!"
+    gecen_sure = (hedef_zaman - simdi).total_seconds()
+    isim = user.first_name or "Kullanıcı"
+
+    async def hatirlat_gonder(ctx: ContextTypes.DEFAULT_TYPE):
+        try:
+            await ctx.bot.send_message(
+                chat_id=chat_id,
+                text=(
+                    f"🔔 **HATIRLATICI!**\n\n"
+                    f"👤 [{isim}](tg://user?id={user_id}), hatırlatıcın geldi!\n\n"
+                    f"📝 **Not:** {hatirlat_metni}\n\n"
+                    f"🕐 **Ayarlanan Saat:** `{hedef_zaman.strftime('%d.%m.%Y %H:%M')}` 🇹🇷"
+                ),
+                parse_mode='Markdown'
+            )
+        except Exception as e:
+            logger.error(f"Hatırlatıcı gönderilemedi: {e}")
+
+    context.job_queue.run_once(
+        hatirlat_gonder,
+        when=gecen_sure,
+        name=f"hatirlat_{user_id}_{int(hedef_zaman.timestamp())}"
+    )
+
+    await update.effective_message.reply_text(
+        f"✅ **Hatırlatıcı Kuruldu!**\n\n"
+        f"📅 **Zaman:** `{hedef_zaman.strftime('%d.%m.%Y saat %H:%M')}` 🇹🇷\n"
+        f"📝 **Not:** {hatirlat_metni}\n\n"
+        f"_O an geldiğinde seni burada etiketleyeceğim!_ ⏰",
+        parse_mode='Markdown'
+    )
 
 # --- ⏰ ZAMANLI GÖREV FONKSİYONLARI ---
 
@@ -1001,6 +1138,7 @@ def main():
     application.add_handler(CommandHandler("meid", meid_komutu))
     application.add_handler(CommandHandler("ip", ip_basit_komutu))
     application.add_handler(CommandHandler("ip_analiz", ip_komutu))
+    application.add_handler(CommandHandler("hatirlat", hatirlat_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
