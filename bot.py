@@ -1573,21 +1573,41 @@ def id_den_kayit_tarihi_tahmin_et(user_id: int) -> str:
         (2_000_000_000,  2024,  2),
         (2_500_000_000,  2024, 10),
         (3_000_000_000,  2025,  5),
+        (3_500_000_000,  2025, 10),
+        (4_000_000_000,  2026,  3),
+        (4_500_000_000,  2026,  8),
+        (5_000_000_000,  2027,  1),
     ]
     ay_adlari = {1:'Ocak',2:'Şubat',3:'Mart',4:'Nisan',5:'Mayıs',6:'Haziran',
                  7:'Temmuz',8:'Ağustos',9:'Eylül',10:'Ekim',11:'Kasım',12:'Aralık'}
+
+    def hesapla(uid, p_id, p_y, p_m, r_id, r_y, r_m):
+        ratio    = (uid - p_id) / max(r_id - p_id, 1)
+        pm_total = p_y * 12 + p_m - 1
+        rm_total = r_y * 12 + r_m - 1
+        est      = pm_total + ratio * (rm_total - pm_total)
+        y = int(est) // 12
+        m = int(est) % 12 + 1
+        return y, m
+
     p_id, p_y, p_m = ref[0]
     for r_id, r_y, r_m in ref[1:]:
         if user_id <= r_id:
-            ratio = (user_id - p_id) / max(r_id - p_id, 1)
-            pm_total = p_y * 12 + p_m - 1
-            rm_total = r_y * 12 + r_m - 1
-            est = pm_total + ratio * (rm_total - pm_total)
-            year  = int(est) // 12
-            month = int(est) % 12 + 1
-            return f"~{ay_adlari.get(month, str(month))} {year}"
+            y, m = hesapla(user_id, p_id, p_y, p_m, r_id, r_y, r_m)
+            return f"~{ay_adlari.get(m, str(m))} {y}"
         p_id, p_y, p_m = r_id, r_y, r_m
-    return "~2025 sonrası"
+
+    # Tablonun ötesi — son iki noktadan lineer ekstrapolasyon
+    prev_id, prev_y, prev_m = ref[-2]
+    last_id, last_y, last_m = ref[-1]
+    aylik_hiz = (last_id - prev_id) / max((last_y * 12 + last_m) - (prev_y * 12 + prev_m), 1)
+    baz_ay    = last_y * 12 + last_m - 1
+    ekstra    = (user_id - last_id) / aylik_hiz
+    est       = baz_ay + ekstra
+    y = int(est) // 12
+    m = int(est) % 12 + 1
+    m = max(1, min(12, m))
+    return f"~{ay_adlari.get(m, str(m))} {y}"
 
 def gece_modu_aktif_mi() -> bool:
     simdi = datetime.datetime.now(TR_SAAT)
