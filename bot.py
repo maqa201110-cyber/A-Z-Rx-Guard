@@ -270,7 +270,7 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
         if getattr(chat, 'active_usernames', None):
             aktif_kullanici_adlari = '  |  '.join([f"@{u}" for u in chat.active_usernames])
 
-        kayit_tarihi = id_den_kayit_tarihi_tahmin_et(chat.id) if chat.type in ('private', 'bot') else '—'
+        kayit_tarihi = id_den_kayit_tarihi_tahmin_et(chat.id)
         id_basamak   = len(str(abs(chat.id)))
 
         metin = (
@@ -399,6 +399,7 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
             visible_hist   = "✅ Evet" if getattr(chat, 'has_visible_history', False) else "❌ Hayır"
 
             metin += (
+                f"📅 **Oluşturma Tarihi (Tahmin):** `{kayit_tarihi}`\n"
                 f"🏷️ **Kullanıcı Adı:** `{chat_user}`\n"
                 f"👥 **Üye Sayısı:** `{uye_sayisi}`\n"
                 f"🛡️ **Admin Sayısı:** `{admin_sayisi}`\n"
@@ -468,6 +469,7 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
                 pass
 
             metin += (
+                f"📅 **Oluşturma Tarihi (Tahmin):** `{kayit_tarihi}`\n"
                 f"🏷️ **Kullanıcı Adı:** `{chat_user}`\n"
                 f"👥 **Abone Sayısı:** `{uye_sayisi}`\n"
                 f"🛡️ **Admin Sayısı:** `{admin_sayisi}`\n"
@@ -1193,12 +1195,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
-    mesaj = await update.message.reply_text("⏳ Başlatılıyor...")
-    await asyncio.sleep(1.0)
-    await mesaj.edit_text("📥 Veri yükleniyor...")
-    await asyncio.sleep(1.0)
-    await mesaj.edit_text("✅ Sistem hazır!")
-    await asyncio.sleep(0.8)
+    def yuklenme_cubugu(yuzde: int) -> str:
+        dolu = yuzde // 10
+        bos  = 10 - dolu
+        return f"🚀 *AZRxGUARD Başlatılıyor...*\n\n{'█' * dolu}{'░' * bos}  {yuzde}%"
+
+    mesaj = await update.message.reply_text(yuklenme_cubugu(0), parse_mode='Markdown')
+    for yuzde in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+        await asyncio.sleep(0.3)
+        try:
+            await mesaj.edit_text(yuklenme_cubugu(yuzde), parse_mode='Markdown')
+        except Exception:
+            pass
+    await asyncio.sleep(0.4)
     await mesaj.edit_text(LANG_DATA[lang]['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1540,6 +1549,12 @@ async def hatirlat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- ⏰ ZAMANLI GÖREV FONKSİYONLARI ---
 
 def id_den_kayit_tarihi_tahmin_et(user_id: int) -> str:
+    if user_id < 0:
+        abs_id = abs(user_id)
+        if abs_id > 999_999_999_999:
+            user_id = abs_id - 1_000_000_000_000
+        else:
+            user_id = abs_id
     if user_id <= 0:
         return "—"
     ref = [
