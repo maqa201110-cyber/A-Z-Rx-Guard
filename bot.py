@@ -1128,9 +1128,6 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
         if channel_post.chat_id == YONETIM_KANAL_ID:
             await _toplu_gonderim_yap(context.bot, channel_post, YONETIM_KANAL_ID)
 
-        elif channel_post.chat_id == KANAL_ID:
-            await _toplu_gonderim_yap(context.bot, channel_post, KANAL_ID)
-
         elif channel_post.text:
             if channel_post.sender_chat or (channel_post.from_user and channel_post.from_user.is_bot):
                 return
