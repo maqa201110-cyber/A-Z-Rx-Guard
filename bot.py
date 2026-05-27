@@ -4,8 +4,6 @@ import re
 import datetime
 import socket as _socket
 import requests as http_requests
-from flask import Flask
-from threading import Thread
 import html
 import os
 import pickle
@@ -13,19 +11,9 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPer
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 # --- 7/24 UYANIK TUTMA SİSTEMİ ---
-server = Flask('')
-
-@server.route('/')
-def home():
-    return "AZRxGUARD Çok Dilli Bot Aktif!"
-
-def run():
-    server.run(host='0.0.0.0', port=6000)
-
+# Replit keeps the bot alive natively; no separate Flask keep-alive needed.
 def uyanik_tut():
-    t = Thread(target=run)
-    t.daemon = True
-    t.start()
+    pass
 
 # --- LOG AYARLARI ---
 logging.basicConfig(
