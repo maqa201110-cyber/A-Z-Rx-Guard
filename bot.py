@@ -81,6 +81,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Sorgula",
         'btn_ip_sorgu': "🌐 IP Sorgu",
         'btn_hatirlat': "⏰ Hatırlatıcı",
+        'btn_panel': "🔍 PANEL",
         'ip_ask': "🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:",
         'ask_admin_msg': "📝 Lütfen iletmek istediğiniz şeyi yazın:",
@@ -90,7 +91,10 @@ LANG_DATA = {
         'force_join_text': "⚠️ **DURUN!** Botu kullanabilmek için önce resmi kanalımıza katılmanız gerekmektedir.\n\nKatıldıktan sonra bota tekrar `/start` yazabilir veya menüyü kullanabilirsiniz.",
         'btn_join_now': "📢 Kanala Katıl",
         'btn_meid': "🪪 Me ID",
-        'meid_title': "🪪 **Kullanıcı Bilgilerin**"
+        'meid_title': "🪪 **Kullanıcı Bilgilerin**",
+        'panel_welcome': "🔍 **PANEL — Kullanıcı Sorgu Merkezi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgulamak istediğin kullanıcının:\n• `@kullaniciadi` yazabilirsin\n• Sayısal `ID` yazabilirsin\n\nÖrnek: `@durov` veya `12345678`\n\n_Her bilgi ekrana dökülecek!_ 🔎",
+        'panel_sorgulanıyor': "🔍 Sorgulanıyor...",
+        'panel_bulunamadi': "❌ **Kullanıcı bulunamadı!**\n\nKullanıcı adını `@` ile ya da sayısal ID olarak gir.\nÖrnek: `@durov` veya `12345678`",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -107,6 +111,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Sorğu",
         'btn_ip_sorgu': "🌐 IP Sorğu",
         'btn_hatirlat': "⏰ Xatırladıcı",
+        'btn_panel': "🔍 PANEL",
         'ip_ask': "🌐 **IP Sorğulama**\n\nSorğulamaq istədiyiniz IP ünvanını yazın:\nNümunə: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Sorğu Menyusu**\n\nAşağıdan sorğu növünü seçin:",
         'ask_admin_msg': "📝 Xahiş edirik çatdırmaq istədiyiniz şeyi yazın:",
@@ -116,7 +121,10 @@ LANG_DATA = {
         'force_join_text': "⚠️ **DAYANIN!** Botdan istifadə edə bilmək üçün əvvəlcə rəsmi kanalımıza qoşulmalısınız.\n\nQoşulduqdan sonra bota yenidən `/start` yaza bilərsiniz.",
         'btn_join_now': "📢 Kanala Qoşul",
         'btn_meid': "🪪 Me ID",
-        'meid_title': "🪪 **İstifadəçi Məlumatların**"
+        'meid_title': "🪪 **İstifadəçi Məlumatların**",
+        'panel_welcome': "🔍 **PANEL — İstifadəçi Sorğu Mərkəzi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğulamaq istədiyin istifadəçinin:\n• `@istifadəçiadı` yaza bilərsən\n• Rəqəmsal `ID` yaza bilərsən\n\nNümunə: `@durov` və ya `12345678`\n\n_Bütün məlumatlar ekrana çıxacaq!_ 🔎",
+        'panel_sorgulanıyor': "🔍 Sorğulanır...",
+        'panel_bulunamadi': "❌ **İstifadəçi tapılmadı!**\n\nİstifadəçi adını `@` ilə ya da rəqəmsal ID kimi daxil et.\nNümunə: `@durov` və ya `12345678`",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -133,6 +141,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Запрос",
         'btn_ip_sorgu': "🌐 IP Запрос",
         'btn_hatirlat': "⏰ Напоминание",
+        'btn_panel': "🔍 PANEL",
         'ip_ask': "🌐 **IP Запрос**\n\nВведите IP-адрес для проверки:\nПример: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **Меню IP Запроса**\n\nВыберите тип запроса:",
         'ask_admin_msg': "📝 Пожалуйста, напишите то, что вы хотите передать:",
@@ -142,7 +151,10 @@ LANG_DATA = {
         'force_join_text': "⚠️ **ВНИМАНИЕ!** Чтобы использовать бота, вы должны сначала подписаться на наш официальный канал.\n\nПосле подписки отправьте `/start` снова.",
         'btn_join_now': "📢 Подписаться на канал",
         'btn_meid': "🪪 Me ID",
-        'meid_title': "🪪 **Информация о тебе**"
+        'meid_title': "🪪 **Информация о тебе**",
+        'panel_welcome': "🔍 **PANEL — Центр запросов пользователей**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВведи:\n• `@username` пользователя\n• Числовой `ID` пользователя\n\nПример: `@durov` или `12345678`\n\n_Вся информация будет выведена!_ 🔎",
+        'panel_sorgulanıyor': "🔍 Запрос выполняется...",
+        'panel_bulunamadi': "❌ **Пользователь не найден!**\n\nВведи username через `@` или числовой ID.\nПример: `@durov` или `12345678`",
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -159,6 +171,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Lookup",
         'btn_ip_sorgu': "🌐 IP Query",
         'btn_hatirlat': "⏰ Reminder",
+        'btn_panel': "🔍 PANEL",
         'ip_ask': "🌐 **IP Lookup**\n\nEnter the IP address to query:\nExample: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Query Menu**\n\nSelect a query type below:",
         'ask_admin_msg': "📝 Please write what you want to convey:",
@@ -168,7 +181,10 @@ LANG_DATA = {
         'force_join_text': "⚠️ **ATTENTION!** To use this bot, you must first join our official channel.\n\nAfter joining, please send `/start` again to unlock.",
         'btn_join_now': "📢 Join Channel",
         'btn_meid': "🪪 Me ID",
-        'meid_title': "🪪 **Your Information**"
+        'meid_title': "🪪 **Your Information**",
+        'panel_welcome': "🔍 **PANEL — User Query Center**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEnter:\n• `@username` of the user\n• Numeric `ID` of the user\n\nExample: `@durov` or `12345678`\n\n_All information will be displayed!_ 🔎",
+        'panel_sorgulanıyor': "🔍 Querying...",
+        'panel_bulunamadi': "❌ **User not found!**\n\nEnter username with `@` or a numeric ID.\nExample: `@durov` or `12345678`",
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -185,6 +201,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Abfrage",
         'btn_ip_sorgu': "🌐 IP Abfrage",
         'btn_hatirlat': "⏰ Erinnerung",
+        'btn_panel': "🔍 PANEL",
         'ip_ask': "🌐 **IP Abfrage**\n\nGeben Sie die IP-Adresse ein:\nBeispiel: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Abfrage-Menü**\n\nWählen Sie unten einen Abfragetyp:",
         'ask_admin_msg': "📝 Bitte schreiben Sie, was Sie übermitteln möchten:",
@@ -194,7 +211,10 @@ LANG_DATA = {
         'force_join_text': "⚠️ **ACHTUNG!** Um diesen Bot nutzen zu können, müssen Sie zuerst unserem offiziellen Kanal beitreten.\n\nNach dem Beitritt senden Sie bitte erneut `/start`.",
         'btn_join_now': "📢 Kanal beitreten",
         'btn_meid': "🪪 Me ID",
-        'meid_title': "🪪 **Deine Informationen**"
+        'meid_title': "🪪 **Deine Informationen**",
+        'panel_welcome': "🔍 **PANEL — Benutzer-Abfragezentrum**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nGib ein:\n• `@benutzername` des Nutzers\n• Numerische `ID` des Nutzers\n\nBeispiel: `@durov` oder `12345678`\n\n_Alle Informationen werden angezeigt!_ 🔎",
+        'panel_sorgulanıyor': "🔍 Abfrage läuft...",
+        'panel_bulunamadi': "❌ **Benutzer nicht gefunden!**\n\nGib den Benutzernamen mit `@` oder eine numerische ID ein.\nBeispiel: `@durov` oder `12345678`",
     }
 }
 
@@ -220,9 +240,104 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings['btn_azr_special'], callback_data='menu_azr_special')
+        ],
+        [
+            InlineKeyboardButton(strings.get('btn_panel', '🔍 PANEL'), callback_data='menu_panel')
         ]
     ]
     return InlineKeyboardMarkup(klavye)
+
+# --- 🔍 PANEL — KULLANICI SORGU FONKSİYONU ---
+async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
+    try:
+        if sorgu.lstrip('-').isdigit():
+            hedef = int(sorgu)
+        else:
+            hedef = sorgu if sorgu.startswith('@') else f"@{sorgu}"
+
+        chat = await bot.get_chat(hedef)
+
+        tip_map = {
+            'private': '👤 Kullanıcı (Private)',
+            'bot': '🤖 Bot',
+            'group': '👥 Grup',
+            'supergroup': '👥 Süper Grup',
+            'channel': '📢 Kanal',
+        }
+        tip = tip_map.get(chat.type, chat.type)
+
+        ad = html.escape(chat.first_name or '') if chat.first_name else '—'
+        soyad = html.escape(chat.last_name or '') if chat.last_name else '—'
+        tam_ad = f"{ad} {soyad}".strip() if chat.last_name else ad
+        kullanici_adi = f"@{chat.username}" if chat.username else '—'
+        bio = html.escape(chat.bio or '—') if chat.bio else '—'
+        aciklama = html.escape(chat.description or '—') if chat.description else '—'
+        profil_link = f"tg://user?id={chat.id}"
+
+        premium = '✅ Evet' if getattr(chat, 'is_premium', False) else '❌ Hayır'
+        dogrulandi = '✅ Evet' if getattr(chat, 'is_verified', False) else '❌ Hayır'
+        kisitlandi = '⚠️ Evet' if getattr(chat, 'is_restricted', False) else '✅ Hayır'
+        scam = '🚨 SCAM' if getattr(chat, 'is_scam', False) else '✅ Temiz'
+        fake = '⚠️ FAKE' if getattr(chat, 'is_fake', False) else '✅ Gerçek'
+
+        foto_sayisi = '—'
+        try:
+            fotolar = await bot.get_user_profile_photos(chat.id, limit=1)
+            foto_sayisi = str(fotolar.total_count)
+        except Exception:
+            pass
+
+        satir1 = (
+            f"🔍 **PANEL — Kullanıcı Raporu**\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"👤 **Ad Soyad:** [{tam_ad}]({profil_link})\n"
+            f"🏷️ **Kullanıcı Adı:** `{kullanici_adi}`\n"
+            f"🆔 **Telegram ID:** `{chat.id}`\n"
+            f"📂 **Hesap Türü:** {tip}\n\n"
+        )
+
+        if chat.type in ('private', 'bot'):
+            satir1 += (
+                f"💎 **Telegram Premium:** {premium}\n"
+                f"✅ **Doğrulanmış:** {dogrulandi}\n"
+                f"🚫 **Kısıtlanmış:** {kisitlandi}\n"
+                f"🚨 **Scam İşareti:** {scam}\n"
+                f"⚠️ **Fake İşareti:** {fake}\n\n"
+                f"📝 **Bio:** {bio}\n"
+                f"🖼️ **Profil Fotoğraf Sayısı:** {foto_sayisi}\n\n"
+            )
+        else:
+            uye_sayisi = '—'
+            try:
+                uye_sayisi = str(await bot.get_chat_member_count(chat.id))
+            except Exception:
+                pass
+            satir1 += (
+                f"✅ **Doğrulanmış:** {dogrulandi}\n"
+                f"🚨 **Scam İşareti:** {scam}\n"
+                f"⚠️ **Fake İşareti:** {fake}\n\n"
+                f"📝 **Açıklama:** {aciklama}\n"
+                f"👥 **Üye Sayısı:** {uye_sayisi}\n\n"
+            )
+
+        davet_linki = '—'
+        try:
+            if chat.invite_link:
+                davet_linki = chat.invite_link
+        except Exception:
+            pass
+
+        satir1 += (
+            f"🔗 **Profil Linki:** {profil_link}\n"
+            f"📨 **Davet Linki:** {davet_linki}\n\n"
+            f"🤖 _AZRxGUARD PANEL tarafından sorgulandı_"
+        )
+        return satir1
+
+    except Exception as e:
+        hata = str(e)
+        logger.error(f"Panel sorgu hatası: {hata}")
+        return None
 
 # BUG FIX: Bu fonksiyon ana_menu_klavye içinde yanlış girintilenmişti, düzeltildi
 async def kanal_takip_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, lang: str) -> bool:
@@ -854,6 +969,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'roll_dice':
         await query.message.delete()
         await query.message.chat.send_dice(emoji='🎲')
+    elif query.data == 'menu_panel':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]])
+        context.user_data['durum'] = 'panel_sorgu_bekliyor'
+        await query.edit_message_text(
+            strings.get('panel_welcome', '🔍 **PANEL**\n\n@kullaniciadi veya ID yaz:'),
+            reply_markup=geri_klavye,
+            parse_mode='Markdown'
+        )
     elif query.data == 'go_home':
         await query.edit_message_text(strings['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
@@ -925,6 +1048,31 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"IP analiz menü hatası: {e}")
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
+        return
+
+    if context.user_data.get('durum') == 'panel_sorgu_bekliyor':
+        context.user_data['durum'] = None
+        sorgu = update.message.text.strip()
+        bekle = await update.message.reply_text(
+            strings.get('panel_sorgulanıyor', '🔍 Sorgulanıyor...'),
+            parse_mode='Markdown'
+        )
+        rapor = await panel_kullanici_sorgula(context.bot, sorgu)
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔍 Yeni Sorgu", callback_data='menu_panel')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ])
+        if rapor:
+            try:
+                await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True, reply_markup=geri_klavye)
+            except Exception:
+                await bekle.edit_text(rapor, disable_web_page_preview=True, reply_markup=geri_klavye)
+        else:
+            await bekle.edit_text(
+                strings.get('panel_bulunamadi', '❌ Kullanıcı bulunamadı!'),
+                parse_mode='Markdown',
+                reply_markup=geri_klavye
+            )
         return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
