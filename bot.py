@@ -81,7 +81,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Sorgula",
         'btn_ip_sorgu': "🌐 IP Sorgu",
         'btn_hatirlat': "⏰ Hatırlatıcı",
-        'btn_panel': "🔍 PANEL",
+        'btn_panel': "🔍 TG PANELİ",
         'ip_ask': "🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:",
         'ask_admin_msg': "📝 Lütfen iletmek istediğiniz şeyi yazın:",
@@ -111,7 +111,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Sorğu",
         'btn_ip_sorgu': "🌐 IP Sorğu",
         'btn_hatirlat': "⏰ Xatırladıcı",
-        'btn_panel': "🔍 PANEL",
+        'btn_panel': "🔍 TG PANELİ",
         'ip_ask': "🌐 **IP Sorğulama**\n\nSorğulamaq istədiyiniz IP ünvanını yazın:\nNümunə: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Sorğu Menyusu**\n\nAşağıdan sorğu növünü seçin:",
         'ask_admin_msg': "📝 Xahiş edirik çatdırmaq istədiyiniz şeyi yazın:",
@@ -141,7 +141,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Запрос",
         'btn_ip_sorgu': "🌐 IP Запрос",
         'btn_hatirlat': "⏰ Напоминание",
-        'btn_panel': "🔍 PANEL",
+        'btn_panel': "🔍 TG PANELİ",
         'ip_ask': "🌐 **IP Запрос**\n\nВведите IP-адрес для проверки:\nПример: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **Меню IP Запроса**\n\nВыберите тип запроса:",
         'ask_admin_msg': "📝 Пожалуйста, напишите то, что вы хотите передать:",
@@ -171,7 +171,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Lookup",
         'btn_ip_sorgu': "🌐 IP Query",
         'btn_hatirlat': "⏰ Reminder",
-        'btn_panel': "🔍 PANEL",
+        'btn_panel': "🔍 TG PANELİ",
         'ip_ask': "🌐 **IP Lookup**\n\nEnter the IP address to query:\nExample: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Query Menu**\n\nSelect a query type below:",
         'ask_admin_msg': "📝 Please write what you want to convey:",
@@ -201,7 +201,7 @@ LANG_DATA = {
         'btn_ip': "🌐 IP Abfrage",
         'btn_ip_sorgu': "🌐 IP Abfrage",
         'btn_hatirlat': "⏰ Erinnerung",
-        'btn_panel': "🔍 PANEL",
+        'btn_panel': "🔍 TG PANELİ",
         'ip_ask': "🌐 **IP Abfrage**\n\nGeben Sie die IP-Adresse ein:\nBeispiel: `8.8.8.8`",
         'ip_sorgu_welcome': "🌐 **IP Abfrage-Menü**\n\nWählen Sie unten einen Abfragetyp:",
         'ask_admin_msg': "📝 Bitte schreiben Sie, was Sie übermitteln möchten:",
@@ -247,7 +247,7 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
     ]
     return InlineKeyboardMarkup(klavye)
 
-# --- 🔍 PANEL — KULLANICI SORGU FONKSİYONU ---
+# --- 🔍 TG PANELİ — GELİŞMİŞ KULLANICI/GRUP/KANAL SORGU FONKSİYONU ---
 async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
     try:
         if sorgu.lstrip('-').isdigit():
@@ -258,7 +258,7 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
         chat = await bot.get_chat(hedef)
 
         tip_map = {
-            'private': '👤 Kullanıcı (Private)',
+            'private': '👤 Kullanıcı',
             'bot': '🤖 Bot',
             'group': '👥 Grup',
             'supergroup': '👥 Süper Grup',
@@ -270,73 +270,187 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
         soyad = html.escape(chat.last_name or '') if chat.last_name else '—'
         tam_ad = f"{ad} {soyad}".strip() if chat.last_name else ad
         kullanici_adi = f"@{chat.username}" if chat.username else '—'
-        bio = html.escape(chat.bio or '—') if chat.bio else '—'
-        aciklama = html.escape(chat.description or '—') if chat.description else '—'
         profil_link = f"tg://user?id={chat.id}"
 
-        premium = '✅ Evet' if getattr(chat, 'is_premium', False) else '❌ Hayır'
         dogrulandi = '✅ Evet' if getattr(chat, 'is_verified', False) else '❌ Hayır'
-        kisitlandi = '⚠️ Evet' if getattr(chat, 'is_restricted', False) else '✅ Hayır'
-        scam = '🚨 SCAM' if getattr(chat, 'is_scam', False) else '✅ Temiz'
-        fake = '⚠️ FAKE' if getattr(chat, 'is_fake', False) else '✅ Gerçek'
+        scam       = '🚨 SCAM' if getattr(chat, 'is_scam', False) else '✅ Temiz'
+        fake       = '⚠️ FAKE' if getattr(chat, 'is_fake', False) else '✅ Gerçek'
 
-        foto_sayisi = '—'
-        try:
-            fotolar = await bot.get_user_profile_photos(chat.id, limit=1)
-            foto_sayisi = str(fotolar.total_count)
-        except Exception:
-            pass
+        aktif_kullanici_adlari = '—'
+        if getattr(chat, 'active_usernames', None):
+            aktif_kullanici_adlari = '  |  '.join([f"@{u}" for u in chat.active_usernames])
 
-        satir1 = (
-            f"🔍 **PANEL — Kullanıcı Raporu**\n"
+        metin = (
+            f"🔍 **TG KANAL SOHBET PANELİ GÜVENLİ**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"👤 **Ad Soyad:** [{tam_ad}]({profil_link})\n"
+            f"📂 **Tür:** {tip}\n"
+            f"👤 **Ad:** [{tam_ad}]({profil_link})\n"
             f"🏷️ **Kullanıcı Adı:** `{kullanici_adi}`\n"
             f"🆔 **Telegram ID:** `{chat.id}`\n"
-            f"📂 **Hesap Türü:** {tip}\n\n"
+            f"🔤 **Aktif Kullanıcı Adları:** {aktif_kullanici_adlari}\n\n"
+            f"✅ **Doğrulanmış:** {dogrulandi}\n"
+            f"🚨 **Scam:** {scam}\n"
+            f"⚠️ **Fake:** {fake}\n\n"
         )
 
+        # ── KULLANICI / BOT ──────────────────────────────────────────
         if chat.type in ('private', 'bot'):
-            satir1 += (
+            premium    = '✅ Evet' if getattr(chat, 'is_premium', False) else '❌ Hayır'
+            kisitlandi = '⚠️ Evet' if getattr(chat, 'is_restricted', False) else '✅ Hayır'
+            bio        = html.escape(chat.bio) if getattr(chat, 'bio', None) else '—'
+            ozel_iletme = "🔒 Gizli" if getattr(chat, 'has_private_forwards', False) else "✅ Açık"
+            emoji_durum = f"`{chat.emoji_status_custom_emoji_id}`" if getattr(chat, 'emoji_status_custom_emoji_id', None) else '—'
+
+            foto_sayisi = '—'
+            try:
+                fotolar = await bot.get_user_profile_photos(chat.id, limit=1)
+                foto_sayisi = str(fotolar.total_count)
+            except Exception:
+                pass
+
+            metin += (
                 f"💎 **Telegram Premium:** {premium}\n"
-                f"✅ **Doğrulanmış:** {dogrulandi}\n"
                 f"🚫 **Kısıtlanmış:** {kisitlandi}\n"
-                f"🚨 **Scam İşareti:** {scam}\n"
-                f"⚠️ **Fake İşareti:** {fake}\n\n"
+                f"🔀 **Mesaj Yönlendirme:** {ozel_iletme}\n"
+                f"😀 **Emoji Durumu:** {emoji_durum}\n\n"
                 f"📝 **Bio:** {bio}\n"
-                f"🖼️ **Profil Fotoğraf Sayısı:** {foto_sayisi}\n\n"
+                f"🖼️ **Profil Fotoğraf Sayısı:** `{foto_sayisi}`\n\n"
+                f"🔗 **Profil Linki:** {profil_link}\n\n"
             )
-        else:
+
+        # ── GRUP / SÜPER GRUP ────────────────────────────────────────
+        elif chat.type in ('group', 'supergroup'):
+            aciklama    = html.escape(chat.description) if getattr(chat, 'description', None) else '—'
+            davet_linki = getattr(chat, 'invite_link', None) or '—'
+            linked_chat = str(getattr(chat, 'linked_chat_id', None) or '—')
+            sticker_set = getattr(chat, 'sticker_set_name', None) or '—'
+
             uye_sayisi = '—'
             try:
                 uye_sayisi = str(await bot.get_chat_member_count(chat.id))
             except Exception:
                 pass
-            satir1 += (
-                f"✅ **Doğrulanmış:** {dogrulandi}\n"
-                f"🚨 **Scam İşareti:** {scam}\n"
-                f"⚠️ **Fake İşareti:** {fake}\n\n"
+
+            # Admin listesi
+            admin_satirlari = []
+            admin_sayisi = 0
+            bot_sayisi = 0
+            try:
+                adminler = await bot.get_chat_administrators(chat.id)
+                admin_sayisi = len(adminler)
+                for a in adminler:
+                    if a.user.is_bot:
+                        bot_sayisi += 1
+                for a in adminler[:8]:
+                    a_adi = html.escape(a.user.first_name or '?')
+                    a_un  = f"@{a.user.username}" if a.user.username else f"#{a.user.id}"
+                    rol   = "👑 Kurucu" if a.status == 'creator' else "🛡️ Admin"
+                    bot_rozet = " 🤖" if a.user.is_bot else ""
+                    admin_satirlari.append(f"  {rol}{bot_rozet} [{a_adi}](tg://user?id={a.user.id}) `{a_un}`")
+            except Exception:
+                pass
+
+            # Ayarlar
+            has_protected  = "🔒 Evet" if getattr(chat, 'has_protected_content', False) else "✅ Hayır"
+            is_forum       = "✅ Evet" if getattr(chat, 'is_forum', False) else "❌ Hayır"
+            join_req       = "✅ Evet" if getattr(chat, 'join_by_request', False) else "❌ Hayır"
+            join_send      = "✅ Evet" if getattr(chat, 'join_to_send_messages', False) else "❌ Hayır"
+            hidden_members = "🔒 Evet" if getattr(chat, 'has_hidden_members', False) else "✅ Hayır"
+            anti_spam      = "✅ Aktif" if getattr(chat, 'has_aggressive_anti_spam_enabled', False) else "❌ Kapalı"
+            slow_mode      = f"`{chat.slow_mode_delay}s`" if getattr(chat, 'slow_mode_delay', None) else "❌ Kapalı"
+            auto_delete    = f"`{chat.message_auto_delete_time}s`" if getattr(chat, 'message_auto_delete_time', None) else "❌ Kapalı"
+            has_visible_history = "✅ Evet" if getattr(chat, 'has_visible_history', False) else "❌ Hayır"
+
+            # İzinler
+            perms = getattr(chat, 'permissions', None)
+            perm_satirlari = ''
+            if perms:
+                def e(v): return "✅" if v else "❌"
+                perm_satirlari = (
+                    f"  Mesaj {e(perms.can_send_messages)} | Fotoğraf {e(perms.can_send_photos)} | "
+                    f"Video {e(perms.can_send_videos)} | Ses {e(perms.can_send_voice_notes)}\n"
+                    f"  Dosya {e(perms.can_send_documents)} | Sticker {e(perms.can_send_other_messages)} | "
+                    f"Poll {e(perms.can_send_polls)} | GIF {e(perms.can_send_animations if hasattr(perms,'can_send_animations') else None)}\n"
+                    f"  Link önizleme {e(perms.can_add_web_page_previews)} | Davet {e(perms.can_invite_users)}\n"
+                    f"  Bilgi değiştir {e(perms.can_change_info)} | Pin {e(perms.can_pin_messages)}"
+                )
+
+            metin += (
+                f"👥 **Üye Sayısı:** `{uye_sayisi}`\n"
+                f"🛡️ **Admin Sayısı:** `{admin_sayisi}`\n"
+                f"🤖 **Bot Sayısı:** `{bot_sayisi}`\n\n"
                 f"📝 **Açıklama:** {aciklama}\n"
-                f"👥 **Üye Sayısı:** {uye_sayisi}\n\n"
+                f"🔗 **Davet Linki:** {davet_linki}\n"
+                f"💬 **Bağlı Kanal ID:** `{linked_chat}`\n"
+                f"🎭 **Sticker Seti:** `{sticker_set}`\n\n"
+                f"🗂️ **Forum Modu:** {is_forum}\n"
+                f"🔒 **İçerik Koruması:** {has_protected}\n"
+                f"✋ **Onay ile Katılım:** {join_req}\n"
+                f"✉️ **Mesaj için Katılım:** {join_send}\n"
+                f"👥 **Gizli Üyeler:** {hidden_members}\n"
+                f"📜 **Geçmiş Mesajlar:** {has_visible_history}\n"
+                f"🛡️ **Agresif Anti-Spam:** {anti_spam}\n"
+                f"🐌 **Yavaş Mod:** {slow_mode}\n"
+                f"⏱️ **Otomatik Mesaj Silme:** {auto_delete}\n\n"
             )
 
-        davet_linki = '—'
-        try:
-            if chat.invite_link:
-                davet_linki = chat.invite_link
-        except Exception:
-            pass
+            if perm_satirlari:
+                metin += f"🔐 **Üye İzinleri:**\n{perm_satirlari}\n\n"
 
-        satir1 += (
-            f"🔗 **Profil Linki:** {profil_link}\n"
-            f"📨 **Davet Linki:** {davet_linki}\n\n"
-            f"🤖 _AZRxGUARD PANEL tarafından sorgulandı_"
-        )
-        return satir1
+            if admin_satirlari:
+                metin += "👑 **Adminler:**\n" + "\n".join(admin_satirlari) + "\n\n"
+
+        # ── KANAL ────────────────────────────────────────────────────
+        elif chat.type == 'channel':
+            aciklama    = html.escape(chat.description) if getattr(chat, 'description', None) else '—'
+            davet_linki = getattr(chat, 'invite_link', None) or '—'
+            linked_chat = str(getattr(chat, 'linked_chat_id', None) or '—')
+            has_protected = "🔒 Evet" if getattr(chat, 'has_protected_content', False) else "✅ Hayır"
+            auto_delete   = f"`{chat.message_auto_delete_time}s`" if getattr(chat, 'message_auto_delete_time', None) else "❌ Kapalı"
+
+            uye_sayisi = '—'
+            try:
+                uye_sayisi = str(await bot.get_chat_member_count(chat.id))
+            except Exception:
+                pass
+
+            admin_satirlari = []
+            admin_sayisi = 0
+            bot_sayisi = 0
+            try:
+                adminler = await bot.get_chat_administrators(chat.id)
+                admin_sayisi = len(adminler)
+                for a in adminler:
+                    if a.user.is_bot:
+                        bot_sayisi += 1
+                for a in adminler[:8]:
+                    a_adi = html.escape(a.user.first_name or '?')
+                    a_un  = f"@{a.user.username}" if a.user.username else f"#{a.user.id}"
+                    rol   = "👑 Kurucu" if a.status == 'creator' else "🛡️ Admin"
+                    bot_rozet = " 🤖" if a.user.is_bot else ""
+                    admin_satirlari.append(f"  {rol}{bot_rozet} [{a_adi}](tg://user?id={a.user.id}) `{a_un}`")
+            except Exception:
+                pass
+
+            metin += (
+                f"👥 **Abone Sayısı:** `{uye_sayisi}`\n"
+                f"🛡️ **Admin Sayısı:** `{admin_sayisi}`\n"
+                f"🤖 **Bot Sayısı:** `{bot_sayisi}`\n\n"
+                f"📝 **Açıklama:** {aciklama}\n"
+                f"🔗 **Davet Linki:** {davet_linki}\n"
+                f"💬 **Bağlı Grup ID:** `{linked_chat}`\n"
+                f"🔒 **İçerik Koruması:** {has_protected}\n"
+                f"⏱️ **Otomatik Mesaj Silme:** {auto_delete}\n\n"
+            )
+
+            if admin_satirlari:
+                metin += "👑 **Adminler:**\n" + "\n".join(admin_satirlari) + "\n\n"
+
+        metin += "🤖 _AZRxGUARD TG PANELİ GÜVENLİ tarafından sorgulandı_"
+        return metin
 
     except Exception as e:
-        hata = str(e)
-        logger.error(f"Panel sorgu hatası: {hata}")
+        logger.error(f"Panel sorgu hatası: {e}")
         return None
 
 # BUG FIX: Bu fonksiyon ana_menu_klavye içinde yanlış girintilenmişti, düzeltildi
@@ -460,25 +574,64 @@ async def stats_komut_tetikleyici(update: Update, context: ContextTypes.DEFAULT_
     await update.message.reply_text(rapor, parse_mode='Markdown')
 
 # --- 🪪 ME ID KOMUTU ---
-def meid_bilgisi_olustur(update: Update, context: ContextTypes.DEFAULT_TYPE, lang: str) -> str:
-    from datetime import datetime, timezone
+async def meid_bilgisi_olustur(bot, update: Update, context: ContextTypes.DEFAULT_TYPE, lang: str) -> str:
     user = update.effective_user
     chat = update.effective_chat
     msg = update.effective_message
 
-    # — Kullanıcı bilgileri —
+    # — Tam chat objesi (daha fazla veri için) —
+    full_chat = None
+    try:
+        full_chat = await bot.get_chat(user.id)
+    except Exception:
+        pass
+
+    # — Profil fotoğraf sayısı —
+    foto_sayisi = '—'
+    try:
+        fotolar = await bot.get_user_profile_photos(user.id, limit=1)
+        foto_sayisi = str(fotolar.total_count)
+    except Exception:
+        pass
+
+    # — Kullanıcı temel bilgileri —
     ad = html.escape(user.first_name) if user.first_name else "—"
     soyad = html.escape(user.last_name) if user.last_name else "—"
     tam_ad = f"{ad} {soyad}".strip() if user.last_name else ad
     kullanici_adi = f"@{user.username}" if user.username else "—"
     tiklanabilir = f"[{html.escape(tam_ad)}](tg://user?id={user.id})"
+
     bot_dili_map = {'tr': '🇹🇷 Türkçe', 'az': '🇦🇿 Azərbaycanca', 'ru': '🇷🇺 Русский', 'en': '🇬🇧 English', 'de': '🇩🇪 Deutsch'}
     bot_dili = bot_dili_map.get(lang, lang)
     tg_dili = user.language_code.upper() if user.language_code else "—"
-    premium = "✅ Evet" if getattr(user, 'is_premium', False) else "❌ Hayır"
+
+    # — Hesap bayrakları —
+    premium    = "✅ Evet" if getattr(user, 'is_premium', False) else "❌ Hayır"
     dogrulandi = "✅ Evet" if getattr(user, 'is_verified', False) else "❌ Hayır"
     kisitlandi = "⚠️ Evet" if getattr(user, 'is_restricted', False) else "✅ Hayır"
+    scam       = "🚨 SCAM" if getattr(user, 'is_scam', False) else "✅ Temiz"
+    fake       = "⚠️ FAKE" if getattr(user, 'is_fake', False) else "✅ Gerçek"
     hesap_turu = "🤖 Bot" if user.is_bot else "👤 Normal Kullanıcı"
+
+    # — full_chat'den ek veriler —
+    bio = '—'
+    ozel_iletme = '—'
+    aktif_kullanici_adlari = '—'
+    emoji_durum = '—'
+    if full_chat:
+        bio = html.escape(full_chat.bio) if getattr(full_chat, 'bio', None) else '—'
+        ozel_iletme = "🔒 Gizli" if getattr(full_chat, 'has_private_forwards', False) else "✅ Açık"
+        if getattr(full_chat, 'active_usernames', None):
+            aktif_kullanici_adlari = '  |  '.join([f"@{u}" for u in full_chat.active_usernames])
+        if getattr(full_chat, 'emoji_status_custom_emoji_id', None):
+            emoji_durum = f"`{full_chat.emoji_status_custom_emoji_id}`"
+
+    # — Bot-a özgü bayraklar —
+    bot_gruba = bot_tum_mesaj = bot_inline = '—'
+    if user.is_bot:
+        bot_gruba    = "✅ Evet" if getattr(user, 'can_join_groups', False) else "❌ Hayır"
+        bot_tum_mesaj = "✅ Evet" if getattr(user, 'can_read_all_group_messages', False) else "❌ Hayır"
+        bot_inline   = "✅ Evet" if getattr(user, 'supports_inline_queries', False) else "❌ Hayır"
 
     # — Sohbet bilgileri —
     chat_turu_map = {
@@ -488,45 +641,60 @@ def meid_bilgisi_olustur(update: Update, context: ContextTypes.DEFAULT_TYPE, lan
         'channel': '📢 Kanal'
     }
     chat_turu = chat_turu_map.get(chat.type, chat.type) if chat else "—"
-    chat_id = str(chat.id) if chat else "—"
-    chat_adi = html.escape(chat.title) if chat and chat.title else "—"
+    chat_id   = str(chat.id) if chat else "—"
+    chat_adi  = html.escape(chat.title) if chat and chat.title else "—"
 
     # — Mesaj bilgileri —
-    mesaj_id = str(msg.message_id) if msg else "—"
-    mesaj_zamani = "—"
-    if msg and msg.date:
-        mesaj_zamani = msg.date.strftime("%d.%m.%Y %H:%M:%S UTC")
-
-    yanit_mi = "✅ Evet" if msg and msg.reply_to_message else "❌ Hayır"
-    medya_turu = "—"
+    mesaj_id     = str(msg.message_id) if msg else "—"
+    mesaj_zamani = msg.date.strftime("%d.%m.%Y %H:%M:%S UTC") if msg and msg.date else "—"
+    yanit_mi     = "✅ Evet" if msg and msg.reply_to_message else "❌ Hayır"
+    medya_turu   = "—"
     if msg:
-        if msg.photo: medya_turu = "🖼️ Fotoğraf"
-        elif msg.video: medya_turu = "🎥 Video"
-        elif msg.voice: medya_turu = "🎙️ Sesli Mesaj"
+        if msg.photo:     medya_turu = "🖼️ Fotoğraf"
+        elif msg.video:   medya_turu = "🎥 Video"
+        elif msg.voice:   medya_turu = "🎙️ Sesli Mesaj"
         elif msg.document: medya_turu = "📄 Dosya"
         elif msg.sticker: medya_turu = "🎭 Sticker"
         elif msg.animation: medya_turu = "🎬 GIF"
-        elif msg.text: medya_turu = "💬 Metin"
+        elif msg.text:    medya_turu = "💬 Metin"
 
     # — Bot kayıt durumu —
-    toplam_uyeler = uyeleri_getir()
-    kayitli = "✅ Evet" if user.id in toplam_uyeler else "❌ Hayır"
+    toplam_uyeler    = uyeleri_getir()
+    kayitli          = "✅ Evet" if user.id in toplam_uyeler else "❌ Hayır"
     toplam_uye_sayisi = len(toplam_uyeler)
 
     title = LANG_DATA[lang].get('meid_title', '🪪 **Kullanıcı Bilgilerin**')
 
-    return (
+    metin = (
         f"{title}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"👤 **Ad Soyad:** {tiklanabilir}\n"
         f"🏷️ **Kullanıcı Adı:** `{kullanici_adi}`\n"
         f"🆔 **Kullanıcı ID:** `{user.id}`\n"
-        f"🧩 **Hesap Türü:** {hesap_turu}\n\n"
+        f"🧩 **Hesap Türü:** {hesap_turu}\n"
         f"🌍 **Bot Dili:** {bot_dili}\n"
-        f"📱 **Telegram Dili:** `{tg_dili}`\n"
+        f"📱 **Telegram Dili:** `{tg_dili}`\n\n"
         f"💎 **Telegram Premium:** {premium}\n"
-        f"✅ **Doğrulanmış Hesap:** {dogrulandi}\n"
-        f"🚫 **Kısıtlanmış:** {kisitlandi}\n\n"
+        f"✅ **Doğrulanmış:** {dogrulandi}\n"
+        f"🚫 **Kısıtlanmış:** {kisitlandi}\n"
+        f"🚨 **Scam İşareti:** {scam}\n"
+        f"⚠️ **Fake İşareti:** {fake}\n\n"
+        f"📝 **Bio:** {bio}\n"
+        f"🖼️ **Profil Fotoğraf Sayısı:** `{foto_sayisi}`\n"
+        f"🔀 **Mesaj Yönlendirme:** {ozel_iletme}\n"
+        f"😀 **Emoji Durumu:** {emoji_durum}\n"
+        f"🔤 **Aktif Kullanıcı Adları:** {aktif_kullanici_adlari}\n\n"
+    )
+
+    if user.is_bot:
+        metin += (
+            f"🤖 **Bot Özellikleri:**\n"
+            f"  👥 Gruba Eklenebilir: {bot_gruba}\n"
+            f"  📖 Tüm Mesajları Okur: {bot_tum_mesaj}\n"
+            f"  ⚡ Inline Destekler: {bot_inline}\n\n"
+        )
+
+    metin += (
         f"💬 **Sohbet Türü:** {chat_turu}\n"
         f"🏠 **Sohbet Adı:** `{chat_adi}`\n"
         f"📌 **Sohbet ID:** `{chat_id}`\n\n"
@@ -539,6 +707,7 @@ def meid_bilgisi_olustur(update: Update, context: ContextTypes.DEFAULT_TYPE, lan
         f"🔗 **Profil Linki:** tg://user?id={user.id}\n\n"
         f"🤖 _AZRxGUARD tarafından oluşturuldu_"
     )
+    return metin
 
 async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user:
@@ -546,7 +715,7 @@ async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     lang = get_lang(context, user_id)
     strings = LANG_DATA[lang]
-    bilgi = meid_bilgisi_olustur(update, context, lang)
+    bilgi = await meid_bilgisi_olustur(context.bot, update, context, lang)
     geri_klavye = None
     if update.effective_chat and update.effective_chat.type == 'private':
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
@@ -940,7 +1109,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=rapor_metni, reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'show_meid':
-        bilgi = meid_bilgisi_olustur(update, context, lang)
+        bilgi = await meid_bilgisi_olustur(context.bot, update, context, lang)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'menu_hatirlat':
