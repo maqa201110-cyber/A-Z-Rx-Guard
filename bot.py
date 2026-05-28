@@ -95,6 +95,12 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — Kullanıcı Sorgu Merkezi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgulamak istediğin kullanıcının:\n• `@kullaniciadi` yazabilirsin\n• Sayısal `ID` yazabilirsin\n\nÖrnek: `@durov` veya `12345678`\n\n_Her bilgi ekrana dökülecek!_ 🔎",
         'panel_sorgulanıyor': "🔍 Sorgulanıyor...",
         'panel_bulunamadi': "❌ **Kullanıcı bulunamadı!**\n\nKullanıcı adını `@` ile ya da sayısal ID olarak gir.\nÖrnek: `@durov` veya `12345678`",
+        'btn_guvenli_sorgu': "🔍 GÜVENLİ SORGU",
+        'guvenli_sorgu_welcome': "🔍 **GÜVENLİ SORGU MERKEZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgu türünü seçin:",
+        'btn_tt_sorgu': "🎵 TikTok Profil Sorgu",
+        'btn_username_checker': "🔎 Platform Kullanıcı Adı Kontrolü",
+        'tt_sorgu_ask': "🎵 **TikTok Profil Sorgu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgulamak istediğin TikTok kullanıcı adını yaz:\nÖrnek: `@maqa_01` veya `maqa_01`",
+        'username_checker_ask': "🔎 **Platform Kullanıcı Adı Kontrolü**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 platformda aynı anda kontrol edilecek.\nKullanıcı adını yaz (@ olmadan da olur):\nÖrnek: `maqa_01`",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -125,6 +131,12 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — İstifadəçi Sorğu Mərkəzi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğulamaq istədiyin istifadəçinin:\n• `@istifadəçiadı` yaza bilərsən\n• Rəqəmsal `ID` yaza bilərsən\n\nNümunə: `@durov` və ya `12345678`\n\n_Bütün məlumatlar ekrana çıxacaq!_ 🔎",
         'panel_sorgulanıyor': "🔍 Sorğulanır...",
         'panel_bulunamadi': "❌ **İstifadəçi tapılmadı!**\n\nİstifadəçi adını `@` ilə ya da rəqəmsal ID kimi daxil et.\nNümunə: `@durov` və ya `12345678`",
+        'btn_guvenli_sorgu': "🔍 TƏHLÜKƏSİZ SORĞU",
+        'guvenli_sorgu_welcome': "🔍 **TƏHLÜKƏSİZ SORĞU MƏRKƏZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğu növünü seçin:",
+        'btn_tt_sorgu': "🎵 TikTok Profil Sorğusu",
+        'btn_username_checker': "🔎 Platforma İstifadəçi Adı Yoxlaması",
+        'tt_sorgu_ask': "🎵 **TikTok Profil Sorğusu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğulamaq istədiyin TikTok istifadəçi adını yaz:\nNümunə: `@maqa_01`",
+        'username_checker_ask': "🔎 **Platforma İstifadəçi Adı Yoxlaması**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 platformda eyni anda yoxlanacaq.\nİstifadəçi adını yaz:\nNümunə: `maqa_01`",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -155,6 +167,12 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — Центр запросов пользователей**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВведи:\n• `@username` пользователя\n• Числовой `ID` пользователя\n\nПример: `@durov` или `12345678`\n\n_Вся информация будет выведена!_ 🔎",
         'panel_sorgulanıyor': "🔍 Запрос выполняется...",
         'panel_bulunamadi': "❌ **Пользователь не найден!**\n\nВведи username через `@` или числовой ID.\nПример: `@durov` или `12345678`",
+        'btn_guvenli_sorgu': "🔍 БЕЗОПАСНЫЙ ЗАПРОС",
+        'guvenli_sorgu_welcome': "🔍 **ЦЕНТР БЕЗОПАСНЫХ ЗАПРОСОВ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите тип запроса:",
+        'btn_tt_sorgu': "🎵 Профиль TikTok",
+        'btn_username_checker': "🔎 Проверка имени на платформах",
+        'tt_sorgu_ask': "🎵 **Запрос профиля TikTok**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВведите имя пользователя TikTok:\nПример: `@maqa_01`",
+        'username_checker_ask': "🔎 **Проверка имени пользователя**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nПроверка на 14 платформах одновременно.\nВведите имя пользователя:\nПример: `maqa_01`",
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -185,6 +203,12 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — User Query Center**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEnter:\n• `@username` of the user\n• Numeric `ID` of the user\n\nExample: `@durov` or `12345678`\n\n_All information will be displayed!_ 🔎",
         'panel_sorgulanıyor': "🔍 Querying...",
         'panel_bulunamadi': "❌ **User not found!**\n\nEnter username with `@` or a numeric ID.\nExample: `@durov` or `12345678`",
+        'btn_guvenli_sorgu': "🔍 SAFE QUERY",
+        'guvenli_sorgu_welcome': "🔍 **SAFE QUERY CENTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSelect a query type:",
+        'btn_tt_sorgu': "🎵 TikTok Profile Lookup",
+        'btn_username_checker': "🔎 Platform Username Checker",
+        'tt_sorgu_ask': "🎵 **TikTok Profile Lookup**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEnter the TikTok username:\nExample: `@maqa_01`",
+        'username_checker_ask': "🔎 **Platform Username Checker**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChecks 14 platforms simultaneously.\nEnter a username:\nExample: `maqa_01`",
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -215,6 +239,12 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — Benutzer-Abfragezentrum**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nGib ein:\n• `@benutzername` des Nutzers\n• Numerische `ID` des Nutzers\n\nBeispiel: `@durov` oder `12345678`\n\n_Alle Informationen werden angezeigt!_ 🔎",
         'panel_sorgulanıyor': "🔍 Abfrage läuft...",
         'panel_bulunamadi': "❌ **Benutzer nicht gefunden!**\n\nGib den Benutzernamen mit `@` oder eine numerische ID ein.\nBeispiel: `@durov` oder `12345678`",
+        'btn_guvenli_sorgu': "🔍 SICHERES ABFRAGE",
+        'guvenli_sorgu_welcome': "🔍 **SICHERES ABFRAGEZENTRUM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nWählen Sie einen Abfragetyp:",
+        'btn_tt_sorgu': "🎵 TikTok-Profil-Suche",
+        'btn_username_checker': "🔎 Benutzername auf Plattformen prüfen",
+        'tt_sorgu_ask': "🎵 **TikTok-Profil-Suche**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBenutzernamen eingeben:\nBeispiel: `@maqa_01`",
+        'username_checker_ask': "🔎 **Benutzername-Prüfung**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nPrüft 14 Plattformen gleichzeitig.\nBenutzernamen eingeben:\nBeispiel: `maqa_01`",
     }
 }
 
@@ -243,6 +273,9 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings.get('btn_panel', '🔍 PANEL'), callback_data='menu_panel')
+        ],
+        [
+            InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🔍 GÜVENLİ SORGU'), callback_data='menu_guvenli_sorgu')
         ]
     ]
     return InlineKeyboardMarkup(klavye)
@@ -493,6 +526,248 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
     except Exception as e:
         logger.error(f"Panel sorgu hatası: {e}")
         return None
+
+# --- 🔍 GÜVENLİ SORGU — TİKTOK & PLATFORM KONTROL ---
+import json as _json
+
+async def tt_profil_getir(username: str) -> str:
+    username = username.lstrip('@').strip()
+    if not username:
+        return "❌ Kullanıcı adı gerekli. Örnek: `@maqa_01`"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    }
+
+    def fetch():
+        try:
+            s = http_requests.Session()
+            r = s.get(f"https://www.tiktok.com/@{username}", headers=headers, timeout=15, allow_redirects=True)
+            return r.text, r.status_code
+        except Exception:
+            return None, 0
+
+    loop = asyncio.get_event_loop()
+    html_text, status_code = await loop.run_in_executor(None, fetch)
+
+    if not html_text:
+        return "❌ TikTok'a bağlanılamadı. Lütfen tekrar deneyin."
+
+    user  = {}
+    stats = {}
+
+    try:
+        m = re.search(r'<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([^<]+)</script>', html_text)
+        if m:
+            data = _json.loads(m.group(1))
+            ud   = data.get('__DEFAULT_SCOPE__', {}).get('webapp.user-detail', {}).get('userInfo', {})
+            user  = ud.get('user', {})
+            stats = ud.get('stats', {})
+    except Exception:
+        pass
+
+    if not user:
+        try:
+            m = re.search(r'<script id="__NEXT_DATA__"[^>]*>([^<]+)</script>', html_text)
+            if m:
+                data = _json.loads(m.group(1))
+                ui   = data.get('props', {}).get('pageProps', {}).get('userInfo', {})
+                user  = ui.get('user', {})
+                stats = ui.get('stats', {})
+        except Exception:
+            pass
+
+    if not user:
+        if status_code == 404:
+            return f"❌ `@{username}` TikTok'ta bulunamadı."
+        return (
+            f"⚠️ `@{username}` verisi alınamadı — TikTok bot koruması aktif olabilir.\n\n"
+            f"🔗 Direkt link: https://www.tiktok.com/@{username}"
+        )
+
+    def safe(*keys, default='—'):
+        v = user
+        for k in keys:
+            if isinstance(v, dict):
+                v = v.get(k)
+                if v is None:
+                    return default
+            else:
+                return default
+        return v if v not in (None, '', {}, []) else default
+
+    uid          = safe('id')
+    display_name = safe('nickname')
+    unique_id    = safe('uniqueId', default=username)
+    bio          = safe('signature', default='Yok')
+    bio_link     = user.get('bioLink', {}).get('link', '—') if isinstance(user.get('bioLink'), dict) else '—'
+    dogrulandi   = "✅ Evet" if user.get('verified') else "❌ Hayır"
+    gizli        = "🔒 Gizli" if user.get('privateAccount') else "🌐 Herkese Açık"
+    bolge        = safe('region')
+    dil          = safe('language')
+
+    create_time = user.get('createTime') or user.get('createtime')
+    if create_time and str(create_time).isdigit() and int(create_time) > 0:
+        import datetime as _dt
+        _ay = {1:'Ocak',2:'Şubat',3:'Mart',4:'Nisan',5:'Mayıs',6:'Haziran',
+               7:'Temmuz',8:'Ağustos',9:'Eylül',10:'Ekim',11:'Kasım',12:'Aralık'}
+        dt = _dt.datetime.fromtimestamp(int(create_time), tz=_dt.timezone.utc)
+        hesap_tarihi = f"{dt.day} {_ay[dt.month]} {dt.year}"
+    else:
+        hesap_tarihi = id_den_kayit_tarihi_tahmin_et(int(uid)) if str(uid).isdigit() else '—'
+
+    def fmt(val):
+        try:
+            return f"{int(val):,}".replace(',', '.')
+        except Exception:
+            return '—'
+
+    takipci  = fmt(stats.get('followerCount'))
+    takip    = fmt(stats.get('followingCount'))
+    begeni   = fmt(stats.get('heartCount'))
+    video_s  = fmt(stats.get('videoCount'))
+    arkadas  = fmt(stats.get('friendCount'))
+    digg_s   = fmt(stats.get('diggCount'))
+
+    try:
+        fc = int(stats.get('followerCount', 0))
+        hc = int(stats.get('heartCount', 0))
+        vc = max(int(stats.get('videoCount', 1)), 1)
+        ort = hc // vc
+        eng = f"~%{(ort / fc * 100):.1f}" if fc > 0 else '—'
+        ort_str = fmt(ort)
+    except Exception:
+        eng, ort_str = '—', '—'
+
+    yorum  = {0:'Herkese Açık', 1:'Sadece Arkadaşlar', 2:'Kapalı'}.get(user.get('commentSetting'), '—')
+    duet   = {0:'Herkese Açık', 1:'Sadece Arkadaşlar', 2:'Kapalı'}.get(user.get('duetSetting'), '—')
+    stitch = {0:'Herkese Açık', 1:'Sadece Arkadaşlar', 2:'Kapalı'}.get(user.get('stitchSetting'), '—')
+    fav    = "✅ Açık" if user.get('openFavorite') else "❌ Kapalı"
+    ticari = "✅ Evet" if user.get('commerceUserInfo', {}).get('commerceUser') else "❌ Hayır"
+    link   = f"https://www.tiktok.com/@{unique_id}"
+
+    return (
+        f"🎵 **TİKTOK PROFİL RAPORU**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"👤 **Görünen Ad:** `{display_name}`\n"
+        f"🏷️ **Kullanıcı Adı:** `@{unique_id}`\n"
+        f"🆔 **TikTok ID:** `{uid}`\n"
+        f"🔗 **Profil Linki:** {link}\n\n"
+        f"✅ **Doğrulanmış Hesap:** {dogrulandi}\n"
+        f"🔒 **Gizlilik:** {gizli}\n"
+        f"🌍 **Bölge:** `{bolge}`\n"
+        f"🗣️ **Dil:** `{dil}`\n"
+        f"📅 **Hesap Oluşturma:** `{hesap_tarihi}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📊 **İSTATİSTİKLER**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"👥 **Takipçi:** `{takipci}`\n"
+        f"➡️ **Takip Edilen:** `{takip}`\n"
+        f"🤝 **Arkadaş:** `{arkadas}`\n"
+        f"❤️ **Toplam Beğeni:** `{begeni}`\n"
+        f"🎬 **Video Sayısı:** `{video_s}`\n"
+        f"👍 **Beğendiği Video:** `{digg_s}`\n"
+        f"📈 **Ort. Beğeni/Video:** `{ort_str}`\n"
+        f"💹 **Tahmini Engagement:** `{eng}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📝 **BİYOGRAFİ**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"💬 **Bio:** {bio}\n"
+        f"🔗 **Bio Linki:** `{bio_link}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"⚙️ **HESAP AYARLARI**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"💬 **Yorum İzni:** `{yorum}`\n"
+        f"🎭 **Duet İzni:** `{duet}`\n"
+        f"✂️ **Stitch İzni:** `{stitch}`\n"
+        f"⭐ **Favoriler:** {fav}\n"
+        f"🛒 **Ticari Hesap:** {ticari}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🤖 _AZRxGUARD GÜVENLİ SORGU tarafından sorgulandı_"
+    )
+
+
+async def platform_username_kontrol(username: str) -> str:
+    username = username.lstrip('@').strip()
+    if not username:
+        return "❌ Kullanıcı adı gerekli. Örnek: `maqa_01`"
+
+    platformlar = [
+        ("🎵 TikTok",      "https://www.tiktok.com/@{u}"),
+        ("📸 Instagram",   "https://www.instagram.com/{u}/"),
+        ("▶️ YouTube",     "https://www.youtube.com/@{u}"),
+        ("🐙 GitHub",      "https://github.com/{u}"),
+        ("🎮 Twitch",      "https://www.twitch.tv/{u}"),
+        ("🤖 Reddit",      "https://www.reddit.com/user/{u}/about.json"),
+        ("🐦 Twitter/X",   "https://twitter.com/{u}"),
+        ("📌 Pinterest",   "https://www.pinterest.com/{u}/"),
+        ("👻 Snapchat",    "https://www.snapchat.com/add/{u}"),
+        ("🔊 SoundCloud",  "https://soundcloud.com/{u}"),
+        ("🎮 Roblox",      "https://www.roblox.com/users/profile?username={u}"),
+        ("💬 Telegram",    "https://t.me/{u}"),
+        ("🎵 Spotify",     "https://open.spotify.com/user/{u}"),
+        ("💼 LinkedIn",    "https://www.linkedin.com/in/{u}/"),
+    ]
+
+    hdrs = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+
+    def kontrol_et(ad, url_tpl):
+        url = url_tpl.replace('{u}', username)
+        try:
+            r = http_requests.get(url, headers=hdrs, timeout=8, allow_redirects=True)
+            if r.status_code == 404:
+                return ad, False, url
+            elif r.status_code == 200:
+                return ad, True, url
+            else:
+                return ad, None, url
+        except Exception:
+            return ad, None, url
+
+    loop = asyncio.get_event_loop()
+    sonuclar = await asyncio.gather(*[
+        loop.run_in_executor(None, kontrol_et, ad, url_tpl)
+        for ad, url_tpl in platformlar
+    ])
+
+    dolu = [(a, u) for a, d, u in sonuclar if d is True]
+    bos  = [(a, u) for a, d, u in sonuclar if d is False]
+    bilm = [(a, u) for a, d, u in sonuclar if d is None]
+
+    metin = (
+        f"🔎 **PLATFORM KULLANICI ADI KONTROLÜ**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔤 **Aranan:** `@{username}`\n"
+        f"❌ **Dolu:** `{len(dolu)}` | ✅ **Boşta:** `{len(bos)}` | ⚪ **Bilinmiyor:** `{len(bilm)}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    )
+    if dolu:
+        metin += "❌ **DOLU PLATFORMLAR:**\n"
+        for ad, url in dolu:
+            metin += f"  └ {ad} → [profil]({url})\n"
+        metin += "\n"
+    if bos:
+        metin += "✅ **BOŞTA OLAN PLATFORMLAR:**\n"
+        for ad, _ in bos:
+            metin += f"  └ {ad}\n"
+        metin += "\n"
+    if bilm:
+        metin += "⚪ **KONTROL EDİLEMEYEN:**\n"
+        for ad, _ in bilm:
+            metin += f"  └ {ad}\n"
+        metin += "\n"
+    metin += "━━━━━━━━━━━━━━━━━━━━━━\n"
+    metin += "🤖 _AZRxGUARD GÜVENLİ SORGU tarafından kontrol edildi_"
+    return metin
+
 
 # BUG FIX: Bu fonksiyon ana_menu_klavye içinde yanlış girintilenmişti, düzeltildi
 async def kanal_takip_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, lang: str) -> bool:
@@ -1307,6 +1582,33 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=geri_klavye,
             parse_mode='Markdown'
         )
+    elif query.data == 'menu_guvenli_sorgu':
+        gs_klavye = [
+            [InlineKeyboardButton(strings.get('btn_tt_sorgu', '🎵 TikTok Sorgu'), callback_data='menu_tt_sorgu')],
+            [InlineKeyboardButton(strings.get('btn_username_checker', '🔎 Platform Kontrolü'), callback_data='menu_username_checker')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ]
+        await query.edit_message_text(
+            strings.get('guvenli_sorgu_welcome', '🔍 **GÜVENLİ SORGU MERKEZİ**\n\nSorgu türünü seçin:'),
+            reply_markup=InlineKeyboardMarkup(gs_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_tt_sorgu':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]])
+        context.user_data['durum'] = 'tt_sorgu_bekliyor'
+        await query.edit_message_text(
+            strings.get('tt_sorgu_ask', '🎵 TikTok kullanıcı adını yaz:'),
+            reply_markup=geri_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_username_checker':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]])
+        context.user_data['durum'] = 'username_checker_bekliyor'
+        await query.edit_message_text(
+            strings.get('username_checker_ask', '🔎 Kullanıcı adını yaz:'),
+            reply_markup=geri_klavye,
+            parse_mode='Markdown'
+        )
     elif query.data == 'go_home':
         await query.edit_message_text(strings['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
@@ -1378,6 +1680,42 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"IP analiz menü hatası: {e}")
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
+        return
+
+    if context.user_data.get('durum') == 'tt_sorgu_bekliyor':
+        context.user_data['durum'] = None
+        kullanici_adi = update.message.text.strip()
+        bekle = await update.message.reply_text(
+            f"🎵 `@{kullanici_adi.lstrip('@')}` TikTok'ta aranıyor...",
+            parse_mode='Markdown'
+        )
+        rapor = await tt_profil_getir(kullanici_adi)
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔍 Yeni Sorgu", callback_data='menu_tt_sorgu')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]
+        ])
+        try:
+            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True, reply_markup=geri_klavye)
+        except Exception:
+            await bekle.edit_text(rapor, disable_web_page_preview=True, reply_markup=geri_klavye)
+        return
+
+    if context.user_data.get('durum') == 'username_checker_bekliyor':
+        context.user_data['durum'] = None
+        kullanici_adi = update.message.text.strip()
+        bekle = await update.message.reply_text(
+            f"🔎 `@{kullanici_adi.lstrip('@')}` 14 platformda kontrol ediliyor...\n_Bu işlem ~10 saniye sürebilir._",
+            parse_mode='Markdown'
+        )
+        rapor = await platform_username_kontrol(kullanici_adi)
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔎 Yeni Kontrol", callback_data='menu_username_checker')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]
+        ])
+        try:
+            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True, reply_markup=geri_klavye)
+        except Exception:
+            await bekle.edit_text(rapor, disable_web_page_preview=True, reply_markup=geri_klavye)
         return
 
     if context.user_data.get('durum') == 'panel_sorgu_bekliyor':
