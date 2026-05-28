@@ -98,8 +98,10 @@ LANG_DATA = {
         'btn_guvenli_sorgu': "🔍 GÜVENLİ SORGU",
         'guvenli_sorgu_welcome': "🔍 **GÜVENLİ SORGU MERKEZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgu türünü seçin:",
         'btn_tt_sorgu': "🎵 TikTok Profil Sorgu",
+        'btn_ig_sorgu': "📸 Instagram Profil Sorgu",
         'btn_username_checker': "🔎 Platform Kullanıcı Adı Kontrolü",
         'tt_sorgu_ask': "🎵 **TikTok Profil Sorgu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgulamak istediğin TikTok kullanıcı adını yaz:\nÖrnek: `@maqa_01` veya `maqa_01`",
+        'ig_sorgu_ask': "📸 **Instagram Profil Sorgu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgulamak istediğin Instagram kullanıcı adını yaz:\nÖrnek: `@kullaniciadi` veya `kullaniciadi`",
         'username_checker_ask': "🔎 **Platform Kullanıcı Adı Kontrolü**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 platformda aynı anda kontrol edilecek.\nKullanıcı adını yaz (@ olmadan da olur):\nÖrnek: `maqa_01`",
     },
     'az': {
@@ -134,8 +136,10 @@ LANG_DATA = {
         'btn_guvenli_sorgu': "🔍 TƏHLÜKƏSİZ SORĞU",
         'guvenli_sorgu_welcome': "🔍 **TƏHLÜKƏSİZ SORĞU MƏRKƏZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğu növünü seçin:",
         'btn_tt_sorgu': "🎵 TikTok Profil Sorğusu",
+        'btn_ig_sorgu': "📸 Instagram Profil Sorğusu",
         'btn_username_checker': "🔎 Platforma İstifadəçi Adı Yoxlaması",
         'tt_sorgu_ask': "🎵 **TikTok Profil Sorğusu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğulamaq istədiyin TikTok istifadəçi adını yaz:\nNümunə: `@maqa_01`",
+        'ig_sorgu_ask': "📸 **Instagram Profil Sorğusu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğulamaq istədiyin Instagram istifadəçi adını yaz:\nNümunə: `@kullaniciadi`",
         'username_checker_ask': "🔎 **Platforma İstifadəçi Adı Yoxlaması**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 platformda eyni anda yoxlanacaq.\nİstifadəçi adını yaz:\nNümunə: `maqa_01`",
     },
     'ru': {
@@ -170,8 +174,10 @@ LANG_DATA = {
         'btn_guvenli_sorgu': "🔍 БЕЗОПАСНЫЙ ЗАПРОС",
         'guvenli_sorgu_welcome': "🔍 **ЦЕНТР БЕЗОПАСНЫХ ЗАПРОСОВ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите тип запроса:",
         'btn_tt_sorgu': "🎵 Профиль TikTok",
+        'btn_ig_sorgu': "📸 Профиль Instagram",
         'btn_username_checker': "🔎 Проверка имени на платформах",
         'tt_sorgu_ask': "🎵 **Запрос профиля TikTok**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВведите имя пользователя TikTok:\nПример: `@maqa_01`",
+        'ig_sorgu_ask': "📸 **Запрос профиля Instagram**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВведите имя пользователя Instagram:\nПример: `@kullaniciadi`",
         'username_checker_ask': "🔎 **Проверка имени пользователя**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nПроверка на 14 платформах одновременно.\nВведите имя пользователя:\nПример: `maqa_01`",
     },
     'en': {
@@ -206,8 +212,10 @@ LANG_DATA = {
         'btn_guvenli_sorgu': "🔍 SAFE QUERY",
         'guvenli_sorgu_welcome': "🔍 **SAFE QUERY CENTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSelect a query type:",
         'btn_tt_sorgu': "🎵 TikTok Profile Lookup",
+        'btn_ig_sorgu': "📸 Instagram Profile Lookup",
         'btn_username_checker': "🔎 Platform Username Checker",
         'tt_sorgu_ask': "🎵 **TikTok Profile Lookup**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEnter the TikTok username:\nExample: `@maqa_01`",
+        'ig_sorgu_ask': "📸 **Instagram Profile Lookup**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEnter the Instagram username:\nExample: `@username`",
         'username_checker_ask': "🔎 **Platform Username Checker**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChecks 14 platforms simultaneously.\nEnter a username:\nExample: `maqa_01`",
     },
     'de': {
@@ -242,8 +250,10 @@ LANG_DATA = {
         'btn_guvenli_sorgu': "🔍 SICHERES ABFRAGE",
         'guvenli_sorgu_welcome': "🔍 **SICHERES ABFRAGEZENTRUM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nWählen Sie einen Abfragetyp:",
         'btn_tt_sorgu': "🎵 TikTok-Profil-Suche",
+        'btn_ig_sorgu': "📸 Instagram-Profil-Suche",
         'btn_username_checker': "🔎 Benutzername auf Plattformen prüfen",
         'tt_sorgu_ask': "🎵 **TikTok-Profil-Suche**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBenutzernamen eingeben:\nBeispiel: `@maqa_01`",
+        'ig_sorgu_ask': "📸 **Instagram-Profil-Suche**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBenutzernamen eingeben:\nBeispiel: `@username`",
         'username_checker_ask': "🔎 **Benutzername-Prüfung**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nPrüft 14 Plattformen gleichzeitig.\nBenutzernamen eingeben:\nBeispiel: `maqa_01`",
     }
 }
@@ -340,7 +350,7 @@ async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
                 pass
 
             metin += (
-                f"📅 **Kayıt Tarihi (Tahmin):** `{kayit_tarihi}`\n"
+                f"📅 **Hesap Oluşturulma (Tahmin):** `{kayit_tarihi}`\n"
                 f"💎 **Telegram Premium:** {premium}\n"
                 f"🚫 **Kısıtlanmış:** {kisitlandi}\n"
                 f"🔀 **Mesaj Yönlendirme:** {ozel_iletme}\n"
@@ -535,59 +545,96 @@ async def tt_profil_getir(username: str) -> str:
     if not username:
         return "❌ Kullanıcı adı gerekli. Örnek: `@maqa_01`"
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-    }
+    ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
     def fetch():
         try:
             s = http_requests.Session()
-            r = s.get(f"https://www.tiktok.com/@{username}", headers=headers, timeout=15, allow_redirects=True)
-            return r.text, r.status_code
+            # 1) Önce ana sayfadan çerez al
+            s.get("https://www.tiktok.com/", headers={
+                "User-Agent": ua,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
+            }, timeout=10)
+
+            # 2) Dahili API dene
+            api_url = (
+                f"https://www.tiktok.com/api/user/detail/?uniqueId={username}"
+                f"&aid=1988&app_language=en&app_name=tiktok_web"
+                f"&browser_language=en&browser_name=Mozilla&browser_online=true"
+                f"&browser_platform=Win32&browser_version=5.0&channel=tiktok_web"
+                f"&cookie_enabled=true&device_platform=web_pc&focus_state=true"
+                f"&from_page=user&history_len=2&is_fullscreen=false"
+                f"&is_page_visible=true&os=windows&region=US"
+                f"&screen_height=1080&screen_width=1920&tz_name=America%2FNew_York"
+            )
+            r_api = s.get(api_url, headers={
+                "User-Agent": ua,
+                "Accept": "application/json, text/plain, */*",
+                "Referer": f"https://www.tiktok.com/@{username}",
+                "Accept-Language": "en-US,en;q=0.9",
+            }, timeout=15)
+            if r_api.status_code == 200:
+                try:
+                    d = _json.loads(r_api.text)
+                    if d.get('userInfo', {}).get('user'):
+                        return d, 200, 'api'
+                except Exception:
+                    pass
+
+            # 3) HTML sayfası yedek
+            r_html = s.get(f"https://www.tiktok.com/@{username}", headers={
+                "User-Agent": ua,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Upgrade-Insecure-Requests": "1",
+            }, timeout=15)
+            return r_html.text, r_html.status_code, 'html'
         except Exception:
-            return None, 0
+            return None, 0, 'err'
 
     loop = asyncio.get_event_loop()
-    html_text, status_code = await loop.run_in_executor(None, fetch)
+    result, status_code, source = await loop.run_in_executor(None, fetch)
 
-    if not html_text:
+    if result is None:
         return "❌ TikTok'a bağlanılamadı. Lütfen tekrar deneyin."
 
     user  = {}
     stats = {}
 
-    try:
-        m = re.search(r'<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([^<]+)</script>', html_text)
-        if m:
-            data = _json.loads(m.group(1))
-            ud   = data.get('__DEFAULT_SCOPE__', {}).get('webapp.user-detail', {}).get('userInfo', {})
-            user  = ud.get('user', {})
-            stats = ud.get('stats', {})
-    except Exception:
-        pass
-
-    if not user:
-        try:
-            m = re.search(r'<script id="__NEXT_DATA__"[^>]*>([^<]+)</script>', html_text)
-            if m:
-                data = _json.loads(m.group(1))
-                ui   = data.get('props', {}).get('pageProps', {}).get('userInfo', {})
-                user  = ui.get('user', {})
-                stats = ui.get('stats', {})
-        except Exception:
-            pass
+    if source == 'api' and isinstance(result, dict):
+        ui    = result.get('userInfo', {})
+        user  = ui.get('user', {})
+        stats = ui.get('stats', {})
+    elif source == 'html' and isinstance(result, str):
+        for pattern in [
+            r'<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([^<]+)</script>',
+            r'<script id="__NEXT_DATA__"[^>]*>([^<]+)</script>',
+        ]:
+            try:
+                m = re.search(pattern, result)
+                if not m:
+                    continue
+                d = _json.loads(m.group(1))
+                # __UNIVERSAL_DATA_FOR_REHYDRATION__ yolu
+                ud = d.get('__DEFAULT_SCOPE__', {}).get('webapp.user-detail', {}).get('userInfo', {})
+                if not ud:
+                    # __NEXT_DATA__ yolu
+                    ud = d.get('props', {}).get('pageProps', {}).get('userInfo', {})
+                user  = ud.get('user', {})
+                stats = ud.get('stats', {})
+                if user:
+                    break
+            except Exception:
+                continue
 
     if not user:
         if status_code == 404:
             return f"❌ `@{username}` TikTok'ta bulunamadı."
         return (
-            f"⚠️ `@{username}` verisi alınamadı — TikTok bot koruması aktif olabilir.\n\n"
-            f"🔗 Direkt link: https://www.tiktok.com/@{username}"
+            f"⚠️ `@{username}` verisi alınamadı.\n"
+            f"TikTok erişim koruması aktif — biraz bekleyip tekrar dene.\n\n"
+            f"🔗 https://www.tiktok.com/@{username}"
         )
 
     def safe(*keys, default='—'):
@@ -687,6 +734,114 @@ async def tt_profil_getir(username: str) -> str:
         f"✂️ **Stitch İzni:** `{stitch}`\n"
         f"⭐ **Favoriler:** {fav}\n"
         f"🛒 **Ticari Hesap:** {ticari}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🤖 _AZRxGUARD GÜVENLİ SORGU tarafından sorgulandı_"
+    )
+
+
+async def instagram_profil_getir(username: str) -> str:
+    username = username.lstrip('@').strip()
+    if not username:
+        return "❌ Kullanıcı adı gerekli. Örnek: `@kullaniciadi`"
+
+    def fetch():
+        try:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1",
+                "Accept": "*/*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-IG-App-ID": "936619743392459",
+                "X-Requested-With": "XMLHttpRequest",
+                "Referer": f"https://www.instagram.com/{username}/",
+            }
+            r = http_requests.get(
+                f"https://i.instagram.com/api/v1/users/web_profile_info/?username={username}",
+                headers=headers, timeout=15
+            )
+            return r.text, r.status_code
+        except Exception:
+            return None, 0
+
+    loop = asyncio.get_event_loop()
+    text, status = await loop.run_in_executor(None, fetch)
+
+    if not text:
+        return "❌ Instagram'a bağlanılamadı."
+
+    user = {}
+    try:
+        d    = _json.loads(text)
+        user = d.get('data', {}).get('user', {})
+    except Exception:
+        pass
+
+    if not user:
+        if status == 404:
+            return f"❌ `@{username}` Instagram'da bulunamadı."
+        return (
+            f"⚠️ `@{username}` için veri alınamadı.\n"
+            f"Instagram erişim kısıtlaması aktif.\n\n"
+            f"🔗 https://www.instagram.com/{username}/"
+        )
+
+    uid          = user.get('id', '—')
+    full_name    = user.get('full_name', '—') or '—'
+    bio          = user.get('biography', 'Yok') or 'Yok'
+    bio_link     = user.get('external_url', '—') or '—'
+    dogrulandi   = "✅ Evet" if user.get('is_verified')              else "❌ Hayır"
+    gizli        = "🔒 Gizli" if user.get('is_private')             else "🌐 Herkese Açık"
+    is_business  = "✅ Evet" if user.get('is_business_account')      else "❌ Hayır"
+    is_prof      = "✅ Evet" if user.get('is_professional_account')  else "❌ Hayır"
+    category     = user.get('category_name', '—') or '—'
+
+    def ig_fmt(d2, *keys):
+        try:
+            v = d2
+            for k in keys:
+                v = v[k]
+            return f"{int(v):,}".replace(',', '.')
+        except Exception:
+            return '—'
+
+    takipci = ig_fmt(user, 'edge_followed_by', 'count')
+    takip   = ig_fmt(user, 'edge_follow', 'count')
+    gonderi = ig_fmt(user, 'edge_owner_to_timeline_media', 'count')
+
+    try:
+        fc = int(user.get('edge_followed_by', {}).get('count', 0))
+        pc = max(int(user.get('edge_owner_to_timeline_media', {}).get('count', 0)), 1)
+        eng = f"~%{(fc / pc * 100):.1f}" if pc > 0 else '—'
+    except Exception:
+        eng = '—'
+
+    hesap_tarihi = id_den_kayit_tarihi_tahmin_et(int(uid)) if str(uid).isdigit() else '—'
+    link = f"https://www.instagram.com/{username}/"
+
+    return (
+        f"📸 **INSTAGRAM PROFİL RAPORU**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"👤 **Ad Soyad:** `{full_name}`\n"
+        f"🏷️ **Kullanıcı Adı:** `@{username}`\n"
+        f"🆔 **Instagram ID:** `{uid}`\n"
+        f"🔗 **Profil Linki:** {link}\n\n"
+        f"✅ **Doğrulanmış:** {dogrulandi}\n"
+        f"🔒 **Gizlilik:** {gizli}\n"
+        f"💼 **İş Hesabı:** {is_business}\n"
+        f"🌟 **Profesyonel Hesap:** {is_prof}\n"
+        f"🏷️ **Kategori:** `{category}`\n"
+        f"📅 **Hesap Oluşturulma (Tahmin):** `{hesap_tarihi}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📊 **İSTATİSTİKLER**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"👥 **Takipçi:** `{takipci}`\n"
+        f"➡️ **Takip Edilen:** `{takip}`\n"
+        f"📷 **Gönderi Sayısı:** `{gonderi}`\n"
+        f"💹 **Takipçi/Gönderi Oranı:** `{eng}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📝 **BİYOGRAFİ**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"💬 **Bio:** {bio}\n"
+        f"🔗 **Bio Linki:** `{bio_link}`\n\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f"🤖 _AZRxGUARD GÜVENLİ SORGU tarafından sorgulandı_"
     )
@@ -1064,7 +1219,7 @@ async def meid_bilgisi_olustur(bot, update: Update, context: ContextTypes.DEFAUL
         f"🆔 **Kullanıcı ID:** `{user.id}`\n"
         f"🔢 **ID Basamak Sayısı:** `{id_basamak}`\n"
         f"🧩 **Hesap Türü:** {hesap_turu}\n"
-        f"📅 **Kayıt Tarihi (Tahmin):** `{kayit_tarihi}`\n\n"
+        f"📅 **Hesap Oluşturulma (Tahmin):** `{kayit_tarihi}`\n\n"
         f"🌍 **Bot Dili:** {bot_dili}\n"
         f"📱 **Telegram Dili:** {tg_dili_goster}\n\n"
         f"💎 **Telegram Premium:** {premium}\n"
@@ -1585,6 +1740,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_guvenli_sorgu':
         gs_klavye = [
             [InlineKeyboardButton(strings.get('btn_tt_sorgu', '🎵 TikTok Sorgu'), callback_data='menu_tt_sorgu')],
+            [InlineKeyboardButton(strings.get('btn_ig_sorgu', '📸 Instagram Sorgu'), callback_data='menu_ig_sorgu')],
             [InlineKeyboardButton(strings.get('btn_username_checker', '🔎 Platform Kontrolü'), callback_data='menu_username_checker')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
@@ -1598,6 +1754,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['durum'] = 'tt_sorgu_bekliyor'
         await query.edit_message_text(
             strings.get('tt_sorgu_ask', '🎵 TikTok kullanıcı adını yaz:'),
+            reply_markup=geri_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_ig_sorgu':
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]])
+        context.user_data['durum'] = 'ig_sorgu_bekliyor'
+        await query.edit_message_text(
+            strings.get('ig_sorgu_ask', '📸 Instagram kullanıcı adını yaz:'),
             reply_markup=geri_klavye,
             parse_mode='Markdown'
         )
@@ -1692,6 +1856,24 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         rapor = await tt_profil_getir(kullanici_adi)
         geri_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔍 Yeni Sorgu", callback_data='menu_tt_sorgu')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]
+        ])
+        try:
+            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True, reply_markup=geri_klavye)
+        except Exception:
+            await bekle.edit_text(rapor, disable_web_page_preview=True, reply_markup=geri_klavye)
+        return
+
+    if context.user_data.get('durum') == 'ig_sorgu_bekliyor':
+        context.user_data['durum'] = None
+        kullanici_adi = update.message.text.strip()
+        bekle = await update.message.reply_text(
+            f"📸 `@{kullanici_adi.lstrip('@')}` Instagram'da aranıyor...",
+            parse_mode='Markdown'
+        )
+        rapor = await instagram_profil_getir(kullanici_adi)
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔍 Yeni Sorgu", callback_data='menu_ig_sorgu')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]
         ])
         try:
