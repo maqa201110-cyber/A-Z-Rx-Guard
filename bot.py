@@ -970,62 +970,436 @@ def dunya_saati() -> str:
     metin += "\n━━━━━━━━━━━━━━━━━━━━━━\n🤖 _AZRxGUARD Zaman Servisi_"
     return metin
 
-# --- 🌍 ÜLKE / ŞEHİR VERİ YAPISI (Hava + Döviz) ---
-ULKE_SEHIRLER = {
-    'ge': {'flag': '🇬🇪', 'name': 'Gürcistan', 'cities': [
-        'Tbilisi', 'Batumi', 'Kutaisi', 'Rustavi', 'Gori', 'Zugdidi',
-        'Poti', 'Telavi', 'Sighnaghi', 'Mestia', 'Borjomi', 'Kobuleti',
-        'Akhaltsikhe', 'Senaki', 'Ambrolauri', 'Kvareli', 'Lagodekhi']},
-    'tr': {'flag': '🇹🇷', 'name': 'Türkiye', 'cities': [
-        'Istanbul', 'Ankara', 'Izmir', 'Bursa', 'Antalya', 'Adana',
-        'Konya', 'Trabzon', 'Gaziantep', 'Erzurum', 'Samsun', 'Kayseri',
-        'Mersin', 'Eskisehir', 'Diyarbakir', 'Bodrum', 'Cappadocia']},
-    'az': {'flag': '🇦🇿', 'name': 'Azerbaycan', 'cities': [
-        'Baku', 'Ganja', 'Sumqayit', 'Mingachevir', 'Nakhchivan',
-        'Lankaran', 'Shaki', 'Quba', 'Gabala', 'Imishli', 'Zagatala', 'Tovuz']},
-    'ru': {'flag': '🇷🇺', 'name': 'Rusya', 'cities': [
-        'Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg',
-        'Kazan', 'Sochi', 'Vladivostok', 'Krasnodar', 'Ufa', 'Rostov-on-Don']},
-    'sa': {'flag': '🇸🇦', 'name': 'Suudi Arabistan', 'cities': [
-        'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Taif', 'Tabuk', 'Abha']},
-    'ae': {'flag': '🇦🇪', 'name': 'BAE', 'cities': [
-        'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras al-Khaimah', 'Fujairah']},
-    'ir': {'flag': '🇮🇷', 'name': 'İran', 'cities': [
-        'Tehran', 'Isfahan', 'Mashhad', 'Tabriz', 'Shiraz', 'Rasht', 'Ahvaz', 'Qom']},
-    'pk': {'flag': '🇵🇰', 'name': 'Pakistan', 'cities': [
-        'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Quetta', 'Multan', 'Faisalabad']},
-    'eg': {'flag': '🇪🇬', 'name': 'Mısır', 'cities': [
-        'Cairo', 'Alexandria', 'Giza', 'Luxor', 'Hurghada', 'Aswan', 'Port Said', 'Sharm el-Sheikh']},
-    'ma': {'flag': '🇲🇦', 'name': 'Fas', 'cities': [
-        'Casablanca', 'Rabat', 'Marrakech', 'Fez', 'Tangier', 'Agadir', 'Oujda', 'Meknes']},
-    'jo': {'flag': '🇯🇴', 'name': 'Ürdün', 'cities': [
-        'Amman', 'Zarqa', 'Irbid', 'Aqaba', 'Petra', 'Jerash', 'Madaba']},
-    'iq': {'flag': '🇮🇶', 'name': 'Irak', 'cities': [
-        'Baghdad', 'Basra', 'Erbil', 'Mosul', 'Najaf', 'Karbala', 'Kirkuk', 'Sulaymaniyah']},
-    'kz': {'flag': '🇰🇿', 'name': 'Kazakistan', 'cities': [
-        'Almaty', 'Astana', 'Shymkent', 'Karaganda', 'Aktobe', 'Semey', 'Atyrau']},
-    'uz': {'flag': '🇺🇿', 'name': 'Özbekistan', 'cities': [
-        'Tashkent', 'Samarkand', 'Bukhara', 'Namangan', 'Andijan', 'Fergana', 'Nukus']},
-    'id': {'flag': '🇮🇩', 'name': 'Endonezya', 'cities': [
-        'Jakarta', 'Surabaya', 'Bandung', 'Bali', 'Medan', 'Makassar', 'Semarang', 'Yogyakarta']},
-    'my': {'flag': '🇲🇾', 'name': 'Malezya', 'cities': [
-        'Kuala Lumpur', 'Penang', 'Johor Bahru', 'Ipoh', 'Kuching', 'Kota Kinabalu']},
-    'de': {'flag': '🇩🇪', 'name': 'Almanya', 'cities': [
-        'Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Cologne', 'Stuttgart', 'Dusseldorf', 'Leipzig']},
-    'gb': {'flag': '🇬🇧', 'name': 'İngiltere', 'cities': [
-        'London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Edinburgh', 'Liverpool', 'Bristol']},
-    'fr': {'flag': '🇫🇷', 'name': 'Fransa', 'cities': [
-        'Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nice', 'Bordeaux', 'Strasbourg']},
-    'us': {'flag': '🇺🇸', 'name': 'ABD', 'cities': [
-        'New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami', 'Las Vegas', 'Washington DC', 'Seattle']},
-    'in': {'flag': '🇮🇳', 'name': 'Hindistan', 'cities': [
-        'Mumbai', 'Delhi', 'Bangalore', 'Kolkata', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad']},
-    'cn': {'flag': '🇨🇳', 'name': 'Çin', 'cities': [
-        'Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Wuhan', 'Xian', 'Hangzhou']},
-    'jp': {'flag': '🇯🇵', 'name': 'Japonya', 'cities': [
-        'Tokyo', 'Osaka', 'Kyoto', 'Sapporo', 'Hiroshima', 'Fukuoka', 'Nagoya', 'Yokohama']},
-    'br': {'flag': '🇧🇷', 'name': 'Brezilya', 'cities': [
-        'Sao Paulo', 'Rio de Janeiro', 'Brasilia', 'Salvador', 'Manaus', 'Curitiba', 'Fortaleza']},
+# --- 🌍 ÜLKE / ŞEHİR / RAYON / KÖY HİYERARŞİSİ ---
+# Yapı: { ülke_kodu: { flag, name, sehirler: { şehir: { rayon: [köy...] } }, koyler: [...] } }
+ULKE_HIYERARSI = {
+    'ge': {
+        'flag': '🇬🇪', 'name': 'Gürcistan',
+        'sehirler': {
+            'Tbilisi': {
+                'Mtatsminda': ['Mtatsminda', 'Betlemi', 'Sololaki', 'Tabori', 'Tsavkisi', 'Kojori'],
+                'Vake': ['Vake Park', 'Makhata', 'Kiketi', 'Saguramo', 'Kojori'],
+                'Saburtalo': ['Saburtalo', 'Mukhiani', 'Delisi', 'Nutsubidze', 'Vaziani'],
+                'Krtsanisi': ['Krtsanisi', 'Ortachala', 'Isani', 'Ponichala', 'Lilo'],
+                'Isani': ['Isani', 'Varketili', 'Samgori', 'Norio', 'Eldari'],
+                'Samgori': ['Navtlugi', 'Ortachala', 'Samgori', 'Nosiri', 'Soghanlug'],
+                'Gldani': ['Gldani', 'Temka', 'Dighomi', 'Sanzona', 'Mukhad'],
+                'Didube': ['Didube', 'Chughureti', 'Abanotubani', 'Kala'],
+                'Chughureti': ['Chughureti', 'Kukia', 'Avlabari', 'Metekhi'],
+                'Nadzaladevi': ['Nadzaladevi', 'Ghrmaghele', 'Ponichala', 'Didi Dighomi'],
+            },
+            'Batumi': {
+                'Batumi Merkez': ['Batumi', 'Makhinjauri', 'Tsikhisdziri', 'Chakvi', 'Kobuleti'],
+                'Khelvachauri': ['Khelvachauri', 'Gonio', 'Sarpi', 'Kvariati', 'Tkhilouris'],
+                'Keda': ['Keda', 'Dandalo', 'Zeda Keda', 'Tcherencha'],
+                'Shuakhevi': ['Shuakhevi', 'Zeda Shuakhevi', 'Beshumi'],
+                'Khulo': ['Khulo', 'Zeda Khulo', 'Beshumi', 'Shuakhevi'],
+                'Kobuleti': ['Kobuleti', 'Ureki', 'Grigoleti', 'Shekvetili', 'Naghvarevi'],
+            },
+            'Kutaisi': {
+                'Kutaisi Merkez': ['Kutaisi', 'Rioni', 'Tskaltubo', 'Gori-Tskali'],
+                'Baghdati': ['Baghdati', 'Vani', 'Dimisi', 'Katskhuri'],
+                'Zestaponi': ['Zestaponi', 'Shorapani', 'Kvishkheti', 'Terjola'],
+                'Sachkhere': ['Sachkhere', 'Chiatura', 'Sakara'],
+                'Tkibuli': ['Tkibuli', 'Rikoti', 'Shaori'],
+                'Kharagauli': ['Kharagauli', 'Sviri', 'Zekari'],
+            },
+            'Rustavi': {
+                'Rustavi Merkez': ['Rustavi', 'Kvemo Rustavi', 'Msakhuri'],
+                'Gardabani': ['Gardabani', 'Ponichala', 'Soganluq', 'Agstafa'],
+                'Marneuli': ['Marneuli', 'Sadakhlo', 'Kizilajlo', 'Kjulalar', 'Sabirkend', 'Kosalar', 'Agdzebedi', 'Baydar', 'Muganlo', 'Tamarisi', 'Shulaveri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Bolnisi Khevi'],
+                'Bolnisi': ['Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Tsalka'],
+                'Tetritskaro': ['Tetritskaro', 'Algeti', 'Kldeisi', 'Manglisi'],
+                'Tsalka': ['Tsalka', 'Bediani', 'Dariali', 'Trialeti'],
+            },
+            'Gori': {
+                'Gori Merkez': ['Gori', 'Akhaldaba', 'Kvakhvreli', 'Variani'],
+                'Kareli': ['Kareli', 'Ruisi', 'Ateni', 'Surami'],
+                'Kaspi': ['Kaspi', 'Agara', 'Tsinari', 'Skulani'],
+                'Borjomi': ['Borjomi', 'Bakuriani', 'Likani', 'Tsagveri', 'Abastumani'],
+                'Khashuri': ['Khashuri', 'Surami', 'Kvishkheti', 'Agara'],
+            },
+            'Zugdidi': {
+                'Zugdidi Merkez': ['Zugdidi', 'Jvari', 'Anaklia', 'Ganmukhuri', 'Ingiri'],
+                'Senaki': ['Senaki', 'Abasha', 'Kortskheli', 'Shuakhevi'],
+                'Mestia': ['Mestia', 'Ushguli', 'Becho', 'Latali', 'Lentekhi', 'Mulakhi'],
+                'Martvili': ['Martvili', 'Khobi', 'Khoni', 'Salkhino'],
+                'Tsalenjikha': ['Tsalenjikha', 'Orsantia', 'Chkhorotsku'],
+            },
+            'Telavi': {
+                'Telavi Merkez': ['Telavi', 'Ikalto', 'Kondoli', 'Akura', 'Napareuli'],
+                'Gurjaani': ['Gurjaani', 'Velistsikhe', 'Ujarma', 'Chabukiauri', 'Bakurtsikhe'],
+                'Sighnaghi': ['Sighnaghi', 'Bodbe', 'Tsnori', 'Anaga', 'Kvareli'],
+                'Lagodekhi': ['Lagodekhi', 'Ninotsminda', 'Khornabuji', 'Shroma'],
+                'Kvareli': ['Kvareli', 'Alvani', 'Eniseli', 'Qvareli', 'Shilda'],
+                'Akhmeta': ['Akhmeta', 'Omalo', 'Batsara', 'Shuakhevi', 'Tusheti'],
+                'Dedoplistskaro': ['Dedoplistskaro', 'Udabno', 'Shilda', 'Samreklo', 'Vashlovani'],
+            },
+            'Poti': {
+                'Poti Merkez': ['Poti', 'Maltakva', 'Shekvetili', 'Ureki'],
+            },
+            'Akhaltsikhe': {
+                'Akhaltsikhe': ['Akhaltsikhe', 'Aspindza', 'Adigeni', 'Zarzma'],
+                'Akhalkalaki': ['Akhalkalaki', 'Ninotsminda', 'Bavra', 'Kartsakhi'],
+                'Adygeni': ['Adygeni', 'Zarzma', 'Chule', 'Vale'],
+            },
+        },
+        'koyler': ['Mtskheta', 'Ananuri', 'Stepantsminda', 'Kazbegi', 'Gudauri', 'Pasanauri', 'Dusheti', 'Tianeti', 'Sioni', 'Truso', 'Dariali', 'Khevsureti', 'Racha', 'Ambrolauri', 'Oni', 'Nikozi', 'Samtredia', 'Ozurgeti', 'Lanchkhuti', 'Chokhatauri', 'Abasha', 'Khoni', 'Terjola', 'Baghdati', 'Vani', 'Zestaponi'],
+    },
+    'tr': {
+        'flag': '🇹🇷', 'name': 'Türkiye',
+        'sehirler': {
+            'Istanbul': {
+                'Avrupa Yakası': ['Beşiktaş', 'Beyoğlu', 'Fatih', 'Bakırköy', 'Şişli', 'Sarıyer', 'Eyüp', 'Bağcılar', 'Bahçelievler', 'Avcılar', 'Beylikdüzü', 'Esenyurt', 'Küçükçekmece', 'Büyükçekmece', 'Arnavutköy', 'Başakşehir'],
+                'Anadolu Yakası': ['Kadıköy', 'Üsküdar', 'Ataşehir', 'Maltepe', 'Kartal', 'Pendik', 'Tuzla', 'Ümraniye', 'Beykoz', 'Sancaktepe', 'Adalar'],
+            },
+            'Ankara': {
+                'Merkez': ['Çankaya', 'Keçiören', 'Mamak', 'Yenimahalle', 'Altındağ', 'Etimesgut', 'Sincan', 'Gölbaşı', 'Pursaklar'],
+            },
+            'Izmir': {
+                'Merkez': ['Konak', 'Karşıyaka', 'Bornova', 'Buca', 'Çiğli', 'Balçova', 'Narlıdere', 'Gaziemir', 'Karabağlar'],
+            },
+            'Antalya': {
+                'Merkez': ['Muratpaşa', 'Konyaaltı', 'Kepez', 'Alanya', 'Manavgat', 'Kaş', 'Kemer', 'Side', 'Belek'],
+            },
+            'Trabzon': {
+                'Merkez': ['Merkez', 'Akçaabat', 'Araklı', 'Vakfıkebir', 'Of', 'Çaykara'],
+            },
+            'Bursa': {
+                'Merkez': ['Osmangazi', 'Nilüfer', 'Yıldırım', 'Gemlik', 'İnegöl', 'Mudanya', 'Orhangazi'],
+            },
+            'Gaziantep': {
+                'Merkez': ['Şahinbey', 'Şehitkamil', 'Islahiye', 'Nizip', 'Karkamış'],
+            },
+            'Bodrum': {
+                'Merkez': ['Bodrum', 'Turgutreis', 'Gümbet', 'Yalıkavak', 'Torba', 'Bitez'],
+            },
+        },
+        'koyler': ['Pamukkale', 'Goreme', 'Avanos', 'Urgup', 'Efes', 'Marmaris', 'Fethiye', 'Kas', 'Oludeniz', 'Cesme', 'Kusadasi', 'Canakkale', 'Safranbolu', 'Amasra'],
+    },
+    'az': {
+        'flag': '🇦🇿', 'name': 'Azerbaycan',
+        'sehirler': {
+            'Baku': {
+                'Merkez': ['Nizami', 'Sabail', 'Narimanov', 'Binagadi', 'Nasimi', 'Sabunchu'],
+                'Abşeron': ['Sumqayit', 'Mashtaga', 'Nardaran', 'Balakhani', 'Ramana', 'Zabrat'],
+                'Surakhani': ['Surakhani', 'Hazi Aslanov', 'Bilajer', 'Saray'],
+                'Khazar': ['Novkhani', 'Buzovna', 'Nardaran', 'Bilgah', 'Pirshagi'],
+            },
+            'Ganja': {
+                'Merkez': ['Ganja', 'Khanlar', 'Kapaz', 'Samux'],
+            },
+            'Nakhchivan': {
+                'Merkez': ['Nakhchivan', 'Julfa', 'Ordubad', 'Sharur', 'Babek'],
+            },
+            'Lankaran': {
+                'Merkez': ['Lankaran', 'Astara', 'Lerik', 'Masalli', 'Jalilabad'],
+            },
+            'Shaki': {
+                'Merkez': ['Shaki', 'Gabala', 'Qax', 'Oguz', 'Zagatala'],
+            },
+            'Quba': {
+                'Merkez': ['Quba', 'Qusar', 'Khachmaz', 'Siazan', 'Shabran'],
+            },
+        },
+        'koyler': ['Lahic', 'Xinaliq', 'Ilisu', 'Gatiq', 'Gobustan', 'Laza', 'Khizi', 'Ismailli', 'Lerikend', 'Ivanovka'],
+    },
+    'ru': {
+        'flag': '🇷🇺', 'name': 'Rusya',
+        'sehirler': {
+            'Moscow': {
+                'Merkez': ['Tverskoy', 'Arbat', 'Presnensky', 'Khamovniki', 'Yakimanka'],
+                'Kuzey': ['Dmitrovsky', 'Korovino', 'Hovrino', 'Levoberezhny'],
+                'Güney': ['Tsaritsyno', 'Biryulevo', 'Orekhovo-Borisovo'],
+                'Doğu': ['Sokolniki', 'Izmailovo', 'Vostochny'],
+            },
+            'Saint Petersburg': {
+                'Merkez': ['Admiralteysky', 'Petrogradsky', 'Vasileostrovsky', 'Tsentralny'],
+                'Diğer': ['Peterhof', 'Pushkin', 'Kronshtadt', 'Kolpino'],
+            },
+            'Kazan': {
+                'Merkez': ['Vakhitovsky', 'Sovetsky', 'Privolzhsky', 'Aviastroitelny'],
+            },
+            'Sochi': {
+                'Merkez': ['Tsentralny', 'Adler', 'Khosta', 'Lazarevsky', 'Krasnaya Polyana'],
+            },
+            'Krasnodar': {
+                'Merkez': ['Tsentralny', 'Prikubansky', 'Karasunsky'],
+            },
+        },
+        'koyler': ['Suzdal', 'Sergiyev Posad', 'Yaroslavl', 'Pskov', 'Veliky Novgorod', 'Irkutsk', 'Murmansk', 'Vladivostok'],
+    },
+    'sa': {
+        'flag': '🇸🇦', 'name': 'Suudi Arabistan',
+        'sehirler': {
+            'Riyadh': {'Merkez': ['Al Olaya', 'Al Malaz', 'Al Muraba', 'Diriyah', 'Al Nakheel']},
+            'Jeddah': {'Merkez': ['Al Balad', 'Al Hamra', 'Al Rawdah', 'Al Safa', 'Al Zahra']},
+            'Mecca': {'Merkez': ['Haram', 'Ajyad', 'Al Aziziyah', 'Mina', 'Arafat', 'Muzdalifah']},
+            'Medina': {'Merkez': ['Al Haram', 'Quba', 'Al Anbariyah', 'Al Aziziyah']},
+            'Dammam': {'Merkez': ['Al Faisaliyah', 'Al Anud', 'Al Muraikabat', 'Al Khobar']},
+            'Taif': {'Merkez': ['Al Hada', 'Al Shafa', 'Al Hawiyah', 'Souq Okaz']},
+        },
+        'koyler': ['Tabuk', 'Al Ula', 'Hegra', 'Al Bahah', 'Jizan', 'Najran', 'Hail', 'Yanbu'],
+    },
+    'ae': {
+        'flag': '🇦🇪', 'name': 'BAE',
+        'sehirler': {
+            'Dubai': {
+                'Merkez': ['Deira', 'Bur Dubai', 'Jumeirah', 'Downtown', 'Marina', 'JBR', 'Karama'],
+                'Yeni Bölgeler': ['Al Barsha', 'Jumeirah Village', 'Discovery Gardens', 'Silicon Oasis', 'DIFC'],
+            },
+            'Abu Dhabi': {
+                'Merkez': ['Al Markaziyah', 'Al Khalidiyah', 'Al Bateen', 'Corniche'],
+                'Diğer': ['Al Ain', 'Musaffah', 'Yas Island', 'Saadiyat Island'],
+            },
+            'Sharjah': {'Merkez': ['Al Nabba', 'Al Qasimia', 'Al Taawun', 'Muwaileh']},
+            'Ajman': {'Merkez': ['Ajman', 'Al Rashidiya', 'Al Nuaimiya']},
+            'Ras al-Khaimah': {'Merkez': ['RAK City', 'Al Nakheel', 'Al Hamra', 'Khuzam']},
+        },
+        'koyler': ['Fujairah', 'Umm al-Quwain', 'Al Dhaid', 'Hatta', 'Liwa Oasis', 'Sir Bani Yas'],
+    },
+    'ir': {
+        'flag': '🇮🇷', 'name': 'İran',
+        'sehirler': {
+            'Tehran': {
+                'Merkez': ['Shemiran', 'Elahieh', 'Darband', 'Vanak', 'Tajrish', 'Niavaran'],
+                'Güney': ['Rey', 'Qarchak', 'Pakdasht', 'Islamshahr', 'Robat Karim'],
+            },
+            'Isfahan': {'Merkez': ['Naqsh-e Jahan', 'Chaharbagh', 'Jolfa', 'Siosepol', 'Hasht Behesht']},
+            'Mashhad': {'Merkez': ['Imam Reza Shrine', 'Bazaar', 'Torqabeh', 'Ferdowsi']},
+            'Tabriz': {'Merkez': ['Bazar', 'Arg', 'El Goli', 'Shahriar', 'Valiasr']},
+            'Shiraz': {'Merkez': ['Persepolis', 'Vakil', 'Eram', 'Hafez Tomb', 'Nasir al-Mulk']},
+            'Rasht': {'Merkez': ['Rasht', 'Bandar Anzali', 'Astara', 'Masal', 'Fooman']},
+        },
+        'koyler': ['Qom', 'Ahvaz', 'Kerman', 'Yazd', 'Hamedan', 'Qazvin', 'Ardabil', 'Zanjan'],
+    },
+    'pk': {
+        'flag': '🇵🇰', 'name': 'Pakistan',
+        'sehirler': {
+            'Karachi': {
+                'Merkez': ['Saddar', 'Clifton', 'Defence', 'Gulshan', 'Malir'],
+                'Diğer': ['Korangi', 'Lyari', 'Orangi', 'Baldia', 'Keamari'],
+            },
+            'Lahore': {'Merkez': ['Gulberg', 'DHA', 'Model Town', 'Johar Town', 'Walled City', 'Cantt']},
+            'Islamabad': {'Merkez': ['F-6', 'F-7 Jinnah', 'G-9 Markaz', 'I-8 Markaz', 'Blue Area', 'F-10']},
+            'Rawalpindi': {'Merkez': ['Satellite Town', 'Cantt', 'Murree Road', 'Raja Bazaar']},
+            'Peshawar': {'Merkez': ['Cantonment', 'Hayatabad', 'University Town', 'Saddar', 'Qissa Khwani']},
+        },
+        'koyler': ['Swat', 'Hunza', 'Skardu', 'Murree', 'Chitral', 'Kaghan', 'Nathiagali', 'Neelum Valley'],
+    },
+    'eg': {
+        'flag': '🇪🇬', 'name': 'Mısır',
+        'sehirler': {
+            'Cairo': {
+                'Merkez': ['Zamalek', 'Maadi', 'Heliopolis', 'Nasr City', 'Downtown', 'Al Mohandessin'],
+                'Çevre': ['Giza', '6th of October', 'New Cairo', 'Rehab City', 'Madinaty'],
+            },
+            'Alexandria': {'Merkez': ['Montaza', 'Smouha', 'Stanley', 'Sidi Bishr', 'Mamura', 'Corniche']},
+            'Luxor': {'Merkez': ['East Bank', 'West Bank', 'Karnak', 'Valley of the Kings', 'Deir el-Bahari']},
+            'Hurghada': {'Merkez': ['El Dahar', 'Sekalla', 'Sahl Hasheesh', 'El Gouna', 'Makadi Bay']},
+            'Sharm el-Sheikh': {'Merkez': ['Naama Bay', 'Hadaba', 'Old Market', 'Shark Bay', 'Ras Um Sid']},
+        },
+        'koyler': ['Aswan', 'Siwa Oasis', 'Marsa Matruh', 'Dahab', 'Nuweiba', 'Abu Simbel', 'Edfu', 'Kom Ombo'],
+    },
+    'ma': {
+        'flag': '🇲🇦', 'name': 'Fas',
+        'sehirler': {
+            'Casablanca': {'Merkez': ['Ain Diab', 'Anfa', 'Bourgogne', 'Maarif', 'Gueliz', 'Hay Hassani']},
+            'Rabat': {'Merkez': ['Agdal', 'Hassan', 'Kasbah', 'Medina', 'Youssoufia', 'Hay Riad']},
+            'Marrakech': {'Merkez': ['Medina', 'Gueliz', 'Hivernage', 'Palmeraie', 'Mellah']},
+            'Fez': {'Merkez': ['Fes el-Bali', 'Fes el-Jdid', 'Ville Nouvelle', 'Saiss', 'Mellah']},
+            'Tangier': {'Merkez': ['Medina', 'Malabata', 'Marshan', 'Beni Makada', 'Corniche']},
+        },
+        'koyler': ['Chefchaouen', 'Essaouira', 'Ouarzazate', 'Merzouga', 'Agadir', 'Meknes', 'Ifrane', 'Asilah'],
+    },
+    'jo': {
+        'flag': '🇯🇴', 'name': 'Ürdün',
+        'sehirler': {
+            'Amman': {
+                'Merkez': ['Downtown', '1st Circle', '3rd Circle', 'Abdoun', 'Shmeisani', 'Sweifieh'],
+                'Çevre': ['Zarqa', 'Russeifa', 'Mafraq', 'Al Salt', 'Fuheis'],
+            },
+            'Aqaba': {'Merkez': ['Aqaba City', 'Tala Bay', 'South Beach', 'Al Rayyan']},
+            'Irbid': {'Merkez': ['Irbid City', 'Ramtha', 'Ajloun', 'Jerash']},
+            'Petra': {'Merkez': ['Wadi Musa', 'Beidha', 'Little Petra', 'Siq Entrance']},
+        },
+        'koyler': ['Jerash', 'Madaba', 'Um Qais', 'Azraq', 'Wadi Rum', 'Karak', 'Dana', 'Shobak'],
+    },
+    'iq': {
+        'flag': '🇮🇶', 'name': 'Irak',
+        'sehirler': {
+            'Baghdad': {'Merkez': ['Mansour', 'Karrada', 'Jadriyah', 'Sadr City', 'Zayona', 'Kadhimiya', 'Rusafa']},
+            'Erbil': {'Merkez': ['Citadel', 'Shar Park', 'Gulan', 'Italian Village', 'Dream City', 'Ankawa']},
+            'Basra': {'Merkez': ['Ashar', 'Margil', 'Shat Al-Arab', 'Abu Al-Khasib', 'Khorramshahr']},
+            'Sulaymaniyah': {'Merkez': ['City Center', 'Rizgari', 'Bakhtiari', 'Ahmad Awa', 'Azmar']},
+            'Najaf': {'Merkez': ['Imam Ali Shrine', 'Old City', 'Kufa', 'Al Hanana']},
+        },
+        'koyler': ['Karbala', 'Kirkuk', 'Tikrit', 'Samarra', 'Hillah', 'Amarah', 'Duhok', 'Zakho'],
+    },
+    'kz': {
+        'flag': '🇰🇿', 'name': 'Kazakistan',
+        'sehirler': {
+            'Astana': {'Merkez': ['Khan Shatyr', 'Bayterek', 'Expo City', 'Nurzhol Boulevard', 'Esil']},
+            'Almaty': {
+                'Merkez': ['Medeu', 'Alatau', 'Bostandyq', 'Almaly', 'Turksib'],
+                'Dağ Bölgesi': ['Shymbulak', 'Big Almaty Lake', 'Chimbulak', 'Kok-Tobe'],
+            },
+            'Shymkent': {'Merkez': ['Al-Farabi', 'Abesov', 'Enbekshi', 'Karatau']},
+            'Karaganda': {'Merkez': ['Kazybek Bi', 'Oktyabr', 'Bukhar-Zhyrau', 'Mishino']},
+        },
+        'koyler': ['Turkestan', 'Taraz', 'Semey', 'Atyrau', 'Aktobe', 'Aktau', 'Petropavl', 'Kyzylorda'],
+    },
+    'uz': {
+        'flag': '🇺🇿', 'name': 'Özbekistan',
+        'sehirler': {
+            'Tashkent': {'Merkez': ['Yunusabad', 'Mirabad', 'Yashnabad', 'Chilanzar', 'Hamza', 'Olmazor']},
+            'Samarkand': {'Merkez': ['Registan', 'Shah-i-Zinda', 'Bibi-Khanym', 'Afrosiab', 'Ulugbek']},
+            'Bukhara': {'Merkez': ['Old City', 'Lyabi Hauz', 'Ark Citadel', 'Bolo Hauz', 'Chor Minor']},
+            'Namangan': {'Merkez': ['Yangi Namangan', 'Chorsu', 'Bozortalik', 'Kosonsoy']},
+            'Fergana': {'Merkez': ['Fergana City', 'Margilan', 'Quvasoy', 'Rishtan']},
+        },
+        'koyler': ['Andijan', 'Nukus', 'Termez', 'Karshi', 'Jizzakh', 'Navoi', 'Urgench', 'Khiva', 'Shakhrisabz'],
+    },
+    'id': {
+        'flag': '🇮🇩', 'name': 'Endonezya',
+        'sehirler': {
+            'Jakarta': {
+                'Merkez': ['Menteng', 'Gambir', 'Tanah Abang', 'Kemayoran'],
+                'Diğer': ['South Jakarta', 'East Jakarta', 'North Jakarta', 'West Jakarta', 'Depok'],
+            },
+            'Bali': {
+                'Kuta': ['Kuta', 'Legian', 'Seminyak', 'Canggu', 'Pererenan'],
+                'Ubud': ['Ubud', 'Tegalalang', 'Payangan', 'Gianyar'],
+                'Nusa Dua': ['Nusa Dua', 'Jimbaran', 'Bukit Peninsula', 'Ungasan'],
+            },
+            'Yogyakarta': {'Merkez': ['Keraton', 'Prawirotaman', 'Malioboro', 'Kotagede', 'Prambanan']},
+            'Surabaya': {'Merkez': ['Wonokromo', 'Gubeng', 'Genteng', 'Tegalsari', 'Kenjeran']},
+            'Lombok': {'Merkez': ['Mataram', 'Senggigi', 'Kuta Lombok', 'Gili Islands', 'Rinjani']},
+        },
+        'koyler': ['Bandung', 'Medan', 'Semarang', 'Makassar', 'Palembang', 'Malang', 'Manado', 'Labuan Bajo'],
+    },
+    'my': {
+        'flag': '🇲🇾', 'name': 'Malezya',
+        'sehirler': {
+            'Kuala Lumpur': {
+                'Merkez': ['KLCC', 'Bukit Bintang', 'Chow Kit', 'Brickfields', 'Bangsar'],
+                'Diğer': ['Mont Kiara', 'Damansara', 'Kepong', 'Ampang', 'Cheras'],
+            },
+            'Penang': {'Merkez': ['George Town', 'Batu Ferringhi', 'Bukit Mertajam', 'Air Itam']},
+            'Johor Bahru': {'Merkez': ['JB City', 'Iskandar Puteri', 'Skudai', 'Senai', 'Kulai']},
+            'Kota Kinabalu': {'Merkez': ['City Center', 'Api-Api', 'Inanam', 'Menggatal', 'Tuaran']},
+            'Kuching': {'Merkez': ['Padungan', 'Samarahan', 'Kota Samarahan', 'Serian']},
+        },
+        'koyler': ['Langkawi', 'Cameron Highlands', 'Ipoh', 'Malacca', 'Mersing', 'Tioman', 'Redang'],
+    },
+    'de': {
+        'flag': '🇩🇪', 'name': 'Almanya',
+        'sehirler': {
+            'Berlin': {
+                'Merkez': ['Mitte', 'Prenzlauer Berg', 'Kreuzberg', 'Charlottenburg', 'Friedrichshain'],
+                'Çevre': ['Spandau', 'Pankow', 'Treptow', 'Köpenick', 'Tempelhof'],
+            },
+            'Munich': {'Merkez': ['Altstadt-Lehel', 'Maxvorstadt', 'Schwabing', 'Haidhausen', 'Neuhausen']},
+            'Hamburg': {'Merkez': ['HafenCity', 'Altona', 'Eimsbüttel', 'Wandsbek', 'Harburg']},
+            'Frankfurt': {'Merkez': ['Sachsenhausen', 'Bornheim', 'Westend', 'Nordend', 'Innenstadt']},
+            'Cologne': {'Merkez': ['Innenstadt', 'Ehrenfeld', 'Nippes', 'Mülheim', 'Deutz']},
+        },
+        'koyler': ['Stuttgart', 'Dusseldorf', 'Leipzig', 'Heidelberg', 'Rothenburg', 'Bamberg', 'Freiburg'],
+    },
+    'gb': {
+        'flag': '🇬🇧', 'name': 'İngiltere',
+        'sehirler': {
+            'London': {
+                'Merkez': ['Westminster', 'City of London', 'Kensington', 'Chelsea', 'Camden', 'Islington'],
+                'Diğer': ['Croydon', 'Bromley', 'Enfield', 'Barnet', 'Ealing', 'Hackney'],
+            },
+            'Manchester': {'Merkez': ['City Centre', 'Salford', 'Trafford', 'Didsbury', 'Withington']},
+            'Birmingham': {'Merkez': ['City Centre', 'Digbeth', 'Harborne', 'Solihull', 'Edgbaston']},
+            'Edinburgh': {'Merkez': ['Old Town', 'New Town', 'Leith', 'Corstorphine', 'Morningside']},
+            'Glasgow': {'Merkez': ['City Centre', 'West End', 'Southside', 'East End', 'Merchant City']},
+        },
+        'koyler': ['Oxford', 'Cambridge', 'Bath', 'Bristol', 'York', 'Liverpool', 'Brighton', 'Canterbury'],
+    },
+    'fr': {
+        'flag': '🇫🇷', 'name': 'Fransa',
+        'sehirler': {
+            'Paris': {
+                'Merkez': ['Montmartre', 'Marais', 'Champs-Elysees', 'Rive Gauche', 'Bastille'],
+                'Banlieue': ['Versailles', 'Saint-Denis', 'Boulogne', 'Vincennes', 'Neuilly'],
+            },
+            'Lyon': {'Merkez': ['Presquile', 'Croix-Rousse', 'Vieux Lyon', 'Part-Dieu', 'Confluence']},
+            'Marseille': {'Merkez': ['Vieux-Port', 'Noailles', 'Endoume', 'Castellane', 'La Joliette']},
+            'Nice': {'Merkez': ['Vieux-Nice', 'Promenade des Anglais', 'Cimiez', 'Liberation']},
+        },
+        'koyler': ['Strasbourg', 'Bordeaux', 'Toulouse', 'Nantes', 'Montpellier', 'Rennes', 'Avignon'],
+    },
+    'us': {
+        'flag': '🇺🇸', 'name': 'ABD',
+        'sehirler': {
+            'New York': {
+                'Manhattan': ['Midtown', 'Downtown', 'Upper East Side', 'Harlem', 'Financial District', 'SoHo'],
+                'Diğer Boroughs': ['Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Flushing'],
+            },
+            'Los Angeles': {'Merkez': ['Hollywood', 'Beverly Hills', 'Santa Monica', 'Downtown', 'Venice Beach', 'Malibu']},
+            'Chicago': {'Merkez': ['Loop', 'River North', 'Wicker Park', 'Lincoln Park', 'Magnificent Mile']},
+            'Miami': {'Merkez': ['South Beach', 'Brickell', 'Wynwood', 'Coconut Grove', 'Coral Gables']},
+            'Las Vegas': {'Merkez': ['The Strip', 'Downtown Fremont', 'Henderson', 'Summerlin', 'Paradise']},
+        },
+        'koyler': ['Houston', 'Phoenix', 'Philadelphia', 'San Francisco', 'Seattle', 'Boston', 'Denver', 'Nashville'],
+    },
+    'in': {
+        'flag': '🇮🇳', 'name': 'Hindistan',
+        'sehirler': {
+            'Mumbai': {
+                'Merkez': ['Colaba', 'Bandra', 'Andheri', 'Powai', 'Juhu', 'Worli'],
+                'Çevre': ['Thane', 'Navi Mumbai', 'Kalyan', 'Ulhasnagar'],
+            },
+            'Delhi': {
+                'Merkez': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar', 'Daryaganj', 'Chandni Chowk'],
+                'NCR': ['Noida', 'Gurgaon', 'Faridabad', 'Ghaziabad'],
+            },
+            'Bangalore': {'Merkez': ['MG Road', 'Indiranagar', 'Koramangala', 'Whitefield', 'Electronic City']},
+            'Kolkata': {'Merkez': ['Park Street', 'Esplanade', 'Salt Lake', 'Howrah', 'New Town']},
+            'Chennai': {'Merkez': ['T Nagar', 'Anna Nagar', 'Egmore', 'Mylapore', 'Adyar']},
+        },
+        'koyler': ['Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Agra', 'Varanasi', 'Goa', 'Kochi', 'Rishikesh'],
+    },
+    'cn': {
+        'flag': '🇨🇳', 'name': 'Çin',
+        'sehirler': {
+            'Beijing': {'Merkez': ['Chaoyang', 'Haidian', 'Dongcheng', 'Xicheng', 'Fengtai', 'Shijingshan']},
+            'Shanghai': {'Merkez': ['Huangpu', 'Lujiazui', 'Xuhui', 'Jing An', 'Pudong', 'Bund']},
+            'Guangzhou': {'Merkez': ['Tianhe', 'Yuexiu', 'Haizhu', 'Baiyun', 'Panyu']},
+            'Shenzhen': {'Merkez': ['Futian', 'Nanshan', 'Longhua', 'Bao An', 'Luohu']},
+            'Chengdu': {'Merkez': ['Jinjiang', 'Wuhou', 'Qingyang', 'Chenghua', 'Jinniu']},
+        },
+        'koyler': ['Xian', 'Hangzhou', 'Wuhan', 'Nanjing', 'Kunming', 'Guilin', 'Lijiang', 'Zhangjiajie'],
+    },
+    'jp': {
+        'flag': '🇯🇵', 'name': 'Japonya',
+        'sehirler': {
+            'Tokyo': {
+                'Merkez': ['Shinjuku', 'Shibuya', 'Harajuku', 'Akihabara', 'Ginza', 'Asakusa'],
+                'Diğer': ['Ikebukuro', 'Ueno', 'Odaiba', 'Roppongi', 'Shimokitazawa'],
+            },
+            'Osaka': {'Merkez': ['Namba', 'Shinsaibashi', 'Umeda', 'Dotonbori', 'Tennoji', 'Shinsekai']},
+            'Kyoto': {'Merkez': ['Gion', 'Arashiyama', 'Higashiyama', 'Nishiki Market', 'Fushimi Inari']},
+            'Sapporo': {'Merkez': ['Susukino', 'Odori Park', 'Hokkaido University', 'Tanukikoji']},
+            'Fukuoka': {'Merkez': ['Hakata', 'Tenjin', 'Ohori', 'Momochi', 'Nakasu']},
+        },
+        'koyler': ['Hiroshima', 'Nagoya', 'Yokohama', 'Nara', 'Nikko', 'Hakone', 'Kamakura', 'Takayama'],
+    },
+    'br': {
+        'flag': '🇧🇷', 'name': 'Brezilya',
+        'sehirler': {
+            'Sao Paulo': {'Merkez': ['Centro', 'Paulista', 'Jardins', 'Vila Madalena', 'Pinheiros', 'Liberdade']},
+            'Rio de Janeiro': {'Merkez': ['Ipanema', 'Copacabana', 'Leblon', 'Santa Teresa', 'Centro', 'Barra']},
+            'Brasilia': {'Merkez': ['Plano Piloto', 'Asa Sul', 'Asa Norte', 'Lago Sul', 'Sudoeste']},
+            'Salvador': {'Merkez': ['Pelourinho', 'Barra', 'Ondina', 'Orla', 'Bonfim']},
+            'Manaus': {'Merkez': ['Centro', 'Adrianopolis', 'Chapada', 'Taruma', 'Ponta Negra']},
+        },
+        'koyler': ['Curitiba', 'Fortaleza', 'Recife', 'Belem', 'Natal', 'Florianopolis', 'Foz do Iguacu', 'Gramado'],
+    },
 }
 
 # Döviz para birimleri
@@ -1040,31 +1414,86 @@ DOVIZ_LISTESI = [
 
 def ulke_klavyesi(geri_cb: str) -> InlineKeyboardMarkup:
     """Ülke seçim klavyesi — 3 sütun."""
-    kodlar = list(ULKE_SEHIRLER.keys())
+    kodlar = list(ULKE_HIYERARSI.keys())
     satirlar = []
     for i in range(0, len(kodlar), 3):
         satir = []
         for kod in kodlar[i:i+3]:
-            u = ULKE_SEHIRLER[kod]
+            u = ULKE_HIYERARSI[kod]
             satir.append(InlineKeyboardButton(f"{u['flag']} {u['name']}", callback_data=f"hava_u_{kod}"))
         satirlar.append(satir)
     satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=geri_cb)])
     return InlineKeyboardMarkup(satirlar)
 
-def sehir_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
-    """Şehir seçim klavyesi — 2 sütun."""
-    ulke = ULKE_SEHIRLER.get(ulke_kodu)
-    if not ulke:
-        return InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='pro_hava')]])
-    sehirler = ulke['cities']
+def kategori_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
+    """Ülke için ŞEHİR / KÖY / ARAMA kategori seçimi."""
+    ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+    satirlar = []
+    row = []
+    if ulke.get('sehirler'):
+        row.append(InlineKeyboardButton("🏙 ŞEHİR", callback_data=f"hava_cs_{ulke_kodu}"))
+    if ulke.get('koyler'):
+        row.append(InlineKeyboardButton("🏘 KÖY/KƏND", callback_data=f"hava_kv_{ulke_kodu}"))
+    if row:
+        satirlar.append(row)
+    satirlar.append([InlineKeyboardButton("🔍 ARAMA", callback_data=f"hava_sx_{ulke_kodu}")])
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='pro_hava')])
+    return InlineKeyboardMarkup(satirlar)
+
+def sehirler_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
+    """Ülkedeki şehirleri listeler — 2 sütun."""
+    ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+    sehirler = list(ulke.get('sehirler', {}).keys())
     satirlar = []
     for i in range(0, len(sehirler), 2):
         satir = []
         for s in sehirler[i:i+2]:
-            # callback_data max 64 byte; city names are short enough
-            satir.append(InlineKeyboardButton(s, callback_data=f"hava_c_{s[:30]}"))
+            satir.append(InlineKeyboardButton(s, callback_data=f"hava_ci_{ulke_kodu}:{s}"))
         satirlar.append(satir)
-    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='pro_hava')])
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_u_{ulke_kodu}")])
+    return InlineKeyboardMarkup(satirlar)
+
+def koyler_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
+    """Ülkedeki köy/kənd listesi — 2 sütun. Tıklayınca direkt hava durumu."""
+    ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+    koyler = ulke.get('koyler', [])
+    satirlar = []
+    for i in range(0, len(koyler), 2):
+        satir = []
+        for k in koyler[i:i+2]:
+            satir.append(InlineKeyboardButton(k, callback_data=f"hava_wx_{k[:45]}"))
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_u_{ulke_kodu}")])
+    return InlineKeyboardMarkup(satirlar)
+
+def rayon_klavyesi(ulke_kodu: str, sehir: str) -> InlineKeyboardMarkup:
+    """Bir şehrin rayon/ilçelerini listeler — 2 sütun."""
+    ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+    sehir_data = ulke.get('sehirler', {}).get(sehir, {})
+    rayonlar = list(sehir_data.keys())
+    satirlar = []
+    for i in range(0, len(rayonlar), 2):
+        satir = []
+        for r in rayonlar[i:i+2]:
+            cb = f"hava_ri_{ulke_kodu}:{sehir}:{r}"
+            satir.append(InlineKeyboardButton(r, callback_data=cb[:64]))
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_cs_{ulke_kodu}")])
+    return InlineKeyboardMarkup(satirlar)
+
+def koy_listesi_klavyesi(ulke_kodu: str, sehir: str, rayon: str) -> InlineKeyboardMarkup:
+    """Bir rayonun köy/kəndlerini listeler — 2 sütun."""
+    ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+    sehir_data = ulke.get('sehirler', {}).get(sehir, {})
+    koyler = sehir_data.get(rayon, [])
+    satirlar = []
+    for i in range(0, len(koyler), 2):
+        satir = []
+        for k in koyler[i:i+2]:
+            satir.append(InlineKeyboardButton(k, callback_data=f"hava_wx_{k[:45]}"))
+        satirlar.append(satir)
+    geri_cb = f"hava_ci_{ulke_kodu}:{sehir}"
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=geri_cb[:64])])
     return InlineKeyboardMarkup(satirlar)
 
 def doviz_from_klavyesi() -> InlineKeyboardMarkup:
@@ -1944,20 +2373,62 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data.startswith('hava_u_'):
         ulke_kodu = query.data[7:]
-        ulke = ULKE_SEHIRLER.get(ulke_kodu)
+        ulke = ULKE_HIYERARSI.get(ulke_kodu)
         if ulke:
             await query.edit_message_text(
-                f"{ulke['flag']} **{ulke['name']}** — {strings.get('hava_sehir_sec', 'Şehir seçin:')}",
-                reply_markup=sehir_klavyesi(ulke_kodu),
+                f"{ulke['flag']} **{ulke['name']}** — Kategori seçin:",
+                reply_markup=kategori_klavyesi(ulke_kodu),
                 parse_mode='Markdown'
             )
-    elif query.data.startswith('hava_c_'):
-        sehir = query.data[7:]
+    elif query.data.startswith('hava_cs_'):
+        ulke_kodu = query.data[8:]
+        ulke = ULKE_HIYERARSI.get(ulke_kodu)
+        if ulke:
+            await query.edit_message_text(
+                f"{ulke['flag']} **{ulke['name']}** — 🏙 Şehir seçin:",
+                reply_markup=sehirler_klavyesi(ulke_kodu),
+                parse_mode='Markdown'
+            )
+    elif query.data.startswith('hava_kv_'):
+        ulke_kodu = query.data[8:]
+        ulke = ULKE_HIYERARSI.get(ulke_kodu)
+        if ulke:
+            await query.edit_message_text(
+                f"{ulke['flag']} **{ulke['name']}** — 🏘 Köy/Kənd seçin:",
+                reply_markup=koyler_klavyesi(ulke_kodu),
+                parse_mode='Markdown'
+            )
+    elif query.data.startswith('hava_ci_'):
+        rest = query.data[8:]
+        parts = rest.split(':', 1)
+        if len(parts) == 2:
+            ulke_kodu, sehir = parts
+            ulke = ULKE_HIYERARSI.get(ulke_kodu)
+            if ulke:
+                await query.edit_message_text(
+                    f"{ulke['flag']} **{sehir}** — Rayon/İlçe seçin:",
+                    reply_markup=rayon_klavyesi(ulke_kodu, sehir),
+                    parse_mode='Markdown'
+                )
+    elif query.data.startswith('hava_ri_'):
+        rest = query.data[8:]
+        parts = rest.split(':', 2)
+        if len(parts) == 3:
+            ulke_kodu, sehir, rayon = parts
+            ulke = ULKE_HIYERARSI.get(ulke_kodu)
+            if ulke:
+                await query.edit_message_text(
+                    f"📍 **{rayon}** ({sehir}) — Köy/Kənd seçin:",
+                    reply_markup=koy_listesi_klavyesi(ulke_kodu, sehir, rayon),
+                    parse_mode='Markdown'
+                )
+    elif query.data.startswith('hava_wx_'):
+        lokasyon = query.data[8:]
         await query.answer()
-        bekle_msg = await query.message.reply_text(f"🌍 `{html.escape(sehir)}` hava durumu getiriliyor...", parse_mode='Markdown')
-        sonuc = await hava_durumu_getir(sehir)
+        bekle_msg = await query.message.reply_text(f"🌍 `{html.escape(lokasyon)}` hava durumu getiriliyor...", parse_mode='Markdown')
+        sonuc = await hava_durumu_getir(lokasyon)
         geri = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔄 Başka Şehir", callback_data='pro_hava')],
+            [InlineKeyboardButton("🔄 Başka Konum", callback_data='pro_hava')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ])
         try:
@@ -1965,6 +2436,19 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             await bekle_msg.edit_text(sonuc, reply_markup=geri)
         return
+    elif query.data.startswith('hava_sx_'):
+        ulke_kodu = query.data[8:]
+        ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+        context.user_data['durum'] = 'hava_arama'
+        context.user_data['hava_ulke'] = ulke_kodu
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data=f"hava_u_{ulke_kodu}")]])
+        await query.edit_message_text(
+            f"🔍 **Konum Arama**\n\n{ulke.get('flag', '')} **{ulke.get('name', '')}**\n\n"
+            f"Aradığınız şehir, köy veya bölge adını yazın:\n"
+            f"_(Örnek: Marneuli, Bakuriani, Ushguli)_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
     elif query.data == 'pro_doviz':
         await query.edit_message_text(
             strings.get('doviz_from_sec', '💱 Kaynak döviz seçin:'),
@@ -2169,6 +2653,23 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         sonuc = await doviz_cevir(f"{miktar_str} {from_kur} {to_kur}")
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni Çeviri", callback_data='pro_doviz')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ])
+        try:
+            await bekle.edit_text(sonuc, parse_mode='Markdown', reply_markup=geri)
+        except Exception:
+            await bekle.edit_text(sonuc, reply_markup=geri)
+        return
+
+    if context.user_data.get('durum') == 'hava_arama':
+        context.user_data['durum'] = None
+        lokasyon = update.message.text.strip()
+        ulke_kodu = context.user_data.pop('hava_ulke', 'ge')
+        bekle = await update.message.reply_text(f"🔍 `{html.escape(lokasyon)}` aranıyor...", parse_mode='Markdown')
+        sonuc = await hava_durumu_getir(lokasyon)
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔍 Tekrar Ara", callback_data=f"hava_sx_{ulke_kodu}")],
+            [InlineKeyboardButton("🌍 Ülke Seç", callback_data='pro_hava')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ])
         try:
