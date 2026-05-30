@@ -11,7 +11,7 @@ import hashlib
 import base64 as b64lib
 import math
 import ast
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 # --- 7/24 UYANIK TUTMA SİSTEMİ ---
@@ -38,8 +38,6 @@ YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))
-WARN_LIMIT = 3
-flood_tracker: dict = {}  # {(chat_id, user_id): [timestamps]}
 
 FILIGRAN_METNI = (
     "__________________________________\n"
@@ -115,8 +113,11 @@ LANG_DATA = {
         'btn_b64_arac': "🔒 Base64",
         'hesap_ask': "🧮 **Hesap Makinesi**\n\nMatematik ifadesi girin:\nÖrnek: `2**10` veya `sqrt(144)` veya `sin(pi/2)`",
         'hash_ask': "🔐 **Hash Üretici**\n\nHashlenmesini istediğiniz metni girin:\nÖrnek: `AZRxGUARD`",
-        'hava_ask': "🌍 **Hava Durumu**\n\nŞehir adı girin (İngilizce tercih edilir):\nÖrnek: `Istanbul` veya `Baku`",
-        'doviz_ask': "💱 **Döviz Kuru**\n\nFormat: `miktar KAYNAKdöviz HEDEFdöviz`\nÖrnek: `100 USD TRY` veya `50 EUR USD`",
+        'hava_ulke_sec': "🌍 **Hava Durumu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nÜlke seçin:",
+        'hava_sehir_sec': "🏙️ **Şehir / Köy seçin:**",
+        'doviz_from_sec': "💱 **Kaynak döviz seçin:**",
+        'doviz_to_sec': "💱 **Hedef döviz seçin:**",
+        'doviz_miktar_ask': "💰 **Miktarı girin:**\nÖrnek: `100` veya `250.50`",
         'b64_ask': "🔒 **Base64 Aracı**\n\nFormat: `encode metin` veya `decode bWV0aW4=`\nÖrnek: `encode AZRxGUARD`",
     },
     'az': {
@@ -162,8 +163,11 @@ LANG_DATA = {
         'btn_b64_arac': "🔒 Base64",
         'hesap_ask': "🧮 **Kalkulyator**\n\nRiyazi ifadə daxil edin:\nNümunə: `2**10` və ya `sqrt(144)`",
         'hash_ask': "🔐 **Hash Yaradıcı**\n\nHash etmək istədiyiniz mətni daxil edin:\nNümunə: `AZRxGUARD`",
-        'hava_ask': "🌍 **Hava Proqnozu**\n\nŞəhər adını daxil edin (İngiliscə):\nNümunə: `Baku` və ya `Istanbul`",
-        'doviz_ask': "💱 **Valyuta Kursu**\n\nFormat: `miqdar KAYNAQvalyuta HƏDƏFvalyuta`\nNümunə: `100 USD EUR`",
+        'hava_ulke_sec': "🌍 **Hava Proqnozu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nÖlkə seçin:",
+        'hava_sehir_sec': "🏙️ **Şəhər / Kənd seçin:**",
+        'doviz_from_sec': "💱 **Mənbə valyuta seçin:**",
+        'doviz_to_sec': "💱 **Hədəf valyuta seçin:**",
+        'doviz_miktar_ask': "💰 **Məbləği daxil edin:**\nNümunə: `100` və ya `250.50`",
         'b64_ask': "🔒 **Base64 Aləti**\n\nFormat: `encode mətn` və ya `decode bWV0aW4=`\nNümunə: `encode AZRxGUARD`",
     },
     'ru': {
@@ -209,8 +213,11 @@ LANG_DATA = {
         'btn_b64_arac': "🔒 Base64",
         'hesap_ask': "🧮 **Калькулятор**\n\nВведите математическое выражение:\nПример: `2**10` или `sqrt(144)`",
         'hash_ask': "🔐 **Генератор Hash**\n\nВведите текст для хеширования:\nПример: `AZRxGUARD`",
-        'hava_ask': "🌍 **Погода**\n\nВведите название города:\nПример: `Moscow` или `Istanbul`",
-        'doviz_ask': "💱 **Курс валют**\n\nФормат: `сумма ИСТОЧНИКвалюта ЦЕЛЕВАЯвалюта`\nПример: `100 USD RUB`",
+        'hava_ulke_sec': "🌍 **Погода**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите страну:",
+        'hava_sehir_sec': "🏙️ **Выберите город / деревню:**",
+        'doviz_from_sec': "💱 **Выберите исходную валюту:**",
+        'doviz_to_sec': "💱 **Выберите целевую валюту:**",
+        'doviz_miktar_ask': "💰 **Введите сумму:**\nПример: `100` или `250.50`",
         'b64_ask': "🔒 **Инструмент Base64**\n\nФормат: `encode текст` или `decode bWV0aW4=`\nПример: `encode AZRxGUARD`",
     },
     'en': {
@@ -256,8 +263,11 @@ LANG_DATA = {
         'btn_b64_arac': "🔒 Base64",
         'hesap_ask': "🧮 **Calculator**\n\nEnter a math expression:\nExample: `2**10` or `sqrt(144)` or `sin(pi/2)`",
         'hash_ask': "🔐 **Hash Generator**\n\nEnter text to hash:\nExample: `AZRxGUARD`",
-        'hava_ask': "🌍 **Weather**\n\nEnter a city name:\nExample: `Istanbul` or `Baku`",
-        'doviz_ask': "💱 **Currency Converter**\n\nFormat: `amount FROM TO`\nExample: `100 USD EUR` or `50 GBP USD`",
+        'hava_ulke_sec': "🌍 **Weather**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSelect a country:",
+        'hava_sehir_sec': "🏙️ **Select city / town:**",
+        'doviz_from_sec': "💱 **Select source currency:**",
+        'doviz_to_sec': "💱 **Select target currency:**",
+        'doviz_miktar_ask': "💰 **Enter amount:**\nExample: `100` or `250.50`",
         'b64_ask': "🔒 **Base64 Tool**\n\nFormat: `encode text` or `decode bWV0aW4=`\nExample: `encode AZRxGUARD`",
     },
     'de': {
@@ -303,9 +313,60 @@ LANG_DATA = {
         'btn_b64_arac': "🔒 Base64",
         'hesap_ask': "🧮 **Taschenrechner**\n\nMathematischen Ausdruck eingeben:\nBeispiel: `2**10` oder `sqrt(144)`",
         'hash_ask': "🔐 **Hash-Generator**\n\nText zum Hashen eingeben:\nBeispiel: `AZRxGUARD`",
-        'hava_ask': "🌍 **Wetter**\n\nStadtname eingeben:\nBeispiel: `Istanbul` oder `Baku`",
-        'doviz_ask': "💱 **Währungsrechner**\n\nFormat: `Betrag VON NACH`\nBeispiel: `100 USD EUR`",
+        'hava_ulke_sec': "🌍 **Wetter**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBitte Land auswählen:",
+        'hava_sehir_sec': "🏙️ **Stadt auswählen:**",
+        'doviz_from_sec': "💱 **Ausgangswährung wählen:**",
+        'doviz_to_sec': "💱 **Zielwährung wählen:**",
+        'doviz_miktar_ask': "💰 **Betrag eingeben:**\nBeispiel: `100` oder `250.50`",
         'b64_ask': "🔒 **Base64-Tool**\n\nFormat: `encode Text` oder `decode bWV0aW4=`\nBeispiel: `encode AZRxGUARD`",
+    },
+    'ka': {
+        'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
+        'lang_select': "🌍 **გთხოვთ აირჩიოთ ენა / Please select a language:**",
+        'lang_changed': "✅ ბოტის ენა წარმატებით შეიცვალა **ქართულად**!",
+        'btn_lang': "🌍 ენა / Language",
+        'btn_channel': "📢 არხი",
+        'btn_fun': "🎲 გასართობი",
+        'btn_admin': "👑 ადმინ პანელი",
+        'welcome_fun': "🎲 **გასართობი**\n\nაირჩიეთ:",
+        'btn_dice': "🎲 კამათელი",
+        'btn_coin': "🪙 მონეტა",
+        'btn_magic8': "🎱 Magic 8-Ball",
+        'btn_joke': "😂 ხუმრობა",
+        'btn_quote': "💬 ციტატა",
+        'btn_giveaway': "🎁 განაწილება",
+        'btn_back': "⬅️ უკან",
+        'btn_admin_panel': "👑 **ადმინ პანელი**\n\nაირჩიეთ ოპერაცია:",
+        'btn_broadcast': "📢 განცხადება",
+        'btn_stats': "📊 სტატისტიკა",
+        'btn_ip_sorgu': "🌐 IP ძიება",
+        'ip_sorgu_welcome': "🌐 **IP ძიება**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nIP მისამართი შეიყვანეთ:",
+        'btn_azr_special': "⭐ AZRx სპეციალური",
+        'btn_panel': "🔍 PANEL",
+        'panel_ask': "🔍 **TG PANEL**\n\nმომხმარებლის სახელი შეიყვანეთ:\nმაგ: `@durov` ან `12345678`",
+        'panel_sorgulanıyor': "🔍 მიმდინარეობს ძიება...",
+        'panel_bulunamadi': "❌ **მომხმარებელი ვერ მოიძებნა!**\n\nშეიყვანეთ `@` სახელი ან ID.\nმაგ: `@durov` ან `12345678`",
+        'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
+        'guvenli_sorgu_welcome': "🕵️ **USERNAME HUNTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 პლატფორმაზე სახელის ძიება:",
+        'btn_username_checker': "🔎 პლატფორმის სახელის შემოწმება",
+        'username_checker_ask': "🔎 **პლატფორმის სახელის შემოწმება**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 პლატფორმაზე ერთდროულად შემოწმება.\nსახელი შეიყვანეთ:\nმაგ: `maqa_01`",
+        'btn_pro_araclar': "⚡ PRO ინსტრუმენტები",
+        'pro_araclar_welcome': "⚡ **PRO ინსტრუმენტები**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nაირჩიეთ ინსტრუმენტი:",
+        'btn_hesap_arac': "🧮 კალკულატორი",
+        'btn_hash_arac': "🔐 Hash გენერატორი",
+        'btn_hava_arac': "🌍 ამინდი",
+        'btn_doviz_arac': "💱 ვალუტა",
+        'btn_saat_arac': "🕐 მსოფლიო დრო",
+        'btn_b64_arac': "🔒 Base64",
+        'hesap_ask': "🧮 **კალკულატორი**\n\nმათემატიკური გამოსახულება შეიყვანეთ:\nმაგ: `2**10` ან `sqrt(144)`",
+        'hash_ask': "🔐 **Hash გენერატორი**\n\nტექსტი შეიყვანეთ:\nმაგ: `AZRxGUARD`",
+        'hava_ulke_sec': "🌍 **ამინდი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nქვეყანა აირჩიეთ:",
+        'hava_sehir_sec': "🏙️ **ქალაქი/სოფელი აირჩიეთ:**",
+        'doviz_from_sec': "💱 **საწყისი ვალუტა აირჩიეთ:**",
+        'doviz_to_sec': "💱 **სამიზნე ვალუტა აირჩიეთ:**",
+        'doviz_miktar_ask': "💰 **თანხა შეიყვანეთ:**\nმაგ: `100` ან `250.50`",
+        'b64_ask': "🔒 **Base64**\n\nფორმატი: `encode ტექსტი` ან `decode bWV0aW4=`\nმაგ: `encode AZRxGUARD`",
+        'msg_sent': "✅ შეტყობინება გაიგზავნა!",
     }
 }
 
@@ -867,18 +928,38 @@ async def doviz_cevir(metin: str) -> str:
 
 def dunya_saati() -> str:
     sehirler = [
-        ("🇦🇿 Bakü",          datetime.timezone(datetime.timedelta(hours=4))),
-        ("🇹🇷 İstanbul",      datetime.timezone(datetime.timedelta(hours=3))),
-        ("🇷🇺 Moskova",       datetime.timezone(datetime.timedelta(hours=3))),
-        ("🇩🇪 Berlin",        datetime.timezone(datetime.timedelta(hours=2))),
-        ("🇬🇧 Londra",        datetime.timezone(datetime.timedelta(hours=1))),
-        ("🇧🇷 São Paulo",     datetime.timezone(datetime.timedelta(hours=-3))),
-        ("🇺🇸 New York",      datetime.timezone(datetime.timedelta(hours=-4))),
-        ("🇺🇸 Los Angeles",   datetime.timezone(datetime.timedelta(hours=-7))),
-        ("🇦🇪 Dubai",         datetime.timezone(datetime.timedelta(hours=4))),
-        ("🇮🇳 Mumbai",        datetime.timezone(datetime.timedelta(hours=5, minutes=30))),
-        ("🇨🇳 Pekin",         datetime.timezone(datetime.timedelta(hours=8))),
-        ("🇯🇵 Tokyo",         datetime.timezone(datetime.timedelta(hours=9))),
+        # Gürcistan
+        ("🇬🇪 Tiflis",         datetime.timezone(datetime.timedelta(hours=4))),
+        # Azerbaycan
+        ("🇦🇿 Bakü",           datetime.timezone(datetime.timedelta(hours=4))),
+        # Türkiye
+        ("🇹🇷 İstanbul",       datetime.timezone(datetime.timedelta(hours=3))),
+        # Rusya
+        ("🇷🇺 Moskova",        datetime.timezone(datetime.timedelta(hours=3))),
+        # Müslüman ülkeler
+        ("🇸🇦 Riyad",          datetime.timezone(datetime.timedelta(hours=3))),
+        ("🇮🇶 Bağdat",         datetime.timezone(datetime.timedelta(hours=3))),
+        ("🇯🇴 Amman",          datetime.timezone(datetime.timedelta(hours=3))),
+        ("🇪🇬 Kahire",         datetime.timezone(datetime.timedelta(hours=3))),
+        ("🇮🇷 Tahran",         datetime.timezone(datetime.timedelta(hours=3, minutes=30))),
+        ("🇦🇪 Dubai",          datetime.timezone(datetime.timedelta(hours=4))),
+        ("🇵🇰 Karaçi",         datetime.timezone(datetime.timedelta(hours=5))),
+        ("🇰🇿 Astana",         datetime.timezone(datetime.timedelta(hours=5))),
+        ("🇺🇿 Taşkent",        datetime.timezone(datetime.timedelta(hours=5))),
+        ("🇮🇩 Cakarta",        datetime.timezone(datetime.timedelta(hours=7))),
+        ("🇲🇾 Kuala Lumpur",   datetime.timezone(datetime.timedelta(hours=8))),
+        ("🇲🇦 Kazablanka",     datetime.timezone(datetime.timedelta(hours=1))),
+        # Avrupa
+        ("🇩🇪 Berlin",         datetime.timezone(datetime.timedelta(hours=2))),
+        ("🇬🇧 Londra",         datetime.timezone(datetime.timedelta(hours=1))),
+        # Amerika
+        ("🇧🇷 São Paulo",      datetime.timezone(datetime.timedelta(hours=-3))),
+        ("🇺🇸 New York",       datetime.timezone(datetime.timedelta(hours=-4))),
+        ("🇺🇸 Los Angeles",    datetime.timezone(datetime.timedelta(hours=-7))),
+        # Asya
+        ("🇮🇳 Mumbai",         datetime.timezone(datetime.timedelta(hours=5, minutes=30))),
+        ("🇨🇳 Pekin",          datetime.timezone(datetime.timedelta(hours=8))),
+        ("🇯🇵 Tokyo",          datetime.timezone(datetime.timedelta(hours=9))),
     ]
     simdi_utc = datetime.datetime.now(datetime.timezone.utc)
     metin = f"🕐 **DÜNYA SAATİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -889,33 +970,118 @@ def dunya_saati() -> str:
     metin += "\n━━━━━━━━━━━━━━━━━━━━━━\n🤖 _AZRxGUARD Zaman Servisi_"
     return metin
 
-# --- 🛡️ GRUP YÖNETİMİ — YARDIMCI FONKSİYONLAR ---
+# --- 🌍 ÜLKE / ŞEHİR VERİ YAPISI (Hava + Döviz) ---
+ULKE_SEHIRLER = {
+    'ge': {'flag': '🇬🇪', 'name': 'Gürcistan', 'cities': [
+        'Tbilisi', 'Batumi', 'Kutaisi', 'Rustavi', 'Gori', 'Zugdidi',
+        'Poti', 'Telavi', 'Sighnaghi', 'Mestia', 'Borjomi', 'Kobuleti',
+        'Akhaltsikhe', 'Senaki', 'Ambrolauri', 'Kvareli', 'Lagodekhi']},
+    'tr': {'flag': '🇹🇷', 'name': 'Türkiye', 'cities': [
+        'Istanbul', 'Ankara', 'Izmir', 'Bursa', 'Antalya', 'Adana',
+        'Konya', 'Trabzon', 'Gaziantep', 'Erzurum', 'Samsun', 'Kayseri',
+        'Mersin', 'Eskisehir', 'Diyarbakir', 'Bodrum', 'Cappadocia']},
+    'az': {'flag': '🇦🇿', 'name': 'Azerbaycan', 'cities': [
+        'Baku', 'Ganja', 'Sumqayit', 'Mingachevir', 'Nakhchivan',
+        'Lankaran', 'Shaki', 'Quba', 'Gabala', 'Imishli', 'Zagatala', 'Tovuz']},
+    'ru': {'flag': '🇷🇺', 'name': 'Rusya', 'cities': [
+        'Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg',
+        'Kazan', 'Sochi', 'Vladivostok', 'Krasnodar', 'Ufa', 'Rostov-on-Don']},
+    'sa': {'flag': '🇸🇦', 'name': 'Suudi Arabistan', 'cities': [
+        'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Taif', 'Tabuk', 'Abha']},
+    'ae': {'flag': '🇦🇪', 'name': 'BAE', 'cities': [
+        'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras al-Khaimah', 'Fujairah']},
+    'ir': {'flag': '🇮🇷', 'name': 'İran', 'cities': [
+        'Tehran', 'Isfahan', 'Mashhad', 'Tabriz', 'Shiraz', 'Rasht', 'Ahvaz', 'Qom']},
+    'pk': {'flag': '🇵🇰', 'name': 'Pakistan', 'cities': [
+        'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Quetta', 'Multan', 'Faisalabad']},
+    'eg': {'flag': '🇪🇬', 'name': 'Mısır', 'cities': [
+        'Cairo', 'Alexandria', 'Giza', 'Luxor', 'Hurghada', 'Aswan', 'Port Said', 'Sharm el-Sheikh']},
+    'ma': {'flag': '🇲🇦', 'name': 'Fas', 'cities': [
+        'Casablanca', 'Rabat', 'Marrakech', 'Fez', 'Tangier', 'Agadir', 'Oujda', 'Meknes']},
+    'jo': {'flag': '🇯🇴', 'name': 'Ürdün', 'cities': [
+        'Amman', 'Zarqa', 'Irbid', 'Aqaba', 'Petra', 'Jerash', 'Madaba']},
+    'iq': {'flag': '🇮🇶', 'name': 'Irak', 'cities': [
+        'Baghdad', 'Basra', 'Erbil', 'Mosul', 'Najaf', 'Karbala', 'Kirkuk', 'Sulaymaniyah']},
+    'kz': {'flag': '🇰🇿', 'name': 'Kazakistan', 'cities': [
+        'Almaty', 'Astana', 'Shymkent', 'Karaganda', 'Aktobe', 'Semey', 'Atyrau']},
+    'uz': {'flag': '🇺🇿', 'name': 'Özbekistan', 'cities': [
+        'Tashkent', 'Samarkand', 'Bukhara', 'Namangan', 'Andijan', 'Fergana', 'Nukus']},
+    'id': {'flag': '🇮🇩', 'name': 'Endonezya', 'cities': [
+        'Jakarta', 'Surabaya', 'Bandung', 'Bali', 'Medan', 'Makassar', 'Semarang', 'Yogyakarta']},
+    'my': {'flag': '🇲🇾', 'name': 'Malezya', 'cities': [
+        'Kuala Lumpur', 'Penang', 'Johor Bahru', 'Ipoh', 'Kuching', 'Kota Kinabalu']},
+    'de': {'flag': '🇩🇪', 'name': 'Almanya', 'cities': [
+        'Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Cologne', 'Stuttgart', 'Dusseldorf', 'Leipzig']},
+    'gb': {'flag': '🇬🇧', 'name': 'İngiltere', 'cities': [
+        'London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Edinburgh', 'Liverpool', 'Bristol']},
+    'fr': {'flag': '🇫🇷', 'name': 'Fransa', 'cities': [
+        'Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nice', 'Bordeaux', 'Strasbourg']},
+    'us': {'flag': '🇺🇸', 'name': 'ABD', 'cities': [
+        'New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami', 'Las Vegas', 'Washington DC', 'Seattle']},
+    'in': {'flag': '🇮🇳', 'name': 'Hindistan', 'cities': [
+        'Mumbai', 'Delhi', 'Bangalore', 'Kolkata', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad']},
+    'cn': {'flag': '🇨🇳', 'name': 'Çin', 'cities': [
+        'Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Wuhan', 'Xian', 'Hangzhou']},
+    'jp': {'flag': '🇯🇵', 'name': 'Japonya', 'cities': [
+        'Tokyo', 'Osaka', 'Kyoto', 'Sapporo', 'Hiroshima', 'Fukuoka', 'Nagoya', 'Yokohama']},
+    'br': {'flag': '🇧🇷', 'name': 'Brezilya', 'cities': [
+        'Sao Paulo', 'Rio de Janeiro', 'Brasilia', 'Salvador', 'Manaus', 'Curitiba', 'Fortaleza']},
+}
 
-async def admin_mi(bot, chat_id: int, user_id: int) -> bool:
-    try:
-        member = await bot.get_chat_member(chat_id, user_id)
-        return member.status in ('creator', 'administrator')
-    except Exception:
-        return False
+# Döviz para birimleri
+DOVIZ_LISTESI = [
+    ('🇺🇸 USD', 'USD'), ('🇪🇺 EUR', 'EUR'), ('🇹🇷 TRY', 'TRY'),
+    ('🇬🇧 GBP', 'GBP'), ('🇷🇺 RUB', 'RUB'), ('🇨🇭 CHF', 'CHF'),
+    ('🇦🇿 AZN', 'AZN'), ('🇬🇪 GEL', 'GEL'), ('🇸🇦 SAR', 'SAR'),
+    ('🇦🇪 AED', 'AED'), ('🇯🇵 JPY', 'JPY'), ('🇨🇳 CNY', 'CNY'),
+    ('🇮🇳 INR', 'INR'), ('🇰🇿 KZT', 'KZT'), ('🇺🇦 UAH', 'UAH'),
+    ('🇨🇦 CAD', 'CAD'), ('🇦🇺 AUD', 'AUD'), ('🇧🇷 BRL', 'BRL'),
+]
 
-async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.effective_message
-    if msg.reply_to_message:
-        return msg.reply_to_message.from_user
-    if context.args:
-        arg = context.args[0]
-        try:
-            uid = int(arg)
-            chat = await context.bot.get_chat(uid)
-            return chat
-        except Exception:
-            try:
-                username = arg if arg.startswith('@') else f"@{arg}"
-                chat = await context.bot.get_chat(username)
-                return chat
-            except Exception:
-                return None
-    return None
+def ulke_klavyesi(geri_cb: str) -> InlineKeyboardMarkup:
+    """Ülke seçim klavyesi — 3 sütun."""
+    kodlar = list(ULKE_SEHIRLER.keys())
+    satirlar = []
+    for i in range(0, len(kodlar), 3):
+        satir = []
+        for kod in kodlar[i:i+3]:
+            u = ULKE_SEHIRLER[kod]
+            satir.append(InlineKeyboardButton(f"{u['flag']} {u['name']}", callback_data=f"hava_u_{kod}"))
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=geri_cb)])
+    return InlineKeyboardMarkup(satirlar)
+
+def sehir_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
+    """Şehir seçim klavyesi — 2 sütun."""
+    ulke = ULKE_SEHIRLER.get(ulke_kodu)
+    if not ulke:
+        return InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='pro_hava')]])
+    sehirler = ulke['cities']
+    satirlar = []
+    for i in range(0, len(sehirler), 2):
+        satir = []
+        for s in sehirler[i:i+2]:
+            # callback_data max 64 byte; city names are short enough
+            satir.append(InlineKeyboardButton(s, callback_data=f"hava_c_{s[:30]}"))
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='pro_hava')])
+    return InlineKeyboardMarkup(satirlar)
+
+def doviz_from_klavyesi() -> InlineKeyboardMarkup:
+    satirlar = []
+    for i in range(0, len(DOVIZ_LISTESI), 3):
+        satir = [InlineKeyboardButton(ad, callback_data=f"kur_f_{kod}") for ad, kod in DOVIZ_LISTESI[i:i+3]]
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')])
+    return InlineKeyboardMarkup(satirlar)
+
+def doviz_to_klavyesi(from_kur: str) -> InlineKeyboardMarkup:
+    satirlar = []
+    for i in range(0, len(DOVIZ_LISTESI), 3):
+        satir = [InlineKeyboardButton(ad, callback_data=f"kur_t_{from_kur}_{kod}") for ad, kod in DOVIZ_LISTESI[i:i+3]]
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='pro_doviz')])
+    return InlineKeyboardMarkup(satirlar)
 
 # BUG FIX: Bu fonksiyon ana_menu_klavye içinde yanlış girintilenmişti, düzeltildi
 async def kanal_takip_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, lang: str) -> bool:
@@ -1643,7 +1809,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         dil_klavye = [
             [InlineKeyboardButton("🇹🇷 Türkçe", callback_data='set_lang_tr'), InlineKeyboardButton("🇦🇿 Azərbaycanca", callback_data='set_lang_az')],
             [InlineKeyboardButton("🇷🇺 Русский", callback_data='set_lang_ru'), InlineKeyboardButton("🇬🇧 English", callback_data='set_lang_en')],
-            [InlineKeyboardButton("🇩🇪 Deutsch", callback_data='set_lang_de')],
+            [InlineKeyboardButton("🇩🇪 Deutsch", callback_data='set_lang_de'), InlineKeyboardButton("🇬🇪 ქართული", callback_data='set_lang_ka')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['lang_select'], reply_markup=InlineKeyboardMarkup(dil_klavye), parse_mode='Markdown')
@@ -1771,13 +1937,60 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['durum'] = 'hash_bekliyor'
         await query.edit_message_text(strings.get('hash_ask', '🔐 Hashlenecek metni girin:'), reply_markup=geri, parse_mode='Markdown')
     elif query.data == 'pro_hava':
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
-        context.user_data['durum'] = 'hava_bekliyor'
-        await query.edit_message_text(strings.get('hava_ask', '🌍 Şehir adı girin:'), reply_markup=geri, parse_mode='Markdown')
+        await query.edit_message_text(
+            strings.get('hava_ulke_sec', '🌍 Ülke seçin:'),
+            reply_markup=ulke_klavyesi('menu_pro_araclar'),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('hava_u_'):
+        ulke_kodu = query.data[7:]
+        ulke = ULKE_SEHIRLER.get(ulke_kodu)
+        if ulke:
+            await query.edit_message_text(
+                f"{ulke['flag']} **{ulke['name']}** — {strings.get('hava_sehir_sec', 'Şehir seçin:')}",
+                reply_markup=sehir_klavyesi(ulke_kodu),
+                parse_mode='Markdown'
+            )
+    elif query.data.startswith('hava_c_'):
+        sehir = query.data[7:]
+        await query.answer()
+        bekle_msg = await query.message.reply_text(f"🌍 `{html.escape(sehir)}` hava durumu getiriliyor...", parse_mode='Markdown')
+        sonuc = await hava_durumu_getir(sehir)
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Başka Şehir", callback_data='pro_hava')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ])
+        try:
+            await bekle_msg.edit_text(sonuc, parse_mode='Markdown', reply_markup=geri)
+        except Exception:
+            await bekle_msg.edit_text(sonuc, reply_markup=geri)
+        return
     elif query.data == 'pro_doviz':
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
-        context.user_data['durum'] = 'doviz_bekliyor'
-        await query.edit_message_text(strings.get('doviz_ask', '💱 Format: 100 USD TRY'), reply_markup=geri, parse_mode='Markdown')
+        await query.edit_message_text(
+            strings.get('doviz_from_sec', '💱 Kaynak döviz seçin:'),
+            reply_markup=doviz_from_klavyesi(),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('kur_f_'):
+        from_kur = query.data[6:]
+        await query.edit_message_text(
+            strings.get('doviz_to_sec', '💱 Hedef döviz seçin:'),
+            reply_markup=doviz_to_klavyesi(from_kur),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('kur_t_'):
+        parts = query.data[6:].split('_', 1)
+        if len(parts) == 2:
+            from_kur, to_kur = parts[0], parts[1]
+            context.user_data['kur_from'] = from_kur
+            context.user_data['kur_to'] = to_kur
+            context.user_data['durum'] = 'kur_miktar_bekliyor'
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='pro_doviz')]])
+            await query.edit_message_text(
+                f"💱 `{from_kur}` → `{to_kur}`\n\n" + strings.get('doviz_miktar_ask', '💰 Miktarı girin:'),
+                reply_markup=geri,
+                parse_mode='Markdown'
+            )
     elif query.data == 'pro_saat':
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yenile", callback_data='pro_saat')],
@@ -1942,11 +2155,18 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             await bekle.edit_text(sonuc, reply_markup=geri)
         return
 
-    if context.user_data.get('durum') == 'doviz_bekliyor':
+    if context.user_data.get('durum') == 'kur_miktar_bekliyor':
         context.user_data['durum'] = None
-        metin = update.message.text.strip()
+        from_kur = context.user_data.pop('kur_from', 'USD')
+        to_kur   = context.user_data.pop('kur_to', 'EUR')
+        miktar_str = update.message.text.strip().replace(',', '.')
+        try:
+            float(miktar_str)
+        except ValueError:
+            await update.message.reply_text("❌ Geçersiz miktar! Sadece sayı girin. Örnek: `100`", parse_mode='Markdown')
+            return
         bekle = await update.message.reply_text("💱 Kur bilgisi getiriliyor...", parse_mode='Markdown')
-        sonuc = await doviz_cevir(metin)
+        sonuc = await doviz_cevir(f"{miktar_str} {from_kur} {to_kur}")
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni Çeviri", callback_data='pro_doviz')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -2362,266 +2582,6 @@ async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         metin += f"↩️ **Yanıtlanan:** `{hedef.id}` ({html.escape(hedef.first_name or '')})\n"
     await msg.reply_text(metin, parse_mode='Markdown')
 
-# --- 🛡️ GRUP YÖNETİM KOMUTLARI ---
-
-async def ban_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/ban` diye mesajı yanıtla veya `/ban @kullanici`", parse_mode='Markdown')
-        return
-    if hedef.id == yapan.id:
-        await msg.reply_text("❌ Kendini ban edemezsin!")
-        return
-    sebep = ' '.join(context.args[1:]) if context.args and len(context.args) > 1 else "Sebep belirtilmedi"
-    try:
-        await context.bot.ban_chat_member(chat.id, hedef.id)
-        isim = html.escape(hedef.first_name or str(hedef.id))
-        await msg.reply_text(
-            f"🔨 **{isim}** gruptan banlandı!\n"
-            f"👤 **ID:** `{hedef.id}`\n"
-            f"📝 **Sebep:** {html.escape(sebep)}\n"
-            f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}",
-            parse_mode='Markdown'
-        )
-    except Exception as e:
-        await msg.reply_text(f"❌ Ban işlemi başarısız: `{str(e)[:100]}`", parse_mode='Markdown')
-
-async def kick_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/kick` diye mesajı yanıtla", parse_mode='Markdown')
-        return
-    if hedef.id == yapan.id:
-        await msg.reply_text("❌ Kendini kick edemezsin!")
-        return
-    try:
-        await context.bot.ban_chat_member(chat.id, hedef.id)
-        await context.bot.unban_chat_member(chat.id, hedef.id)
-        isim = html.escape(hedef.first_name or str(hedef.id))
-        await msg.reply_text(
-            f"👢 **{isim}** gruptan atıldı! (tekrar katılabilir)\n"
-            f"👤 **ID:** `{hedef.id}`\n"
-            f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}",
-            parse_mode='Markdown'
-        )
-    except Exception as e:
-        await msg.reply_text(f"❌ Kick işlemi başarısız: `{str(e)[:100]}`", parse_mode='Markdown')
-
-async def mute_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/mute [dakika]` diye mesajı yanıtla", parse_mode='Markdown')
-        return
-    if hedef.id == yapan.id:
-        await msg.reply_text("❌ Kendini mute edemezsin!")
-        return
-    dakika = 0
-    if context.args:
-        try:
-            dakika = int(context.args[0])
-        except ValueError:
-            if len(context.args) > 1:
-                try:
-                    dakika = int(context.args[1])
-                except Exception:
-                    pass
-    sure_str = f"{dakika} dakika" if dakika > 0 else "Süresiz"
-    until = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=dakika) if dakika > 0 else None
-    try:
-        await context.bot.restrict_chat_member(
-            chat.id, hedef.id,
-            permissions=ChatPermissions(can_send_messages=False),
-            until_date=until
-        )
-        isim = html.escape(hedef.first_name or str(hedef.id))
-        await msg.reply_text(
-            f"🔇 **{isim}** susturuldu!\n"
-            f"👤 **ID:** `{hedef.id}`\n"
-            f"⏱️ **Süre:** {sure_str}\n"
-            f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}",
-            parse_mode='Markdown'
-        )
-    except Exception as e:
-        await msg.reply_text(f"❌ Mute işlemi başarısız: `{str(e)[:100]}`", parse_mode='Markdown')
-
-async def unmute_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/unmute` diye mesajı yanıtla", parse_mode='Markdown')
-        return
-    try:
-        await context.bot.restrict_chat_member(
-            chat.id, hedef.id,
-            permissions=ChatPermissions(
-                can_send_messages=True, can_send_audios=True,
-                can_send_documents=True, can_send_photos=True,
-                can_send_videos=True, can_send_other_messages=True,
-                can_add_web_page_previews=True
-            )
-        )
-        isim = html.escape(hedef.first_name or str(hedef.id))
-        await msg.reply_text(
-            f"🔊 **{isim}** susturması kaldırıldı!\n"
-            f"👤 **ID:** `{hedef.id}`\n"
-            f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}",
-            parse_mode='Markdown'
-        )
-    except Exception as e:
-        await msg.reply_text(f"❌ Unmute işlemi başarısız: `{str(e)[:100]}`", parse_mode='Markdown')
-
-async def warn_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/warn` diye mesajı yanıtla", parse_mode='Markdown')
-        return
-    if hedef.id == yapan.id:
-        await msg.reply_text("❌ Kendini uyaramazsın!")
-        return
-    sebep = ' '.join(context.args[1:]) if context.args and len(context.args) > 1 else "Sebep belirtilmedi"
-    warns = context.bot_data.setdefault('warns', {})
-    chat_warns = warns.setdefault(str(chat.id), {})
-    sayac = chat_warns.get(str(hedef.id), 0) + 1
-    chat_warns[str(hedef.id)] = sayac
-    isim = html.escape(hedef.first_name or str(hedef.id))
-    if sayac >= WARN_LIMIT:
-        chat_warns[str(hedef.id)] = 0
-        try:
-            await context.bot.ban_chat_member(chat.id, hedef.id)
-            await msg.reply_text(
-                f"🚨 **{isim}** {WARN_LIMIT} uyarı aldı ve **BANLANDI!**\n"
-                f"👤 **ID:** `{hedef.id}`\n"
-                f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}",
-                parse_mode='Markdown'
-            )
-        except Exception as e:
-            await msg.reply_text(f"❌ Otomatik ban başarısız: `{str(e)[:80]}`", parse_mode='Markdown')
-    else:
-        await msg.reply_text(
-            f"⚠️ **{isim}** uyarıldı! (`{sayac}/{WARN_LIMIT}`)\n"
-            f"📝 **Sebep:** {html.escape(sebep)}\n"
-            f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}\n\n"
-            f"_{WARN_LIMIT - sayac} daha uyarı alırsa banlanır!_",
-            parse_mode='Markdown'
-        )
-
-async def warns_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    if chat.type not in ('group', 'supergroup'):
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/warns` diye mesajı yanıtla", parse_mode='Markdown')
-        return
-    warns = context.bot_data.get('warns', {})
-    sayac = warns.get(str(chat.id), {}).get(str(hedef.id), 0)
-    isim = html.escape(hedef.first_name or str(hedef.id))
-    await msg.reply_text(
-        f"📋 **{isim}** uyarı durumu:\n"
-        f"⚠️ **Uyarı:** `{sayac}/{WARN_LIMIT}`\n"
-        f"👤 **ID:** `{hedef.id}`",
-        parse_mode='Markdown'
-    )
-
-async def clearwarns_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    hedef = await hedef_kullanici_bul(update, context)
-    if not hedef:
-        await msg.reply_text("❌ Kullanıcıyı belirt: `/clearwarns` diye mesajı yanıtla", parse_mode='Markdown')
-        return
-    warns = context.bot_data.setdefault('warns', {})
-    chat_warns = warns.setdefault(str(chat.id), {})
-    chat_warns[str(hedef.id)] = 0
-    isim = html.escape(hedef.first_name or str(hedef.id))
-    await msg.reply_text(
-        f"✅ **{isim}** uyarıları temizlendi!\n"
-        f"👤 **ID:** `{hedef.id}`\n"
-        f"🛡️ **Admin:** {html.escape(yapan.first_name or '')}",
-        parse_mode='Markdown'
-    )
-
-async def pin_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    if not msg.reply_to_message:
-        await msg.reply_text("❌ Sabitlenecek mesajı yanıtla: `/pin`", parse_mode='Markdown')
-        return
-    try:
-        await context.bot.pin_chat_message(chat.id, msg.reply_to_message.message_id, disable_notification=False)
-        await msg.reply_text(f"📌 Mesaj sabitlendi!\n🛡️ **Admin:** {html.escape(yapan.first_name or '')}", parse_mode='Markdown')
-    except Exception as e:
-        await msg.reply_text(f"❌ Sabitleme başarısız: `{str(e)[:100]}`", parse_mode='Markdown')
-
-async def unpin_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg  = update.effective_message
-    chat = update.effective_chat
-    yapan = update.effective_user
-    if chat.type not in ('group', 'supergroup'):
-        return
-    if not await admin_mi(context.bot, chat.id, yapan.id):
-        await msg.reply_text("❌ Bu komutu sadece adminler kullanabilir!")
-        return
-    try:
-        if msg.reply_to_message:
-            await context.bot.unpin_chat_message(chat.id, msg.reply_to_message.message_id)
-        else:
-            await context.bot.unpin_chat_message(chat.id)
-        await msg.reply_text(f"📌 Mesaj sabitlemesi kaldırıldı!\n🛡️ **Admin:** {html.escape(yapan.first_name or '')}", parse_mode='Markdown')
-    except Exception as e:
-        await msg.reply_text(f"❌ İşlem başarısız: `{str(e)[:100]}`", parse_mode='Markdown')
 
 def main():
     uyanik_tut()
@@ -2641,16 +2601,6 @@ def main():
     application.add_handler(CommandHandler("saat", saat_komutu))
     application.add_handler(CommandHandler("b64", b64_komutu))
     application.add_handler(CommandHandler("id", id_komutu))
-    # 🛡️ GRUP YÖNETİM komutları
-    application.add_handler(CommandHandler("ban", ban_komutu))
-    application.add_handler(CommandHandler("kick", kick_komutu))
-    application.add_handler(CommandHandler("mute", mute_komutu))
-    application.add_handler(CommandHandler("unmute", unmute_komutu))
-    application.add_handler(CommandHandler("warn", warn_komutu))
-    application.add_handler(CommandHandler("warns", warns_komutu))
-    application.add_handler(CommandHandler("clearwarns", clearwarns_komutu))
-    application.add_handler(CommandHandler("pin", pin_komutu))
-    application.add_handler(CommandHandler("unpin", unpin_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
