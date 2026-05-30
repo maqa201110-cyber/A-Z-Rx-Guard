@@ -95,8 +95,8 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — Kullanıcı Sorgu Merkezi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgulamak istediğin kullanıcının:\n• `@kullaniciadi` yazabilirsin\n• Sayısal `ID` yazabilirsin\n\nÖrnek: `@durov` veya `12345678`\n\n_Her bilgi ekrana dökülecek!_ 🔎",
         'panel_sorgulanıyor': "🔍 Sorgulanıyor...",
         'panel_bulunamadi': "❌ **Kullanıcı bulunamadı!**\n\nKullanıcı adını `@` ile ya da sayısal ID olarak gir.\nÖrnek: `@durov` veya `12345678`",
-        'btn_guvenli_sorgu': "🔍 GÜVENLİ SORGU",
-        'guvenli_sorgu_welcome': "🔍 **GÜVENLİ SORGU MERKEZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorgu türünü seçin:",
+        'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
+        'guvenli_sorgu_welcome': "🕵️ **USERNAME HUNTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nKullanıcı adını 14 platformda aynı anda tara:",
         'btn_username_checker': "🔎 Platform Kullanıcı Adı Kontrolü",
         'username_checker_ask': "🔎 **Platform Kullanıcı Adı Kontrolü**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 platformda aynı anda kontrol edilecek.\nKullanıcı adını yaz (@ olmadan da olur):\nÖrnek: `maqa_01`",
     },
@@ -129,8 +129,8 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — İstifadəçi Sorğu Mərkəzi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğulamaq istədiyin istifadəçinin:\n• `@istifadəçiadı` yaza bilərsən\n• Rəqəmsal `ID` yaza bilərsən\n\nNümunə: `@durov` və ya `12345678`\n\n_Bütün məlumatlar ekrana çıxacaq!_ 🔎",
         'panel_sorgulanıyor': "🔍 Sorğulanır...",
         'panel_bulunamadi': "❌ **İstifadəçi tapılmadı!**\n\nİstifadəçi adını `@` ilə ya da rəqəmsal ID kimi daxil et.\nNümunə: `@durov` və ya `12345678`",
-        'btn_guvenli_sorgu': "🔍 TƏHLÜKƏSİZ SORĞU",
-        'guvenli_sorgu_welcome': "🔍 **TƏHLÜKƏSİZ SORĞU MƏRKƏZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSorğu növünü seçin:",
+        'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
+        'guvenli_sorgu_welcome': "🕵️ **USERNAME HUNTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nİstifadəçi adını 14 platformda eyni anda tara:",
         'btn_username_checker': "🔎 Platforma İstifadəçi Adı Yoxlaması",
         'username_checker_ask': "🔎 **Platforma İstifadəçi Adı Yoxlaması**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n14 platformda eyni anda yoxlanacaq.\nİstifadəçi adını yaz:\nNümunə: `maqa_01`",
     },
@@ -163,8 +163,8 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — Центр запросов пользователей**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВведи:\n• `@username` пользователя\n• Числовой `ID` пользователя\n\nПример: `@durov` или `12345678`\n\n_Вся информация будет выведена!_ 🔎",
         'panel_sorgulanıyor': "🔍 Запрос выполняется...",
         'panel_bulunamadi': "❌ **Пользователь не найден!**\n\nВведи username через `@` или числовой ID.\nПример: `@durov` или `12345678`",
-        'btn_guvenli_sorgu': "🔍 БЕЗОПАСНЫЙ ЗАПРОС",
-        'guvenli_sorgu_welcome': "🔍 **ЦЕНТР БЕЗОПАСНЫХ ЗАПРОСОВ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите тип запроса:",
+        'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
+        'guvenli_sorgu_welcome': "🕵️ **USERNAME HUNTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nПроверьте имя на 14 платформах одновременно:",
         'btn_username_checker': "🔎 Проверка имени на платформах",
         'username_checker_ask': "🔎 **Проверка имени пользователя**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nПроверка на 14 платформах одновременно.\nВведите имя пользователя:\nПример: `maqa_01`",
     },
@@ -197,8 +197,8 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — User Query Center**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEnter:\n• `@username` of the user\n• Numeric `ID` of the user\n\nExample: `@durov` or `12345678`\n\n_All information will be displayed!_ 🔎",
         'panel_sorgulanıyor': "🔍 Querying...",
         'panel_bulunamadi': "❌ **User not found!**\n\nEnter username with `@` or a numeric ID.\nExample: `@durov` or `12345678`",
-        'btn_guvenli_sorgu': "🔍 SAFE QUERY",
-        'guvenli_sorgu_welcome': "🔍 **SAFE QUERY CENTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSelect a query type:",
+        'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
+        'guvenli_sorgu_welcome': "🕵️ **USERNAME HUNTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nScan a username across 14 platforms at once:",
         'btn_username_checker': "🔎 Platform Username Checker",
         'username_checker_ask': "🔎 **Platform Username Checker**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChecks 14 platforms simultaneously.\nEnter a username:\nExample: `maqa_01`",
     },
@@ -231,8 +231,8 @@ LANG_DATA = {
         'panel_welcome': "🔍 **PANEL — Benutzer-Abfragezentrum**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nGib ein:\n• `@benutzername` des Nutzers\n• Numerische `ID` des Nutzers\n\nBeispiel: `@durov` oder `12345678`\n\n_Alle Informationen werden angezeigt!_ 🔎",
         'panel_sorgulanıyor': "🔍 Abfrage läuft...",
         'panel_bulunamadi': "❌ **Benutzer nicht gefunden!**\n\nGib den Benutzernamen mit `@` oder eine numerische ID ein.\nBeispiel: `@durov` oder `12345678`",
-        'btn_guvenli_sorgu': "🔍 SICHERES ABFRAGE",
-        'guvenli_sorgu_welcome': "🔍 **SICHERES ABFRAGEZENTRUM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nWählen Sie einen Abfragetyp:",
+        'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
+        'guvenli_sorgu_welcome': "🕵️ **USERNAME HUNTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBenutzernamen auf 14 Plattformen gleichzeitig prüfen:",
         'btn_username_checker': "🔎 Benutzername auf Plattformen prüfen",
         'username_checker_ask': "🔎 **Benutzername-Prüfung**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nPrüft 14 Plattformen gleichzeitig.\nBenutzernamen eingeben:\nBeispiel: `maqa_01`",
     }
@@ -885,7 +885,6 @@ async def meid_bilgisi_olustur(bot, update: Update, context: ContextTypes.DEFAUL
         f"🆔 **Kullanıcı ID:** `{user.id}`\n"
         f"🔢 **ID Basamak Sayısı:** `{id_basamak}`\n"
         f"🧩 **Hesap Türü:** {hesap_turu}\n"
-        f"📅 **Hesap Oluşturulma (Tahmin):** `{kayit_tarihi}`\n\n"
         f"🌍 **Bot Dili:** {bot_dili}\n"
         f"📱 **Telegram Dili:** {tg_dili_goster}\n\n"
         f"💎 **Telegram Premium:** {premium}\n"
@@ -1405,30 +1404,12 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_guvenli_sorgu':
         gs_klavye = [
-            [InlineKeyboardButton(strings.get('btn_tt_sorgu', '🎵 TikTok Sorgu'), callback_data='menu_tt_sorgu')],
-            [InlineKeyboardButton(strings.get('btn_ig_sorgu', '📸 Instagram Sorgu'), callback_data='menu_ig_sorgu')],
             [InlineKeyboardButton(strings.get('btn_username_checker', '🔎 Platform Kontrolü'), callback_data='menu_username_checker')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
-            strings.get('guvenli_sorgu_welcome', '🔍 **GÜVENLİ SORGU MERKEZİ**\n\nSorgu türünü seçin:'),
+            strings.get('guvenli_sorgu_welcome', '🕵️ **USERNAME HUNTER**\n\nKullanıcı adını 14 platformda tara:'),
             reply_markup=InlineKeyboardMarkup(gs_klavye),
-            parse_mode='Markdown'
-        )
-    elif query.data == 'menu_tt_sorgu':
-        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]])
-        context.user_data['durum'] = 'tt_sorgu_bekliyor'
-        await query.edit_message_text(
-            strings.get('tt_sorgu_ask', '🎵 TikTok kullanıcı adını yaz:'),
-            reply_markup=geri_klavye,
-            parse_mode='Markdown'
-        )
-    elif query.data == 'menu_ig_sorgu':
-        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]])
-        context.user_data['durum'] = 'ig_sorgu_bekliyor'
-        await query.edit_message_text(
-            strings.get('ig_sorgu_ask', '📸 Instagram kullanıcı adını yaz:'),
-            reply_markup=geri_klavye,
             parse_mode='Markdown'
         )
     elif query.data == 'menu_username_checker':
@@ -1510,42 +1491,6 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"IP analiz menü hatası: {e}")
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
-        return
-
-    if context.user_data.get('durum') == 'tt_sorgu_bekliyor':
-        context.user_data['durum'] = None
-        kullanici_adi = update.message.text.strip()
-        bekle = await update.message.reply_text(
-            f"🎵 `@{kullanici_adi.lstrip('@')}` TikTok'ta aranıyor...",
-            parse_mode='Markdown'
-        )
-        rapor = await tt_profil_getir(kullanici_adi)
-        geri_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔍 Yeni Sorgu", callback_data='menu_tt_sorgu')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]
-        ])
-        try:
-            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True, reply_markup=geri_klavye)
-        except Exception:
-            await bekle.edit_text(rapor, disable_web_page_preview=True, reply_markup=geri_klavye)
-        return
-
-    if context.user_data.get('durum') == 'ig_sorgu_bekliyor':
-        context.user_data['durum'] = None
-        kullanici_adi = update.message.text.strip()
-        bekle = await update.message.reply_text(
-            f"📸 `@{kullanici_adi.lstrip('@')}` Instagram'da aranıyor...",
-            parse_mode='Markdown'
-        )
-        rapor = await instagram_profil_getir(kullanici_adi)
-        geri_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔍 Yeni Sorgu", callback_data='menu_ig_sorgu')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]
-        ])
-        try:
-            await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True, reply_markup=geri_klavye)
-        except Exception:
-            await bekle.edit_text(rapor, disable_web_page_preview=True, reply_markup=geri_klavye)
         return
 
     if context.user_data.get('durum') == 'username_checker_bekliyor':
