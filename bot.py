@@ -2896,6 +2896,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_not':
+        context.user_data['durum'] = None
         notlar = not_yukle(user_id)
         not_klavye_geri = [[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]]
         if not notlar:
