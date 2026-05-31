@@ -11,6 +11,9 @@ import hashlib
 import base64 as b64lib
 import math
 import ast
+import random
+import string
+import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
@@ -31,7 +34,7 @@ TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN environment variable is not set!")
 
-MY_ID = 74210240
+MY_ID = 5730924995
 KANAL_ID = -1003930940829
 KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
@@ -111,6 +114,9 @@ LANG_DATA = {
         'btn_doviz_arac': "💱 Döviz Kuru",
         'btn_saat_arac': "🕐 Dünya Saati",
         'btn_b64_arac': "🔒 Base64",
+        'btn_sifre_arac': "🔑 Şifre Üretici",
+        'btn_not_arac': "📝 Not Defterim",
+        'btn_wiki_arac': "🌐 Wikipedia Ara",
         'hesap_ask': "🧮 **Hesap Makinesi**\n\nMatematik ifadesi girin:\nÖrnek: `2**10` veya `sqrt(144)` veya `sin(pi/2)`",
         'hash_ask': "🔐 **Hash Üretici**\n\nHashlenmesini istediğiniz metni girin:\nÖrnek: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Hava Durumu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nÜlke seçin:",
@@ -161,6 +167,9 @@ LANG_DATA = {
         'btn_doviz_arac': "💱 Valyuta Kursu",
         'btn_saat_arac': "🕐 Dünya Saatı",
         'btn_b64_arac': "🔒 Base64",
+        'btn_sifre_arac': "🔑 Şifrə Yaradıcı",
+        'btn_not_arac': "📝 Qeydlərim",
+        'btn_wiki_arac': "🌐 Wikipedia Axtar",
         'hesap_ask': "🧮 **Kalkulyator**\n\nRiyazi ifadə daxil edin:\nNümunə: `2**10` və ya `sqrt(144)`",
         'hash_ask': "🔐 **Hash Yaradıcı**\n\nHash etmək istədiyiniz mətni daxil edin:\nNümunə: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Hava Proqnozu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nÖlkə seçin:",
@@ -211,6 +220,9 @@ LANG_DATA = {
         'btn_doviz_arac': "💱 Курс валют",
         'btn_saat_arac': "🕐 Мировое время",
         'btn_b64_arac': "🔒 Base64",
+        'btn_sifre_arac': "🔑 Генератор паролей",
+        'btn_not_arac': "📝 Мои заметки",
+        'btn_wiki_arac': "🌐 Поиск Wikipedia",
         'hesap_ask': "🧮 **Калькулятор**\n\nВведите математическое выражение:\nПример: `2**10` или `sqrt(144)`",
         'hash_ask': "🔐 **Генератор Hash**\n\nВведите текст для хеширования:\nПример: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Погода**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите страну:",
@@ -261,6 +273,9 @@ LANG_DATA = {
         'btn_doviz_arac': "💱 Currency Converter",
         'btn_saat_arac': "🕐 World Clock",
         'btn_b64_arac': "🔒 Base64",
+        'btn_sifre_arac': "🔑 Password Generator",
+        'btn_not_arac': "📝 My Notes",
+        'btn_wiki_arac': "🌐 Wikipedia Search",
         'hesap_ask': "🧮 **Calculator**\n\nEnter a math expression:\nExample: `2**10` or `sqrt(144)` or `sin(pi/2)`",
         'hash_ask': "🔐 **Hash Generator**\n\nEnter text to hash:\nExample: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Weather**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSelect a country:",
@@ -311,6 +326,9 @@ LANG_DATA = {
         'btn_doviz_arac': "💱 Währungsrechner",
         'btn_saat_arac': "🕐 Weltzeit",
         'btn_b64_arac': "🔒 Base64",
+        'btn_sifre_arac': "🔑 Passwort-Generator",
+        'btn_not_arac': "📝 Meine Notizen",
+        'btn_wiki_arac': "🌐 Wikipedia Suche",
         'hesap_ask': "🧮 **Taschenrechner**\n\nMathematischen Ausdruck eingeben:\nBeispiel: `2**10` oder `sqrt(144)`",
         'hash_ask': "🔐 **Hash-Generator**\n\nText zum Hashen eingeben:\nBeispiel: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Wetter**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBitte Land auswählen:",
@@ -327,23 +345,26 @@ LANG_DATA = {
         'btn_lang': "🌍 ენა / Language",
         'btn_channel': "📢 არხი",
         'btn_fun': "🎲 გასართობი",
-        'btn_admin': "👑 ადმინ პანელი",
-        'welcome_fun': "🎲 **გასართობი**\n\nაირჩიეთ:",
-        'btn_dice': "🎲 კამათელი",
-        'btn_coin': "🪙 მონეტა",
-        'btn_magic8': "🎱 Magic 8-Ball",
-        'btn_joke': "😂 ხუმრობა",
-        'btn_quote': "💬 ციტატა",
-        'btn_giveaway': "🎁 განაწილება",
+        'btn_admin': "📩 ადმინს მიწერე",
+        'btn_roll_dice': "🎲 კამათელი",
         'btn_back': "⬅️ უკან",
-        'btn_admin_panel': "👑 **ადმინ პანელი**\n\nაირჩიეთ ოპერაცია:",
-        'btn_broadcast': "📢 განცხადება",
         'btn_stats': "📊 სტატისტიკა",
+        'btn_ip': "🌐 IP ძიება",
         'btn_ip_sorgu': "🌐 IP ძიება",
-        'ip_sorgu_welcome': "🌐 **IP ძიება**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nIP მისამართი შეიყვანეთ:",
+        'btn_hatirlat': "⏰ შეხსენება",
+        'btn_meid': "🪪 Me ID",
+        'meid_title': "🪪 **შენი ინფორმაცია**",
         'btn_azr_special': "⭐ AZRx სპეციალური",
         'btn_panel': "🔍 PANEL",
-        'panel_ask': "🔍 **TG PANEL**\n\nმომხმარებლის სახელი შეიყვანეთ:\nმაგ: `@durov` ან `12345678`",
+        'ip_ask': "🌐 **IP ძიება**\n\nIP მისამართი შეიყვანეთ:\nმაგ: `8.8.8.8`",
+        'ip_sorgu_welcome': "🌐 **IP ძიება**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nIP მისამართი შეიყვანეთ:",
+        'ask_admin_msg': "📝 გთხოვთ დაწეროთ თქვენი შეტყობინება:",
+        'msg_sent': "✅ შეტყობინება გაიგზავნა!",
+        'fun_welcome': "🎲 **გასართობი მენიუ**\n\nდაჭირეთ ქვემოთ მოცემულ ღილაკს:",
+        'azr_welcome': "🔥 **AZRxGUARD სპეციალური მენიუ!**\n\nბოტის სტატისტიკის სანახავად ქვემოთ ღილაკს დააჭირეთ:",
+        'force_join_text': "⚠️ **გაჩერდი!** ბოტის გამოსაყენებლად ჯერ ჩვენს არხს გამოიწერეთ.\n\nგამოწერის შემდეგ კვლავ `/start` გაგზავნეთ.",
+        'btn_join_now': "📢 არხის გამოწერა",
+        'panel_welcome': "🔍 **PANEL — მომხმარებლის ძიება**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nშეიყვანეთ:\n• `@username` ან ციფრული `ID`\n\nმაგ: `@durov` ან `12345678`\n\n_ყველა ინფო ეკრანზე გამოჩნდება!_ 🔎",
         'panel_sorgulanıyor': "🔍 მიმდინარეობს ძიება...",
         'panel_bulunamadi': "❌ **მომხმარებელი ვერ მოიძებნა!**\n\nშეიყვანეთ `@` სახელი ან ID.\nმაგ: `@durov` ან `12345678`",
         'btn_guvenli_sorgu': "🕵️ USERNAME HUNTER",
@@ -358,6 +379,9 @@ LANG_DATA = {
         'btn_doviz_arac': "💱 ვალუტა",
         'btn_saat_arac': "🕐 მსოფლიო დრო",
         'btn_b64_arac': "🔒 Base64",
+        'btn_sifre_arac': "🔑 პაროლის გენერატორი",
+        'btn_not_arac': "📝 ჩემი ჩანაწერები",
+        'btn_wiki_arac': "🌐 Wikipedia",
         'hesap_ask': "🧮 **კალკულატორი**\n\nმათემატიკური გამოსახულება შეიყვანეთ:\nმაგ: `2**10` ან `sqrt(144)`",
         'hash_ask': "🔐 **Hash გენერატორი**\n\nტექსტი შეიყვანეთ:\nმაგ: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **ამინდი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nქვეყანა აირჩიეთ:",
@@ -366,7 +390,6 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **სამიზნე ვალუტა აირჩიეთ:**",
         'doviz_miktar_ask': "💰 **თანხა შეიყვანეთ:**\nმაგ: `100` ან `250.50`",
         'b64_ask': "🔒 **Base64**\n\nფორმატი: `encode ტექსტი` ან `decode bWV0aW4=`\nმაგ: `encode AZRxGUARD`",
-        'msg_sent': "✅ შეტყობინება გაიგზავნა!",
     }
 }
 
@@ -832,6 +855,58 @@ def base64_islem(metin: str) -> str:
     except Exception as e:
         return f"❌ **Hata:** `{str(e)[:100]}`"
 
+def sifre_uret(uzunluk: int = 16, buyuk: bool = True, rakam: bool = True, sembol: bool = True) -> str:
+    karakterler = string.ascii_lowercase
+    zorunlu = [random.choice(string.ascii_lowercase)]
+    if buyuk:
+        karakterler += string.ascii_uppercase
+        zorunlu.append(random.choice(string.ascii_uppercase))
+    if rakam:
+        karakterler += string.digits
+        zorunlu.append(random.choice(string.digits))
+    if sembol:
+        semboller = '!@#$%^&*()-_=+[]{}|;:,.<>?'
+        karakterler += semboller
+        zorunlu.append(random.choice(semboller))
+    kalan = [random.choice(karakterler) for _ in range(uzunluk - len(zorunlu))]
+    sifre_listesi = zorunlu + kalan
+    random.shuffle(sifre_listesi)
+    return ''.join(sifre_listesi)
+
+async def wikipedia_ara(sorgu: str, lang: str = 'tr') -> str:
+    try:
+        wiki_lang = {'tr': 'tr', 'az': 'az', 'ru': 'ru', 'en': 'en', 'de': 'de', 'ka': 'ka'}.get(lang, 'tr')
+        loop = asyncio.get_event_loop()
+        def fetch():
+            search_url = f"https://{wiki_lang}.wikipedia.org/api/rest_v1/page/summary/{sorgu.replace(' ', '_')}"
+            r = http_requests.get(search_url, timeout=10, headers={"User-Agent": "AZRxGUARD-Bot/1.0"})
+            if r.status_code == 200:
+                return r.json()
+            # Fallback to English
+            r2 = http_requests.get(f"https://en.wikipedia.org/api/rest_v1/page/summary/{sorgu.replace(' ', '_')}", timeout=10, headers={"User-Agent": "AZRxGUARD-Bot/1.0"})
+            if r2.status_code == 200:
+                return r2.json()
+            return None
+        data = await loop.run_in_executor(None, fetch)
+        if not data or data.get('type') == 'disambiguation':
+            return f"❌ `{html.escape(sorgu)}` için Wikipedia'da sonuç bulunamadı.\n\n💡 Farklı kelimeler deneyin veya İngilizce yazın."
+        baslik = data.get('title', sorgu)
+        ozet   = data.get('extract', '—')
+        wiki_url = data.get('content_urls', {}).get('desktop', {}).get('page', '')
+        if len(ozet) > 600:
+            ozet = ozet[:600] + '...'
+        return (
+            f"🌐 **WIKIPEDIA**\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📖 **{html.escape(baslik)}**\n\n"
+            f"{html.escape(ozet)}\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔗 [Tam makale için tıkla]({wiki_url})"
+        )
+    except Exception as e:
+        logger.error(f"Wikipedia hatası: {e}")
+        return "❌ Wikipedia'ya ulaşılamadı. Lütfen sonra tekrar dene."
+
 async def hava_durumu_getir(sehir: str) -> str:
     try:
         sehir_enc = sehir.strip().replace(' ', '+')
@@ -891,34 +966,39 @@ async def doviz_cevir(metin: str) -> str:
     try:
         parts = metin.strip().upper().split()
         if len(parts) < 3:
-            return "❌ **Format:** `100 USD TRY`\nÖrnek: `50 EUR USD` veya `1000 TRY EUR`"
+            return "❌ **Format:** `100 USD TRY`\nÖrnek: `50 EUR USD` veya `1000 TRY GEL`"
         try:
             miktar = float(parts[0].replace(',', '.'))
         except ValueError:
             return "❌ **Geçersiz miktar!** Örnek: `100 USD TRY`"
         kfrom, kto = parts[1], parts[2]
-        url = f"https://api.frankfurter.app/latest?amount={miktar}&from={kfrom}&to={kto}"
         loop = asyncio.get_event_loop()
         def fetch():
+            url = f"https://open.er-api.com/v6/latest/{kfrom}"
             r = http_requests.get(url, timeout=10)
-            return r.json() if r.status_code == 200 else None
+            if r.status_code == 200:
+                return r.json()
+            return None
         data = await loop.run_in_executor(None, fetch)
-        if not data or 'rates' not in data:
+        if not data or data.get('result') != 'success':
             return (
-                f"❌ `{kfrom}` → `{kto}` dönüşüm yapılamadı!\n\n"
-                f"💡 **Desteklenen:** USD, EUR, TRY, GBP, RUB, CHF, JPY, CNY, AED, CAD, AUD\n"
-                f"_AZN Manat için: USD → AZN ≈ 1.70_"
+                f"❌ `{kfrom}` para birimi bulunamadı veya servis yanıt vermedi!\n\n"
+                f"💡 Desteklenen para birimleri: USD, EUR, TRY, GBP, RUB, AZN, GEL, AED, SAR, KZT, UAH ve daha fazlası."
             )
-        sonuc = data['rates'].get(kto)
+        rates = data.get('rates', {})
+        sonuc = rates.get(kto)
         if sonuc is None:
-            return f"❌ `{kto}` para birimi desteklenmiyor!"
+            return f"❌ `{kto}` hedef para birimi bulunamadı!"
+        sonuc_miktar = miktar * sonuc
+        tarih = data.get('time_last_update_utc', '—')[:16]
         return (
             f"💱 **DÖVİZ ÇEVİRİCİ**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"📥 **Giriş:** `{miktar:,.2f} {kfrom}`\n"
-            f"📤 **Sonuç:** `{sonuc:,.4f} {kto}`\n\n"
-            f"📅 **Kur Tarihi:** `{data.get('date', '—')}`\n"
-            f"🌐 **Kaynak:** Frankfurter Open API\n\n"
+            f"📤 **Sonuç:** `{sonuc_miktar:,.4f} {kto}`\n"
+            f"📊 **Kur:** `1 {kfrom} = {sonuc:,.4f} {kto}`\n\n"
+            f"📅 **Güncelleme:** `{tarih}`\n"
+            f"🌐 **Kaynak:** Open Exchange Rates\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
             f"🤖 _AZRxGUARD Döviz Servisi_"
         )
@@ -978,73 +1058,139 @@ ULKE_HIYERARSI = {
         'sehirler': {
             'Tbilisi': {
                 'Mtatsminda': ['Mtatsminda', 'Betlemi', 'Sololaki', 'Tabori', 'Tsavkisi', 'Kojori'],
-                'Vake': ['Vake Park', 'Makhata', 'Kiketi', 'Saguramo', 'Kojori'],
-                'Saburtalo': ['Saburtalo', 'Mukhiani', 'Delisi', 'Nutsubidze', 'Vaziani'],
+                'Vake': ['Vake Park', 'Makhata', 'Kiketi', 'Saguramo', 'Shindisi'],
+                'Saburtalo': ['Saburtalo', 'Mukhiani', 'Delisi', 'Nutsubidze', 'Vaziani', 'Digomi'],
                 'Krtsanisi': ['Krtsanisi', 'Ortachala', 'Isani', 'Ponichala', 'Lilo'],
                 'Isani': ['Isani', 'Varketili', 'Samgori', 'Norio', 'Eldari'],
-                'Samgori': ['Navtlugi', 'Ortachala', 'Samgori', 'Nosiri', 'Soghanlug'],
-                'Gldani': ['Gldani', 'Temka', 'Dighomi', 'Sanzona', 'Mukhad'],
-                'Didube': ['Didube', 'Chughureti', 'Abanotubani', 'Kala'],
-                'Chughureti': ['Chughureti', 'Kukia', 'Avlabari', 'Metekhi'],
-                'Nadzaladevi': ['Nadzaladevi', 'Ghrmaghele', 'Ponichala', 'Didi Dighomi'],
+                'Samgori': ['Navtlugi', 'Ortachala', 'Samgori', 'Nosiri', 'Soghanlug', 'Akhali Samgori'],
+                'Gldani': ['Gldani', 'Temka', 'Dighomi', 'Sanzona', 'Mukhad', 'Zahesi'],
+                'Didube': ['Didube', 'Chughureti', 'Abanotubani', 'Kala', 'Old Town'],
+                'Chughureti': ['Chughureti', 'Kukia', 'Avlabari', 'Metekhi', 'Isani'],
+                'Nadzaladevi': ['Nadzaladevi', 'Ghrmaghele', 'Ponichala', 'Didi Dighomi', 'Liliani'],
             },
             'Batumi': {
                 'Batumi Merkez': ['Batumi', 'Makhinjauri', 'Tsikhisdziri', 'Chakvi', 'Kobuleti'],
-                'Khelvachauri': ['Khelvachauri', 'Gonio', 'Sarpi', 'Kvariati', 'Tkhilouris'],
-                'Keda': ['Keda', 'Dandalo', 'Zeda Keda', 'Tcherencha'],
-                'Shuakhevi': ['Shuakhevi', 'Zeda Shuakhevi', 'Beshumi'],
-                'Khulo': ['Khulo', 'Zeda Khulo', 'Beshumi', 'Shuakhevi'],
+                'Khelvachauri': ['Khelvachauri', 'Gonio', 'Sarpi', 'Kvariati', 'Tsikhisdziri'],
+                'Keda': ['Keda', 'Dandalo', 'Zeda Keda', 'Tcherencha', 'Bzhutubani'],
+                'Shuakhevi': ['Shuakhevi', 'Zeda Shuakhevi', 'Beshumi', 'Zekari'],
+                'Khulo': ['Khulo', 'Zeda Khulo', 'Beshumi', 'Shuakhevi', 'Chitakhevi'],
                 'Kobuleti': ['Kobuleti', 'Ureki', 'Grigoleti', 'Shekvetili', 'Naghvarevi'],
             },
             'Kutaisi': {
-                'Kutaisi Merkez': ['Kutaisi', 'Rioni', 'Tskaltubo', 'Gori-Tskali'],
-                'Baghdati': ['Baghdati', 'Vani', 'Dimisi', 'Katskhuri'],
-                'Zestaponi': ['Zestaponi', 'Shorapani', 'Kvishkheti', 'Terjola'],
-                'Sachkhere': ['Sachkhere', 'Chiatura', 'Sakara'],
-                'Tkibuli': ['Tkibuli', 'Rikoti', 'Shaori'],
-                'Kharagauli': ['Kharagauli', 'Sviri', 'Zekari'],
+                'Kutaisi Merkez': ['Kutaisi', 'Rioni', 'Tskaltubo', 'Gori-Tskali', 'Sveti'],
+                'Baghdati': ['Baghdati', 'Vani', 'Dimisi', 'Katskhuri', 'Kveda Shuakhevi'],
+                'Zestaponi': ['Zestaponi', 'Shorapani', 'Kvishkheti', 'Terjola', 'Khoni'],
+                'Sachkhere': ['Sachkhere', 'Chiatura', 'Sakara', 'Sori'],
+                'Tkibuli': ['Tkibuli', 'Rikoti', 'Shaori', 'Tvishi'],
+                'Kharagauli': ['Kharagauli', 'Sviri', 'Zekari', 'Khargheti'],
+                'Samtredia': ['Samtredia', 'Abasha', 'Shuakhevi', 'Khoni'],
             },
             'Rustavi': {
-                'Rustavi Merkez': ['Rustavi', 'Kvemo Rustavi', 'Msakhuri'],
-                'Gardabani': ['Gardabani', 'Ponichala', 'Soganluq', 'Agstafa'],
-                'Marneuli': ['Marneuli', 'Sadakhlo', 'Kizilajlo', 'Kjulalar', 'Sabirkend', 'Kosalar', 'Agdzebedi', 'Baydar', 'Muganlo', 'Tamarisi', 'Shulaveri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Bolnisi Khevi'],
-                'Bolnisi': ['Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Tsalka'],
-                'Tetritskaro': ['Tetritskaro', 'Algeti', 'Kldeisi', 'Manglisi'],
-                'Tsalka': ['Tsalka', 'Bediani', 'Dariali', 'Trialeti'],
+                'Rustavi Merkez': ['Rustavi', 'Kvemo Rustavi', 'Msakhuri', 'Krtsanisi'],
+                'Gardabani': ['Gardabani', 'Ponichala', 'Soganluq', 'Agstafa', 'Vaziani'],
+                'Marneuli': ['Marneuli', 'Sadaxlı', 'Qızılajlo', 'Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Ulaşhlo', 'Kasmulo'],
+                'Bolnisi': ['Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Başkənd', 'Sarvan'],
+                'Tetritskaro': ['Tetritskaro', 'Algeti', 'Kldeisi', 'Manglisi', 'Tsalka yolu'],
+                'Tsalka': ['Tsalka', 'Bediani', 'Dariali', 'Trialeti', 'Patara Tsalka'],
+            },
+            'Marneuli': {
+                'Marneuli Şəhər': ['Marneuli', 'Böyük Marneuli', 'Kiçik Marneuli', 'Marneulis Sənaye'],
+                'Sadaxlı': ['Sadaxlı', 'Ağbulaq', 'Qaçağan', 'Corablar', 'Hacıkənd'],
+                'Ulaşhlo-Kasmulo': ['Ulaşhlo', 'Kasmulo', 'Qızılajlo', 'Kepenekçi', 'Avranlo'],
+                'Muğanlı-Sabirkənd': ['Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Bəhrəmtəpə'],
+                'Baydar-Tamarisi': ['Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Algeti'],
+                'Karakilis-Bolnisi': ['Karakilis', 'Bolnisi Khevi', 'Orjonikidze', 'Sarvan'],
+            },
+            'Gardabani': {
+                'Gardabani Merkez': ['Gardabani', 'Rustavi', 'Ponichala', 'Soğanlıq'],
+                'Vaziani': ['Vaziani', 'Norio', 'Eldari', 'Samgori', 'Akhali Samgori'],
+                'Krasnogorsk': ['Krasnogorsk', 'Tetri Tskaro', 'Nazarlevani', 'Patardzeuli'],
             },
             'Gori': {
-                'Gori Merkez': ['Gori', 'Akhaldaba', 'Kvakhvreli', 'Variani'],
-                'Kareli': ['Kareli', 'Ruisi', 'Ateni', 'Surami'],
-                'Kaspi': ['Kaspi', 'Agara', 'Tsinari', 'Skulani'],
+                'Gori Merkez': ['Gori', 'Akhaldaba', 'Kvakhvreli', 'Variani', 'Skra'],
+                'Kareli': ['Kareli', 'Ruisi', 'Ateni', 'Surami', 'Agara'],
+                'Kaspi': ['Kaspi', 'Agara', 'Tsinari', 'Skulani', 'Khashuri'],
                 'Borjomi': ['Borjomi', 'Bakuriani', 'Likani', 'Tsagveri', 'Abastumani'],
-                'Khashuri': ['Khashuri', 'Surami', 'Kvishkheti', 'Agara'],
+                'Khashuri': ['Khashuri', 'Surami', 'Kvishkheti', 'Agara', 'Tsikhisjvari'],
+            },
+            'Borjomi': {
+                'Borjomi Merkez': ['Borjomi', 'Likani', 'Tsagveri', 'Abastumani', 'Vale'],
+                'Bakuriani': ['Bakuriani', 'Kokhta', 'Tba', 'Didveli', 'Mitarbi'],
+                'Akhaltsikhe': ['Akhaltsikhe', 'Aspindza', 'Adigeni', 'Zarzma', 'Vale'],
             },
             'Zugdidi': {
                 'Zugdidi Merkez': ['Zugdidi', 'Jvari', 'Anaklia', 'Ganmukhuri', 'Ingiri'],
-                'Senaki': ['Senaki', 'Abasha', 'Kortskheli', 'Shuakhevi'],
-                'Mestia': ['Mestia', 'Ushguli', 'Becho', 'Latali', 'Lentekhi', 'Mulakhi'],
-                'Martvili': ['Martvili', 'Khobi', 'Khoni', 'Salkhino'],
-                'Tsalenjikha': ['Tsalenjikha', 'Orsantia', 'Chkhorotsku'],
+                'Senaki': ['Senaki', 'Abasha', 'Kortskheli', 'Orsantia'],
+                'Mestia-Svaneti': ['Mestia', 'Ushguli', 'Becho', 'Latali', 'Lentekhi', 'Mulakhi'],
+                'Martvili': ['Martvili', 'Khobi', 'Khoni', 'Salkhino', 'Tsalenjikha'],
             },
             'Telavi': {
                 'Telavi Merkez': ['Telavi', 'Ikalto', 'Kondoli', 'Akura', 'Napareuli'],
                 'Gurjaani': ['Gurjaani', 'Velistsikhe', 'Ujarma', 'Chabukiauri', 'Bakurtsikhe'],
-                'Sighnaghi': ['Sighnaghi', 'Bodbe', 'Tsnori', 'Anaga', 'Kvareli'],
-                'Lagodekhi': ['Lagodekhi', 'Ninotsminda', 'Khornabuji', 'Shroma'],
-                'Kvareli': ['Kvareli', 'Alvani', 'Eniseli', 'Qvareli', 'Shilda'],
-                'Akhmeta': ['Akhmeta', 'Omalo', 'Batsara', 'Shuakhevi', 'Tusheti'],
+                'Sighnaghi': ['Sighnaghi', 'Bodbe', 'Tsnori', 'Anaga', 'Vakiri'],
+                'Lagodekhi': ['Lagodekhi', 'Ninotsminda', 'Khornabuji', 'Shroma', 'Matani'],
+                'Kvareli': ['Kvareli', 'Alvani', 'Eniseli', 'Shilda', 'Kabali'],
+                'Akhmeta': ['Akhmeta', 'Omalo', 'Batsara', 'Tusheti', 'Shuakhevi'],
                 'Dedoplistskaro': ['Dedoplistskaro', 'Udabno', 'Shilda', 'Samreklo', 'Vashlovani'],
             },
             'Poti': {
-                'Poti Merkez': ['Poti', 'Maltakva', 'Shekvetili', 'Ureki'],
+                'Poti Merkez': ['Poti', 'Maltakva', 'Shekvetili', 'Ureki', 'Grigoleti'],
+            },
+            'Mtskheta': {
+                'Mtskheta Merkez': ['Mtskheta', 'Svetitskhoveli', 'Jvari', 'Shio-Mgvime'],
+                'Dusheti': ['Dusheti', 'Ananuri', 'Zhinvali', 'Pasanauri', 'Gudauri'],
+                'Stepantsminda': ['Stepantsminda', 'Kazbegi', 'Gergeti', 'Truso', 'Dariali'],
+                'Tianeti': ['Tianeti', 'Sioni', 'Khevsureti', 'Barisakho', 'Shuakhevi'],
             },
             'Akhaltsikhe': {
-                'Akhaltsikhe': ['Akhaltsikhe', 'Aspindza', 'Adigeni', 'Zarzma'],
-                'Akhalkalaki': ['Akhalkalaki', 'Ninotsminda', 'Bavra', 'Kartsakhi'],
-                'Adygeni': ['Adygeni', 'Zarzma', 'Chule', 'Vale'],
+                'Akhaltsikhe': ['Akhaltsikhe', 'Aspindza', 'Adigeni', 'Zarzma', 'Vale'],
+                'Akhalkalaki': ['Akhalkalaki', 'Ninotsminda', 'Bavra', 'Kartsakhi', 'Gandzani'],
+                'Adygeni': ['Adygeni', 'Zarzma', 'Chule', 'Vale', 'Nakalakevi'],
+            },
+            'Ozurgeti': {
+                'Ozurgeti Merkez': ['Ozurgeti', 'Chokhatauri', 'Lanchkhuti', 'Nasakirali'],
+                'Lanchkhuti': ['Lanchkhuti', 'Shekvetili', 'Ureki', 'Naghvarevi'],
+            },
+            'Ambrolauri': {
+                'Ambrolauri Merkez': ['Ambrolauri', 'Oni', 'Tvishi', 'Utsera', 'Shovi'],
+                'Racha-Lechkhumi': ['Racha', 'Lentekhi', 'Khvamli', 'Alpana'],
             },
         },
-        'koyler': ['Mtskheta', 'Ananuri', 'Stepantsminda', 'Kazbegi', 'Gudauri', 'Pasanauri', 'Dusheti', 'Tianeti', 'Sioni', 'Truso', 'Dariali', 'Khevsureti', 'Racha', 'Ambrolauri', 'Oni', 'Nikozi', 'Samtredia', 'Ozurgeti', 'Lanchkhuti', 'Chokhatauri', 'Abasha', 'Khoni', 'Terjola', 'Baghdati', 'Vani', 'Zestaponi'],
+        'koyler': {
+            'Marneuli Rayonu 🇦🇿': [
+                'Marneuli', 'Sadaxlı', 'Ulaşhlo', 'Kasmulo', 'Ağbulaq',
+                'Qızılajlo', 'Qaçağan', 'Muğanlı', 'Sabirkənd', 'Kosalar',
+                'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta',
+                'Karakilis', 'Algeti', 'Bolnisi Khevi', 'Avranlo', 'Kepenekçi',
+                'Corablar', 'Hacıkənd', 'Bəhrəmtəpə', 'Sarvan', 'Orjonikidze',
+            ],
+            'Gardabani Rayonu 🇦🇿': [
+                'Gardabani', 'Rustavi', 'Soğanlıq', 'Ponichala', 'Krasnogorsk',
+                'Akhali Samgori', 'Norio', 'Eldari', 'Tetri Tskaro', 'Nazarlevani',
+                'Vaziani', 'Patardzeuli', 'Kvemo Ponichala', 'Samgori',
+            ],
+            'Bolnisi Rayonu 🇦🇿': [
+                'Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Başkənd',
+                'Sarvan', 'Moliti', 'Qızılhacılı', 'Kvemo Bolnisi', 'Karatakla',
+                'Sioni', 'Klde', 'Tambovka',
+            ],
+            'Tetritskaro Rayonu': [
+                'Tetritskaro', 'Algeti', 'Kldeisi', 'Manglisi', 'Trialeti',
+                'Tsalka yolu', 'Bershveti', 'Khashuri',
+            ],
+            'Tsalka Rayonu': [
+                'Tsalka', 'Bediani', 'Dariali', 'Trialeti', 'Patara Tsalka',
+                'Gantiadi', 'Ktsia', 'Kumisi',
+            ],
+            'Akhalkalaki Rayonu 🇦🇿': [
+                'Akhalkalaki', 'Ninotsminda', 'Bavra', 'Kartsakhi',
+                'Gandzani', 'Arjevaniskhevi', 'Sameba',
+            ],
+            'Borjomi Rayonu': [
+                'Borjomi', 'Bakuriani', 'Likani', 'Tsagveri', 'Abastumani',
+                'Kodistskali', 'Patara Borjomi', 'Tabatskuri',
+            ],
+        },
     },
     'tr': {
         'flag': '🇹🇷', 'name': 'Türkiye',
@@ -1441,33 +1587,60 @@ def kategori_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(satirlar)
 
 def sehirler_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
-    """Ülkedeki şehirleri listeler — 2 sütun."""
+    """Ülkedeki şehirleri listeler — 2 sütun + ARAMA."""
     ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
     sehirler = list(ulke.get('sehirler', {}).keys())
     satirlar = []
     for i in range(0, len(sehirler), 2):
         satir = []
         for s in sehirler[i:i+2]:
-            satir.append(InlineKeyboardButton(s, callback_data=f"hava_ci_{ulke_kodu}:{s}"))
+            cb = f"hava_ci_{ulke_kodu}:{s}"
+            satir.append(InlineKeyboardButton(s, callback_data=cb[:64]))
         satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("🔍 ARAMA", callback_data=f"hava_sx_{ulke_kodu}")])
     satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_u_{ulke_kodu}")])
     return InlineKeyboardMarkup(satirlar)
 
 def koyler_klavyesi(ulke_kodu: str) -> InlineKeyboardMarkup:
-    """Ülkedeki köy/kənd listesi — 2 sütun. Tıklayınca direkt hava durumu."""
+    """KÖY/KƏND listesi. Dict ise rayonlar gösterir; list ise direkt hava."""
     ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
     koyler = ulke.get('koyler', [])
     satirlar = []
-    for i in range(0, len(koyler), 2):
-        satir = []
-        for k in koyler[i:i+2]:
-            satir.append(InlineKeyboardButton(k, callback_data=f"hava_wx_{k[:45]}"))
-        satirlar.append(satir)
+    if isinstance(koyler, dict):
+        rayonlar = list(koyler.keys())
+        for i in range(0, len(rayonlar), 2):
+            satir = []
+            for r in rayonlar[i:i+2]:
+                cb = f"hava_kr_{ulke_kodu}:{r}"
+                satir.append(InlineKeyboardButton(r, callback_data=cb[:64]))
+            satirlar.append(satir)
+    else:
+        for i in range(0, len(koyler), 2):
+            satir = []
+            for k in koyler[i:i+2]:
+                satir.append(InlineKeyboardButton(k, callback_data=f"hava_wx_{k[:45]}"))
+            satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("🔍 ARAMA", callback_data=f"hava_sx_{ulke_kodu}")])
     satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_u_{ulke_kodu}")])
     return InlineKeyboardMarkup(satirlar)
 
+def koy_rayon_klavyesi(ulke_kodu: str, rayon: str) -> InlineKeyboardMarkup:
+    """KÖY/KƏND yolunda: bir rayonun köylerini listeler — 2 sütun."""
+    ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+    koyler_dict = ulke.get('koyler', {})
+    koy_listesi = koyler_dict.get(rayon, []) if isinstance(koyler_dict, dict) else []
+    satirlar = []
+    for i in range(0, len(koy_listesi), 2):
+        satir = []
+        for k in koy_listesi[i:i+2]:
+            satir.append(InlineKeyboardButton(k, callback_data=f"hava_wx_{k[:45]}"))
+        satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("🔍 ARAMA", callback_data=f"hava_sx_{ulke_kodu}")])
+    satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_kv_{ulke_kodu}")])
+    return InlineKeyboardMarkup(satirlar)
+
 def rayon_klavyesi(ulke_kodu: str, sehir: str) -> InlineKeyboardMarkup:
-    """Bir şehrin rayon/ilçelerini listeler — 2 sütun."""
+    """Bir şehrin rayon/ilçelerini listeler — 2 sütun + ARAMA."""
     ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
     sehir_data = ulke.get('sehirler', {}).get(sehir, {})
     rayonlar = list(sehir_data.keys())
@@ -1478,11 +1651,12 @@ def rayon_klavyesi(ulke_kodu: str, sehir: str) -> InlineKeyboardMarkup:
             cb = f"hava_ri_{ulke_kodu}:{sehir}:{r}"
             satir.append(InlineKeyboardButton(r, callback_data=cb[:64]))
         satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("🔍 ARAMA", callback_data=f"hava_sx_{ulke_kodu}")])
     satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=f"hava_cs_{ulke_kodu}")])
     return InlineKeyboardMarkup(satirlar)
 
 def koy_listesi_klavyesi(ulke_kodu: str, sehir: str, rayon: str) -> InlineKeyboardMarkup:
-    """Bir rayonun köy/kəndlerini listeler — 2 sütun."""
+    """Bir rayonun köy/kəndlerini listeler — 2 sütun + ARAMA."""
     ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
     sehir_data = ulke.get('sehirler', {}).get(sehir, {})
     koyler = sehir_data.get(rayon, [])
@@ -1492,6 +1666,7 @@ def koy_listesi_klavyesi(ulke_kodu: str, sehir: str, rayon: str) -> InlineKeyboa
         for k in koyler[i:i+2]:
             satir.append(InlineKeyboardButton(k, callback_data=f"hava_wx_{k[:45]}"))
         satirlar.append(satir)
+    satirlar.append([InlineKeyboardButton("🔍 ARAMA", callback_data=f"hava_sx_{ulke_kodu}")])
     geri_cb = f"hava_ci_{ulke_kodu}:{sehir}"
     satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data=geri_cb[:64])])
     return InlineKeyboardMarkup(satirlar)
@@ -2350,6 +2525,9 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(strings.get('btn_doviz_arac', '💱 Döviz Kuru'), callback_data='pro_doviz')],
             [InlineKeyboardButton(strings.get('btn_saat_arac', '🕐 Dünya Saati'), callback_data='pro_saat'),
              InlineKeyboardButton(strings.get('btn_b64_arac', '🔒 Base64'), callback_data='pro_b64')],
+            [InlineKeyboardButton(strings.get('btn_sifre_arac', '🔑 Şifre Üretici'), callback_data='pro_sifre'),
+             InlineKeyboardButton(strings.get('btn_wiki_arac', '🌐 Wikipedia'), callback_data='pro_wiki')],
+            [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -2393,9 +2571,23 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ulke_kodu = query.data[8:]
         ulke = ULKE_HIYERARSI.get(ulke_kodu)
         if ulke:
+            koyler = ulke.get('koyler', [])
+            baslik = "Rayon seçin:" if isinstance(koyler, dict) else "🏘 Köy/Kənd seçin:"
             await query.edit_message_text(
-                f"{ulke['flag']} **{ulke['name']}** — 🏘 Köy/Kənd seçin:",
+                f"{ulke['flag']} **{ulke['name']}** — {baslik}",
                 reply_markup=koyler_klavyesi(ulke_kodu),
+                parse_mode='Markdown'
+            )
+    elif query.data.startswith('hava_kr_'):
+        rest = query.data[8:]
+        parts = rest.split(':', 1)
+        if len(parts) == 2:
+            ulke_kodu, rayon = parts
+            ulke = ULKE_HIYERARSI.get(ulke_kodu, {})
+            rayon_display = rayon.replace(' 🇦🇿', '')
+            await query.edit_message_text(
+                f"🏘 **{rayon_display}** — Köy/Kənd seçin:",
+                reply_markup=koy_rayon_klavyesi(ulke_kodu, rayon),
                 parse_mode='Markdown'
             )
     elif query.data.startswith('hava_ci_'):
@@ -2485,6 +2677,112 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         context.user_data['durum'] = 'b64_bekliyor'
         await query.edit_message_text(strings.get('b64_ask', '🔒 encode metin / decode bWV0aW4='), reply_markup=geri, parse_mode='Markdown')
+    elif query.data == 'pro_sifre':
+        sifre_klavye = [
+            [InlineKeyboardButton("8 karakter", callback_data='sifre_8'),
+             InlineKeyboardButton("12 karakter", callback_data='sifre_12'),
+             InlineKeyboardButton("16 karakter", callback_data='sifre_16')],
+            [InlineKeyboardButton("20 karakter", callback_data='sifre_20'),
+             InlineKeyboardButton("24 karakter", callback_data='sifre_24'),
+             InlineKeyboardButton("32 karakter", callback_data='sifre_32')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ]
+        await query.edit_message_text(
+            "🔑 **ŞİFRE ÜRETİCİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nKaç karakterli şifre üreteyim?\n_Büyük harf + rakam + sembol içerir._",
+            reply_markup=InlineKeyboardMarkup(sifre_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('sifre_'):
+        uzunluk = int(query.data.split('_')[1])
+        sifre1 = sifre_uret(uzunluk)
+        sifre2 = sifre_uret(uzunluk)
+        sifre3 = sifre_uret(uzunluk)
+        yenile_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Yenile", callback_data=query.data),
+             InlineKeyboardButton("📏 Başka Uzunluk", callback_data='pro_sifre')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ])
+        await query.edit_message_text(
+            f"🔑 **{uzunluk} Karakterli Şifreler**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"1️⃣ `{sifre1}`\n"
+            f"2️⃣ `{sifre2}`\n"
+            f"3️⃣ `{sifre3}`\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"💡 _Kopyalamak için şifreye dokun._",
+            reply_markup=yenile_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro_wiki':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
+        context.user_data['durum'] = 'wiki_bekliyor'
+        await query.edit_message_text(
+            "🌐 **WİKİPEDİA ARAMA**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Aramak istediğiniz konuyu yazın:\nÖrnek: `Marneuli`, `Tbilisi`, `Azerbaycan`\n\n"
+            "_Seçtiğiniz dilde aranır, yoksa İngilizce._",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro_not':
+        notlar = context.user_data.get('notlar', [])
+        if not notlar:
+            not_klavye = [
+                [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ]
+            await query.edit_message_text(
+                "📝 **NOT DEFTERİM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n📭 Henüz hiç notun yok.\n\nİlk notunu eklemek için aşağıdaki butona bas!",
+                reply_markup=InlineKeyboardMarkup(not_klavye),
+                parse_mode='Markdown'
+            )
+        else:
+            not_metni = f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            for i, not_ in enumerate(notlar[-10:], 1):
+                not_metni += f"{i}. {html.escape(not_[:80])}\n"
+            not_klavye = [
+                [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle'),
+                 InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ]
+            await query.edit_message_text(not_metni, reply_markup=InlineKeyboardMarkup(not_klavye), parse_mode='Markdown')
+    elif query.data == 'not_ekle':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='pro_not')]])
+        context.user_data['durum'] = 'not_ekle_bekliyor'
+        await query.edit_message_text(
+            "📝 **Not Ekle**\n\nYeni notunu yaz:",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'not_sil_menu':
+        notlar = context.user_data.get('notlar', [])
+        if not notlar:
+            await query.answer("Silinecek not yok!", show_alert=True)
+            return
+        satirlar = []
+        for i, not_ in enumerate(notlar):
+            satirlar.append([InlineKeyboardButton(f"🗑️ {i+1}. {not_[:30]}...", callback_data=f"not_sil_{i}")])
+        satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='pro_not')])
+        await query.edit_message_text(
+            "🗑️ **Silmek istediğin notu seç:**",
+            reply_markup=InlineKeyboardMarkup(satirlar),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('not_sil_') and query.data != 'not_sil_menu':
+        idx = int(query.data[8:])
+        notlar = context.user_data.get('notlar', [])
+        if 0 <= idx < len(notlar):
+            silinen = notlar.pop(idx)
+            context.user_data['notlar'] = notlar
+            await query.answer(f"✅ Not silindi!", show_alert=False)
+        await query.edit_message_text(
+            f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+            ('\n'.join(f"{i+1}. {html.escape(n[:80])}" for i, n in enumerate(notlar[-10:])) or '📭 Not defteri boş.'),
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle'),
+                 InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ]),
+            parse_mode='Markdown'
+        )
     elif query.data == 'go_home':
         await query.edit_message_text(strings['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
@@ -2687,6 +2985,39 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ])
         await update.message.reply_text(sonuc, parse_mode='Markdown', reply_markup=geri)
+        return
+
+    if context.user_data.get('durum') == 'wiki_bekliyor':
+        context.user_data['durum'] = None
+        sorgu = update.message.text.strip()
+        bekle = await update.message.reply_text(f"🌐 `{html.escape(sorgu)}` Wikipedia'da aranıyor...", parse_mode='Markdown')
+        sonuc = await wikipedia_ara(sorgu, lang)
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔍 Başka Arama", callback_data='pro_wiki')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ])
+        try:
+            await bekle.edit_text(sonuc, parse_mode='Markdown', reply_markup=geri, disable_web_page_preview=True)
+        except Exception:
+            await bekle.edit_text(sonuc, reply_markup=geri, disable_web_page_preview=True)
+        return
+
+    if context.user_data.get('durum') == 'not_ekle_bekliyor':
+        context.user_data['durum'] = None
+        yeni_not = update.message.text.strip()
+        if not context.user_data.get('notlar'):
+            context.user_data['notlar'] = []
+        context.user_data['notlar'].append(yeni_not)
+        notlar = context.user_data['notlar']
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📝 Not Defterime Git", callback_data='pro_not')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ])
+        await update.message.reply_text(
+            f"✅ **Not kaydedildi!**\n\n_{html.escape(yeni_not[:100])}_\n\n📝 Toplam {len(notlar)} not.",
+            parse_mode='Markdown',
+            reply_markup=geri
+        )
         return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
