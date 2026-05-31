@@ -128,6 +128,27 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **Hedef döviz seçin:**",
         'doviz_miktar_ask': "💰 **Miktarı girin:**\nÖrnek: `100` veya `250.50`",
         'b64_ask': "🔒 **Base64 Aracı**\n\nFormat: `encode metin` veya `decode bWV0aW4=`\nÖrnek: `encode AZRxGUARD`",
+        'out_hava_title': 'HAVA DURUMU', 'out_hava_konum': 'Konum', 'out_hava_sicaklik': 'Sıcaklık',
+        'out_hava_hissedilen': 'Hissedilen', 'out_hava_nem': 'Nem', 'out_hava_ruzgar': 'Rüzgar',
+        'out_hava_basinc': 'Basınç', 'out_hava_durum': 'Durum', 'out_hava_uv': 'UV Endeksi',
+        'out_hava_gorus': 'Görüş', 'out_hava_servis': 'AZRxGUARD Hava Servisi',
+        'out_doviz_title': 'DÖVİZ ÇEVİRİCİ', 'out_doviz_giris': 'Giriş', 'out_doviz_sonuc': 'Sonuç',
+        'out_doviz_kur': 'Kur', 'out_doviz_guncelleme': 'Güncelleme', 'out_doviz_kaynak': 'Kaynak',
+        'out_doviz_servis': 'AZRxGUARD Döviz Servisi',
+        'out_saat_title': 'DÜNYA SAATİ', 'out_saat_servis': 'AZRxGUARD Zaman Servisi',
+        'out_hash_title': 'HASH ÜRETİCİ', 'out_hash_metin': 'Metin', 'out_hash_uzunluk': 'Uzunluk', 'out_hash_karakter': 'karakter',
+        'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'Giriş', 'out_b64_sonuc': 'Sonuç',
+        'out_ip_title': 'IP Detaylı Güvenlik Analizi', 'out_ip_sorgu': 'Sorgu',
+        'out_ip_konum_bilgi': 'Konum Bilgisi', 'out_ip_ulke': 'Ülke', 'out_ip_bolge': 'Bölge',
+        'out_ip_saat': 'Saat Dilimi', 'out_ip_ag_bilgi': 'Ağ Bilgisi', 'out_ip_inet': 'İnternet IP',
+        'out_ip_isp': 'İnternet İsmi (ISP)', 'out_ip_org': 'Organizasyon', 'out_ip_asn': 'Altyapı (ASN)',
+        'out_ip_mobil': 'Mobil Hat', 'out_ip_ptr': 'Ters DNS (PTR)',
+        'out_ip_gizlilik': 'Gizlilik & Tehdit Durumu', 'out_ip_tehdit': 'Tehdit Skoru',
+        'out_ip_portlar': 'Açık Portlar', 'out_ip_servis': 'AZRxGUARD Güvenlik Analizi',
+        'out_ip_evet': '✅ Evet', 'out_ip_hayir': '❌ Hayır', 'out_ip_mobil_evet': '📱 Evet',
+        'out_ip_risk_yuksek': 'Yüksek Risk', 'out_ip_risk_orta': 'Orta Risk', 'out_ip_risk_dusuk': 'Düşük Risk',
+        'out_ip_dc': "VERİ MERKEZİ IP'si!", 'out_ip_port_yok': 'Açık port bulunamadı',
+        'out_hesap_title': 'HESAP MAKİNESİ', 'out_hesap_ifade': 'İfade', 'out_hesap_sonuc': 'Sonuç',
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -184,6 +205,27 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **Hədəf valyuta seçin:**",
         'doviz_miktar_ask': "💰 **Məbləği daxil edin:**\nNümunə: `100` və ya `250.50`",
         'b64_ask': "🔒 **Base64 Aləti**\n\nFormat: `encode mətn` və ya `decode bWV0aW4=`\nNümunə: `encode AZRxGUARD`",
+        'out_hava_title': 'HAVA PROQNOZU', 'out_hava_konum': 'Məkan', 'out_hava_sicaklik': 'Temperatur',
+        'out_hava_hissedilen': 'Hiss edilən', 'out_hava_nem': 'Rütubət', 'out_hava_ruzgar': 'Külək',
+        'out_hava_basinc': 'Təzyiq', 'out_hava_durum': 'Vəziyyət', 'out_hava_uv': 'UV İndeksi',
+        'out_hava_gorus': 'Görünüş', 'out_hava_servis': 'AZRxGUARD Hava Xidməti',
+        'out_doviz_title': 'VALYUTA ÇEVİRİCİSİ', 'out_doviz_giris': 'Giriş', 'out_doviz_sonuc': 'Nəticə',
+        'out_doviz_kur': 'Kurs', 'out_doviz_guncelleme': 'Yenilənmə', 'out_doviz_kaynak': 'Mənbə',
+        'out_doviz_servis': 'AZRxGUARD Valyuta Xidməti',
+        'out_saat_title': 'DÜNYA SAATİ', 'out_saat_servis': 'AZRxGUARD Zaman Xidməti',
+        'out_hash_title': 'HASH YARADICI', 'out_hash_metin': 'Mətn', 'out_hash_uzunluk': 'Uzunluq', 'out_hash_karakter': 'simvol',
+        'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'Giriş', 'out_b64_sonuc': 'Nəticə',
+        'out_ip_title': 'IP Ətraflı Təhlükəsizlik Analizi', 'out_ip_sorgu': 'Sorğu',
+        'out_ip_konum_bilgi': 'Məkan Məlumatı', 'out_ip_ulke': 'Ölkə', 'out_ip_bolge': 'Bölgə',
+        'out_ip_saat': 'Saat Qurşağı', 'out_ip_ag_bilgi': 'Şəbəkə Məlumatı', 'out_ip_inet': 'İnternet IP',
+        'out_ip_isp': 'İnternet Provayderi (ISP)', 'out_ip_org': 'Təşkilat', 'out_ip_asn': 'İnfrastruktur (ASN)',
+        'out_ip_mobil': 'Mobil Xətt', 'out_ip_ptr': 'Əks DNS (PTR)',
+        'out_ip_gizlilik': 'Məxfilik & Təhlükə Vəziyyəti', 'out_ip_tehdit': 'Təhlükə Skoru',
+        'out_ip_portlar': 'Açıq Portlar', 'out_ip_servis': 'AZRxGUARD Təhlükəsizlik Analizi',
+        'out_ip_evet': '✅ Bəli', 'out_ip_hayir': '❌ Xeyr', 'out_ip_mobil_evet': '📱 Bəli',
+        'out_ip_risk_yuksek': 'Yüksək Risk', 'out_ip_risk_orta': 'Orta Risk', 'out_ip_risk_dusuk': 'Aşağı Risk',
+        'out_ip_dc': 'VERİ MƏRKƏZİ IP-si!', 'out_ip_port_yok': 'Açıq port tapılmadı',
+        'out_hesap_title': 'KALKULYATOR', 'out_hesap_ifade': 'İfadə', 'out_hesap_sonuc': 'Nəticə',
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -240,6 +282,27 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **Выберите целевую валюту:**",
         'doviz_miktar_ask': "💰 **Введите сумму:**\nПример: `100` или `250.50`",
         'b64_ask': "🔒 **Инструмент Base64**\n\nФормат: `encode текст` или `decode bWV0aW4=`\nПример: `encode AZRxGUARD`",
+        'out_hava_title': 'ПОГОДА', 'out_hava_konum': 'Местоположение', 'out_hava_sicaklik': 'Температура',
+        'out_hava_hissedilen': 'Ощущается', 'out_hava_nem': 'Влажность', 'out_hava_ruzgar': 'Ветер',
+        'out_hava_basinc': 'Давление', 'out_hava_durum': 'Состояние', 'out_hava_uv': 'UV Индекс',
+        'out_hava_gorus': 'Видимость', 'out_hava_servis': 'AZRxGUARD Служба Погоды',
+        'out_doviz_title': 'КОНВЕРТЕР ВАЛЮТ', 'out_doviz_giris': 'Введено', 'out_doviz_sonuc': 'Результат',
+        'out_doviz_kur': 'Курс', 'out_doviz_guncelleme': 'Обновлено', 'out_doviz_kaynak': 'Источник',
+        'out_doviz_servis': 'AZRxGUARD Служба Валют',
+        'out_saat_title': 'МИРОВОЕ ВРЕМЯ', 'out_saat_servis': 'AZRxGUARD Служба Времени',
+        'out_hash_title': 'ГЕНЕРАТОР HASH', 'out_hash_metin': 'Текст', 'out_hash_uzunluk': 'Длина', 'out_hash_karakter': 'симв.',
+        'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'Ввод', 'out_b64_sonuc': 'Результат',
+        'out_ip_title': 'IP Детальный Анализ Безопасности', 'out_ip_sorgu': 'Запрос',
+        'out_ip_konum_bilgi': 'Данные о местоположении', 'out_ip_ulke': 'Страна', 'out_ip_bolge': 'Регион',
+        'out_ip_saat': 'Часовой пояс', 'out_ip_ag_bilgi': 'Данные о сети', 'out_ip_inet': 'IP адрес',
+        'out_ip_isp': 'Провайдер (ISP)', 'out_ip_org': 'Организация', 'out_ip_asn': 'Инфраструктура (ASN)',
+        'out_ip_mobil': 'Мобильная сеть', 'out_ip_ptr': 'Обратный DNS (PTR)',
+        'out_ip_gizlilik': 'Конфиденциальность & Угрозы', 'out_ip_tehdit': 'Оценка угрозы',
+        'out_ip_portlar': 'Открытые порты', 'out_ip_servis': 'AZRxGUARD Анализ Безопасности',
+        'out_ip_evet': '✅ Да', 'out_ip_hayir': '❌ Нет', 'out_ip_mobil_evet': '📱 Да',
+        'out_ip_risk_yuksek': 'Высокий риск', 'out_ip_risk_orta': 'Средний риск', 'out_ip_risk_dusuk': 'Низкий риск',
+        'out_ip_dc': 'IP ЦОД!', 'out_ip_port_yok': 'Открытых портов нет',
+        'out_hesap_title': 'КАЛЬКУЛЯТОР', 'out_hesap_ifade': 'Выражение', 'out_hesap_sonuc': 'Результат',
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -296,6 +359,27 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **Select target currency:**",
         'doviz_miktar_ask': "💰 **Enter amount:**\nExample: `100` or `250.50`",
         'b64_ask': "🔒 **Base64 Tool**\n\nFormat: `encode text` or `decode bWV0aW4=`\nExample: `encode AZRxGUARD`",
+        'out_hava_title': 'WEATHER', 'out_hava_konum': 'Location', 'out_hava_sicaklik': 'Temperature',
+        'out_hava_hissedilen': 'Feels Like', 'out_hava_nem': 'Humidity', 'out_hava_ruzgar': 'Wind',
+        'out_hava_basinc': 'Pressure', 'out_hava_durum': 'Condition', 'out_hava_uv': 'UV Index',
+        'out_hava_gorus': 'Visibility', 'out_hava_servis': 'AZRxGUARD Weather Service',
+        'out_doviz_title': 'CURRENCY CONVERTER', 'out_doviz_giris': 'Input', 'out_doviz_sonuc': 'Result',
+        'out_doviz_kur': 'Rate', 'out_doviz_guncelleme': 'Updated', 'out_doviz_kaynak': 'Source',
+        'out_doviz_servis': 'AZRxGUARD Currency Service',
+        'out_saat_title': 'WORLD CLOCK', 'out_saat_servis': 'AZRxGUARD Time Service',
+        'out_hash_title': 'HASH GENERATOR', 'out_hash_metin': 'Text', 'out_hash_uzunluk': 'Length', 'out_hash_karakter': 'chars',
+        'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'Input', 'out_b64_sonuc': 'Result',
+        'out_ip_title': 'IP Detailed Security Analysis', 'out_ip_sorgu': 'Query',
+        'out_ip_konum_bilgi': 'Location Info', 'out_ip_ulke': 'Country', 'out_ip_bolge': 'Region',
+        'out_ip_saat': 'Timezone', 'out_ip_ag_bilgi': 'Network Info', 'out_ip_inet': 'Internet IP',
+        'out_ip_isp': 'Internet Provider (ISP)', 'out_ip_org': 'Organization', 'out_ip_asn': 'Infrastructure (ASN)',
+        'out_ip_mobil': 'Mobile Network', 'out_ip_ptr': 'Reverse DNS (PTR)',
+        'out_ip_gizlilik': 'Privacy & Threat Status', 'out_ip_tehdit': 'Threat Score',
+        'out_ip_portlar': 'Open Ports', 'out_ip_servis': 'AZRxGUARD Security Analysis',
+        'out_ip_evet': '✅ Yes', 'out_ip_hayir': '❌ No', 'out_ip_mobil_evet': '📱 Yes',
+        'out_ip_risk_yuksek': 'High Risk', 'out_ip_risk_orta': 'Medium Risk', 'out_ip_risk_dusuk': 'Low Risk',
+        'out_ip_dc': 'DATACENTER IP!', 'out_ip_port_yok': 'No open ports found',
+        'out_hesap_title': 'CALCULATOR', 'out_hesap_ifade': 'Expression', 'out_hesap_sonuc': 'Result',
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -352,6 +436,27 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **Zielwährung wählen:**",
         'doviz_miktar_ask': "💰 **Betrag eingeben:**\nBeispiel: `100` oder `250.50`",
         'b64_ask': "🔒 **Base64-Tool**\n\nFormat: `encode Text` oder `decode bWV0aW4=`\nBeispiel: `encode AZRxGUARD`",
+        'out_hava_title': 'WETTER', 'out_hava_konum': 'Standort', 'out_hava_sicaklik': 'Temperatur',
+        'out_hava_hissedilen': 'Gefühlt', 'out_hava_nem': 'Luftfeuchtigkeit', 'out_hava_ruzgar': 'Wind',
+        'out_hava_basinc': 'Luftdruck', 'out_hava_durum': 'Zustand', 'out_hava_uv': 'UV-Index',
+        'out_hava_gorus': 'Sichtweite', 'out_hava_servis': 'AZRxGUARD Wetterdienst',
+        'out_doviz_title': 'WÄHRUNGSRECHNER', 'out_doviz_giris': 'Eingabe', 'out_doviz_sonuc': 'Ergebnis',
+        'out_doviz_kur': 'Kurs', 'out_doviz_guncelleme': 'Aktualisiert', 'out_doviz_kaynak': 'Quelle',
+        'out_doviz_servis': 'AZRxGUARD Währungsdienst',
+        'out_saat_title': 'WELTZEIT', 'out_saat_servis': 'AZRxGUARD Zeitdienst',
+        'out_hash_title': 'HASH-GENERATOR', 'out_hash_metin': 'Text', 'out_hash_uzunluk': 'Länge', 'out_hash_karakter': 'Zeichen',
+        'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'Eingabe', 'out_b64_sonuc': 'Ergebnis',
+        'out_ip_title': 'IP Detaillierte Sicherheitsanalyse', 'out_ip_sorgu': 'Anfrage',
+        'out_ip_konum_bilgi': 'Standortdaten', 'out_ip_ulke': 'Land', 'out_ip_bolge': 'Region',
+        'out_ip_saat': 'Zeitzone', 'out_ip_ag_bilgi': 'Netzwerkdaten', 'out_ip_inet': 'Internet IP',
+        'out_ip_isp': 'Internetanbieter (ISP)', 'out_ip_org': 'Organisation', 'out_ip_asn': 'Infrastruktur (ASN)',
+        'out_ip_mobil': 'Mobilfunknetz', 'out_ip_ptr': 'Reverse DNS (PTR)',
+        'out_ip_gizlilik': 'Datenschutz & Bedrohung', 'out_ip_tehdit': 'Bedrohungswert',
+        'out_ip_portlar': 'Offene Ports', 'out_ip_servis': 'AZRxGUARD Sicherheitsanalyse',
+        'out_ip_evet': '✅ Ja', 'out_ip_hayir': '❌ Nein', 'out_ip_mobil_evet': '📱 Ja',
+        'out_ip_risk_yuksek': 'Hohes Risiko', 'out_ip_risk_orta': 'Mittleres Risiko', 'out_ip_risk_dusuk': 'Geringes Risiko',
+        'out_ip_dc': 'RECHENZENTRUM IP!', 'out_ip_port_yok': 'Keine offenen Ports',
+        'out_hesap_title': 'TASCHENRECHNER', 'out_hesap_ifade': 'Ausdruck', 'out_hesap_sonuc': 'Ergebnis',
     },
     'ka': {
         'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
@@ -408,6 +513,27 @@ LANG_DATA = {
         'doviz_to_sec': "💱 **სამიზნე ვალუტა აირჩიეთ:**",
         'doviz_miktar_ask': "💰 **თანხა შეიყვანეთ:**\nმაგ: `100` ან `250.50`",
         'b64_ask': "🔒 **Base64**\n\nფორმატი: `encode ტექსტი` ან `decode bWV0aW4=`\nმაგ: `encode AZRxGUARD`",
+        'out_hava_title': 'ამინდი', 'out_hava_konum': 'მდებარეობა', 'out_hava_sicaklik': 'ტემპერატურა',
+        'out_hava_hissedilen': 'შეგრძნება', 'out_hava_nem': 'ტენიანობა', 'out_hava_ruzgar': 'ქარი',
+        'out_hava_basinc': 'წნევა', 'out_hava_durum': 'მდგომარეობა', 'out_hava_uv': 'UV ინდექსი',
+        'out_hava_gorus': 'ხილვადობა', 'out_hava_servis': 'AZRxGUARD ამინდის სერვისი',
+        'out_doviz_title': 'ვალუტის გადამყვანი', 'out_doviz_giris': 'შეყვანა', 'out_doviz_sonuc': 'შედეგი',
+        'out_doviz_kur': 'კურსი', 'out_doviz_guncelleme': 'განახლება', 'out_doviz_kaynak': 'წყარო',
+        'out_doviz_servis': 'AZRxGUARD ვალუტის სერვისი',
+        'out_saat_title': 'მსოფლიო საათი', 'out_saat_servis': 'AZRxGUARD დროის სერვისი',
+        'out_hash_title': 'HASH გენერატორი', 'out_hash_metin': 'ტექსტი', 'out_hash_uzunluk': 'სიგრძე', 'out_hash_karakter': 'სიმბ.',
+        'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'შეყვანა', 'out_b64_sonuc': 'შედეგი',
+        'out_ip_title': 'IP დეტალური უსაფრთხოების ანალიზი', 'out_ip_sorgu': 'მოთხოვნა',
+        'out_ip_konum_bilgi': 'მდებარეობის ინფო', 'out_ip_ulke': 'ქვეყანა', 'out_ip_bolge': 'რეგიონი',
+        'out_ip_saat': 'დროის სარტყელი', 'out_ip_ag_bilgi': 'ქსელის ინფო', 'out_ip_inet': 'ინტერნეტ IP',
+        'out_ip_isp': 'ინტერნეტ პროვაიდერი (ISP)', 'out_ip_org': 'ორგანიზაცია', 'out_ip_asn': 'ინფრასტრუქტურა (ASN)',
+        'out_ip_mobil': 'მობილური ქსელი', 'out_ip_ptr': 'Reverse DNS (PTR)',
+        'out_ip_gizlilik': 'კონფიდენციალობა & საფრთხე', 'out_ip_tehdit': 'საფრთხის ქულა',
+        'out_ip_portlar': 'ღია პორტები', 'out_ip_servis': 'AZRxGUARD უსაფრთხოების ანალიზი',
+        'out_ip_evet': '✅ დიახ', 'out_ip_hayir': '❌ არა', 'out_ip_mobil_evet': '📱 დიახ',
+        'out_ip_risk_yuksek': 'მაღალი რისკი', 'out_ip_risk_orta': 'საშუალო რისკი', 'out_ip_risk_dusuk': 'დაბალი რისკი',
+        'out_ip_dc': 'მონაცემთა ცენტრის IP!', 'out_ip_port_yok': 'ღია პორტი ვერ მოიძებნა',
+        'out_hesap_title': 'კალკულატორი', 'out_hesap_ifade': 'გამოსახულება', 'out_hesap_sonuc': 'შედეგი',
     }
 }
 
@@ -768,7 +894,8 @@ async def platform_username_kontrol(username: str) -> str:
 
 # --- ⚡ PRO ARAÇLAR — UTILITY FONKSİYONLARI ---
 
-def guvenli_hesapla(ifade: str) -> str:
+def guvenli_hesapla(ifade: str, lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     try:
         ifade_clean = ifade.strip().replace('^', '**')
         if len(ifade_clean) > 200:
@@ -804,12 +931,12 @@ def guvenli_hesapla(ifade: str) -> str:
         else:
             sonuc_str = str(sonuc)
         return (
-            f"🧮 **HESAP MAKİNESİ**\n"
+            f"🧮 **{L.get('out_hesap_title','HESAP MAKİNESİ')}**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📥 **İfade:** `{html.escape(ifade)}`\n"
-            f"📤 **Sonuç:** `{sonuc_str}`\n\n"
+            f"📥 **{L.get('out_hesap_ifade','İfade')}:** `{html.escape(ifade)}`\n"
+            f"📤 **{L.get('out_hesap_sonuc','Sonuç')}:** `{sonuc_str}`\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"💡 _sin, cos, sqrt, log, pi, e, factorial desteklenir_"
+            f"💡 _sin, cos, sqrt, log, pi, e, factorial_"
         )
     except ZeroDivisionError:
         return "❌ **Sıfıra bölme hatası!**"
@@ -818,7 +945,8 @@ def guvenli_hesapla(ifade: str) -> str:
     except Exception:
         return "❌ **Geçersiz ifade!** Örnek: `2**10` veya `sqrt(144)` veya `sin(pi/2)`"
 
-def hash_uret(metin: str) -> str:
+def hash_uret(metin: str, lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     if not metin.strip():
         return "❌ Metin boş olamaz!"
     if len(metin) > 5000:
@@ -830,10 +958,10 @@ def hash_uret(metin: str) -> str:
     sha512_h = hashlib.sha512(veri).hexdigest()
     ozet = metin[:40] + ('...' if len(metin) > 40 else '')
     return (
-        f"🔐 **HASH ÜRETİCİ**\n"
+        f"🔐 **{L.get('out_hash_title','HASH ÜRETİCİ')}**\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"📝 **Metin:** `{html.escape(ozet)}`\n"
-        f"📊 **Uzunluk:** `{len(metin)} karakter`\n\n"
+        f"📝 **{L.get('out_hash_metin','Metin')}:** `{html.escape(ozet)}`\n"
+        f"📊 **{L.get('out_hash_uzunluk','Uzunluk')}:** `{len(metin)} {L.get('out_hash_karakter','karakter')}`\n\n"
         f"🔸 **MD5:**\n`{md5_h}`\n\n"
         f"🔸 **SHA-1:**\n`{sha1_h}`\n\n"
         f"🔸 **SHA-256:**\n`{sha256_h}`\n\n"
@@ -842,7 +970,8 @@ def hash_uret(metin: str) -> str:
         f"🤖 _AZRxGUARD Hash Engine_"
     )
 
-def base64_islem(metin: str) -> str:
+def base64_islem(metin: str, lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     metin = metin.strip()
     parts = metin.split(None, 1)
     if len(parts) < 2:
@@ -852,10 +981,10 @@ def base64_islem(metin: str) -> str:
         if mod in ('encode', 'enc', 'e'):
             sonuc = b64lib.b64encode(icerik.encode('utf-8')).decode('ascii')
             return (
-                f"🔒 **BASE64 ENCODE**\n"
+                f"🔒 **{L.get('out_b64_enc','BASE64 ENCODE')}**\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"📥 **Giriş:** `{html.escape(icerik[:100])}`\n\n"
-                f"📤 **Sonuç:**\n`{sonuc}`"
+                f"📥 **{L.get('out_b64_giris','Giriş')}:** `{html.escape(icerik[:100])}`\n\n"
+                f"📤 **{L.get('out_b64_sonuc','Sonuç')}:**\n`{sonuc}`"
             )
         elif mod in ('decode', 'dec', 'd'):
             padding = 4 - len(icerik) % 4
@@ -863,10 +992,10 @@ def base64_islem(metin: str) -> str:
                 icerik += '=' * padding
             sonuc = b64lib.b64decode(icerik).decode('utf-8', errors='replace')
             return (
-                f"🔓 **BASE64 DECODE**\n"
+                f"🔓 **{L.get('out_b64_dec','BASE64 DECODE')}**\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"📥 **Giriş:** `{icerik[:80]}`\n\n"
-                f"📤 **Sonuç:**\n`{html.escape(sonuc[:500])}`"
+                f"📥 **{L.get('out_b64_giris','Giriş')}:** `{icerik[:80]}`\n\n"
+                f"📤 **{L.get('out_b64_sonuc','Sonuç')}:**\n`{html.escape(sonuc[:500])}`"
             )
         else:
             return "❌ **Format:** `encode metin` veya `decode bWV0aW4=`"
@@ -1077,7 +1206,8 @@ def sans_cevap_getir() -> str:
         f"_Sorunuzu düşünün ve tekrar basın._"
     )
 
-async def hava_durumu_getir(sehir: str) -> str:
+async def hava_durumu_getir(sehir: str, lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     try:
         sehir_enc = sehir.strip().replace(' ', '+')
         url = f"https://wttr.in/{sehir_enc}?format=j1"
@@ -1114,25 +1244,26 @@ async def hava_durumu_getir(sehir: str) -> str:
         else:                                                   icon = '🌤️'
         loc = sehir.strip() + (f", {country}" if country else "")
         return (
-            f"{icon} **HAVA DURUMU**\n"
+            f"{icon} **{L.get('out_hava_title','HAVA DURUMU')}**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📍 **Konum:** {loc}\n\n"
-            f"🌡️ **Sıcaklık:** `{temp_c}°C`\n"
-            f"🤔 **Hissedilen:** `{feels_like}°C`\n"
-            f"💧 **Nem:** `%{humidity}`\n"
-            f"💨 **Rüzgar:** `{windspeed} km/h`\n"
-            f"🌡 **Basınç:** `{pressure} hPa`\n"
-            f"☁️ **Durum:** {desc}\n"
-            f"🌞 **UV Endeksi:** `{uv}`\n"
-            f"👁️ **Görüş:** `{visibility} km`\n\n"
+            f"📍 **{L.get('out_hava_konum','Konum')}:** {loc}\n\n"
+            f"🌡️ **{L.get('out_hava_sicaklik','Sıcaklık')}:** `{temp_c}°C`\n"
+            f"🤔 **{L.get('out_hava_hissedilen','Hissedilen')}:** `{feels_like}°C`\n"
+            f"💧 **{L.get('out_hava_nem','Nem')}:** `%{humidity}`\n"
+            f"💨 **{L.get('out_hava_ruzgar','Rüzgar')}:** `{windspeed} km/h`\n"
+            f"🌡 **{L.get('out_hava_basinc','Basınç')}:** `{pressure} hPa`\n"
+            f"☁️ **{L.get('out_hava_durum','Durum')}:** {desc}\n"
+            f"🌞 **{L.get('out_hava_uv','UV Endeksi')}:** `{uv}`\n"
+            f"👁️ **{L.get('out_hava_gorus','Görüş')}:** `{visibility} km`\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"🤖 _AZRxGUARD Hava Servisi_"
+            f"🤖 _{L.get('out_hava_servis','AZRxGUARD Hava Servisi')}_"
         )
     except Exception as e:
         logger.error(f"Hava durumu hatası: {e}")
         return "❌ Hava servisi şu an erişilemiyor. Lütfen şehri İngilizce yaz.\nÖrnek: `Istanbul`, `Baku`, `Moscow`"
 
-async def doviz_cevir(metin: str) -> str:
+async def doviz_cevir(metin: str, lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     try:
         parts = metin.strip().upper().split()
         if len(parts) < 3:
@@ -1162,21 +1293,22 @@ async def doviz_cevir(metin: str) -> str:
         sonuc_miktar = miktar * sonuc
         tarih = data.get('time_last_update_utc', '—')[:16]
         return (
-            f"💱 **DÖVİZ ÇEVİRİCİ**\n"
+            f"💱 **{L.get('out_doviz_title','DÖVİZ ÇEVİRİCİ')}**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📥 **Giriş:** `{miktar:,.2f} {kfrom}`\n"
-            f"📤 **Sonuç:** `{sonuc_miktar:,.4f} {kto}`\n"
-            f"📊 **Kur:** `1 {kfrom} = {sonuc:,.4f} {kto}`\n\n"
-            f"📅 **Güncelleme:** `{tarih}`\n"
-            f"🌐 **Kaynak:** Open Exchange Rates\n\n"
+            f"📥 **{L.get('out_doviz_giris','Giriş')}:** `{miktar:,.2f} {kfrom}`\n"
+            f"📤 **{L.get('out_doviz_sonuc','Sonuç')}:** `{sonuc_miktar:,.4f} {kto}`\n"
+            f"📊 **{L.get('out_doviz_kur','Kur')}:** `1 {kfrom} = {sonuc:,.4f} {kto}`\n\n"
+            f"📅 **{L.get('out_doviz_guncelleme','Güncelleme')}:** `{tarih}`\n"
+            f"🌐 **{L.get('out_doviz_kaynak','Kaynak')}:** Open Exchange Rates\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"🤖 _AZRxGUARD Döviz Servisi_"
+            f"🤖 _{L.get('out_doviz_servis','AZRxGUARD Döviz Servisi')}_"
         )
     except Exception as e:
         logger.error(f"Döviz hatası: {e}")
         return "❌ Döviz servisi şu an erişilemiyor. Lütfen sonra tekrar dene."
 
-def dunya_saati() -> str:
+def dunya_saati(lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     sehirler = [
         # Gürcistan
         ("🇬🇪 Tiflis",         datetime.timezone(datetime.timedelta(hours=4))),
@@ -1212,12 +1344,12 @@ def dunya_saati() -> str:
         ("🇯🇵 Tokyo",          datetime.timezone(datetime.timedelta(hours=9))),
     ]
     simdi_utc = datetime.datetime.now(datetime.timezone.utc)
-    metin = f"🕐 **DÜNYA SAATİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    metin = f"🕐 **{L.get('out_saat_title','DÜNYA SAATİ')}**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
     metin += f"🌐 **UTC:** `{simdi_utc.strftime('%H:%M')}` — `{simdi_utc.strftime('%d.%m.%Y')}`\n\n"
     for isim, tz in sehirler:
         simdi = datetime.datetime.now(tz)
         metin += f"{isim}: `{simdi.strftime('%H:%M')}` _{simdi.strftime('%d.%m')}_\n"
-    metin += "\n━━━━━━━━━━━━━━━━━━━━━━\n🤖 _AZRxGUARD Zaman Servisi_"
+    metin += f"\n━━━━━━━━━━━━━━━━━━━━━━\n🤖 _{L.get('out_saat_servis','AZRxGUARD Zaman Servisi')}_"
     return metin
 
 # --- 🌍 ÜLKE / ŞEHİR / RAYON / KÖY HİYERARŞİSİ ---
@@ -2345,7 +2477,8 @@ def _proxycheck_getir(ip: str) -> dict:
     except Exception:
         return {}
 
-async def ip_tam_analiz_yap(ip_adresi: str) -> str:
+async def ip_tam_analiz_yap(ip_adresi: str, lang: str = 'tr') -> str:
+    L = LANG_DATA.get(lang, LANG_DATA['tr'])
     ipapi, proxycheck, ptr, acik_portlar = await asyncio.gather(
         asyncio.to_thread(_ipapi_getir, ip_adresi),
         asyncio.to_thread(_proxycheck_getir, ip_adresi),
@@ -2366,12 +2499,6 @@ async def ip_tam_analiz_yap(ip_adresi: str) -> str:
     asn_raw    = ipapi.get('as', '—')
     asn_adi    = ipapi.get('asname', '—')
     hosting    = ipapi.get('hosting', False)
-    mobil      = "📱 Evet" if ipapi.get('mobile', False) else "❌ Hayır"
-
-    # Veri merkezi uyarısı
-    dc_uyari = "  ⚠️ *[VERİ MERKEZİ IP'si!]*" if hosting else ""
-    asn_str  = f"`{asn_raw}` ({asn_adi}){dc_uyari}"
-
     # Gizlilik — proxycheck.io + ip-api.com
     pc_type   = str(proxycheck.get('type', '')).lower()
     pc_vpn    = str(proxycheck.get('vpn', 'no')).lower() in ('yes', 'true', '1')
@@ -2380,9 +2507,11 @@ async def ip_tam_analiz_yap(ip_adresi: str) -> str:
     is_proxy  = 'proxy' in pc_type
     is_tor    = 'tor' in pc_type
 
-    vpn_str   = "✅ Evet" if is_vpn   else "❌ Hayır"
-    proxy_str = "✅ Evet" if is_proxy else "❌ Hayır"
-    tor_str   = "✅ Evet" if is_tor   else "❌ Hayır"
+    evet  = L.get('out_ip_evet',  '✅ Evet')
+    hayir = L.get('out_ip_hayir', '❌ Hayır')
+    vpn_str   = evet if is_vpn   else hayir
+    proxy_str = evet if is_proxy else hayir
+    tor_str   = evet if is_tor   else hayir
 
     # Tehdit skoru
     if pc_risk is not None:
@@ -2396,38 +2525,43 @@ async def ip_tam_analiz_yap(ip_adresi: str) -> str:
         risk_sayi = min(100, risk_sayi)
 
     if risk_sayi >= 70:
-        risk_str = f"🔴 %{risk_sayi} (Yüksek Risk)"
+        risk_str = f"🔴 %{risk_sayi} ({L.get('out_ip_risk_yuksek','Yüksek Risk')})"
     elif risk_sayi >= 40:
-        risk_str = f"🟡 %{risk_sayi} (Orta Risk)"
+        risk_str = f"🟡 %{risk_sayi} ({L.get('out_ip_risk_orta','Orta Risk')})"
     else:
-        risk_str = f"🟢 %{risk_sayi} (Düşük Risk)"
+        risk_str = f"🟢 %{risk_sayi} ({L.get('out_ip_risk_dusuk','Düşük Risk')})"
+
+    mobil_str = L.get('out_ip_mobil_evet', '📱 Evet') if ipapi.get('mobile', False) else hayir
+    dc_label  = L.get('out_ip_dc', "VERİ MERKEZİ IP'si!")
+    dc_uyari  = f"  ⚠️ *[{dc_label}]*" if hosting else ""
+    asn_str   = f"`{asn_raw}` ({asn_adi}){dc_uyari}"
 
     # Portlar
     if acik_portlar:
         port_str = ", ".join([f"{p} ({PORT_ADLARI[p]})" for p in acik_portlar])
     else:
-        port_str = "Açık port bulunamadı"
+        port_str = L.get('out_ip_port_yok', 'Açık port bulunamadı')
 
     return (
-        f"🛡️ **IP Detaylı Güvenlik Analizi**\n"
+        f"🛡️ **{L.get('out_ip_title','IP Detaylı Güvenlik Analizi')}**\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🔍 **Sorgu:** `{gercek_ip}`\n\n"
-        f"📍 **Konum Bilgisi**\n"
-        f"🏳️ **Ülke:** {ulke}\n"
-        f"🏙️ **Bölge:** {bolge}\n"
-        f"🕐 **Saat Dilimi:** `{saat_dilimi}`\n\n"
-        f"🔌 **Ağ Bilgisi**\n"
-        f"🌐 **İnternet IP:** `{gercek_ip}`\n"
-        f"🏢 **İnternet İsmi (ISP):** {isp}\n"
-        f"🏛️ **Organizasyon:** {org}\n"
-        f"📡 **Altyapı (ASN):** {asn_str}\n"
-        f"📱 **Mobil Hat:** {mobil}\n"
-        f"🏷️ **Ters DNS (PTR):** `{ptr}`\n\n"
-        f"🕵️ **Gizlilik & Tehdit Durumu**\n"
+        f"🔍 **{L.get('out_ip_sorgu','Sorgu')}:** `{gercek_ip}`\n\n"
+        f"📍 **{L.get('out_ip_konum_bilgi','Konum Bilgisi')}**\n"
+        f"🏳️ **{L.get('out_ip_ulke','Ülke')}:** {ulke}\n"
+        f"🏙️ **{L.get('out_ip_bolge','Bölge')}:** {bolge}\n"
+        f"🕐 **{L.get('out_ip_saat','Saat Dilimi')}:** `{saat_dilimi}`\n\n"
+        f"🔌 **{L.get('out_ip_ag_bilgi','Ağ Bilgisi')}**\n"
+        f"🌐 **{L.get('out_ip_inet','İnternet IP')}:** `{gercek_ip}`\n"
+        f"🏢 **{L.get('out_ip_isp','İnternet İsmi (ISP)')}:** {isp}\n"
+        f"🏛️ **{L.get('out_ip_org','Organizasyon')}:** {org}\n"
+        f"📡 **{L.get('out_ip_asn','Altyapı (ASN)')}:** {asn_str}\n"
+        f"📱 **{L.get('out_ip_mobil','Mobil Hat')}:** {mobil_str}\n"
+        f"🏷️ **{L.get('out_ip_ptr','Ters DNS (PTR)')}:** `{ptr}`\n\n"
+        f"🕵️ **{L.get('out_ip_gizlilik','Gizlilik & Tehdit Durumu')}**\n"
         f"VPN: {vpn_str}  |  Proxy: {proxy_str}  |  Tor: {tor_str}\n"
-        f"⚠️ **Tehdit Skoru:** {risk_str}\n\n"
-        f"🔓 **Açık Portlar:** `{port_str}`\n\n"
-        f"🤖 _AZRxGUARD Güvenlik Analizi_"
+        f"⚠️ **{L.get('out_ip_tehdit','Tehdit Skoru')}:** {risk_str}\n\n"
+        f"🔓 **{L.get('out_ip_portlar','Açık Portlar')}:** `{port_str}`\n\n"
+        f"🤖 _{L.get('out_ip_servis','AZRxGUARD Güvenlik Analizi')}_"
     )
 
 async def ip_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2442,12 +2576,13 @@ async def ip_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not re.match(r'^[0-9a-fA-F.:]{3,45}$', ip_adresi):
         await update.effective_message.reply_text("❌ Geçersiz IP formatı. Örnek: `/ip_analiz 8.8.8.8`", parse_mode='Markdown')
         return
+    lang = get_lang(context, update.effective_user.id)
     bekle = await update.effective_message.reply_text(
         f"🔍 `{ip_adresi}` analiz ediliyor...\n_Bu işlem birkaç saniye sürebilir._",
         parse_mode='Markdown'
     )
     try:
-        rapor = await ip_tam_analiz_yap(ip_adresi)
+        rapor = await ip_tam_analiz_yap(ip_adresi, lang)
         await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
     except Exception as e:
         logger.error(f"IP analiz hatası: {e}")
@@ -2790,7 +2925,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lokasyon = query.data[8:]
         await query.answer()
         bekle_msg = await query.message.reply_text(f"🌍 `{html.escape(lokasyon)}` hava durumu getiriliyor...", parse_mode='Markdown')
-        sonuc = await hava_durumu_getir(lokasyon)
+        sonuc = await hava_durumu_getir(lokasyon, lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Başka Konum", callback_data='pro_hava')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -2844,7 +2979,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🔄 Yenile", callback_data='pro_saat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ])
-        await query.edit_message_text(dunya_saati(), reply_markup=geri, parse_mode='Markdown')
+        await query.edit_message_text(dunya_saati(lang), reply_markup=geri, parse_mode='Markdown')
     elif query.data == 'pro_b64':
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         context.user_data['durum'] = 'b64_bekliyor'
@@ -3081,7 +3216,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             parse_mode='Markdown'
         )
         try:
-            rapor = await ip_tam_analiz_yap(ip_adresi)
+            rapor = await ip_tam_analiz_yap(ip_adresi, lang)
             await bekle.edit_text(rapor, parse_mode='Markdown', disable_web_page_preview=True)
         except Exception as e:
             logger.error(f"IP analiz menü hatası: {e}")
@@ -3135,7 +3270,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     if context.user_data.get('durum') == 'hesap_bekliyor':
         context.user_data['durum'] = None
         ifade = update.message.text.strip()
-        sonuc = guvenli_hesapla(ifade)
+        sonuc = guvenli_hesapla(ifade, lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni Hesap", callback_data='pro_hesap')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -3146,7 +3281,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     if context.user_data.get('durum') == 'hash_bekliyor':
         context.user_data['durum'] = None
         metin = update.message.text.strip()
-        sonuc = hash_uret(metin)
+        sonuc = hash_uret(metin, lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni Hash", callback_data='pro_hash')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -3158,7 +3293,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         context.user_data['durum'] = None
         sehir = update.message.text.strip()
         bekle = await update.message.reply_text(f"🌍 `{html.escape(sehir)}` için hava durumu getiriliyor...", parse_mode='Markdown')
-        sonuc = await hava_durumu_getir(sehir)
+        sonuc = await hava_durumu_getir(sehir, lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni Şehir", callback_data='pro_hava')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -3180,7 +3315,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             await update.message.reply_text("❌ Geçersiz miktar! Sadece sayı girin. Örnek: `100`", parse_mode='Markdown')
             return
         bekle = await update.message.reply_text("💱 Kur bilgisi getiriliyor...", parse_mode='Markdown')
-        sonuc = await doviz_cevir(f"{miktar_str} {from_kur} {to_kur}")
+        sonuc = await doviz_cevir(f"{miktar_str} {from_kur} {to_kur}", lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni Çeviri", callback_data='pro_doviz')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -3196,7 +3331,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         lokasyon = update.message.text.strip()
         ulke_kodu = context.user_data.pop('hava_ulke', 'ge')
         bekle = await update.message.reply_text(f"🔍 `{html.escape(lokasyon)}` aranıyor...", parse_mode='Markdown')
-        sonuc = await hava_durumu_getir(lokasyon)
+        sonuc = await hava_durumu_getir(lokasyon, lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔍 Tekrar Ara", callback_data=f"hava_sx_{ulke_kodu}")],
             [InlineKeyboardButton("🌍 Ülke Seç", callback_data='pro_hava')],
@@ -3211,7 +3346,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     if context.user_data.get('durum') == 'b64_bekliyor':
         context.user_data['durum'] = None
         metin = update.message.text.strip()
-        sonuc = base64_islem(metin)
+        sonuc = base64_islem(metin, lang)
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yeni İşlem", callback_data='pro_b64')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
@@ -3584,7 +3719,8 @@ async def hash_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     metin = ' '.join(context.args)
-    sonuc = hash_uret(metin)
+    lang = get_lang(context, update.effective_user.id)
+    sonuc = hash_uret(metin, lang)
     await update.effective_message.reply_text(sonuc, parse_mode='Markdown')
 
 async def hava_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3595,8 +3731,9 @@ async def hava_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     sehir = ' '.join(context.args)
+    lang = get_lang(context, update.effective_user.id)
     bekle = await update.effective_message.reply_text(f"🌍 `{html.escape(sehir)}` sorgulanıyor...", parse_mode='Markdown')
-    sonuc = await hava_durumu_getir(sehir)
+    sonuc = await hava_durumu_getir(sehir, lang)
     try:
         await bekle.edit_text(sonuc, parse_mode='Markdown')
     except Exception:
@@ -3610,15 +3747,17 @@ async def kur_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     metin = ' '.join(context.args)
+    lang = get_lang(context, update.effective_user.id)
     bekle = await update.effective_message.reply_text("💱 Kur bilgisi getiriliyor...", parse_mode='Markdown')
-    sonuc = await doviz_cevir(metin)
+    sonuc = await doviz_cevir(metin, lang)
     try:
         await bekle.edit_text(sonuc, parse_mode='Markdown')
     except Exception:
         await bekle.edit_text(sonuc)
 
 async def saat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    sonuc = dunya_saati()
+    lang = get_lang(context, update.effective_user.id)
+    sonuc = dunya_saati(lang)
     await update.effective_message.reply_text(sonuc, parse_mode='Markdown')
 
 async def b64_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3629,7 +3768,8 @@ async def b64_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     metin = ' '.join(context.args)
-    sonuc = base64_islem(metin)
+    lang = get_lang(context, update.effective_user.id)
+    sonuc = base64_islem(metin, lang)
     await update.effective_message.reply_text(sonuc, parse_mode='Markdown')
 
 async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
