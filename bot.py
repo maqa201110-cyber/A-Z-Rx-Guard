@@ -2911,7 +2911,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             not_metni = f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             for i, not_ in enumerate(notlar[-10:], 1):
-                not_metni += f"{i}\\. {not_[:80]}\n"
+                not_metni += f"{i}. {not_[:80]}\n"
             await query.edit_message_text(
                 not_metni,
                 reply_markup=InlineKeyboardMarkup([
@@ -2919,7 +2919,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                      InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
                     *not_klavye_geri
                 ]),
-                parse_mode='MarkdownV2'
+                parse_mode='Markdown'
             )
     elif query.data == 'not_ekle':
         context.user_data['durum'] = 'not_ekle_bekliyor'
@@ -2961,7 +2961,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             not_metni = f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             for i, n in enumerate(notlar[-10:], 1):
-                not_metni += f"{i}\\. {n[:80]}\n"
+                not_metni += f"{i}. {n[:80]}\n"
             await query.edit_message_text(
                 not_metni,
                 reply_markup=InlineKeyboardMarkup([
@@ -2969,7 +2969,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                      InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
                     [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
                 ]),
-                parse_mode='MarkdownV2'
+                parse_mode='Markdown'
             )
     elif query.data == 'pro_gunsozu':
         soz = gunun_sozu_getir()
