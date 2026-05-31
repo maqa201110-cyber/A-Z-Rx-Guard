@@ -1114,19 +1114,19 @@ async def hava_durumu_getir(sehir: str) -> str:
         else:                                                   icon = '🌤️'
         loc = sehir.strip() + (f", {country}" if country else "")
         return (
-            f"{icon} **WEATHER**\n"
+            f"{icon} **HAVA DURUMU**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📍 **Location:** {loc}\n\n"
-            f"🌡️ **Temperature:** `{temp_c}°C`\n"
-            f"🤔 **Feels Like:** `{feels_like}°C`\n"
-            f"💧 **Humidity:** `{humidity}%`\n"
-            f"💨 **Wind:** `{windspeed} km/h`\n"
-            f"🌡 **Pressure:** `{pressure} hPa`\n"
-            f"☁️ **Condition:** {desc}\n"
-            f"🌞 **UV Index:** `{uv}`\n"
-            f"👁️ **Visibility:** `{visibility} km`\n\n"
+            f"📍 **Konum:** {loc}\n\n"
+            f"🌡️ **Sıcaklık:** `{temp_c}°C`\n"
+            f"🤔 **Hissedilen:** `{feels_like}°C`\n"
+            f"💧 **Nem:** `%{humidity}`\n"
+            f"💨 **Rüzgar:** `{windspeed} km/h`\n"
+            f"🌡 **Basınç:** `{pressure} hPa`\n"
+            f"☁️ **Durum:** {desc}\n"
+            f"🌞 **UV Endeksi:** `{uv}`\n"
+            f"👁️ **Görüş:** `{visibility} km`\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"🤖 _AZRxGUARD Weather Service_"
+            f"🤖 _AZRxGUARD Hava Servisi_"
         )
     except Exception as e:
         logger.error(f"Hava durumu hatası: {e}")
