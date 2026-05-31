@@ -34,7 +34,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python bot.py"
+args = ".pythonlibs/bin/python3 bot.py"
 
 [[workflows.workflow]]
 name = "Start application"
@@ -42,8 +42,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
+args = ".pythonlibs/bin/gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
 waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [agent]
 stack = "FLASK_VANILLA_JS"
@@ -55,11 +58,7 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 6000
-externalPort = 6000
+externalPort = 80
 
 [[ports]]
 localPort = 8080
