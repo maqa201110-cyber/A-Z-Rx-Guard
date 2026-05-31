@@ -1112,7 +1112,7 @@ async def hava_durumu_getir(sehir: str) -> str:
         elif any(w in dl for w in ['thunder', 'storm']):      icon = '⛈️'
         elif any(w in dl for w in ['fog', 'mist', 'haze']):   icon = '🌫️'
         else:                                                   icon = '🌤️'
-        loc = area_val + (f", {country}" if country else "")
+        loc = sehir.strip() + (f", {country}" if country else "")
         return (
             f"{icon} **HAVA DURUMU**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
