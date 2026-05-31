@@ -117,6 +117,9 @@ LANG_DATA = {
         'btn_sifre_arac': "🔑 Şifre Üretici",
         'btn_not_arac': "📝 Not Defterim",
         'btn_wiki_arac': "🌐 Wikipedia Ara",
+        'btn_gunsozu_arac': "💡 Günün Sözü",
+        'btn_birim_arac': "📐 Birim Çevir",
+        'btn_sans_arac': "🎱 Şans Topu",
         'hesap_ask': "🧮 **Hesap Makinesi**\n\nMatematik ifadesi girin:\nÖrnek: `2**10` veya `sqrt(144)` veya `sin(pi/2)`",
         'hash_ask': "🔐 **Hash Üretici**\n\nHashlenmesini istediğiniz metni girin:\nÖrnek: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Hava Durumu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nÜlke seçin:",
@@ -170,6 +173,9 @@ LANG_DATA = {
         'btn_sifre_arac': "🔑 Şifrə Yaradıcı",
         'btn_not_arac': "📝 Qeydlərim",
         'btn_wiki_arac': "🌐 Wikipedia Axtar",
+        'btn_gunsozu_arac': "💡 Günün Sözü",
+        'btn_birim_arac': "📐 Vahid Çeviricisi",
+        'btn_sans_arac': "🎱 Şans Topu",
         'hesap_ask': "🧮 **Kalkulyator**\n\nRiyazi ifadə daxil edin:\nNümunə: `2**10` və ya `sqrt(144)`",
         'hash_ask': "🔐 **Hash Yaradıcı**\n\nHash etmək istədiyiniz mətni daxil edin:\nNümunə: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Hava Proqnozu**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nÖlkə seçin:",
@@ -223,6 +229,9 @@ LANG_DATA = {
         'btn_sifre_arac': "🔑 Генератор паролей",
         'btn_not_arac': "📝 Мои заметки",
         'btn_wiki_arac': "🌐 Поиск Wikipedia",
+        'btn_gunsozu_arac': "💡 Цитата дня",
+        'btn_birim_arac': "📐 Конвертер единиц",
+        'btn_sans_arac': "🎱 Шар удачи",
         'hesap_ask': "🧮 **Калькулятор**\n\nВведите математическое выражение:\nПример: `2**10` или `sqrt(144)`",
         'hash_ask': "🔐 **Генератор Hash**\n\nВведите текст для хеширования:\nПример: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Погода**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите страну:",
@@ -276,6 +285,9 @@ LANG_DATA = {
         'btn_sifre_arac': "🔑 Password Generator",
         'btn_not_arac': "📝 My Notes",
         'btn_wiki_arac': "🌐 Wikipedia Search",
+        'btn_gunsozu_arac': "💡 Quote of the Day",
+        'btn_birim_arac': "📐 Unit Converter",
+        'btn_sans_arac': "🎱 Lucky Ball",
         'hesap_ask': "🧮 **Calculator**\n\nEnter a math expression:\nExample: `2**10` or `sqrt(144)` or `sin(pi/2)`",
         'hash_ask': "🔐 **Hash Generator**\n\nEnter text to hash:\nExample: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Weather**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSelect a country:",
@@ -329,6 +341,9 @@ LANG_DATA = {
         'btn_sifre_arac': "🔑 Passwort-Generator",
         'btn_not_arac': "📝 Meine Notizen",
         'btn_wiki_arac': "🌐 Wikipedia Suche",
+        'btn_gunsozu_arac': "💡 Zitat des Tages",
+        'btn_birim_arac': "📐 Einheitenumrechner",
+        'btn_sans_arac': "🎱 Glückskugel",
         'hesap_ask': "🧮 **Taschenrechner**\n\nMathematischen Ausdruck eingeben:\nBeispiel: `2**10` oder `sqrt(144)`",
         'hash_ask': "🔐 **Hash-Generator**\n\nText zum Hashen eingeben:\nBeispiel: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **Wetter**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBitte Land auswählen:",
@@ -382,6 +397,9 @@ LANG_DATA = {
         'btn_sifre_arac': "🔑 პაროლის გენერატორი",
         'btn_not_arac': "📝 ჩემი ჩანაწერები",
         'btn_wiki_arac': "🌐 Wikipedia",
+        'btn_gunsozu_arac': "💡 დღის ციტატა",
+        'btn_birim_arac': "📐 ერთეულის გადამყვანი",
+        'btn_sans_arac': "🎱 იღბლიანი ბურთი",
         'hesap_ask': "🧮 **კალკულატორი**\n\nმათემატიკური გამოსახულება შეიყვანეთ:\nმაგ: `2**10` ან `sqrt(144)`",
         'hash_ask': "🔐 **Hash გენერატორი**\n\nტექსტი შეიყვანეთ:\nმაგ: `AZRxGUARD`",
         'hava_ulke_sec': "🌍 **ამინდი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nქვეყანა აირჩიეთ:",
@@ -408,7 +426,7 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings['btn_fun'], callback_data='menu_fun'),
-            InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
+            InlineKeyboardButton(strings['btn_admin'], url='https://t.me/Maqa343')
         ],
         [
             InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu')
@@ -907,6 +925,158 @@ async def wikipedia_ara(sorgu: str, lang: str = 'tr') -> str:
         logger.error(f"Wikipedia hatası: {e}")
         return "❌ Wikipedia'ya ulaşılamadı. Lütfen sonra tekrar dene."
 
+# ─── NOT DEFTERİ (kalıcı dosya depolama) ───────────────────────────────────
+NOTES_FILE = 'notes_data.json'
+
+def not_yukle(user_id: int) -> list:
+    try:
+        with open(NOTES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f).get(str(user_id), [])
+    except Exception:
+        return []
+
+def not_kaydet(user_id: int, notlar: list):
+    try:
+        try:
+            with open(NOTES_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+        data[str(user_id)] = notlar
+        with open(NOTES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Not kaydetme hatası: {e}")
+
+# ─── GÜNÜN SÖZÜ ──────────────────────────────────────────────────────────────
+GUNUN_SOZLERI = [
+    "💡 _\"Bugün yapabileceğini yarına bırakma.\"_\n— Benjamin Franklin",
+    "💡 _\"Başarı, her gün tekrar edilen küçük çabaların toplamıdır.\"_\n— Robert Collier",
+    "💡 _\"Düşündüğün gibi yaşamazsan, yaşadığın gibi düşünmeye başlarsın.\"_\n— Paul Bourget",
+    "💡 _\"Zorluklar olmadan büyüme olmaz.\"_\n— Anonim",
+    "💡 _\"Hedefsiz bir gemi, her rüzgarı karşı rüzgar sayar.\"_\n— Montaigne",
+    "💡 _\"Başarısızlık, başarıya giden yolun taşlarından biridir.\"_\n— Anonim",
+    "💡 _\"Önce kendin değiş, sonra dünyayı değiştirmeyi dene.\"_\n— Mahatma Gandhi",
+    "💡 _\"Hayatın en büyük mirası umuttur.\"_\n— Victor Hugo",
+    "💡 _\"Dün tarihtir, yarın sırdır, bugün hediyedir.\"_\n— Anonim",
+    "💡 _\"Bir yolculuk, tek bir adımla başlar.\"_\n— Lao Tzu",
+    "💡 _\"İmkânsız, büyük işler yapmaya karar vermeyenler için vardır.\"_\n— Napoleon Bonaparte",
+    "💡 _\"Karanlıkta bir mum yakmak, karanlığa sövmekten iyidir.\"_\n— Konfüçyüs",
+    "💡 _\"Harekete geç. İlham yolda seni bulur.\"_\n— Jack London",
+    "💡 _\"Bir insanın en büyük düşmanı cehalettir.\"_\n— Anonim",
+    "💡 _\"Zamanın değerini bil — her saniye geri gelmez.\"_\n— Anonim",
+    "💡 _\"Azmin önünde her engel eğilir.\"_\n— Anonim",
+    "💡 _\"Bilgi güçtür.\"_\n— Francis Bacon",
+    "💡 _\"İyilik yap, suya at — balık bilmese de Allah bilir.\"_\n— Türk Atasözü",
+    "💡 _\"Qüvvət bilikdədir.\"_\n— Anonim",
+    "💡 _\"Hər gecənin bir sabahı var.\"_\n— Azərbaycan atalar sözü",
+    "💡 _\"Səbrli olan, muradına çatar.\"_\n— Azərbaycan atalar sözü",
+    "💡 _\"Достаточно сделать один шаг — остальное сложится само.\"_\n— Anonim",
+    "💡 _\"Не бойся медленно идти — бойся стоять на месте.\"_\n— Китайская мудрость",
+    "💡 _\"The secret of getting ahead is getting started.\"_\n— Mark Twain",
+    "💡 _\"In the middle of every difficulty lies opportunity.\"_\n— Albert Einstein",
+    "💡 _\"მარტო მოიყვანე ცხენი წყლამდე, სასმელს ვეღარ მოაქცევ.\"_\n— ქართული სიბრძნე",
+    "💡 _\"Hardship often prepares an ordinary person for an extraordinary destiny.\"_\n— C.S. Lewis",
+    "💡 _\"Do not watch the clock. Do what it does — keep going.\"_\n— Sam Levenson",
+    "💡 _\"Eğer hayaller görmüyorsan, uykun değil, gözlerin kapalıdır.\"_\n— Anonim",
+    "💡 _\"Kısmet bekleyene değil, çalışana güler.\"_\n— Türk Atasözü",
+]
+
+def gunun_sozu_getir() -> str:
+    return random.choice(GUNUN_SOZLERI)
+
+# ─── BİRİM ÇEVİRİCİ ──────────────────────────────────────────────────────────
+BIRIM_TABLOLARI = {
+    'sicaklik': (
+        "🌡️ **SICAKLIK ÇEVİRİCİSİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "| °C | °F | K |\n"
+        "|:---:|:---:|:---:|\n"
+        "| -40 | -40 | 233 |\n"
+        "| 0 | 32 | 273 |\n"
+        "| 10 | 50 | 283 |\n"
+        "| 20 | 68 | 293 |\n"
+        "| 25 | 77 | 298 |\n"
+        "| 30 | 86 | 303 |\n"
+        "| 37 | 99 | 310 |\n"
+        "| 40 | 104 | 313 |\n"
+        "| 100 | 212 | 373 |\n\n"
+        "📐 _Formül: °F = °C×1.8+32 | K = °C+273_"
+    ),
+    'uzunluk': (
+        "📏 **UZUNLUK ÇEVİRİCİSİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "| km | mil | m | ft |\n"
+        "|:---:|:---:|:---:|:---:|\n"
+        "| 1 | 0.62 | 1000 | 3281 |\n"
+        "| 5 | 3.1 | 5000 | 16404 |\n"
+        "| 10 | 6.2 | 10000 | 32808 |\n"
+        "| 50 | 31 | 50000 | 164042 |\n"
+        "| 100 | 62 | 100000 | 328084 |\n\n"
+        "| cm | inch | mm |\n"
+        "|:---:|:---:|:---:|\n"
+        "| 1 | 0.39 | 10 |\n"
+        "| 10 | 3.94 | 100 |\n"
+        "| 30 | 11.81 | 300 |\n"
+        "| 100 | 39.37 | 1000 |\n\n"
+        "📐 _1 mil = 1.609 km | 1 ft = 30.48 cm | 1 inch = 2.54 cm_"
+    ),
+    'agirlik': (
+        "⚖️ **AĞIRLIK ÇEVİRİCİSİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "| kg | lb | g | oz |\n"
+        "|:---:|:---:|:---:|:---:|\n"
+        "| 0.5 | 1.1 | 500 | 17.6 |\n"
+        "| 1 | 2.2 | 1000 | 35.3 |\n"
+        "| 5 | 11 | 5000 | 176 |\n"
+        "| 10 | 22 | 10000 | 353 |\n"
+        "| 50 | 110 | 50000 | 1764 |\n"
+        "| 70 | 154 | 70000 | 2469 |\n"
+        "| 100 | 220 | 100000 | 3527 |\n\n"
+        "📐 _1 kg = 2.205 lb | 1 lb = 453.6 g | 1 oz = 28.35 g_"
+    ),
+    'hiz': (
+        "🚗 **HIZ ÇEVİRİCİSİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "| km/s | mil/s | m/s | knot |\n"
+        "|:---:|:---:|:---:|:---:|\n"
+        "| 30 | 18.6 | 8.3 | 16.2 |\n"
+        "| 50 | 31.1 | 13.9 | 27.0 |\n"
+        "| 60 | 37.3 | 16.7 | 32.4 |\n"
+        "| 80 | 49.7 | 22.2 | 43.2 |\n"
+        "| 100 | 62.1 | 27.8 | 54.0 |\n"
+        "| 120 | 74.6 | 33.3 | 64.8 |\n"
+        "| 300 | 186 | 83.3 | 162 |\n\n"
+        "📐 _1 km/s = 0.621 mph | 1 knot = 1.852 km/s_"
+    ),
+}
+
+# ─── ŞANS TOPU ────────────────────────────────────────────────────────────────
+SANS_CEVAPLARI = [
+    ("✅", "Kesinlikle evet!"),
+    ("✅", "Evet, öyle görünüyor."),
+    ("✅", "Bence evet!"),
+    ("✅", "Şüphesiz!"),
+    ("✅", "Evet, güvenebilirsin."),
+    ("✅", "Sinyaller evet diyor."),
+    ("🤔", "Şu an belirsiz, tekrar sor."),
+    ("🤔", "Cevap bulanık — biraz bekle."),
+    ("🤔", "Odaklan ve tekrar sor."),
+    ("🤔", "Şimdi tahmin edemiyorum."),
+    ("❌", "Pek öyle görünmüyor."),
+    ("❌", "Cevabım hayır."),
+    ("❌", "Kesinlikle hayır!"),
+    ("❌", "Beklentini düşür."),
+    ("❌", "Şüpheli görünüyor."),
+    ("❌", "Hayır, bu sefer olmaz."),
+]
+
+def sans_cevap_getir() -> str:
+    emoji, cevap = random.choice(SANS_CEVAPLARI)
+    return (
+        f"🎱 **ŞANS TOPU**\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"**{emoji} {cevap}**\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"_Sorunuzu düşünün ve tekrar basın._"
+    )
+
 async def hava_durumu_getir(sehir: str) -> str:
     try:
         sehir_enc = sehir.strip().replace(' ', '+')
@@ -1088,7 +1258,7 @@ ULKE_HIYERARSI = {
             'Rustavi': {
                 'Rustavi Merkez': ['Rustavi', 'Kvemo Rustavi', 'Msakhuri', 'Krtsanisi'],
                 'Gardabani': ['Gardabani', 'Ponichala', 'Soganluq', 'Agstafa', 'Vaziani'],
-                'Marneuli': ['Marneuli', 'Sadaxlı', 'Qızılajlo', 'Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Ulaşhlo', 'Kasmulo'],
+                'Marneuli': ['Marneuli', 'Sadaxlı', 'Qızılajlo', 'Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Ulaşhlo', 'Kasumlo'],
                 'Bolnisi': ['Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Başkənd', 'Sarvan'],
                 'Tetritskaro': ['Tetritskaro', 'Algeti', 'Kldeisi', 'Manglisi', 'Tsalka yolu'],
                 'Tsalka': ['Tsalka', 'Bediani', 'Dariali', 'Trialeti', 'Patara Tsalka'],
@@ -1096,7 +1266,7 @@ ULKE_HIYERARSI = {
             'Marneuli': {
                 'Marneuli Şəhər': ['Marneuli', 'Böyük Marneuli', 'Kiçik Marneuli', 'Marneulis Sənaye'],
                 'Sadaxlı': ['Sadaxlı', 'Ağbulaq', 'Qaçağan', 'Corablar', 'Hacıkənd'],
-                'Ulaşhlo-Kasmulo': ['Ulaşhlo', 'Kasmulo', 'Qızılajlo', 'Kepenekçi', 'Avranlo'],
+                'Ulaşhlo-Kasumlo': ['Ulaşhlo', 'Kasumlo', 'Qızılajlo', 'Kepenekçi', 'Avranlo'],
                 'Muğanlı-Sabirkənd': ['Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Bəhrəmtəpə'],
                 'Baydar-Tamarisi': ['Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Algeti'],
                 'Karakilis-Bolnisi': ['Karakilis', 'Bolnisi Khevi', 'Orjonikidze', 'Sarvan'],
@@ -1158,7 +1328,7 @@ ULKE_HIYERARSI = {
         },
         'koyler': {
             'Marneuli Rayonu 🇦🇿': [
-                'Marneuli', 'Sadaxlı', 'Ulaşhlo', 'Kasmulo', 'Ağbulaq',
+                'Marneuli', 'Sadaxlı', 'Ulaşhlo', 'Kasumlo', 'Ağbulaq',
                 'Qızılajlo', 'Qaçağan', 'Muğanlı', 'Sabirkənd', 'Kosalar',
                 'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta',
                 'Karakilis', 'Algeti', 'Bolnisi Khevi', 'Avranlo', 'Kepenekçi',
@@ -2527,7 +2697,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(strings.get('btn_b64_arac', '🔒 Base64'), callback_data='pro_b64')],
             [InlineKeyboardButton(strings.get('btn_sifre_arac', '🔑 Şifre Üretici'), callback_data='pro_sifre'),
              InlineKeyboardButton(strings.get('btn_wiki_arac', '🌐 Wikipedia'), callback_data='pro_wiki')],
-            [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not')],
+            [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not'),
+             InlineKeyboardButton(strings.get('btn_gunsozu_arac', '💡 Günün Sözü'), callback_data='pro_gunsozu')],
+            [InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çevir'), callback_data='pro_birim'),
+             InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -2723,43 +2896,45 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_not':
-        notlar = context.user_data.get('notlar', [])
+        notlar = not_yukle(user_id)
+        not_klavye_geri = [[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]]
         if not notlar:
-            not_klavye = [
-                [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle')],
-                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
-            ]
             await query.edit_message_text(
-                "📝 **NOT DEFTERİM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n📭 Henüz hiç notun yok.\n\nİlk notunu eklemek için aşağıdaki butona bas!",
-                reply_markup=InlineKeyboardMarkup(not_klavye),
+                "📝 **NOT DEFTERİM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n📭 Henüz hiç notun yok.\n\n✍️ İlk notunu eklemek için aşağıdaki butona bas!",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle')],
+                    *not_klavye_geri
+                ]),
                 parse_mode='Markdown'
             )
         else:
             not_metni = f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             for i, not_ in enumerate(notlar[-10:], 1):
-                not_metni += f"{i}. {html.escape(not_[:80])}\n"
-            not_klavye = [
-                [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle'),
-                 InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
-                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
-            ]
-            await query.edit_message_text(not_metni, reply_markup=InlineKeyboardMarkup(not_klavye), parse_mode='Markdown')
+                not_metni += f"{i}\\. {not_[:80]}\n"
+            await query.edit_message_text(
+                not_metni,
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle'),
+                     InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
+                    *not_klavye_geri
+                ]),
+                parse_mode='MarkdownV2'
+            )
     elif query.data == 'not_ekle':
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='pro_not')]])
         context.user_data['durum'] = 'not_ekle_bekliyor'
         await query.edit_message_text(
-            "📝 **Not Ekle**\n\nYeni notunu yaz:",
-            reply_markup=geri,
+            "📝 **Not Ekle**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nYeni notunu yaz:\n_İptal için /start yaz_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='pro_not')]]),
             parse_mode='Markdown'
         )
     elif query.data == 'not_sil_menu':
-        notlar = context.user_data.get('notlar', [])
+        notlar = not_yukle(user_id)
         if not notlar:
             await query.answer("Silinecek not yok!", show_alert=True)
             return
         satirlar = []
         for i, not_ in enumerate(notlar):
-            satirlar.append([InlineKeyboardButton(f"🗑️ {i+1}. {not_[:30]}...", callback_data=f"not_sil_{i}")])
+            satirlar.append([InlineKeyboardButton(f"🗑️ {i+1}. {not_[:28]}...", callback_data=f"not_sil_{i}")])
         satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='pro_not')])
         await query.edit_message_text(
             "🗑️ **Silmek istediğin notu seç:**",
@@ -2768,17 +2943,74 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data.startswith('not_sil_') and query.data != 'not_sil_menu':
         idx = int(query.data[8:])
-        notlar = context.user_data.get('notlar', [])
+        notlar = not_yukle(user_id)
         if 0 <= idx < len(notlar):
-            silinen = notlar.pop(idx)
-            context.user_data['notlar'] = notlar
-            await query.answer(f"✅ Not silindi!", show_alert=False)
+            notlar.pop(idx)
+            not_kaydet(user_id, notlar)
+            await query.answer("✅ Not silindi!", show_alert=False)
+        if not notlar:
+            await query.edit_message_text(
+                "📝 **NOT DEFTERİM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n📭 Tüm notlar silindi.",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle')],
+                    [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+                ]),
+                parse_mode='Markdown'
+            )
+        else:
+            not_metni = f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            for i, n in enumerate(notlar[-10:], 1):
+                not_metni += f"{i}\\. {n[:80]}\n"
+            await query.edit_message_text(
+                not_metni,
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle'),
+                     InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
+                    [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+                ]),
+                parse_mode='MarkdownV2'
+            )
+    elif query.data == 'pro_gunsozu':
+        soz = gunun_sozu_getir()
         await query.edit_message_text(
-            f"📝 **NOT DEFTERİM** ({len(notlar)} not)\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n" +
-            ('\n'.join(f"{i+1}. {html.escape(n[:80])}" for i, n in enumerate(notlar[-10:])) or '📭 Not defteri boş.'),
+            f"💡 **GÜNÜN SÖZÜ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n{soz}",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("➕ Not Ekle", callback_data='not_ekle'),
-                 InlineKeyboardButton("🗑️ Not Sil", callback_data='not_sil_menu')],
+                [InlineKeyboardButton("🔄 Yeni Söz", callback_data='pro_gunsozu')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro_birim':
+        await query.edit_message_text(
+            "📐 **BİRİM ÇEVİRİCİSİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nHangi birim kategorisini görmek istiyorsunuz?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🌡️ Sıcaklık (°C/°F/K)", callback_data='birim_sicaklik'),
+                 InlineKeyboardButton("📏 Uzunluk (km/m/mil)", callback_data='birim_uzunluk')],
+                [InlineKeyboardButton("⚖️ Ağırlık (kg/lb/g)", callback_data='birim_agirlik'),
+                 InlineKeyboardButton("🚗 Hız (km/s-mph)", callback_data='birim_hiz')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('birim_'):
+        tip = query.data[6:]
+        tablo = BIRIM_TABLOLARI.get(tip, "❌ Bilinmeyen kategori.")
+        await query.edit_message_text(
+            tablo,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🌡️ Sıcaklık", callback_data='birim_sicaklik'),
+                 InlineKeyboardButton("📏 Uzunluk", callback_data='birim_uzunluk')],
+                [InlineKeyboardButton("⚖️ Ağırlık", callback_data='birim_agirlik'),
+                 InlineKeyboardButton("🚗 Hız", callback_data='birim_hiz')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro_sans':
+        await query.edit_message_text(
+            sans_cevap_getir(),
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🎱 Tekrar Sor", callback_data='pro_sans')],
                 [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
             ]),
             parse_mode='Markdown'
@@ -3005,18 +3237,19 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     if context.user_data.get('durum') == 'not_ekle_bekliyor':
         context.user_data['durum'] = None
         yeni_not = update.message.text.strip()
-        if not context.user_data.get('notlar'):
-            context.user_data['notlar'] = []
-        context.user_data['notlar'].append(yeni_not)
-        notlar = context.user_data['notlar']
-        geri = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📝 Not Defterime Git", callback_data='pro_not')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
-        ])
+        if not yeni_not:
+            return
+        notlar = not_yukle(user_id)
+        notlar.append(yeni_not)
+        not_kaydet(user_id, notlar)
         await update.message.reply_text(
-            f"✅ **Not kaydedildi!**\n\n_{html.escape(yeni_not[:100])}_\n\n📝 Toplam {len(notlar)} not.",
+            f"✅ **Not kaydedildi!**\n\n`{html.escape(yeni_not[:120])}`\n\n📝 Toplam {len(notlar)} not.",
             parse_mode='Markdown',
-            reply_markup=geri
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("📝 Not Defterime Git", callback_data='pro_not'),
+                 InlineKeyboardButton("➕ Bir Tane Daha", callback_data='not_ekle')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            ])
         )
         return
 
