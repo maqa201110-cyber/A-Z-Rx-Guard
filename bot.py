@@ -1257,8 +1257,8 @@ ULKE_HIYERARSI = {
             },
             'Rustavi': {
                 'Rustavi Merkez': ['Rustavi', 'Kvemo Rustavi', 'Msakhuri', 'Krtsanisi'],
-                'Gardabani': ['Gardabani', 'Ponichala', 'Soganluq', 'Agstafa', 'Vaziani'],
-                'Marneuli': ['Marneuli', 'Sadaxlı', 'Qızılajlo', 'Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Ulaşhlo', 'Kasumlo'],
+                'Gardabani': ['Gardabani', 'Ponichala', 'Soganluq', 'Vaziani'],
+                'Marneuli': ['Marneuli', 'Sadaxlı', 'Qızılajlo', 'Muğanlı', 'Sabirkənd', 'Kosalar', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Karakilis', 'Algeti', 'Ulaşhlo', 'Kasumlo'],
                 'Bolnisi': ['Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Başkənd', 'Sarvan'],
                 'Tetritskaro': ['Tetritskaro', 'Algeti', 'Kldeisi', 'Manglisi', 'Tsalka yolu'],
                 'Tsalka': ['Tsalka', 'Bediani', 'Dariali', 'Trialeti', 'Patara Tsalka'],
@@ -1267,7 +1267,7 @@ ULKE_HIYERARSI = {
                 'Marneuli Şəhər': ['Marneuli', 'Böyük Marneuli', 'Kiçik Marneuli', 'Marneulis Sənaye'],
                 'Sadaxlı': ['Sadaxlı', 'Ağbulaq', 'Qaçağan', 'Corablar', 'Hacıkənd'],
                 'Ulaşhlo-Kasumlo': ['Ulaşhlo', 'Kasumlo', 'Qızılajlo', 'Kepenekçi', 'Avranlo'],
-                'Muğanlı-Sabirkənd': ['Muğanlı', 'Sabirkənd', 'Kosalar', 'Ağcabədi', 'Bəhrəmtəpə'],
+                'Muğanlı-Sabirkənd': ['Muğanlı', 'Sabirkənd', 'Kosalar', 'Bəhrəmtəpə'],
                 'Baydar-Tamarisi': ['Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta', 'Algeti'],
                 'Karakilis-Bolnisi': ['Karakilis', 'Bolnisi Khevi', 'Orjonikidze', 'Sarvan'],
             },
@@ -1327,19 +1327,19 @@ ULKE_HIYERARSI = {
             },
         },
         'koyler': {
-            'Marneuli Rayonu 🇦🇿': [
+            'Marneuli Rayonu': [
                 'Marneuli', 'Sadaxlı', 'Ulaşhlo', 'Kasumlo', 'Ağbulaq',
                 'Qızılajlo', 'Qaçağan', 'Muğanlı', 'Sabirkənd', 'Kosalar',
-                'Ağcabədi', 'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta',
+                'Baydar', 'Tamarisi', 'Şülavəri', 'Dalis Mta',
                 'Karakilis', 'Algeti', 'Bolnisi Khevi', 'Avranlo', 'Kepenekçi',
                 'Corablar', 'Hacıkənd', 'Bəhrəmtəpə', 'Sarvan', 'Orjonikidze',
             ],
-            'Gardabani Rayonu 🇦🇿': [
+            'Gardabani Rayonu': [
                 'Gardabani', 'Rustavi', 'Soğanlıq', 'Ponichala', 'Krasnogorsk',
                 'Akhali Samgori', 'Norio', 'Eldari', 'Tetri Tskaro', 'Nazarlevani',
                 'Vaziani', 'Patardzeuli', 'Kvemo Ponichala', 'Samgori',
             ],
-            'Bolnisi Rayonu 🇦🇿': [
+            'Bolnisi Rayonu': [
                 'Bolnisi', 'Dmanisi', 'Kazreti', 'Dashbulagi', 'Başkənd',
                 'Sarvan', 'Moliti', 'Qızılhacılı', 'Kvemo Bolnisi', 'Karatakla',
                 'Sioni', 'Klde', 'Tambovka',
@@ -1352,7 +1352,7 @@ ULKE_HIYERARSI = {
                 'Tsalka', 'Bediani', 'Dariali', 'Trialeti', 'Patara Tsalka',
                 'Gantiadi', 'Ktsia', 'Kumisi',
             ],
-            'Akhalkalaki Rayonu 🇦🇿': [
+            'Akhalkalaki Rayonu': [
                 'Akhalkalaki', 'Ninotsminda', 'Bavra', 'Kartsakhi',
                 'Gandzani', 'Arjevaniskhevi', 'Sameba',
             ],
