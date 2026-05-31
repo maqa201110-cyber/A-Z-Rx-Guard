@@ -426,6 +426,7 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings['btn_fun'], callback_data='menu_fun'),
+            InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
         ],
         [
             InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu')
