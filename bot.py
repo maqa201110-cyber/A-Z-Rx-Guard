@@ -34,7 +34,7 @@ TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN environment variable is not set!")
 
-MY_ID = 5730924995
+MY_ID = 74210240
 KANAL_ID = -1003930940829
 KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
