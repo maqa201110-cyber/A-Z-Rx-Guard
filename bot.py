@@ -1272,21 +1272,20 @@ ULKE_HIYERARSI = {
                 'Karakilis-Bolnisi': ['Karakilis', 'Bolnisi Khevi', 'Orjonikidze', 'Sarvan'],
             },
             'Gardabani': {
-                'Gardabani Merkez': ['Gardabani', 'Rustavi', 'Ponichala', 'Soğanlıq'],
+                'Gardabani Merkez': ['Gardabani', 'Ponichala', 'Soğanlıq'],
                 'Vaziani': ['Vaziani', 'Norio', 'Eldari', 'Samgori', 'Akhali Samgori'],
-                'Krasnogorsk': ['Krasnogorsk', 'Tetri Tskaro', 'Nazarlevani', 'Patardzeuli'],
+                'Krasnogorsk': ['Krasnogorsk', 'Nazarlevani', 'Patardzeuli'],
             },
             'Gori': {
                 'Gori Merkez': ['Gori', 'Akhaldaba', 'Kvakhvreli', 'Variani', 'Skra'],
                 'Kareli': ['Kareli', 'Ruisi', 'Ateni', 'Surami', 'Agara'],
                 'Kaspi': ['Kaspi', 'Agara', 'Tsinari', 'Skulani', 'Khashuri'],
-                'Borjomi': ['Borjomi', 'Bakuriani', 'Likani', 'Tsagveri', 'Abastumani'],
                 'Khashuri': ['Khashuri', 'Surami', 'Kvishkheti', 'Agara', 'Tsikhisjvari'],
             },
             'Borjomi': {
                 'Borjomi Merkez': ['Borjomi', 'Likani', 'Tsagveri', 'Abastumani', 'Vale'],
                 'Bakuriani': ['Bakuriani', 'Kokhta', 'Tba', 'Didveli', 'Mitarbi'],
-                'Akhaltsikhe': ['Akhaltsikhe', 'Aspindza', 'Adigeni', 'Zarzma', 'Vale'],
+                'Aspindza': ['Aspindza', 'Adigeni', 'Zarzma', 'Vale'],
             },
             'Zugdidi': {
                 'Zugdidi Merkez': ['Zugdidi', 'Jvari', 'Anaklia', 'Ganmukhuri', 'Ingiri'],
@@ -1335,8 +1334,8 @@ ULKE_HIYERARSI = {
                 'Corablar', 'Hacıkənd', 'Bəhrəmtəpə', 'Sarvan', 'Orjonikidze',
             ],
             'Gardabani Rayonu': [
-                'Gardabani', 'Rustavi', 'Soğanlıq', 'Ponichala', 'Krasnogorsk',
-                'Akhali Samgori', 'Norio', 'Eldari', 'Tetri Tskaro', 'Nazarlevani',
+                'Gardabani', 'Soğanlıq', 'Ponichala', 'Krasnogorsk',
+                'Akhali Samgori', 'Norio', 'Eldari', 'Nazarlevani',
                 'Vaziani', 'Patardzeuli', 'Kvemo Ponichala', 'Samgori',
             ],
             'Bolnisi Rayonu': [
