@@ -14,6 +14,8 @@ import ast
 import random
 import string
 import json
+import tempfile
+import shutil
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
@@ -568,9 +570,132 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings.get('btn_pro_araclar', '⚡ PRO ARAÇLAR'), callback_data='menu_pro_araclar')
+        ],
+        [
+            InlineKeyboardButton(strings.get('btn_video_indir', '📥 VİDEO & SES İNDİRİCİ'), callback_data='menu_video_indir')
         ]
     ]
     return InlineKeyboardMarkup(klavye)
+
+# --- 📥 VİDEO & SES İNDİRİCİ ---
+FFMPEG_YOL = '/nix/store/41s8i1695hbcpqdpjqrm3i55ifnysgrf-replit-runtime-path/bin/ffmpeg'
+MAKS_DOSYA = 49 * 1024 * 1024  # 49 MB Telegram sınırı
+
+PLATFORM_EMOJI = {
+    'youtube.com': '▶️ YouTube', 'youtu.be': '▶️ YouTube',
+    'instagram.com': '📸 Instagram', 'instagr.am': '📸 Instagram',
+    'tiktok.com': '🎵 TikTok', 'vm.tiktok.com': '🎵 TikTok',
+    'twitter.com': '🐦 Twitter/X', 'x.com': '🐦 Twitter/X',
+    'facebook.com': '📘 Facebook', 'fb.watch': '📘 Facebook', 'fb.com': '📘 Facebook',
+    'reddit.com': '🤖 Reddit',
+    'pinterest.com': '📌 Pinterest',
+    'dailymotion.com': '🎬 Dailymotion',
+    'twitch.tv': '🎮 Twitch',
+    'vimeo.com': '🎞️ Vimeo',
+    'soundcloud.com': '🎧 SoundCloud',
+    'streamable.com': '📹 Streamable',
+    'bilibili.com': '📺 Bilibili',
+    'ok.ru': '🌐 OK.ru',
+    'vk.com': '💬 VK',
+}
+
+URL_REGEX = re.compile(r'https?://\S+', re.IGNORECASE)
+
+def _platform_tespit(url: str) -> str:
+    url_lower = url.lower()
+    for domain, isim in PLATFORM_EMOJI.items():
+        if domain in url_lower:
+            return isim
+    return '🌐 Video'
+
+def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
+    try:
+        import yt_dlp
+        opts = {
+            'format': 'bestvideo[ext=mp4][filesize<45M]+bestaudio[ext=m4a]/best[ext=mp4][filesize<45M]/best[filesize<45M]/best',
+            'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+            'merge_output_format': 'mp4',
+            'quiet': True,
+            'no_warnings': True,
+            'ffmpeg_location': FFMPEG_YOL,
+            'noplaylist': True,
+        }
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = info.get('title', 'Video')[:80]
+            duration = info.get('duration', 0)
+            thumb = info.get('thumbnail', None)
+            dosyalar = [f for f in os.listdir(tmp_dir)]
+            if not dosyalar:
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
+            yol = os.path.join(tmp_dir, dosyalar[0])
+            boyut = os.path.getsize(yol)
+            if boyut > MAKS_DOSYA:
+                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB). Telegram sınırı 49 MB.'}
+            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb}
+    except Exception as e:
+        hata = str(e)
+        if 'Unsupported URL' in hata or 'No video formats' in hata:
+            hata = 'Bu platform desteklenmiyor veya video bulunamadı.'
+        elif 'Private video' in hata or 'private' in hata.lower():
+            hata = 'Video gizli/özel, indirilemiyor.'
+        elif 'age' in hata.lower():
+            hata = 'Yaş kısıtlı içerik, indirilemiyor.'
+        return {'ok': False, 'hata': hata[:200]}
+
+def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
+    try:
+        import yt_dlp
+        # Önce ffmpeg ile mp3'e dönüştür, yoksa en iyi ses formatını indir
+        ffmpeg_var = os.path.exists(FFMPEG_YOL)
+        if ffmpeg_var:
+            opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
+                'quiet': True,
+                'no_warnings': True,
+                'ffmpeg_location': FFMPEG_YOL,
+                'noplaylist': True,
+            }
+        else:
+            opts = {
+                'format': 'bestaudio[ext=m4a]/bestaudio/best',
+                'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+                'quiet': True,
+                'no_warnings': True,
+                'noplaylist': True,
+            }
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = info.get('title', 'Ses')[:80]
+            duration = info.get('duration', 0)
+            dosyalar = [f for f in os.listdir(tmp_dir)]
+            if not dosyalar:
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
+            # mp3 tercih et
+            mp3ler = [f for f in dosyalar if f.endswith('.mp3')]
+            sec = mp3ler[0] if mp3ler else dosyalar[0]
+            yol = os.path.join(tmp_dir, sec)
+            boyut = os.path.getsize(yol)
+            if boyut > MAKS_DOSYA:
+                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB).'}
+            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration}
+    except Exception as e:
+        hata = str(e)
+        if 'Unsupported URL' in hata:
+            hata = 'Bu platform desteklenmiyor.'
+        return {'ok': False, 'hata': hata[:200]}
+
+def _sure_formatla(saniye) -> str:
+    if not saniye:
+        return ''
+    try:
+        s = int(saniye)
+        d, s = divmod(s, 60)
+        return f'{d}:{s:02d}'
+    except Exception:
+        return ''
 
 # --- 🔍 TG PANELİ — GELİŞMİŞ KULLANICI/GRUP/KANAL SORGU FONKSİYONU ---
 async def panel_kullanici_sorgula(bot, sorgu: str) -> str:
@@ -3150,6 +3275,77 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]),
             parse_mode='Markdown'
         )
+    elif query.data == 'menu_video_indir':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]])
+        await query.edit_message_text(
+            "📥 **VİDEO & SES İNDİRİCİ**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🌍 **1000+ platform destekleniyor:**\n"
+            "▶️ YouTube · 📸 Instagram · 🎵 TikTok\n"
+            "🐦 Twitter/X · 📘 Facebook · 🤖 Reddit\n"
+            "🎞️ Vimeo · 🎮 Twitch · 🎧 SoundCloud\n"
+            "📺 Bilibili · 💬 VK · 🌐 OK.ru ve daha fazlası\n\n"
+            "📌 **Kullanım çok basit:**\n"
+            "Sadece video linkini buraya **yapıştır**,\n"
+            "ben video mu ses mi istediğini sorarım! 🎯\n\n"
+            "💡 _Maksimum dosya boyutu: 49 MB_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+
+    elif query.data in ('vid_video', 'vid_ses'):
+        url = context.user_data.get('vid_url')
+        if not url:
+            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
+            return
+        tip = 'video' if query.data == 'vid_video' else 'ses'
+        platform = _platform_tespit(url)
+        bekle_metni = f"⬇️ **{platform}** {'video' if tip == 'video' else 'ses'} indiriliyor...\n_Bu işlem birkaç saniye sürebilir._"
+        bekle = await query.message.reply_text(bekle_metni, parse_mode='Markdown')
+        tmp_dir = tempfile.mkdtemp()
+        try:
+            if tip == 'video':
+                sonuc = await asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir)
+            else:
+                sonuc = await asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir)
+
+            if not sonuc['ok']:
+                await bekle.edit_text(f"❌ **İndirme başarısız**\n\n`{html.escape(sonuc['hata'])}`", parse_mode='Markdown')
+                return
+
+            dosya_yol = sonuc['yol']
+            baslik = sonuc.get('baslik', 'İndirildi')
+            sure_str = _sure_formatla(sonuc.get('sure', 0))
+            caption = f"📥 **{html.escape(baslik)}**"
+            if sure_str:
+                caption += f"\n⏱ {sure_str}"
+            caption += f"\n\n🤖 _AZRxGUARD İndirici_"
+
+            await bekle.edit_text(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", parse_mode='Markdown')
+
+            with open(dosya_yol, 'rb') as f:
+                if tip == 'video':
+                    await query.message.reply_video(
+                        video=f,
+                        caption=caption,
+                        parse_mode='Markdown',
+                        supports_streaming=True
+                    )
+                else:
+                    await query.message.reply_audio(
+                        audio=f,
+                        caption=caption,
+                        parse_mode='Markdown',
+                        title=baslik[:60],
+                        performer='AZRxGUARD'
+                    )
+            await bekle.delete()
+        except Exception as e:
+            logger.error(f"Video indirme hatası: {e}")
+            await bekle.edit_text(f"❌ **Bir hata oluştu:**\n`{html.escape(str(e)[:200])}`", parse_mode='Markdown')
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
     elif query.data == 'go_home':
         await query.edit_message_text(strings['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
@@ -3385,6 +3581,30 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
                  InlineKeyboardButton("➕ Bir Tane Daha", callback_data='not_ekle')],
                 [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
             ])
+        )
+        return
+
+    # --- 📥 URL TESPİTİ — VİDEO İNDİRİCİ ---
+    mesaj_metni = update.message.text.strip() if update.message and update.message.text else ''
+    url_eslesmesi = URL_REGEX.search(mesaj_metni)
+    if url_eslesmesi and not context.user_data.get('durum'):
+        url = url_eslesmesi.group(0).rstrip('.,!?;)')
+        platform = _platform_tespit(url)
+        context.user_data['vid_url'] = url
+        indir_klavye = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("📹 Video İndir", callback_data='vid_video'),
+                InlineKeyboardButton("🎵 Ses İndir", callback_data='vid_ses')
+            ],
+            [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
+        ])
+        await update.message.reply_text(
+            f"🔗 **{platform} linki algılandı!**\n\n"
+            f"`{html.escape(url[:80])}{'...' if len(url) > 80 else ''}`\n\n"
+            f"Ne indirmek istiyorsun?",
+            parse_mode='Markdown',
+            reply_markup=indir_klavye,
+            disable_web_page_preview=True
         )
         return
 
