@@ -74,7 +74,7 @@ def uyeleri_kaydet(uyeler_seti):
 # --- DİL SÖZLÜĞÜ ---
 LANG_DATA = {
     'tr': {
-        'welcome': "👋 **AZRxGUARD'a hoş geldin!**\n\nLütfen işlem yapmak için aşağıdaki butonları kullanın.\n\n📋 _TÜM KOMUTLARI GÖRMEK İÇİN /help yazın_",
+        'welcome': "👋 **AZRxGUARD'a hoş geldin!**\n\nLütfen işlem yapmak için aşağıdaki butonları kullanın.",
         'lang_select': "🌍 **Lütfen bir dil seçin / Please select a language:**",
         'lang_changed': "✅ Bot dili başarıyla **Türkçe** olarak ayarlandı!",
         'btn_lang': "🌍 Dil / Language",
@@ -151,7 +151,7 @@ LANG_DATA = {
         'out_hesap_title': 'HESAP MAKİNESİ', 'out_hesap_ifade': 'İfade', 'out_hesap_sonuc': 'Sonuç',
     },
     'az': {
-        'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.\n\n📋 _Bütün əmrləri görmək üçün /help yazın_",
+        'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
         'lang_select': "🌍 **Lütfen bir dil seçin / Please select a language:**",
         'lang_changed': "✅ Bot dili uğurla **Azərbaycanca** olaraq dəyişdirildi!",
         'btn_lang': "🌍 Dil / Language",
@@ -228,7 +228,7 @@ LANG_DATA = {
         'out_hesap_title': 'KALKULYATOR', 'out_hesap_ifade': 'İfadə', 'out_hesap_sonuc': 'Nəticə',
     },
     'ru': {
-        'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.\n\n📋 _Для просмотра всех команд напишите /help_",
+        'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
         'lang_select': "🌍 **Пожалуйста, выберите язык / Please select a language:**",
         'lang_changed': "✅ Язык бота успешно изменен на **Русский**!",
         'btn_lang': "🌍 Язык / Language",
@@ -305,7 +305,7 @@ LANG_DATA = {
         'out_hesap_title': 'КАЛЬКУЛЯТОР', 'out_hesap_ifade': 'Выражение', 'out_hesap_sonuc': 'Результат',
     },
     'en': {
-        'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.\n\n📋 _Type /help to see all commands_",
+        'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
         'lang_select': "🌍 **Please select a language / Lütfen bir dil seçin:**",
         'lang_changed': "✅ Bot language has been successfully set to **English**!",
         'btn_lang': "🌍 Dil / Language",
@@ -382,7 +382,7 @@ LANG_DATA = {
         'out_hesap_title': 'CALCULATOR', 'out_hesap_ifade': 'Expression', 'out_hesap_sonuc': 'Result',
     },
     'de': {
-        'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.\n\n📋 _Schreiben Sie /help um alle Befehle zu sehen_",
+        'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
         'lang_select': "🌍 **Bitte wählen Sie eine Sprache / Please select a language:**",
         'lang_changed': "✅ Die Botsprache wurde erfolgreich auf **Deutsch** umgestellt!",
         'btn_lang': "🌍 Sprache / Language",
@@ -459,7 +459,7 @@ LANG_DATA = {
         'out_hesap_title': 'TASCHENRECHNER', 'out_hesap_ifade': 'Ausdruck', 'out_hesap_sonuc': 'Ergebnis',
     },
     'ka': {
-        'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.\n\n📋 _ყველა ბრძანების სანახავად დაწერეთ /help_",
+        'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
         'lang_select': "🌍 **გთხოვთ აირჩიოთ ენა / Please select a language:**",
         'lang_changed': "✅ ბოტის ენა წარმატებით შეიცვალა **ქართულად**!",
         'btn_lang': "🌍 ენა / Language",
@@ -3772,249 +3772,6 @@ async def b64_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sonuc = base64_islem(metin, lang)
     await update.effective_message.reply_text(sonuc, parse_mode='Markdown')
 
-async def help_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id if update.effective_user else 0
-    lang = get_lang(context, user_id)
-
-    HELP_METNI = {
-        'tr': (
-            "🛡️ **AZRxGUARD — Tam Komut & Özellik Listesi**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🚀 **GENEL**\n"
-            "/start — Botu başlat & ana menüyü aç\n"
-            "/help — Bu listeyi göster\n"
-            "/id — Kendi & sohbet ID bilgini öğren\n"
-            "/stats — Bot istatistiklerini gör _(özel mesajda)_\n\n"
-            "🌐 **IP SORGULAMA**\n"
-            "/ip `8.8.8.8` — Temel IP bilgisi (ülke, ISP, konum)\n"
-            "/ip\\_analiz `8.8.8.8` — Gelişmiş analiz: VPN/Proxy/Tor tespiti, tehdit skoru, açık port taraması\n\n"
-            "⚡ **PRO ARAÇLAR** _(komutla)_\n"
-            "/hesap `sqrt(144)` — Bilimsel hesap makinesi (sin/cos/log/pi...)\n"
-            "/hash `metin` — MD5 · SHA1 · SHA256 · SHA512 üret\n"
-            "/hava `İstanbul` — Anlık hava durumu (sıcaklık/nem/rüzgar)\n"
-            "/kur `100 USD TRY` — Gerçek zamanlı döviz çevirici\n"
-            "/saat — Dünya şehirlerinin anlık saatlerini göster\n"
-            "/b64 `encode metin` — Base64 şifrele/çöz\n\n"
-            "🔧 **PRO ARAÇLAR** _(menüden: ⚡ PRO ARAÇLAR)_\n"
-            "🔑 Şifre Üretici — 8-32 karakter güçlü şifre oluştur\n"
-            "🌐 Wikipedia — Konuyu seçtiğin dilde Wikipedia'dan ara\n"
-            "📝 Not Defteri — Kişisel notlarını bot üzerinde sakla/sil\n"
-            "💡 Günün Sözü — Her gün yeni motivasyon sözü\n"
-            "📐 Birim Çevirici — °C/°F/K · km/mil · kg/lb · km/h · mph\n"
-            "🎱 Şans Topu — Evet/Hayır şans sorusu sor\n\n"
-            "🕵️ **USERNAME HUNTER** _(menüden)_\n"
-            "🔎 Platform Kontrolü — Kullanıcı adını 14 platformda tara\n"
-            "_(Instagram, Twitter, TikTok, GitHub, LinkedIn ve daha fazlası)_\n\n"
-            "👤 **KİŞİSEL**\n"
-            "/meid — Telegram kimlik kartın (ID, kullanıcı adı, premium...)\n\n"
-            "⏰ **HATIRLATICI**\n"
-            "/hatirlat `21:30 Ödev` — Bugün için hatırlatıcı kur\n"
-            "/hatirlat `25.06.2026 09:00 Toplantı` — İleri tarih için hatırlatıcı\n\n"
-            "🎲 **EĞLENCE** _(menüden: 🎲 Eğlence)_\n"
-            "🎲 Zar At — 1-6 arası rastgele zar at\n\n"
-            "🖼️ **OTOMATİK ÖZELLİK**\n"
-            "📷 Filigran — Gruba fotoğraf/video gönder, otomatik @AZRxMAQA filigranı eklenir\n\n"
-            "🤖 _AZRxGUARD — Çok dilli güvenlik & yardımcı botu_"
-        ),
-        'az': (
-            "🛡️ **AZRxGUARD — Tam Əmr & Xüsusiyyət Siyahısı**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🚀 **ÜMUMI**\n"
-            "/start — Botu başlat & ana menyunu aç\n"
-            "/help — Bu siyahını göstər\n"
-            "/id — Öz & söhbət ID məlumatını öyrən\n"
-            "/stats — Bot statistikası _(şəxsi mesajda)_\n\n"
-            "🌐 **IP SORĞU**\n"
-            "/ip `8.8.8.8` — Əsas IP məlumatı (ölkə, ISP, məkan)\n"
-            "/ip\\_analiz `8.8.8.8` — Ətraflı analiz: VPN/Proxy/Tor, təhdid skoru, açıq port skan\n\n"
-            "⚡ **PRO ALƏTLƏR** _(əmrlə)_\n"
-            "/hesap `sqrt(144)` — Elmi kalkulyator (sin/cos/log/pi...)\n"
-            "/hash `mətn` — MD5 · SHA1 · SHA256 · SHA512\n"
-            "/hava `Bakı` — Canlı hava (temperatur/rütubət/külək)\n"
-            "/kur `100 USD AZN` — Real valyuta çeviricisi\n"
-            "/saat — Dünya şəhərlərinin anlıq saatları\n"
-            "/b64 `encode mətn` — Base64 şifrələ/açıqla\n\n"
-            "🔧 **PRO ALƏTLƏR** _(menyudan: ⚡ PRO ALƏTLƏR)_\n"
-            "🔑 Şifrə Yaradıcı — 8-32 simvol güclü şifrə\n"
-            "🌐 Wikipedia — Mövzunu seçilmiş dildə axtar\n"
-            "📝 Qeyd Dəftəri — Şəxsi qeydlərini bot üzərində saxla/sil\n"
-            "💡 Günün Sözü — Hər gün yeni motivasiya sözü\n"
-            "📐 Vahid Çeviricisi — °C/°F/K · km/mil · kg/lb · km/s · mph\n"
-            "🎱 Şans Topu — Bəli/Xeyr şans sualı ver\n\n"
-            "🕵️ **USERNAME HUNTER** _(menyudan)_\n"
-            "🔎 Platform Yoxlama — İstifadəçi adını 14 platformda axtar\n"
-            "_(Instagram, Twitter, TikTok, GitHub, LinkedIn və s.)_\n\n"
-            "👤 **ŞƏXSİ**\n"
-            "/meid — Telegram kimlik kartın (ID, istifadəçi adı, premium...)\n\n"
-            "⏰ **XATIRLATICI**\n"
-            "/hatirlat `21:30 Ev tapşırığı` — Bu gün üçün xatırlatıcı\n"
-            "/hatirlat `25.06.2026 09:00 İclас` — İrəli tarix üçün xatırlatıcı\n\n"
-            "🎲 **ƏYLƏNCƏ** _(menyudan: 🎲 Əyləncə)_\n"
-            "🎲 Zər At — 1-6 arası təsadüfi zər at\n\n"
-            "🖼️ **OTOMATİK XÜSUSİYYƏT**\n"
-            "📷 Filigrаn — Qrupa şəkil/video göndər, avtomatik @AZRxMAQA filigranı əlavə edilir\n\n"
-            "🤖 _AZRxGUARD — Çoxdilli təhlükəsizlik & köməkçi bot_"
-        ),
-        'ru': (
-            "🛡️ **AZRxGUARD — Полный список команд & функций**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🚀 **ОБЩЕЕ**\n"
-            "/start — Запустить бота & открыть главное меню\n"
-            "/help — Показать этот список\n"
-            "/id — Узнать свой ID и ID чата\n"
-            "/stats — Статистика бота _(в личных сообщениях)_\n\n"
-            "🌐 **IP ЗАПРОС**\n"
-            "/ip `8.8.8.8` — Базовая информация об IP (страна, ISP, местоположение)\n"
-            "/ip\\_analiz `8.8.8.8` — Расширенный анализ: VPN/Proxy/Tor, рейтинг угроз, сканирование портов\n\n"
-            "⚡ **ПРО ИНСТРУМЕНТЫ** _(командой)_\n"
-            "/hesap `sqrt(144)` — Научный калькулятор (sin/cos/log/pi...)\n"
-            "/hash `текст` — MD5 · SHA1 · SHA256 · SHA512\n"
-            "/hava `Москва` — Погода в реальном времени (температура/влажность/ветер)\n"
-            "/kur `100 USD RUB` — Конвертер валют в реальном времени\n"
-            "/saat — Текущее время в городах мира\n"
-            "/b64 `encode текст` — Base64 шифрование/расшифровка\n\n"
-            "🔧 **ПРО ИНСТРУМЕНТЫ** _(из меню: ⚡ PRO TOOLS)_\n"
-            "🔑 Генератор паролей — Надёжный пароль 8-32 символа\n"
-            "🌐 Wikipedia — Поиск по теме на выбранном языке\n"
-            "📝 Блокнот — Сохраняй и удаляй личные заметки в боте\n"
-            "💡 Цитата дня — Каждый день новая мотивационная цитата\n"
-            "📐 Конвертер единиц — °C/°F/K · км/миль · кг/фунт · км/ч · mph\n"
-            "🎱 Шар удачи — Задай вопрос Да/Нет\n\n"
-            "🕵️ **USERNAME HUNTER** _(из меню)_\n"
-            "🔎 Проверка по платформам — Найди никнейм на 14 платформах\n"
-            "_(Instagram, Twitter, TikTok, GitHub, LinkedIn и другие)_\n\n"
-            "👤 **ЛИЧНОЕ**\n"
-            "/meid — Твоя Telegram ID-карточка (ID, юзернейм, premium...)\n\n"
-            "⏰ **НАПОМИНАНИЕ**\n"
-            "/hatirlat `21:30 Сделать домашку` — Напоминание на сегодня\n"
-            "/hatirlat `25.06.2026 09:00 Встреча` — Напоминание на будущую дату\n\n"
-            "🎲 **РАЗВЛЕЧЕНИЯ** _(из меню: 🎲 Развлечения)_\n"
-            "🎲 Бросить кубик — Случайное число 1-6\n\n"
-            "🖼️ **АВТОМАТИЧЕСКАЯ ФУНКЦИЯ**\n"
-            "📷 Водяной знак — Отправь фото/видео в группу — автоматически добавится @AZRxMAQA\n\n"
-            "🤖 _AZRxGUARD — Многоязычный бот безопасности и помощник_"
-        ),
-        'en': (
-            "🛡️ **AZRxGUARD — Full Command & Feature List**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🚀 **GENERAL**\n"
-            "/start — Launch the bot & open main menu\n"
-            "/help — Show this list\n"
-            "/id — Get your user ID and chat ID\n"
-            "/stats — Bot statistics _(private chat only)_\n\n"
-            "🌐 **IP LOOKUP**\n"
-            "/ip `8.8.8.8` — Basic IP info (country, ISP, location)\n"
-            "/ip\\_analiz `8.8.8.8` — Advanced analysis: VPN/Proxy/Tor detection, threat score, open port scan\n\n"
-            "⚡ **PRO TOOLS** _(via command)_\n"
-            "/hesap `sqrt(144)` — Scientific calculator (sin/cos/log/pi...)\n"
-            "/hash `text` — Generate MD5 · SHA1 · SHA256 · SHA512\n"
-            "/hava `London` — Live weather (temp/humidity/wind)\n"
-            "/kur `100 USD EUR` — Real-time currency converter\n"
-            "/saat — Current time in world cities\n"
-            "/b64 `encode text` — Base64 encode/decode\n\n"
-            "🔧 **PRO TOOLS** _(via menu: ⚡ PRO TOOLS)_\n"
-            "🔑 Password Generator — Strong password 8-32 characters\n"
-            "🌐 Wikipedia — Search any topic in your selected language\n"
-            "📝 Notepad — Save and delete personal notes inside the bot\n"
-            "💡 Quote of the Day — New motivational quote every day\n"
-            "📐 Unit Converter — °C/°F/K · km/mi · kg/lb · km/h · mph\n"
-            "🎱 Magic 8-Ball — Ask any Yes/No question\n\n"
-            "🕵️ **USERNAME HUNTER** _(via menu)_\n"
-            "🔎 Platform Check — Search a username across 14 platforms\n"
-            "_(Instagram, Twitter, TikTok, GitHub, LinkedIn and more)_\n\n"
-            "👤 **PERSONAL**\n"
-            "/meid — Your Telegram ID card (ID, username, premium...)\n\n"
-            "⏰ **REMINDER**\n"
-            "/hatirlat `21:30 Do homework` — Set a reminder for today\n"
-            "/hatirlat `25.06.2026 09:00 Meeting` — Set a reminder for a future date\n\n"
-            "🎲 **FUN** _(via menu: 🎲 Fun)_\n"
-            "🎲 Roll Dice — Random number 1-6\n\n"
-            "🖼️ **AUTOMATIC FEATURE**\n"
-            "📷 Watermark — Send a photo/video to the group, @AZRxMAQA watermark is added automatically\n\n"
-            "🤖 _AZRxGUARD — Multilingual security & utility bot_"
-        ),
-        'de': (
-            "🛡️ **AZRxGUARD — Vollständige Befehls- & Funktionsliste**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🚀 **ALLGEMEIN**\n"
-            "/start — Bot starten & Hauptmenü öffnen\n"
-            "/help — Diese Liste anzeigen\n"
-            "/id — Eigene ID und Chat-ID anzeigen\n"
-            "/stats — Bot-Statistik _(nur im Privatchat)_\n\n"
-            "🌐 **IP-ABFRAGE**\n"
-            "/ip `8.8.8.8` — Grundlegende IP-Info (Land, ISP, Standort)\n"
-            "/ip\\_analiz `8.8.8.8` — Erweiterte Analyse: VPN/Proxy/Tor, Bedrohungsscore, Port-Scan\n\n"
-            "⚡ **PRO WERKZEUGE** _(per Befehl)_\n"
-            "/hesap `sqrt(144)` — Wissenschaftlicher Rechner (sin/cos/log/pi...)\n"
-            "/hash `Text` — MD5 · SHA1 · SHA256 · SHA512 generieren\n"
-            "/hava `Berlin` — Live-Wetter (Temp/Feuchtigkeit/Wind)\n"
-            "/kur `100 USD EUR` — Echtzeit-Währungsrechner\n"
-            "/saat — Aktuelle Uhrzeit in Weltstädten\n"
-            "/b64 `encode Text` — Base64 ver-/entschlüsseln\n\n"
-            "🔧 **PRO WERKZEUGE** _(über Menü: ⚡ PRO TOOLS)_\n"
-            "🔑 Passwort-Generator — Starkes Passwort 8-32 Zeichen\n"
-            "🌐 Wikipedia — Thema in deiner Sprache suchen\n"
-            "📝 Notizbuch — Persönliche Notizen im Bot speichern/löschen\n"
-            "💡 Zitat des Tages — Täglich neues Motivationszitat\n"
-            "📐 Einheitenrechner — °C/°F/K · km/mi · kg/lb · km/h · mph\n"
-            "🎱 Glückskugel — Ja/Nein-Frage stellen\n\n"
-            "🕵️ **USERNAME HUNTER** _(über Menü)_\n"
-            "🔎 Plattform-Check — Benutzername auf 14 Plattformen suchen\n"
-            "_(Instagram, Twitter, TikTok, GitHub, LinkedIn und mehr)_\n\n"
-            "👤 **PERSÖNLICH**\n"
-            "/meid — Deine Telegram-ID-Karte (ID, Username, Premium...)\n\n"
-            "⏰ **ERINNERUNG**\n"
-            "/hatirlat `21:30 Hausaufgaben` — Erinnerung für heute setzen\n"
-            "/hatirlat `25.06.2026 09:00 Meeting` — Erinnerung für ein zukünftiges Datum\n\n"
-            "🎲 **UNTERHALTUNG** _(über Menü: 🎲 Fun)_\n"
-            "🎲 Würfeln — Zufallszahl 1-6\n\n"
-            "🖼️ **AUTOMATISCHE FUNKTION**\n"
-            "📷 Wasserzeichen — Foto/Video in Gruppe senden, @AZRxMAQA Wasserzeichen wird automatisch hinzugefügt\n\n"
-            "🤖 _AZRxGUARD — Mehrsprachiger Sicherheits- & Hilfsbot_"
-        ),
-        'ka': (
-            "🛡️ **AZRxGUARD — სრული ბრძანებებისა და ფუნქციების სია**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🚀 **ზოგადი**\n"
-            "/start — ბოტის გაშვება & მთავარი მენიუ\n"
-            "/help — ამ სიის ჩვენება\n"
-            "/id — შენი ID და ჩატის ID\n"
-            "/stats — ბოტის სტატისტიკა _(პირად ჩატში)_\n\n"
-            "🌐 **IP მოთხოვნა**\n"
-            "/ip `8.8.8.8` — IP-ის ძირითადი ინფო (ქვეყანა, ISP, მდებარეობა)\n"
-            "/ip\\_analiz `8.8.8.8` — გაფართოებული ანალიზი: VPN/Proxy/Tor, საფრთხის ქულა, პორტები\n\n"
-            "⚡ **PRO ინსტრუმენტები** _(ბრძანებით)_\n"
-            "/hesap `sqrt(144)` — სამეცნიერო კალკულატორი (sin/cos/log/pi...)\n"
-            "/hash `ტექსტი` — MD5 · SHA1 · SHA256 · SHA512\n"
-            "/hava `თბილისი` — ცოცხალი ამინდი (ტემპ/ტენიანობა/ქარი)\n"
-            "/kur `100 USD GEL` — ვალუტის კონვერტორი\n"
-            "/saat — მსოფლიოს ქალაქების მიმდინარე დრო\n"
-            "/b64 `encode ტექსტი` — Base64 კოდირება/გაშიფვრა\n\n"
-            "🔧 **PRO ინსტრუმენტები** _(მენიუდან: ⚡ PRO TOOLS)_\n"
-            "🔑 პაროლის გენერატორი — 8-32 სიმბოლოს ძლიერი პაროლი\n"
-            "🌐 Wikipedia — თემის ძიება შენს ენაზე\n"
-            "📝 ჩანაწერების წიგნი — პირადი ჩანაწერების შენახვა/წაშლა\n"
-            "💡 დღის ციტატა — ყოველდღე ახალი მოტივაციური ციტატა\n"
-            "📐 ერთეულების კონვერტორი — °C/°F/K · კმ/მილი · კგ/ფუნტი · კმ/სთ\n"
-            "🎱 საბედისწერო ბურთი — დიახ/არა კითხვის დასმა\n\n"
-            "🕵️ **USERNAME HUNTER** _(მენიუდან)_\n"
-            "🔎 პლატფორმის შემოწმება — მომხმარებლის სახელი 14 პლატფორმაზე\n"
-            "_(Instagram, Twitter, TikTok, GitHub, LinkedIn და სხვ.)_\n\n"
-            "👤 **პირადი**\n"
-            "/meid — Telegram-ის პირადობის ბარათი (ID, username, premium...)\n\n"
-            "⏰ **შეხსენება**\n"
-            "/hatirlat `21:30 საშინაო დავალება` — შეხსენება დღეს\n"
-            "/hatirlat `25.06.2026 09:00 შეხვედრა` — შეხსენება მომავალ თარიღზე\n\n"
-            "🎲 **გართობა** _(მენიუდან: 🎲 გართობა)_\n"
-            "🎲 კამათლის გადაგდება — შემთხვევითი რიცხვი 1-6\n\n"
-            "🖼️ **ავტომატური ფუნქცია**\n"
-            "📷 წყლის ნიშანი — ჯგუფში ფოტო/ვიდეოს გაგზავნა — @AZRxMAQA ავტომატურად დაემატება\n\n"
-            "🤖 _AZRxGUARD — მრავალენოვანი უსაფრთხოებისა და დამხმარე ბოტი_"
-        ),
-    }
-
-    metin = HELP_METNI.get(lang, HELP_METNI['tr'])
-    await update.effective_message.reply_text(metin, parse_mode='Markdown')
 
 
 async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4038,7 +3795,6 @@ def main():
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
-    application.add_handler(CommandHandler("help", help_komutu))
     application.add_handler(CommandHandler("stats", stats_komut_tetikleyici, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("meid", meid_komutu))
     application.add_handler(CommandHandler("ip", ip_basit_komutu))
