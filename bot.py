@@ -208,6 +208,25 @@ def ft(metin: str, context, user_id: int) -> str:
     """Apply user's selected font to text."""
     return font_donustur(metin, get_font(context, user_id))
 
+class FontStrings:
+    """LANG_DATA wrapper: auto-applies user font to every string value."""
+    __slots__ = ('_d', '_f')
+    def __init__(self, data: dict, font_id: str):
+        self._d = data
+        self._f = font_id
+    def __getitem__(self, key: str) -> str:
+        val = self._d[key]
+        return font_donustur(val, self._f) if isinstance(val, str) else val
+    def get(self, key: str, default=None):
+        val = self._d.get(key, default)
+        return font_donustur(val, self._f) if (isinstance(val, str) and val is not None) else val
+    def __contains__(self, key: str) -> bool:
+        return key in self._d
+
+def fs(context, user_id: int, lang: str) -> FontStrings:
+    """Shortcut: returns a FontStrings wrapper for the given lang + user."""
+    return FontStrings(LANG_DATA[lang], get_font(context, user_id))
+
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
 
@@ -735,8 +754,8 @@ def get_lang(context: ContextTypes.DEFAULT_TYPE, user_id: int) -> str:
         context.bot_data['lang'] = {}
     return context.bot_data['lang'].get(user_id, 'tr')
 
-def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
-    strings = LANG_DATA[lang]
+def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
+    strings = FontStrings(LANG_DATA[lang], font_id)
     klavye = [
         [
             InlineKeyboardButton(strings.get('btn_bot_ayarlari', '⚙️ BOT AYARLARI'), callback_data='menu_bot_ayarlari'),
@@ -2701,7 +2720,7 @@ async def meid_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     user_id = update.effective_user.id
     lang = get_lang(context, user_id)
-    strings = LANG_DATA[lang]
+    strings = fs(context, user_id, lang)
     bilgi = await meid_bilgisi_olustur(context.bot, update, context, lang)
     geri_klavye = None
     if update.effective_chat and update.effective_chat.type == 'private':
@@ -3056,13 +3075,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
     await asyncio.sleep(0.4)
-    await mesaj.edit_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
+    fid = get_font(context, user_id)
+    await mesaj.edit_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
 
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     lang = get_lang(context, user_id)
-    strings = LANG_DATA[lang]
+    strings = fs(context, user_id, lang)
     await query.answer()
 
     if not await kanal_takip_kontrol(update, context, user_id, lang):
@@ -3123,10 +3143,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if 'lang' not in context.bot_data:
             context.bot_data['lang'] = {}
         context.bot_data['lang'][user_id] = yeni_dil
-        yeni_strings = LANG_DATA[yeni_dil]
+        fid = get_font(context, user_id)
+        yeni_strings = FontStrings(LANG_DATA[yeni_dil], fid)
         await query.edit_message_text(
-            f"{yeni_strings['lang_changed']}\n\n{ft(yeni_strings['welcome'], context, user_id)}",
-            reply_markup=ana_menu_klavye(yeni_dil),
+            f"{LANG_DATA[yeni_dil]['lang_changed']}\n\n{yeni_strings['welcome']}",
+            reply_markup=ana_menu_klavye(yeni_dil, fid),
             parse_mode='Markdown'
         )
     elif query.data == 'menu_admin':
@@ -3549,18 +3570,20 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_video_indir':
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]])
         await query.edit_message_text(
-            "📥 **VİDEO & SES İNDİRİCİ**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🌍 **1000+ platform destekleniyor:**\n"
-            "▶️ YouTube  ·  📸 Instagram  ·  🎵 TikTok\n"
-            "🐦 Twitter/X  ·  📘 Facebook  ·  🤖 Reddit\n"
-            "🎞️ Vimeo  ·  🎮 Twitch  ·  🎧 SoundCloud\n"
-            "📺 Bilibili  ·  💬 VK  ·  🌐 OK.ru  ·  ve daha fazlası\n\n"
-            "📌 **Kullanım:**\n"
-            "Video/ses linkini buraya **yapıştır** — kalite seçimi sana bırakılır! 🎯\n\n"
-            "📊 **Kalite seçenekleri:** 360p / 480p / 720p / 1080p / En İyi\n"
-            "🎵 **Ses kalitesi:** 128 / 192 / 320 kbps\n\n"
-            "⚠️ _Telegram limiti: 50 MB. Büyük videolar için düşük kalite seçin._",
+            ft(
+                "📥 **VİDEO & SES İNDİRİCİ**\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "🌍 **1000+ platform destekleniyor:**\n"
+                "▶️ YouTube  ·  📸 Instagram  ·  🎵 TikTok\n"
+                "🐦 Twitter/X  ·  📘 Facebook  ·  🤖 Reddit\n"
+                "🎞️ Vimeo  ·  🎮 Twitch  ·  🎧 SoundCloud\n"
+                "📺 Bilibili  ·  💬 VK  ·  🌐 OK.ru  ·  ve daha fazlası\n\n"
+                "📌 **Kullanım:** Linki buraya **yapıştır** — kalite seçimi sana bırakılır! 🎯\n\n"
+                "📊 **Video kalite:** 360p / 480p / 720p / 1080p / En İyi\n"
+                "🎵 **Ses kalite:** 128 / 192 / 320 kbps\n\n"
+                "⚠️ _Telegram limiti: 50 MB. Büyük videolar için düşük kalite seçin._",
+                context, user_id
+            ),
             reply_markup=geri,
             parse_mode='Markdown'
         )
@@ -3568,7 +3591,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'vid_video':
         url = context.user_data.get('vid_url')
         if not url:
-            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
+            await query.answer('❌ Link bulunamadı! Önce bir link gönder.', show_alert=True)
             return
         platform = _platform_tespit(url)
         kalite_klavye = InlineKeyboardMarkup([
@@ -3577,14 +3600,16 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🖥 720p HD", callback_data='vid_v_720'),
              InlineKeyboardButton("🖥 1080p FHD", callback_data='vid_v_1080')],
             [InlineKeyboardButton("🔥 En İyi Kalite", callback_data='vid_v_best')],
-            [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
+            [InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]
         ])
         await query.edit_message_text(
-            f"📹 **Video Kalitesi Seçin**\n\n"
-            f"🔗 Platform: **{platform}**\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"💡 _50 MB üzeri dosyalar gönderilemez._\n"
-            f"_Büyük videolar için düşük kalite öneririz._",
+            ft(
+                f"📹 **Video Kalitesi Seçin**\n\n"
+                f"🔗 Platform: **{platform}**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"💡 _50 MB üzeri gönderilemez — büyük videolar için 360p/480p öneririz._",
+                context, user_id
+            ),
             reply_markup=kalite_klavye,
             parse_mode='Markdown'
         )
@@ -3592,20 +3617,23 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'vid_ses':
         url = context.user_data.get('vid_url')
         if not url:
-            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
+            await query.answer('❌ Link bulunamadı! Önce bir link gönder.', show_alert=True)
             return
         platform = _platform_tespit(url)
         ses_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🎵 128 kbps", callback_data='vid_a_128'),
              InlineKeyboardButton("🎵 192 kbps", callback_data='vid_a_192')],
             [InlineKeyboardButton("🔊 320 kbps (En İyi)", callback_data='vid_a_320')],
-            [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
+            [InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]
         ])
         await query.edit_message_text(
-            f"🎵 **Ses Kalitesi Seçin**\n\n"
-            f"🔗 Platform: **{platform}**\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"💡 _128 kbps standart, 320 kbps en kaliteli._",
+            ft(
+                f"🎵 **Ses Kalitesi Seçin**\n\n"
+                f"🔗 Platform: **{platform}**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"💡 _128 kbps standart · 192 kbps iyi · 320 kbps en kaliteli_",
+                context, user_id
+            ),
             reply_markup=ses_klavye,
             parse_mode='Markdown'
         )
@@ -3613,40 +3641,65 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data.startswith('vid_v_') or query.data.startswith('vid_a_'):
         url = context.user_data.get('vid_url')
         if not url:
-            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
+            await query.answer('❌ Link süresi doldu! Linki tekrar gönder.', show_alert=True)
             return
         is_video = query.data.startswith('vid_v_')
         kalite = query.data.split('_')[-1]
         platform = _platform_tespit(url)
         if is_video:
             kalite_etiket = {'360': '360p', '480': '480p', '720': '720p HD', '1080': '1080p FHD', 'best': 'En İyi'}.get(kalite, kalite)
-            bekle_metni = f"⬇️ **{platform}** video indiriliyor...\n📊 Kalite: **{kalite_etiket}**\n_Bu işlem birkaç saniye sürebilir._"
+            bekle_metni = ft(
+                f"⬇️ **{platform}** video indiriliyor...\n"
+                f"📊 Kalite: **{kalite_etiket}**\n"
+                f"_Bu işlem 10-60 saniye sürebilir, lütfen bekleyin..._",
+                context, user_id
+            )
         else:
-            bekle_metni = f"⬇️ **{platform}** ses indiriliyor...\n🎵 Kalite: **{kalite} kbps**\n_Bu işlem birkaç saniye sürebilir._"
+            bekle_metni = ft(
+                f"⬇️ **{platform}** ses indiriliyor...\n"
+                f"🎵 Kalite: **{kalite} kbps**\n"
+                f"_Bu işlem 10-60 saniye sürebilir, lütfen bekleyin..._",
+                context, user_id
+            )
         bekle = await query.message.reply_text(bekle_metni, parse_mode='Markdown')
+        logger.info(f"İndirme başladı: user={user_id} is_video={is_video} kalite={kalite} url={url[:60]}")
         tmp_dir = tempfile.mkdtemp()
         try:
             if is_video:
-                sonuc = await asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir, kalite)
+                sonuc = await asyncio.wait_for(
+                    asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir, kalite),
+                    timeout=300
+                )
             else:
-                sonuc = await asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir, kalite)
+                sonuc = await asyncio.wait_for(
+                    asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir, kalite),
+                    timeout=300
+                )
+
+            logger.info(f"İndirme sonucu: user={user_id} ok={sonuc.get('ok')} hata={sonuc.get('hata','')[:80]}")
 
             if not sonuc['ok']:
-                await bekle.edit_text(f"❌ **İndirme başarısız**\n\n{html.escape(sonuc['hata'])}", parse_mode='Markdown')
+                await bekle.edit_text(
+                    ft(f"❌ **İndirme başarısız**\n\n{sonuc['hata']}", context, user_id),
+                    parse_mode='Markdown'
+                )
                 return
 
             dosya_yol = sonuc['yol']
             baslik = sonuc.get('baslik', 'İndirildi')
             sure_str = _sure_formatla(sonuc.get('sure', 0))
             boyut_mb = sonuc.get('boyut', 0) // 1024 // 1024
-            caption = f"📥 **{html.escape(baslik)}**"
+            caption = f"📥 **{html.escape(baslik[:200])}**"
             if sure_str:
-                caption += f"\n⏱ Süre: {sure_str}"
+                caption += f"\n⏱ {sure_str}"
             if boyut_mb:
-                caption += f"\n💾 Boyut: {boyut_mb} MB"
-            caption += f"\n\n🤖 _AZRxGUARD İndirici_"
+                caption += f"\n💾 {boyut_mb} MB"
+            caption += f"\n\n🤖 _AZRxGUARD_"
 
-            await bekle.edit_text(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", parse_mode='Markdown')
+            await bekle.edit_text(
+                ft(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", context, user_id),
+                parse_mode='Markdown'
+            )
 
             with open(dosya_yol, 'rb') as f:
                 if is_video:
@@ -3654,7 +3707,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         video=f,
                         caption=caption,
                         parse_mode='Markdown',
-                        supports_streaming=True
+                        supports_streaming=True,
+                        read_timeout=120,
+                        write_timeout=120,
+                        connect_timeout=30,
                     )
                 else:
                     await query.message.reply_audio(
@@ -3662,30 +3718,49 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         caption=caption,
                         parse_mode='Markdown',
                         title=baslik[:64],
-                        performer='AZRxGUARD'
+                        performer='AZRxGUARD',
+                        read_timeout=120,
+                        write_timeout=120,
+                        connect_timeout=30,
                     )
             await bekle.delete()
+            logger.info(f"İndirme tamamlandı: user={user_id} baslik={baslik[:40]}")
+
+        except asyncio.TimeoutError:
+            logger.error(f"İndirme zaman aşımı: user={user_id} url={url[:60]}")
+            try:
+                await bekle.edit_text(
+                    ft("⏱️ **Zaman aşımı!**\n\nVideo çok uzun veya bağlantı yavaş. Daha kısa/düşük kaliteli video deneyin.", context, user_id),
+                    parse_mode='Markdown'
+                )
+            except Exception:
+                pass
         except Exception as e:
-            logger.error(f"Video/ses indirme hatası: {e}")
+            logger.error(f"Video/ses indirme hatası: user={user_id} hata={e}")
             err_msg = str(e)
             if 'Request Entity Too Large' in err_msg or '413' in err_msg:
-                err_msg = '❌ Dosya Telegram limitini (50 MB) aştı. Daha düşük kalite seçin.'
+                err_msg = '❌ Dosya 50 MB limitini aştı! Daha düşük kalite seçin.'
             elif 'timed out' in err_msg.lower():
-                err_msg = '⏱️ Zaman aşımı. Lütfen tekrar deneyin.'
+                err_msg = '⏱️ Zaman aşımı. Tekrar deneyin.'
+            elif 'NetworkError' in err_msg or 'network' in err_msg.lower():
+                err_msg = '🌐 Ağ hatası. Tekrar deneyin.'
+            else:
+                err_msg = f'❌ Hata: {err_msg[:150]}'
             try:
-                await bekle.edit_text(f"❌ **Hata:**\n{html.escape(err_msg[:250])}", parse_mode='Markdown')
+                await bekle.edit_text(ft(err_msg, context, user_id), parse_mode='Markdown')
             except Exception:
                 pass
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
     elif query.data == 'go_home':
-        await query.edit_message_text(ft(strings['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
+        fid = get_font(context, user_id)
+        await query.edit_message_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
 
 async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     lang = get_lang(context, user_id)
-    strings = LANG_DATA[lang]
+    strings = fs(context, user_id, lang)
     if not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
@@ -3711,8 +3786,9 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"Kanala mesaj hatası: {e}")
         try:
+            fid = get_font(context, user_id)
             await update.message.reply_text(strings['msg_sent'], parse_mode='Markdown')
-            await update.message.reply_text(strings['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
+            await update.message.reply_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
         except Exception as e:
             logger.error(f"Cevap iletme hatası: {e}")
         context.user_data['durum'] = None
@@ -3920,10 +3996,14 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     # --- 📥 URL TESPİTİ — VİDEO İNDİRİCİ ---
     mesaj_metni = update.message.text.strip() if update.message and update.message.text else ''
     url_eslesmesi = URL_REGEX.search(mesaj_metni)
-    if url_eslesmesi and not context.user_data.get('durum'):
+    durum = context.user_data.get('durum')
+    if url_eslesmesi and (not durum or durum is None or durum == 'None'):
         url = url_eslesmesi.group(0).rstrip('.,!?;)')
+        # Clear any stale state
+        context.user_data['durum'] = None
         platform = _platform_tespit(url)
         context.user_data['vid_url'] = url
+        logger.info(f"URL tespiti: user={user_id} platform={platform} url={url[:60]}")
         indir_klavye = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton("📹 Video İndir", callback_data='vid_video'),
@@ -3932,9 +4012,12 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
         ])
         await update.message.reply_text(
-            f"🔗 **{platform} linki algılandı!**\n\n"
-            f"`{html.escape(url[:80])}{'...' if len(url) > 80 else ''}`\n\n"
-            f"Ne indirmek istiyorsun?",
+            ft(
+                f"🔗 **{platform} linki algılandı!**\n\n"
+                f"`{html.escape(url[:80])}{'...' if len(url) > 80 else ''}`\n\n"
+                f"📹 Video mu 🎵 Ses mi indirmek istiyorsun?",
+                context, user_id
+            ),
             parse_mode='Markdown',
             reply_markup=indir_klavye,
             disable_web_page_preview=True
