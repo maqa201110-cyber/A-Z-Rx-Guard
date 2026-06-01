@@ -3588,91 +3588,30 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
 
-    elif query.data == 'vid_video':
+    elif query.data in ('vid_video', 'vid_ses'):
         url = context.user_data.get('vid_url')
         if not url:
-            await query.answer('❌ Link bulunamadı! Önce bir link gönder.', show_alert=True)
+            await query.answer('❌ Link bulunamadı! Önce bir video linki gönder.', show_alert=True)
             return
+        is_video = query.data == 'vid_video'
         platform = _platform_tespit(url)
-        kalite_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📱 360p", callback_data='vid_v_360'),
-             InlineKeyboardButton("📺 480p", callback_data='vid_v_480')],
-            [InlineKeyboardButton("🖥 720p HD", callback_data='vid_v_720'),
-             InlineKeyboardButton("🖥 1080p FHD", callback_data='vid_v_1080')],
-            [InlineKeyboardButton("🔥 En İyi Kalite", callback_data='vid_v_best')],
-            [InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]
-        ])
-        await query.edit_message_text(
-            ft(
-                f"📹 **Video Kalitesi Seçin**\n\n"
-                f"🔗 Platform: **{platform}**\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"💡 _50 MB üzeri gönderilemez — büyük videolar için 360p/480p öneririz._",
-                context, user_id
-            ),
-            reply_markup=kalite_klavye,
-            parse_mode='Markdown'
+        bekle_metni = ft(
+            f"⬇️ **{platform}** {'video' if is_video else 'ses'} indiriliyor...\n"
+            f"_Bu işlem 10-60 saniye sürebilir, lütfen bekleyin..._",
+            context, user_id
         )
-
-    elif query.data == 'vid_ses':
-        url = context.user_data.get('vid_url')
-        if not url:
-            await query.answer('❌ Link bulunamadı! Önce bir link gönder.', show_alert=True)
-            return
-        platform = _platform_tespit(url)
-        ses_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🎵 128 kbps", callback_data='vid_a_128'),
-             InlineKeyboardButton("🎵 192 kbps", callback_data='vid_a_192')],
-            [InlineKeyboardButton("🔊 320 kbps (En İyi)", callback_data='vid_a_320')],
-            [InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]
-        ])
-        await query.edit_message_text(
-            ft(
-                f"🎵 **Ses Kalitesi Seçin**\n\n"
-                f"🔗 Platform: **{platform}**\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"💡 _128 kbps standart · 192 kbps iyi · 320 kbps en kaliteli_",
-                context, user_id
-            ),
-            reply_markup=ses_klavye,
-            parse_mode='Markdown'
-        )
-
-    elif query.data.startswith('vid_v_') or query.data.startswith('vid_a_'):
-        url = context.user_data.get('vid_url')
-        if not url:
-            await query.answer('❌ Link süresi doldu! Linki tekrar gönder.', show_alert=True)
-            return
-        is_video = query.data.startswith('vid_v_')
-        kalite = query.data.split('_')[-1]
-        platform = _platform_tespit(url)
-        if is_video:
-            kalite_etiket = {'360': '360p', '480': '480p', '720': '720p HD', '1080': '1080p FHD', 'best': 'En İyi'}.get(kalite, kalite)
-            bekle_metni = ft(
-                f"⬇️ **{platform}** video indiriliyor...\n"
-                f"📊 Kalite: **{kalite_etiket}**\n"
-                f"_Bu işlem 10-60 saniye sürebilir, lütfen bekleyin..._",
-                context, user_id
-            )
-        else:
-            bekle_metni = ft(
-                f"⬇️ **{platform}** ses indiriliyor...\n"
-                f"🎵 Kalite: **{kalite} kbps**\n"
-                f"_Bu işlem 10-60 saniye sürebilir, lütfen bekleyin..._",
-                context, user_id
-            )
         bekle = await query.message.reply_text(bekle_metni, parse_mode='Markdown')
-        logger.info(f"İndirme başladı: user={user_id} is_video={is_video} kalite={kalite} url={url[:60]}")
+        logger.info(f"İndirme başladı: user={user_id} is_video={is_video} url={url[:60]}")
         tmp_dir = tempfile.mkdtemp()
         try:
             if is_video:
                 sonuc = await asyncio.wait_for(
-                    asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir, kalite),
+                    asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir, 'best'),
                     timeout=300
                 )
             else:
                 sonuc = await asyncio.wait_for(
-                    asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir, kalite),
+                    asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir, '192'),
                     timeout=300
                 )
 
@@ -3694,7 +3633,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 caption += f"\n⏱ {sure_str}"
             if boyut_mb:
                 caption += f"\n💾 {boyut_mb} MB"
-            caption += f"\n\n🤖 _AZRxGUARD_"
+            caption += f"\n\n🤖 _AZRxGUARD İndirici_"
 
             await bekle.edit_text(
                 ft(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", context, user_id),
@@ -3730,7 +3669,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.error(f"İndirme zaman aşımı: user={user_id} url={url[:60]}")
             try:
                 await bekle.edit_text(
-                    ft("⏱️ **Zaman aşımı!**\n\nVideo çok uzun veya bağlantı yavaş. Daha kısa/düşük kaliteli video deneyin.", context, user_id),
+                    ft("⏱️ **Zaman aşımı!**\n\nVideo çok uzun veya bağlantı yavaş. Tekrar deneyin.", context, user_id),
                     parse_mode='Markdown'
                 )
             except Exception:
@@ -3739,13 +3678,13 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.error(f"Video/ses indirme hatası: user={user_id} hata={e}")
             err_msg = str(e)
             if 'Request Entity Too Large' in err_msg or '413' in err_msg:
-                err_msg = '❌ Dosya 50 MB limitini aştı! Daha düşük kalite seçin.'
+                err_msg = '❌ Dosya 50 MB limitini aştı!'
             elif 'timed out' in err_msg.lower():
                 err_msg = '⏱️ Zaman aşımı. Tekrar deneyin.'
             elif 'NetworkError' in err_msg or 'network' in err_msg.lower():
                 err_msg = '🌐 Ağ hatası. Tekrar deneyin.'
             else:
-                err_msg = f'❌ Hata: {err_msg[:150]}'
+                err_msg = f'❌ Hata: {err_msg[:200]}'
             try:
                 await bekle.edit_text(ft(err_msg, context, user_id), parse_mode='Markdown')
             except Exception:
