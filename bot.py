@@ -16,8 +16,8 @@ import string
 import json
 import tempfile
 import shutil
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, JobQueue
 
 # --- 7/24 UYANIK TUTMA SİSTEMİ ---
 # Replit keeps the bot alive natively; no separate Flask keep-alive needed.
@@ -53,6 +53,160 @@ FILIGRAN_METNI = (
     "|𝑪𝑯𝑨𝑵𝑵𝑬𝑳 ➣ 𝐚𝐳𝐫𝐗𝐦𝐚𝐪𝐚 \n"
     "|__________________________________"
 )
+
+# --- 🔤 YAZI TİPİ SİSTEMİ ---
+_CAPS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+_LOWS = 'abcdefghijklmnopqrstuvwxyz'
+_DIGS = '0123456789'
+
+def _harita_olustur(kap_str: str, kuc_str: str, rak_str: str = '') -> dict:
+    h = {}
+    for i, c in enumerate(_CAPS):
+        if i < len(kap_str):
+            h[c] = kap_str[i]
+    for i, c in enumerate(_LOWS):
+        if i < len(kuc_str):
+            h[c] = kuc_str[i]
+    for i, c in enumerate(_DIGS):
+        if i < len(rak_str):
+            h[c] = rak_str[i]
+    return h
+
+YAZI_TIPI_HARITASI: dict = {
+    'normal':           {},
+    'bold':             _harita_olustur(
+        '𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙',
+        '𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳',
+        '𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗'),
+    'bold_italic':      _harita_olustur(
+        '𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁',
+        '𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛'),
+    'italic':           _harita_olustur(
+        '𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍',
+        '𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧'),
+    'sans_bold':        _harita_olustur(
+        '𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭',
+        '𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇',
+        '𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵'),
+    'sans_italic':      _harita_olustur(
+        '𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡',
+        '𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻'),
+    'sans_bold_italic': _harita_olustur(
+        '𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕',
+        '𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯'),
+    'monospace':        _harita_olustur(
+        '𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉',
+        '𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣',
+        '𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿'),
+    'double_struck':    _harita_olustur(
+        '𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ',
+        '𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫',
+        '𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡'),
+    'fraktur':          _harita_olustur(
+        '𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ',
+        '𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷'),
+    'strikethrough':    'strikethrough',
+    'underline':        'underline',
+    'bubble':           _harita_olustur(
+        'ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ',
+        'ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ'),
+}
+
+# Turkish character decomposition for font transformation
+_TR_DECOMP = {
+    'ö': 'o\u0308', 'Ö': 'O\u0308',
+    'ü': 'u\u0308', 'Ü': 'U\u0308',
+    'ç': 'c\u0327', 'Ç': 'C\u0327',
+    'ş': 's\u0327', 'Ş': 'S\u0327',
+    'ğ': 'g\u0306', 'Ğ': 'G\u0306',
+    'ı': 'i',       'İ': 'I',
+}
+
+# Font display names for the selection menu
+YAZI_TIPLERI = [
+    ('normal',           '𝗡𝗼𝗿𝗺𝗮𝗹  —  Normal'),
+    ('bold',             '𝐁𝐨𝐥𝐝  —  𝐁𝐎̈𝐘𝐋𝐄'),
+    ('bold_italic',      '𝑩𝒐𝒍𝒅 𝑰𝒕𝒂𝒍𝒊𝒄  —  𝑩𝑶̈𝒀𝑳𝑬'),
+    ('italic',           '𝐼𝑡𝑎𝑙𝑖𝑐  —  𝐵𝑂̈𝑌𝐿𝐸'),
+    ('sans_bold',        '𝗦𝗮𝗻𝘀 𝗕𝗼𝗹𝗱  —  𝗕𝗢̈𝗬𝗟𝗘'),
+    ('sans_italic',      '𝘚𝘢𝘯𝘴 𝘐𝘵𝘢𝘭𝘪𝘤  —  𝘉𝘖̈𝘠𝘓𝘌'),
+    ('sans_bold_italic', '𝙎𝙖𝙣𝙨 𝘽𝙤𝙡𝙙 𝙄𝙩𝙖𝙡𝙞𝙘  —  𝘽𝙊̈𝙔𝙇𝙀'),
+    ('monospace',        '𝙼𝚘𝚗𝚘𝚜𝚙𝚊𝚌𝚎  —  𝙱𝙾̈𝚈𝙻𝙴'),
+    ('double_struck',    '𝔻𝕠𝕦𝕓𝕝𝕖 𝕊𝕥𝕣𝕦𝕔𝕜  —  𝔹𝕆̈𝕐𝕃𝔼'),
+    ('fraktur',          '𝔉𝔯𝔞𝔨𝔱𝔲𝔯  —  𝔅𝔒̈𝔜𝔏𝔈'),
+    ('bubble',           'Ⓑⓤⓑⓑⓛⓔ  —  ⒷÖⓎⓁⒺ'),
+    ('strikethrough',    'S̶t̶r̶i̶k̶e̶  —  B̶Ö̶Y̶L̶E̶'),
+    ('underline',        'U͟n͟d͟e͟r͟l͟i͟n͟e͟  —  B͟Ö͟Y͟L͟E͟'),
+]
+
+def font_donustur(metin: str, font_id: str) -> str:
+    """Apply font transformation to text, preserving code blocks and URLs."""
+    if not font_id or font_id == 'normal':
+        return metin
+    combining = None
+    harita: dict = {}
+    if font_id == 'strikethrough':
+        combining = '\u0336'
+    elif font_id == 'underline':
+        combining = '\u0332'
+    else:
+        harita = YAZI_TIPI_HARITASI.get(font_id, {})
+        if not harita:
+            return metin
+
+    result = []
+    i = 0
+    in_code = False
+    n = len(metin)
+
+    while i < n:
+        ch = metin[i]
+        if ch == '`':
+            in_code = not in_code
+            result.append(ch)
+            i += 1
+            continue
+        if in_code:
+            result.append(ch)
+            i += 1
+            continue
+        # Skip URLs
+        if metin[i:i+7] == 'http://' or metin[i:i+8] == 'https://':
+            j = i
+            while j < n and metin[j] not in (' ', '\n', '\t', ')', ']'):
+                j += 1
+            result.append(metin[i:j])
+            i = j
+            continue
+        # Decompose Turkish characters
+        if ch in _TR_DECOMP:
+            for ec in _TR_DECOMP[ch]:
+                if combining:
+                    result.append(ec + combining)
+                elif ec in harita:
+                    result.append(harita[ec])
+                else:
+                    result.append(ec)
+            i += 1
+            continue
+        if combining:
+            result.append(ch + combining)
+            i += 1
+            continue
+        result.append(harita.get(ch, ch))
+        i += 1
+
+    return ''.join(result)
+
+def get_font(context, user_id: int) -> str:
+    """Get user's chosen font style id."""
+    if 'font' not in context.bot_data:
+        context.bot_data['font'] = {}
+    return context.bot_data['font'].get(user_id, 'normal')
+
+def ft(metin: str, context, user_id: int) -> str:
+    """Apply user's selected font to text."""
+    return font_donustur(metin, get_font(context, user_id))
 
 # --- KALICI HAFIZA DOSYASI SİSTEMİ ---
 HAFIZA_DOSYASI = "bot_uyeleri.dat"
@@ -151,6 +305,12 @@ LANG_DATA = {
         'out_ip_risk_yuksek': 'Yüksek Risk', 'out_ip_risk_orta': 'Orta Risk', 'out_ip_risk_dusuk': 'Düşük Risk',
         'out_ip_dc': "VERİ MERKEZİ IP'si!", 'out_ip_port_yok': 'Açık port bulunamadı',
         'out_hesap_title': 'HESAP MAKİNESİ', 'out_hesap_ifade': 'İfade', 'out_hesap_sonuc': 'Sonuç',
+        'btn_bot_ayarlari': "⚙️ BOT AYARLARI",
+        'bot_ayarlari_welcome': "⚙️ **BOT AYARLARI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBir ayar seçin:",
+        'btn_yazi_tipi': "🔤 BOT YAZI TİPİ",
+        'yazi_tipi_welcome': "🔤 **BOT YAZI TİPİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBir yazı tipi seçin:\n_Tüm bot yazıları seçtiğin tipte görünecek!_",
+        'font_changed': "✅ Yazı tipi değiştirildi!",
+        'font_active': "✅ Aktif",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -228,6 +388,12 @@ LANG_DATA = {
         'out_ip_risk_yuksek': 'Yüksək Risk', 'out_ip_risk_orta': 'Orta Risk', 'out_ip_risk_dusuk': 'Aşağı Risk',
         'out_ip_dc': 'VERİ MƏRKƏZİ IP-si!', 'out_ip_port_yok': 'Açıq port tapılmadı',
         'out_hesap_title': 'KALKULYATOR', 'out_hesap_ifade': 'İfadə', 'out_hesap_sonuc': 'Nəticə',
+        'btn_bot_ayarlari': "⚙️ BOT AYARLARI",
+        'bot_ayarlari_welcome': "⚙️ **BOT AYARLARI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBir ayar seçin:",
+        'btn_yazi_tipi': "🔤 BOT YAZI TİPİ",
+        'yazi_tipi_welcome': "🔤 **BOT YAZI TİPİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nYazı tipi seçin:\n_Bütün bot yazıları seçdiyiniz tiplə görünəcək!_",
+        'font_changed': "✅ Yazı tipi dəyişdirildi!",
+        'font_active': "✅ Aktiv",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -305,6 +471,12 @@ LANG_DATA = {
         'out_ip_risk_yuksek': 'Высокий риск', 'out_ip_risk_orta': 'Средний риск', 'out_ip_risk_dusuk': 'Низкий риск',
         'out_ip_dc': 'IP ЦОД!', 'out_ip_port_yok': 'Открытых портов нет',
         'out_hesap_title': 'КАЛЬКУЛЯТОР', 'out_hesap_ifade': 'Выражение', 'out_hesap_sonuc': 'Результат',
+        'btn_bot_ayarlari': "⚙️ НАСТРОЙКИ БОТА",
+        'bot_ayarlari_welcome': "⚙️ **НАСТРОЙКИ БОТА**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите настройку:",
+        'btn_yazi_tipi': "🔤 ШРИФТ БОТА",
+        'yazi_tipi_welcome': "🔤 **ШРИФТ БОТА**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите шрифт:\n_Весь текст бота будет отображаться в выбранном стиле!_",
+        'font_changed': "✅ Шрифт изменён!",
+        'font_active': "✅ Активен",
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -382,6 +554,12 @@ LANG_DATA = {
         'out_ip_risk_yuksek': 'High Risk', 'out_ip_risk_orta': 'Medium Risk', 'out_ip_risk_dusuk': 'Low Risk',
         'out_ip_dc': 'DATACENTER IP!', 'out_ip_port_yok': 'No open ports found',
         'out_hesap_title': 'CALCULATOR', 'out_hesap_ifade': 'Expression', 'out_hesap_sonuc': 'Result',
+        'btn_bot_ayarlari': "⚙️ BOT SETTINGS",
+        'bot_ayarlari_welcome': "⚙️ **BOT SETTINGS**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChoose a setting:",
+        'btn_yazi_tipi': "🔤 BOT FONT STYLE",
+        'yazi_tipi_welcome': "🔤 **BOT FONT STYLE**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChoose a font style:\n_All bot text will appear in the selected style!_",
+        'font_changed': "✅ Font style changed!",
+        'font_active': "✅ Active",
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -459,6 +637,12 @@ LANG_DATA = {
         'out_ip_risk_yuksek': 'Hohes Risiko', 'out_ip_risk_orta': 'Mittleres Risiko', 'out_ip_risk_dusuk': 'Geringes Risiko',
         'out_ip_dc': 'RECHENZENTRUM IP!', 'out_ip_port_yok': 'Keine offenen Ports',
         'out_hesap_title': 'TASCHENRECHNER', 'out_hesap_ifade': 'Ausdruck', 'out_hesap_sonuc': 'Ergebnis',
+        'btn_bot_ayarlari': "⚙️ BOT EINSTELLUNGEN",
+        'bot_ayarlari_welcome': "⚙️ **BOT EINSTELLUNGEN**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nEinstellung auswählen:",
+        'btn_yazi_tipi': "🔤 BOT SCHRIFTART",
+        'yazi_tipi_welcome': "🔤 **BOT SCHRIFTART**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSchriftart wählen:\n_Alle Texte werden im gewählten Stil angezeigt!_",
+        'font_changed': "✅ Schriftart geändert!",
+        'font_active': "✅ Aktiv",
     },
     'ka': {
         'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
@@ -536,6 +720,12 @@ LANG_DATA = {
         'out_ip_risk_yuksek': 'მაღალი რისკი', 'out_ip_risk_orta': 'საშუალო რისკი', 'out_ip_risk_dusuk': 'დაბალი რისკი',
         'out_ip_dc': 'მონაცემთა ცენტრის IP!', 'out_ip_port_yok': 'ღია პორტი ვერ მოიძებნა',
         'out_hesap_title': 'კალკულატორი', 'out_hesap_ifade': 'გამოსახულება', 'out_hesap_sonuc': 'შედეგი',
+        'btn_bot_ayarlari': "⚙️ BOT პარამეტრები",
+        'bot_ayarlari_welcome': "⚙️ **BOT პარამეტრები**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nპარამეტრი აირჩიეთ:",
+        'btn_yazi_tipi': "🔤 BOT შრიფტი",
+        'yazi_tipi_welcome': "🔤 **BOT შრიფტი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nშრიფტი აირჩიეთ:\n_ყველა ტექსტი არჩეულ სტილში გამოჩნდება!_",
+        'font_changed': "✅ შრიფტი შეიცვალა!",
+        'font_active': "✅ აქტიური",
     }
 }
 
@@ -549,7 +739,7 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
     strings = LANG_DATA[lang]
     klavye = [
         [
-            InlineKeyboardButton(strings['btn_lang'], callback_data='menu_lang'),
+            InlineKeyboardButton(strings.get('btn_bot_ayarlari', '⚙️ BOT AYARLARI'), callback_data='menu_bot_ayarlari'),
             InlineKeyboardButton(strings['btn_channel'], url='https://t.me/azrXmaqa')
         ],
         [
@@ -579,7 +769,22 @@ def ana_menu_klavye(lang: str) -> InlineKeyboardMarkup:
 
 # --- 📥 VİDEO & SES İNDİRİCİ ---
 FFMPEG_YOL = '/nix/store/41s8i1695hbcpqdpjqrm3i55ifnysgrf-replit-runtime-path/bin/ffmpeg'
-MAKS_DOSYA = 49 * 1024 * 1024  # 49 MB Telegram sınırı
+MAKS_DOSYA = 50 * 1024 * 1024  # 50 MB Telegram Bot API hard limit
+
+# Quality format strings for yt-dlp
+KALITE_FORMATLAR = {
+    '360':  'bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360][ext=mp4]/best[height<=360]/best',
+    '480':  'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best[height<=480]/best',
+    '720':  'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best[height<=720]/best',
+    '1080': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best[height<=1080]/best',
+    'best': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+}
+
+SES_KALITE = {
+    '128': '128',
+    '192': '192',
+    '320': '320',
+}
 
 PLATFORM_EMOJI = {
     'youtube.com': '▶️ YouTube', 'youtu.be': '▶️ YouTube',
@@ -608,84 +813,109 @@ def _platform_tespit(url: str) -> str:
             return isim
     return '🌐 Video'
 
-def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
+def _ytdlp_video_indir(url: str, tmp_dir: str, kalite: str = 'best') -> dict:
     try:
         import yt_dlp
+        fmt = KALITE_FORMATLAR.get(kalite, KALITE_FORMATLAR['best'])
+        # Build ffmpeg location list - try multiple paths
+        ffmpeg_loc = FFMPEG_YOL if os.path.exists(FFMPEG_YOL) else None
         opts = {
-            'format': 'bestvideo[ext=mp4][filesize<45M]+bestaudio[ext=m4a]/best[ext=mp4][filesize<45M]/best[filesize<45M]/best',
-            'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+            'format': fmt,
+            'outtmpl': os.path.join(tmp_dir, '%(title).60s.%(ext)s'),
             'merge_output_format': 'mp4',
             'quiet': True,
             'no_warnings': True,
-            'ffmpeg_location': FFMPEG_YOL,
             'noplaylist': True,
+            'socket_timeout': 60,
+            'retries': 3,
         }
+        if ffmpeg_loc:
+            opts['ffmpeg_location'] = ffmpeg_loc
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get('title', 'Video')[:80]
             duration = info.get('duration', 0)
             thumb = info.get('thumbnail', None)
-            dosyalar = [f for f in os.listdir(tmp_dir)]
+            height = info.get('height') or info.get('resolution', '')
+            dosyalar = [f for f in os.listdir(tmp_dir) if os.path.isfile(os.path.join(tmp_dir, f))]
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
-            yol = os.path.join(tmp_dir, dosyalar[0])
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı. Platform desteklenmiyor olabilir.'}
+            # Prefer mp4
+            mp4ler = [f for f in dosyalar if f.endswith('.mp4')]
+            sec = mp4ler[0] if mp4ler else dosyalar[0]
+            yol = os.path.join(tmp_dir, sec)
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
-                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB). Telegram sınırı 49 MB.'}
-            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb}
+                boyut_mb = boyut // 1024 // 1024
+                return {'ok': False, 'hata': f'Dosya çok büyük: {boyut_mb} MB. Telegram limiti 50 MB.\n💡 Daha düşük kalite seçin (örn: 360p veya 480p).'}
+            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb, 'boyut': boyut, 'height': height}
     except Exception as e:
         hata = str(e)
-        if 'Unsupported URL' in hata or 'No video formats' in hata:
-            hata = 'Bu platform desteklenmiyor veya video bulunamadı.'
+        if 'Unsupported URL' in hata or 'No video formats' in hata or 'Unable to extract' in hata:
+            hata = '❌ Bu platform desteklenmiyor veya video bulunamadı.'
         elif 'Private video' in hata or 'private' in hata.lower():
-            hata = 'Video gizli/özel, indirilemiyor.'
+            hata = '🔒 Video gizli/özel, indirilemiyor.'
         elif 'age' in hata.lower():
-            hata = 'Yaş kısıtlı içerik, indirilemiyor.'
-        return {'ok': False, 'hata': hata[:200]}
+            hata = '🔞 Yaş kısıtlı içerik, indirilemiyor.'
+        elif 'copyright' in hata.lower():
+            hata = '©️ Telif hakkı kısıtlaması nedeniyle indirilemiyor.'
+        elif 'Sign in' in hata or 'login' in hata.lower():
+            hata = '🔐 Bu içerik giriş gerektiriyor, indirilemiyor.'
+        elif 'ffmpeg' in hata.lower():
+            hata = '⚙️ Video dönüştürme hatası. Farklı kalite deneyin.'
+        return {'ok': False, 'hata': hata[:300]}
 
-def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
+def _ytdlp_ses_indir(url: str, tmp_dir: str, kalite: str = '192') -> dict:
     try:
         import yt_dlp
-        # Önce ffmpeg ile mp3'e dönüştür, yoksa en iyi ses formatını indir
+        ses_kb = SES_KALITE.get(kalite, '192')
         ffmpeg_var = os.path.exists(FFMPEG_YOL)
         if ffmpeg_var:
             opts = {
                 'format': 'bestaudio/best',
-                'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
-                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
+                'outtmpl': os.path.join(tmp_dir, '%(title).60s.%(ext)s'),
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': ses_kb}],
                 'quiet': True,
                 'no_warnings': True,
                 'ffmpeg_location': FFMPEG_YOL,
                 'noplaylist': True,
+                'socket_timeout': 60,
+                'retries': 3,
             }
         else:
             opts = {
-                'format': 'bestaudio[ext=m4a]/bestaudio/best',
-                'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+                'format': 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio/best',
+                'outtmpl': os.path.join(tmp_dir, '%(title).60s.%(ext)s'),
                 'quiet': True,
                 'no_warnings': True,
                 'noplaylist': True,
+                'socket_timeout': 60,
+                'retries': 3,
             }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get('title', 'Ses')[:80]
             duration = info.get('duration', 0)
-            dosyalar = [f for f in os.listdir(tmp_dir)]
+            dosyalar = [f for f in os.listdir(tmp_dir) if os.path.isfile(os.path.join(tmp_dir, f))]
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
-            # mp3 tercih et
+                return {'ok': False, 'hata': 'Ses dosyası oluşturulamadı.'}
             mp3ler = [f for f in dosyalar if f.endswith('.mp3')]
             sec = mp3ler[0] if mp3ler else dosyalar[0]
             yol = os.path.join(tmp_dir, sec)
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
-                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB).'}
-            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration}
+                boyut_mb = boyut // 1024 // 1024
+                return {'ok': False, 'hata': f'Ses dosyası çok büyük: {boyut_mb} MB. Telegram limiti 50 MB.\n💡 Daha düşük kalite deneyin.'}
+            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'boyut': boyut}
     except Exception as e:
         hata = str(e)
         if 'Unsupported URL' in hata:
-            hata = 'Bu platform desteklenmiyor.'
-        return {'ok': False, 'hata': hata[:200]}
+            hata = '❌ Bu platform desteklenmiyor.'
+        elif 'Private' in hata or 'private' in hata.lower():
+            hata = '🔒 Özel içerik, indirilemiyor.'
+        elif 'ffmpeg' in hata.lower():
+            hata = '⚙️ Ses dönüştürme hatası.'
+        return {'ok': False, 'hata': hata[:300]}
 
 def _sure_formatla(saniye) -> str:
     if not saniye:
@@ -2826,7 +3056,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
     await asyncio.sleep(0.4)
-    await mesaj.edit_text(LANG_DATA[lang]['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
+    await mesaj.edit_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -2838,12 +3068,54 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
-    if query.data == 'menu_lang':
+    if query.data == 'menu_bot_ayarlari':
+        ayarlar_klavye = [
+            [InlineKeyboardButton(strings['btn_lang'], callback_data='menu_lang')],
+            [InlineKeyboardButton(strings.get('btn_yazi_tipi', '🔤 BOT YAZI TİPİ'), callback_data='bot_yazi_tipi')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ]
+        await query.edit_message_text(
+            ft(strings.get('bot_ayarlari_welcome', '⚙️ **BOT AYARLARI**\n\nBir ayar seçin:'), context, user_id),
+            reply_markup=InlineKeyboardMarkup(ayarlar_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'bot_yazi_tipi':
+        aktif_font = get_font(context, user_id)
+        font_satirlari = []
+        for font_id, preview in YAZI_TIPLERI:
+            isaretli = " ✅" if font_id == aktif_font else ""
+            font_satirlari.append([InlineKeyboardButton(f"{preview}{isaretli}", callback_data=f'set_font_{font_id}')])
+        font_satirlari.append([InlineKeyboardButton(strings['btn_back'], callback_data='menu_bot_ayarlari')])
+        await query.edit_message_text(
+            strings.get('yazi_tipi_welcome', '🔤 **BOT YAZI TİPİ**\n\nBir yazı tipi seçin:'),
+            reply_markup=InlineKeyboardMarkup(font_satirlari),
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('set_font_'):
+        font_id = query.data[9:]
+        if font_id not in YAZI_TIPI_HARITASI and font_id not in ('strikethrough', 'underline'):
+            await query.answer('❌ Geçersiz yazı tipi!', show_alert=True)
+            return
+        if 'font' not in context.bot_data:
+            context.bot_data['font'] = {}
+        context.bot_data['font'][user_id] = font_id
+        ornek = font_donustur('AZRxGUARD - Merhaba!', font_id)
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔤 Başka Yazı Tipi', callback_data='bot_yazi_tipi')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_bot_ayarlari')]
+        ])
+        await query.edit_message_text(
+            f"{strings.get('font_changed', '✅ Yazı tipi değiştirildi!')}\n\n"
+            f"🔤 **Örnek:** {ornek}",
+            reply_markup=geri_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_lang':
         dil_klavye = [
             [InlineKeyboardButton("🇹🇷 Türkçe", callback_data='set_lang_tr'), InlineKeyboardButton("🇦🇿 Azərbaycanca", callback_data='set_lang_az')],
             [InlineKeyboardButton("🇷🇺 Русский", callback_data='set_lang_ru'), InlineKeyboardButton("🇬🇧 English", callback_data='set_lang_en')],
             [InlineKeyboardButton("🇩🇪 Deutsch", callback_data='set_lang_de'), InlineKeyboardButton("🇬🇪 ქართული", callback_data='set_lang_ka')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_bot_ayarlari')]
         ]
         await query.edit_message_text(strings['lang_select'], reply_markup=InlineKeyboardMarkup(dil_klavye), parse_mode='Markdown')
     elif query.data.startswith('set_lang_'):
@@ -2853,7 +3125,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.bot_data['lang'][user_id] = yeni_dil
         yeni_strings = LANG_DATA[yeni_dil]
         await query.edit_message_text(
-            f"{yeni_strings['lang_changed']}\n\n{yeni_strings['welcome']}",
+            f"{yeni_strings['lang_changed']}\n\n{ft(yeni_strings['welcome'], context, user_id)}",
             reply_markup=ana_menu_klavye(yeni_dil),
             parse_mode='Markdown'
         )
@@ -3048,7 +3320,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
     elif query.data.startswith('hava_wx_'):
         lokasyon = query.data[8:]
-        await query.answer()
         bekle_msg = await query.message.reply_text(f"🌍 `{html.escape(lokasyon)}` hava durumu getiriliyor...", parse_mode='Markdown')
         sonuc = await hava_durumu_getir(lokasyon, lang)
         geri = InlineKeyboardMarkup([
@@ -3281,50 +3552,104 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "📥 **VİDEO & SES İNDİRİCİ**\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "🌍 **1000+ platform destekleniyor:**\n"
-            "▶️ YouTube · 📸 Instagram · 🎵 TikTok\n"
-            "🐦 Twitter/X · 📘 Facebook · 🤖 Reddit\n"
-            "🎞️ Vimeo · 🎮 Twitch · 🎧 SoundCloud\n"
-            "📺 Bilibili · 💬 VK · 🌐 OK.ru ve daha fazlası\n\n"
-            "📌 **Kullanım çok basit:**\n"
-            "Sadece video linkini buraya **yapıştır**,\n"
-            "ben video mu ses mi istediğini sorarım! 🎯\n\n"
-            "💡 _Maksimum dosya boyutu: 49 MB_",
+            "▶️ YouTube  ·  📸 Instagram  ·  🎵 TikTok\n"
+            "🐦 Twitter/X  ·  📘 Facebook  ·  🤖 Reddit\n"
+            "🎞️ Vimeo  ·  🎮 Twitch  ·  🎧 SoundCloud\n"
+            "📺 Bilibili  ·  💬 VK  ·  🌐 OK.ru  ·  ve daha fazlası\n\n"
+            "📌 **Kullanım:**\n"
+            "Video/ses linkini buraya **yapıştır** — kalite seçimi sana bırakılır! 🎯\n\n"
+            "📊 **Kalite seçenekleri:** 360p / 480p / 720p / 1080p / En İyi\n"
+            "🎵 **Ses kalitesi:** 128 / 192 / 320 kbps\n\n"
+            "⚠️ _Telegram limiti: 50 MB. Büyük videolar için düşük kalite seçin._",
             reply_markup=geri,
             parse_mode='Markdown'
         )
 
-    elif query.data in ('vid_video', 'vid_ses'):
+    elif query.data == 'vid_video':
         url = context.user_data.get('vid_url')
         if not url:
             await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
             return
-        tip = 'video' if query.data == 'vid_video' else 'ses'
         platform = _platform_tespit(url)
-        bekle_metni = f"⬇️ **{platform}** {'video' if tip == 'video' else 'ses'} indiriliyor...\n_Bu işlem birkaç saniye sürebilir._"
+        kalite_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📱 360p", callback_data='vid_v_360'),
+             InlineKeyboardButton("📺 480p", callback_data='vid_v_480')],
+            [InlineKeyboardButton("🖥 720p HD", callback_data='vid_v_720'),
+             InlineKeyboardButton("🖥 1080p FHD", callback_data='vid_v_1080')],
+            [InlineKeyboardButton("🔥 En İyi Kalite", callback_data='vid_v_best')],
+            [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            f"📹 **Video Kalitesi Seçin**\n\n"
+            f"🔗 Platform: **{platform}**\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"💡 _50 MB üzeri dosyalar gönderilemez._\n"
+            f"_Büyük videolar için düşük kalite öneririz._",
+            reply_markup=kalite_klavye,
+            parse_mode='Markdown'
+        )
+
+    elif query.data == 'vid_ses':
+        url = context.user_data.get('vid_url')
+        if not url:
+            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
+            return
+        platform = _platform_tespit(url)
+        ses_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🎵 128 kbps", callback_data='vid_a_128'),
+             InlineKeyboardButton("🎵 192 kbps", callback_data='vid_a_192')],
+            [InlineKeyboardButton("🔊 320 kbps (En İyi)", callback_data='vid_a_320')],
+            [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            f"🎵 **Ses Kalitesi Seçin**\n\n"
+            f"🔗 Platform: **{platform}**\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"💡 _128 kbps standart, 320 kbps en kaliteli._",
+            reply_markup=ses_klavye,
+            parse_mode='Markdown'
+        )
+
+    elif query.data.startswith('vid_v_') or query.data.startswith('vid_a_'):
+        url = context.user_data.get('vid_url')
+        if not url:
+            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
+            return
+        is_video = query.data.startswith('vid_v_')
+        kalite = query.data.split('_')[-1]
+        platform = _platform_tespit(url)
+        if is_video:
+            kalite_etiket = {'360': '360p', '480': '480p', '720': '720p HD', '1080': '1080p FHD', 'best': 'En İyi'}.get(kalite, kalite)
+            bekle_metni = f"⬇️ **{platform}** video indiriliyor...\n📊 Kalite: **{kalite_etiket}**\n_Bu işlem birkaç saniye sürebilir._"
+        else:
+            bekle_metni = f"⬇️ **{platform}** ses indiriliyor...\n🎵 Kalite: **{kalite} kbps**\n_Bu işlem birkaç saniye sürebilir._"
         bekle = await query.message.reply_text(bekle_metni, parse_mode='Markdown')
         tmp_dir = tempfile.mkdtemp()
         try:
-            if tip == 'video':
-                sonuc = await asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir)
+            if is_video:
+                sonuc = await asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir, kalite)
             else:
-                sonuc = await asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir)
+                sonuc = await asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir, kalite)
 
             if not sonuc['ok']:
-                await bekle.edit_text(f"❌ **İndirme başarısız**\n\n`{html.escape(sonuc['hata'])}`", parse_mode='Markdown')
+                await bekle.edit_text(f"❌ **İndirme başarısız**\n\n{html.escape(sonuc['hata'])}", parse_mode='Markdown')
                 return
 
             dosya_yol = sonuc['yol']
             baslik = sonuc.get('baslik', 'İndirildi')
             sure_str = _sure_formatla(sonuc.get('sure', 0))
+            boyut_mb = sonuc.get('boyut', 0) // 1024 // 1024
             caption = f"📥 **{html.escape(baslik)}**"
             if sure_str:
-                caption += f"\n⏱ {sure_str}"
+                caption += f"\n⏱ Süre: {sure_str}"
+            if boyut_mb:
+                caption += f"\n💾 Boyut: {boyut_mb} MB"
             caption += f"\n\n🤖 _AZRxGUARD İndirici_"
 
             await bekle.edit_text(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", parse_mode='Markdown')
 
             with open(dosya_yol, 'rb') as f:
-                if tip == 'video':
+                if is_video:
                     await query.message.reply_video(
                         video=f,
                         caption=caption,
@@ -3336,18 +3661,26 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         audio=f,
                         caption=caption,
                         parse_mode='Markdown',
-                        title=baslik[:60],
+                        title=baslik[:64],
                         performer='AZRxGUARD'
                     )
             await bekle.delete()
         except Exception as e:
-            logger.error(f"Video indirme hatası: {e}")
-            await bekle.edit_text(f"❌ **Bir hata oluştu:**\n`{html.escape(str(e)[:200])}`", parse_mode='Markdown')
+            logger.error(f"Video/ses indirme hatası: {e}")
+            err_msg = str(e)
+            if 'Request Entity Too Large' in err_msg or '413' in err_msg:
+                err_msg = '❌ Dosya Telegram limitini (50 MB) aştı. Daha düşük kalite seçin.'
+            elif 'timed out' in err_msg.lower():
+                err_msg = '⏱️ Zaman aşımı. Lütfen tekrar deneyin.'
+            try:
+                await bekle.edit_text(f"❌ **Hata:**\n{html.escape(err_msg[:250])}", parse_mode='Markdown')
+            except Exception:
+                pass
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
     elif query.data == 'go_home':
-        await query.edit_message_text(strings['welcome'], reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
+        await query.edit_message_text(ft(strings['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang), parse_mode='Markdown')
 
 async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -4068,6 +4401,21 @@ def main():
         name="oglen_yemek"
     )
 
+    async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+        logger.error("Güncelleme sırasında hata oluştu:", exc_info=context.error)
+        if isinstance(context.error, Exception):
+            err_str = str(context.error)
+            if 'Message is not modified' in err_str or 'Query is too old' in err_str:
+                return  # Sessizce geç
+            if 'Forbidden: bot was blocked' in err_str or 'Chat not found' in err_str:
+                return  # Sessizce geç
+        try:
+            if update and hasattr(update, 'effective_message') and update.effective_message:
+                await update.effective_message.reply_text("⚠️ Bir hata oluştu. Lütfen tekrar deneyin.")
+        except Exception:
+            pass
+
+    application.add_error_handler(error_handler)
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
     application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"])
 
