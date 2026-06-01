@@ -74,7 +74,7 @@ def uyeleri_kaydet(uyeler_seti):
 # --- DİL SÖZLÜĞÜ ---
 LANG_DATA = {
     'tr': {
-        'welcome': "👋 **AZRxGUARD'a hoş geldin!**\n\nLütfen işlem yapmak için aşağıdaki butonları kullanın.",
+        'welcome': "👋 **AZRxGUARD'a hoş geldin!**\n\nLütfen işlem yapmak için aşağıdaki butonları kullanın.\n\n📋 _TÜM KOMUTLARI GÖRMEK İÇİN /help yazın_",
         'lang_select': "🌍 **Lütfen bir dil seçin / Please select a language:**",
         'lang_changed': "✅ Bot dili başarıyla **Türkçe** olarak ayarlandı!",
         'btn_lang': "🌍 Dil / Language",
@@ -151,7 +151,7 @@ LANG_DATA = {
         'out_hesap_title': 'HESAP MAKİNESİ', 'out_hesap_ifade': 'İfade', 'out_hesap_sonuc': 'Sonuç',
     },
     'az': {
-        'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
+        'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.\n\n📋 _Bütün əmrləri görmək üçün /help yazın_",
         'lang_select': "🌍 **Lütfen bir dil seçin / Please select a language:**",
         'lang_changed': "✅ Bot dili uğurla **Azərbaycanca** olaraq dəyişdirildi!",
         'btn_lang': "🌍 Dil / Language",
@@ -228,7 +228,7 @@ LANG_DATA = {
         'out_hesap_title': 'KALKULYATOR', 'out_hesap_ifade': 'İfadə', 'out_hesap_sonuc': 'Nəticə',
     },
     'ru': {
-        'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
+        'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.\n\n📋 _Для просмотра всех команд напишите /help_",
         'lang_select': "🌍 **Пожалуйста, выберите язык / Please select a language:**",
         'lang_changed': "✅ Язык бота успешно изменен на **Русский**!",
         'btn_lang': "🌍 Язык / Language",
@@ -305,7 +305,7 @@ LANG_DATA = {
         'out_hesap_title': 'КАЛЬКУЛЯТОР', 'out_hesap_ifade': 'Выражение', 'out_hesap_sonuc': 'Результат',
     },
     'en': {
-        'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
+        'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.\n\n📋 _Type /help to see all commands_",
         'lang_select': "🌍 **Please select a language / Lütfen bir dil seçin:**",
         'lang_changed': "✅ Bot language has been successfully set to **English**!",
         'btn_lang': "🌍 Dil / Language",
@@ -382,7 +382,7 @@ LANG_DATA = {
         'out_hesap_title': 'CALCULATOR', 'out_hesap_ifade': 'Expression', 'out_hesap_sonuc': 'Result',
     },
     'de': {
-        'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
+        'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.\n\n📋 _Schreiben Sie /help um alle Befehle zu sehen_",
         'lang_select': "🌍 **Bitte wählen Sie eine Sprache / Please select a language:**",
         'lang_changed': "✅ Die Botsprache wurde erfolgreich auf **Deutsch** umgestellt!",
         'btn_lang': "🌍 Sprache / Language",
@@ -446,7 +446,7 @@ LANG_DATA = {
         'out_saat_title': 'WELTZEIT', 'out_saat_servis': 'AZRxGUARD Zeitdienst',
         'out_hash_title': 'HASH-GENERATOR', 'out_hash_metin': 'Text', 'out_hash_uzunluk': 'Länge', 'out_hash_karakter': 'Zeichen',
         'out_b64_enc': 'BASE64 ENCODE', 'out_b64_dec': 'BASE64 DECODE', 'out_b64_giris': 'Eingabe', 'out_b64_sonuc': 'Ergebnis',
-        'out_ip_title': 'IP Detaillierte Sicherheitsanalyse', 'out_ip_sorgu': 'Anfrage',
+        'out_ip_title': 'IP Detaillierte Sicherheitsanalyse', 'out_ip_sorgu': 'Anfrage', 
         'out_ip_konum_bilgi': 'Standortdaten', 'out_ip_ulke': 'Land', 'out_ip_bolge': 'Region',
         'out_ip_saat': 'Zeitzone', 'out_ip_ag_bilgi': 'Netzwerkdaten', 'out_ip_inet': 'Internet IP',
         'out_ip_isp': 'Internetanbieter (ISP)', 'out_ip_org': 'Organisation', 'out_ip_asn': 'Infrastruktur (ASN)',
@@ -459,7 +459,7 @@ LANG_DATA = {
         'out_hesap_title': 'TASCHENRECHNER', 'out_hesap_ifade': 'Ausdruck', 'out_hesap_sonuc': 'Ergebnis',
     },
     'ka': {
-        'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
+        'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.\n\n📋 _ყველა ბრძანების სანახავად დაწერეთ /help_",
         'lang_select': "🌍 **გთხოვთ აირჩიოთ ენა / Please select a language:**",
         'lang_changed': "✅ ბოტის ენა წარმატებით შეიცვალა **ქართულად**!",
         'btn_lang': "🌍 ენა / Language",
@@ -3772,6 +3772,167 @@ async def b64_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sonuc = base64_islem(metin, lang)
     await update.effective_message.reply_text(sonuc, parse_mode='Markdown')
 
+async def help_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id if update.effective_user else 0
+    lang = get_lang(context, user_id)
+
+    HELP_METNI = {
+        'tr': (
+            "🛡️ **AZRxGUARD — Komut Listesi**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🚀 **GENEL**\n"
+            "/start — Botu başlat / Ana menü\n"
+            "/help — Tüm komutları göster\n"
+            "/id — Kullanıcı & sohbet ID bilgisi\n\n"
+            "📊 **İSTATİSTİK** _(Özel mesajda)_\n"
+            "/stats — Bot istatistikleri\n\n"
+            "🌐 **IP SORGULAMA**\n"
+            "/ip `<IP>` — Temel IP konum bilgisi\n"
+            "/ip\\_analiz `<IP>` — Gelişmiş analiz (VPN/Proxy/Tor/Port)\n\n"
+            "⚡ **PRO ARAÇLAR**\n"
+            "/hesap `<ifade>` — Hesap makinesi\n"
+            "/hash `<metin>` — MD5/SHA1/SHA256/SHA512 üret\n"
+            "/hava `<şehir>` — Anlık hava durumu\n"
+            "/kur `<miktar> <A> <B>` — Döviz çevirici\n"
+            "/saat — Dünya saatleri\n"
+            "/b64 `encode/decode <metin>` — Base64\n\n"
+            "👤 **KİŞİSEL**\n"
+            "/meid — Telegram kimlik kartın\n\n"
+            "⏰ **HATIRLATICI**\n"
+            "/hatirlat `<saat> <mesaj>` — Hatırlatıcı kur\n\n"
+            "🤖 _AZRxGUARD — Çok dilli güvenlik botu_"
+        ),
+        'az': (
+            "🛡️ **AZRxGUARD — Əmrlər Siyahısı**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🚀 **ÜMUMI**\n"
+            "/start — Botu başlat / Ana menü\n"
+            "/help — Bütün əmrləri göstər\n"
+            "/id — İstifadəçi & söhbət ID məlumatı\n\n"
+            "📊 **STATİSTİKA** _(Şəxsi mesajda)_\n"
+            "/stats — Bot statistikası\n\n"
+            "🌐 **IP SORĞU**\n"
+            "/ip `<IP>` — Əsas IP məkan məlumatı\n"
+            "/ip\\_analiz `<IP>` — Ətraflı analiz (VPN/Proxy/Tor/Port)\n\n"
+            "⚡ **PRO ALƏTLƏR**\n"
+            "/hesap `<ifadə>` — Kalkulyator\n"
+            "/hash `<mətn>` — MD5/SHA1/SHA256/SHA512\n"
+            "/hava `<şəhər>` — Canlı hava\n"
+            "/kur `<miqdar> <A> <B>` — Valyuta çevirici\n"
+            "/saat — Dünya saatları\n"
+            "/b64 `encode/decode <mətn>` — Base64\n\n"
+            "👤 **ŞƏXSİ**\n"
+            "/meid — Telegram kimlik kartın\n\n"
+            "⏰ **XATIRLATICI**\n"
+            "/hatirlat `<saat> <mesaj>` — Xatırlatıcı qur\n\n"
+            "🤖 _AZRxGUARD — Çoxdilli təhlükəsizlik botu_"
+        ),
+        'ru': (
+            "🛡️ **AZRxGUARD — Список команд**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🚀 **ОБЩЕЕ**\n"
+            "/start — Запустить бота / Главное меню\n"
+            "/help — Показать все команды\n"
+            "/id — ID пользователя и чата\n\n"
+            "📊 **СТАТИСТИКА** _(В личных сообщениях)_\n"
+            "/stats — Статистика бота\n\n"
+            "🌐 **IP ЗАПРОС**\n"
+            "/ip `<IP>` — Базовая информация об IP\n"
+            "/ip\\_analiz `<IP>` — Расширенный анализ (VPN/Proxy/Tor/Port)\n\n"
+            "⚡ **ПРО ИНСТРУМЕНТЫ**\n"
+            "/hesap `<выражение>` — Калькулятор\n"
+            "/hash `<текст>` — MD5/SHA1/SHA256/SHA512\n"
+            "/hava `<город>` — Погода\n"
+            "/kur `<сумма> <A> <B>` — Конвертер валют\n"
+            "/saat — Мировое время\n"
+            "/b64 `encode/decode <текст>` — Base64\n\n"
+            "👤 **ЛИЧНОЕ**\n"
+            "/meid — Telegram ID-карточка\n\n"
+            "⏰ **НАПОМИНАНИЕ**\n"
+            "/hatirlat `<время> <сообщение>` — Установить напоминание\n\n"
+            "🤖 _AZRxGUARD — Многоязычный бот безопасности_"
+        ),
+        'en': (
+            "🛡️ **AZRxGUARD — Command List**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🚀 **GENERAL**\n"
+            "/start — Start the bot / Main menu\n"
+            "/help — Show all commands\n"
+            "/id — User & chat ID info\n\n"
+            "📊 **STATISTICS** _(Private chat only)_\n"
+            "/stats — Bot statistics\n\n"
+            "🌐 **IP LOOKUP**\n"
+            "/ip `<IP>` — Basic IP location info\n"
+            "/ip\\_analiz `<IP>` — Advanced analysis (VPN/Proxy/Tor/Port)\n\n"
+            "⚡ **PRO TOOLS**\n"
+            "/hesap `<expression>` — Calculator\n"
+            "/hash `<text>` — MD5/SHA1/SHA256/SHA512\n"
+            "/hava `<city>` — Live weather\n"
+            "/kur `<amount> <A> <B>` — Currency converter\n"
+            "/saat — World clocks\n"
+            "/b64 `encode/decode <text>` — Base64\n\n"
+            "👤 **PERSONAL**\n"
+            "/meid — Your Telegram ID card\n\n"
+            "⏰ **REMINDER**\n"
+            "/hatirlat `<time> <message>` — Set a reminder\n\n"
+            "🤖 _AZRxGUARD — Multilingual security bot_"
+        ),
+        'de': (
+            "🛡️ **AZRxGUARD — Befehlsliste**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🚀 **ALLGEMEIN**\n"
+            "/start — Bot starten / Hauptmenü\n"
+            "/help — Alle Befehle anzeigen\n"
+            "/id — Benutzer- & Chat-ID\n\n"
+            "📊 **STATISTIK** _(Nur im Privatchat)_\n"
+            "/stats — Bot-Statistik\n\n"
+            "🌐 **IP-ABFRAGE**\n"
+            "/ip `<IP>` — Grundlegende IP-Info\n"
+            "/ip\\_analiz `<IP>` — Erweiterte Analyse (VPN/Proxy/Tor/Port)\n\n"
+            "⚡ **PRO WERKZEUGE**\n"
+            "/hesap `<Ausdruck>` — Rechner\n"
+            "/hash `<Text>` — MD5/SHA1/SHA256/SHA512\n"
+            "/hava `<Stadt>` — Aktuelles Wetter\n"
+            "/kur `<Betrag> <A> <B>` — Währungsrechner\n"
+            "/saat — Weltuhren\n"
+            "/b64 `encode/decode <Text>` — Base64\n\n"
+            "👤 **PERSÖNLICH**\n"
+            "/meid — Deine Telegram-ID-Karte\n\n"
+            "⏰ **ERINNERUNG**\n"
+            "/hatirlat `<Zeit> <Nachricht>` — Erinnerung setzen\n\n"
+            "🤖 _AZRxGUARD — Mehrsprachiger Sicherheitsbot_"
+        ),
+        'ka': (
+            "🛡️ **AZRxGUARD — ბრძანებების სია**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🚀 **ზოგადი**\n"
+            "/start — ბოტის გაშვება / მთავარი მენიუ\n"
+            "/help — ყველა ბრძანების ჩვენება\n"
+            "/id — მომხმარებლის & ჩატის ID\n\n"
+            "📊 **სტატისტიკა** _(პირად ჩატში)_\n"
+            "/stats — ბოტის სტატისტიკა\n\n"
+            "🌐 **IP მოთხოვნა**\n"
+            "/ip `<IP>` — IP-ის ძირითადი ინფო\n"
+            "/ip\\_analiz `<IP>` — გაფართოებული ანალიზი (VPN/Proxy/Tor/Port)\n\n"
+            "⚡ **PRO ინსტრუმენტები**\n"
+            "/hesap `<გამოსახულება>` — კალკულატორი\n"
+            "/hash `<ტექსტი>` — MD5/SHA1/SHA256/SHA512\n"
+            "/hava `<ქალაქი>` — ამინდი\n"
+            "/kur `<თანხა> <A> <B>` — ვალუტის კონვერტორი\n"
+            "/saat — მსოფლიო საათები\n"
+            "/b64 `encode/decode <ტექსტი>` — Base64\n\n"
+            "👤 **პირადი**\n"
+            "/meid — Telegram პირადობის ბარათი\n\n"
+            "⏰ **შეხსენება**\n"
+            "/hatirlat `<დრო> <შეტყობინება>` — შეხსენების დაყენება\n\n"
+            "🤖 _AZRxGUARD — მრავალენოვანი უსაფრთხოების ბოტი_"
+        ),
+    }
+
+    metin = HELP_METNI.get(lang, HELP_METNI['tr'])
+    await update.effective_message.reply_text(metin, parse_mode='Markdown')
+
+
 async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg  = update.effective_message
     user = update.effective_user
@@ -3793,6 +3954,7 @@ def main():
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start, filters=filters.ChatType.PRIVATE))
+    application.add_handler(CommandHandler("help", help_komutu))
     application.add_handler(CommandHandler("stats", stats_komut_tetikleyici, filters=filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("meid", meid_komutu))
     application.add_handler(CommandHandler("ip", ip_basit_komutu))
