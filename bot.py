@@ -862,105 +862,112 @@ def _platform_tespit(url: str) -> str:
             return isim
     return '🌐 Video'
 
+_YTDLP_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+    'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.8',
+}
+
+def _ytdlp_hata_mesaji(hata: str) -> str:
+    h = hata.lower()
+    if 'unsupported url' in h:
+        return ('❌ Bu bir video linki değil veya desteklenmiyor.\n\n'
+                '📌 Desteklenen platformlar:\n'
+                'YouTube · TikTok · Instagram · Twitter/X · Facebook · Vimeo ve daha fazlası\n\n'
+                '_Videoyu aç → Paylaş → Linki Kopyala yapıp tekrar gönder._')
+    if 'private' in h or 'gizli' in h:
+        return '🔒 Video gizli/özel, indirilemiyor.'
+    if 'age' in h and ('restrict' in h or 'limit' in h or 'verif' in h):
+        return '🔞 Yaş kısıtlı içerik, indirilemiyor.'
+    if '403' in h or 'forbidden' in h:
+        return '🚫 Erişim engellendi. Video korumalı veya bölge kısıtlı.'
+    if '404' in h or 'not found' in h:
+        return '❓ Video bulunamadı. Link silinmiş olabilir.'
+    if 'copyright' in h:
+        return '©️ Telif hakkı kısıtlaması, video indirilemez.'
+    if 'too large' in h or 'filesize' in h:
+        return '📦 Dosya 50 MB sınırını aşıyor, indirilemez.'
+    if 'no video' in h or 'no formats' in h:
+        return '⚠️ İndirilebilir video formatı bulunamadı.'
+    return hata[:250]
+
 def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
     try:
         import yt_dlp
+        # Önce merge gerektirmeyen tek-stream format dene
         opts = {
-            'format': 'bestvideo[ext=mp4][filesize<45M]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4][filesize<45M]/best[filesize<45M]/best',
+            'format': 'best[ext=mp4][filesize<45M]/best[ext=mp4]/best[filesize<45M]/best',
             'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
-            'merge_output_format': 'mp4',
             'quiet': True,
             'no_warnings': True,
-            'ffmpeg_location': FFMPEG_YOL,
             'noplaylist': True,
-            'extractor_args': {
-                'tiktok': {'webpage_download': ['1']},
-            },
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
+            'ignoreerrors': False,
+            'no_color': True,
+            'ffmpeg_location': FFMPEG_YOL,
+            'socket_timeout': 30,
+            'retries': 3,
+            'http_headers': _YTDLP_HEADERS,
         }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get('title', 'Video')[:80]
             duration = info.get('duration', 0)
             thumb = info.get('thumbnail', None)
-            dosyalar = [f for f in os.listdir(tmp_dir)]
+            dosyalar = sorted([f for f in os.listdir(tmp_dir)], key=lambda f: os.path.getsize(os.path.join(tmp_dir, f)), reverse=True)
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı.'}
+                return {'ok': False, 'hata': '⚠️ Dosya oluşturulamadı. Farklı bir link dene.'}
             yol = os.path.join(tmp_dir, dosyalar[0])
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
-                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB). Telegram sınırı 49 MB.'}
+                return {'ok': False, 'hata': f'📦 Dosya çok büyük ({boyut // 1024 // 1024} MB). Telegram max 50 MB.'}
             return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb}
     except Exception as e:
-        hata = str(e)
-        if 'Unsupported URL' in hata:
-            hata = '❌ Bu bir video linki değil.\n\nLütfen gerçek bir video linki gönder.\n_(Örn: youtube.com/watch?v=... veya tiktok.com/@.../video/...)_'
-        elif 'No video formats' in hata or 'no video' in hata.lower():
-            hata = 'Video formatı bulunamadı. Farklı bir link dene.'
-        elif 'Private video' in hata or 'private' in hata.lower():
-            hata = 'Video gizli/özel, indirilemiyor.'
-        elif 'age' in hata.lower():
-            hata = 'Yaş kısıtlı içerik, indirilemiyor.'
-        elif 'HTTP Error 403' in hata or '403' in hata:
-            hata = 'Erişim engellendi (403). Video korumalı veya bölge kısıtlı olabilir.'
-        elif 'HTTP Error 404' in hata or '404' in hata:
-            hata = 'Video bulunamadı (404). Link silinmiş veya hatalı.'
-        return {'ok': False, 'hata': hata[:300]}
+        return {'ok': False, 'hata': _ytdlp_hata_mesaji(str(e))}
 
 def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
     try:
         import yt_dlp
-        ffmpeg_var = os.path.exists(FFMPEG_YOL)
-        ortak = {
-            'quiet': True,
-            'no_warnings': True,
-            'noplaylist': True,
-            'extractor_args': {
-                'tiktok': {'webpage_download': ['1']},
-            },
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
-        }
-        if ffmpeg_var:
+        ffmpeg_mevcut = os.path.exists(FFMPEG_YOL)
+        if ffmpeg_mevcut:
             opts = {
-                **ortak,
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
+                'quiet': True,
+                'no_warnings': True,
+                'noplaylist': True,
                 'ffmpeg_location': FFMPEG_YOL,
+                'socket_timeout': 30,
+                'retries': 3,
+                'http_headers': _YTDLP_HEADERS,
             }
         else:
             opts = {
-                **ortak,
-                'format': 'bestaudio[ext=m4a]/bestaudio/best',
+                'format': 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio/best',
                 'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+                'quiet': True,
+                'no_warnings': True,
+                'noplaylist': True,
+                'socket_timeout': 30,
+                'retries': 3,
+                'http_headers': _YTDLP_HEADERS,
             }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get('title', 'Ses')[:80]
             duration = info.get('duration', 0)
-            dosyalar = [f for f in os.listdir(tmp_dir)]
+            dosyalar = os.listdir(tmp_dir)
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı.'}
+                return {'ok': False, 'hata': '⚠️ Dosya oluşturulamadı. Farklı bir link dene.'}
             mp3ler = [f for f in dosyalar if f.endswith('.mp3')]
-            sec = mp3ler[0] if mp3ler else dosyalar[0]
+            m4alar = [f for f in dosyalar if f.endswith('.m4a')]
+            sec = (mp3ler or m4alar or dosyalar)[0]
             yol = os.path.join(tmp_dir, sec)
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
-                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB).'}
+                return {'ok': False, 'hata': f'📦 Dosya çok büyük ({boyut // 1024 // 1024} MB). Telegram max 50 MB.'}
             return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration}
     except Exception as e:
-        hata = str(e)
-        if 'Unsupported URL' in hata:
-            hata = '❌ Bu bir video linki değil.\n\nLütfen gerçek bir video linki gönder.\n_(Örn: youtube.com/watch?v=... veya tiktok.com/@.../video/...)_'
-        elif 'HTTP Error 403' in hata or '403' in hata:
-            hata = 'Erişim engellendi (403). Video korumalı veya bölge kısıtlı olabilir.'
-        elif 'HTTP Error 404' in hata or '404' in hata:
-            hata = 'Video bulunamadı (404). Link silinmiş veya hatalı.'
-        return {'ok': False, 'hata': hata[:300]}
+        return {'ok': False, 'hata': _ytdlp_hata_mesaji(str(e))}
 
 def _sure_formatla(saniye) -> str:
     if not saniye:
