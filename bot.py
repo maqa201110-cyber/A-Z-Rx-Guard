@@ -866,13 +866,19 @@ def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
     try:
         import yt_dlp
         opts = {
-            'format': 'bestvideo[ext=mp4][filesize<45M]+bestaudio[ext=m4a]/best[ext=mp4][filesize<45M]/best[filesize<45M]/best',
+            'format': 'bestvideo[ext=mp4][filesize<45M]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4][filesize<45M]/best[filesize<45M]/best',
             'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
             'merge_output_format': 'mp4',
             'quiet': True,
             'no_warnings': True,
             'ffmpeg_location': FFMPEG_YOL,
             'noplaylist': True,
+            'extractor_args': {
+                'tiktok': {'webpage_download': ['1']},
+            },
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            },
         }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -881,7 +887,7 @@ def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
             thumb = info.get('thumbnail', None)
             dosyalar = [f for f in os.listdir(tmp_dir)]
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı.'}
             yol = os.path.join(tmp_dir, dosyalar[0])
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
@@ -889,35 +895,48 @@ def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
             return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb}
     except Exception as e:
         hata = str(e)
-        if 'Unsupported URL' in hata or 'No video formats' in hata:
-            hata = 'Bu platform desteklenmiyor veya video bulunamadı.'
+        if 'Unsupported URL' in hata:
+            hata = '❌ Bu bir video linki değil.\n\nLütfen gerçek bir video linki gönder.\n_(Örn: youtube.com/watch?v=... veya tiktok.com/@.../video/...)_'
+        elif 'No video formats' in hata or 'no video' in hata.lower():
+            hata = 'Video formatı bulunamadı. Farklı bir link dene.'
         elif 'Private video' in hata or 'private' in hata.lower():
             hata = 'Video gizli/özel, indirilemiyor.'
         elif 'age' in hata.lower():
             hata = 'Yaş kısıtlı içerik, indirilemiyor.'
-        return {'ok': False, 'hata': hata[:200]}
+        elif 'HTTP Error 403' in hata or '403' in hata:
+            hata = 'Erişim engellendi (403). Video korumalı veya bölge kısıtlı olabilir.'
+        elif 'HTTP Error 404' in hata or '404' in hata:
+            hata = 'Video bulunamadı (404). Link silinmiş veya hatalı.'
+        return {'ok': False, 'hata': hata[:300]}
 
 def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
     try:
         import yt_dlp
         ffmpeg_var = os.path.exists(FFMPEG_YOL)
+        ortak = {
+            'quiet': True,
+            'no_warnings': True,
+            'noplaylist': True,
+            'extractor_args': {
+                'tiktok': {'webpage_download': ['1']},
+            },
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            },
+        }
         if ffmpeg_var:
             opts = {
+                **ortak,
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
-                'quiet': True,
-                'no_warnings': True,
                 'ffmpeg_location': FFMPEG_YOL,
-                'noplaylist': True,
             }
         else:
             opts = {
+                **ortak,
                 'format': 'bestaudio[ext=m4a]/bestaudio/best',
                 'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
-                'quiet': True,
-                'no_warnings': True,
-                'noplaylist': True,
             }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -925,7 +944,7 @@ def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
             duration = info.get('duration', 0)
             dosyalar = [f for f in os.listdir(tmp_dir)]
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı.'}
             mp3ler = [f for f in dosyalar if f.endswith('.mp3')]
             sec = mp3ler[0] if mp3ler else dosyalar[0]
             yol = os.path.join(tmp_dir, sec)
@@ -936,8 +955,12 @@ def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
     except Exception as e:
         hata = str(e)
         if 'Unsupported URL' in hata:
-            hata = 'Bu platform desteklenmiyor.'
-        return {'ok': False, 'hata': hata[:200]}
+            hata = '❌ Bu bir video linki değil.\n\nLütfen gerçek bir video linki gönder.\n_(Örn: youtube.com/watch?v=... veya tiktok.com/@.../video/...)_'
+        elif 'HTTP Error 403' in hata or '403' in hata:
+            hata = 'Erişim engellendi (403). Video korumalı veya bölge kısıtlı olabilir.'
+        elif 'HTTP Error 404' in hata or '404' in hata:
+            hata = 'Video bulunamadı (404). Link silinmiş veya hatalı.'
+        return {'ok': False, 'hata': hata[:300]}
 
 def _sure_formatla(saniye) -> str:
     if not saniye:
