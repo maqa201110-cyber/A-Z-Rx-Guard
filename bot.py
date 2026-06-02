@@ -817,7 +817,7 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(klavye)
 
 # --- 📥 VİDEO & SES İNDİRİCİ ---
-FFMPEG_YOL = '/nix/store/41s8i1695hbcpqdpjqrm3i55ifnysgrf-replit-runtime-path/bin/ffmpeg'
+FFMPEG_YOL = '/nix/store/bl78f0v8yq8nqn3kp98lbk79kp5k62a0-replit-runtime-path/bin/ffmpeg'
 MAKS_DOSYA = 50 * 1024 * 1024  # 50 MB Telegram Bot API hard limit
 
 # Quality format strings for yt-dlp
