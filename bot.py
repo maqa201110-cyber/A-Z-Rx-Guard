@@ -336,6 +336,10 @@ LANG_DATA = {
         'btn_sahte_veri': "🧪 Sahte Veri Üretici",
         'btn_oyun_tkmk': "✊ Taş-Kağıt-Makas",
         'btn_oyun_sayi': "🔢 Sayı Tahmin Oyunu",
+        'btn_ai_sohbet': "🤖 AI Sohbet",
+        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nHerhangi bir soru sor, yardımcı olayım!\n_Çıkmak için: /start_",
+        'ai_thinking': "🤔 Düşünüyorum...",
+        'ai_error': "❌ AI şu an kullanılamıyor. Lütfen tekrar dene.",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -425,6 +429,10 @@ LANG_DATA = {
         'btn_sahte_veri': "🧪 Saxta Məlumat Yaradıcı",
         'btn_oyun_tkmk': "✊ Daş-Kağız-Qayçı",
         'btn_oyun_sayi': "🔢 Rəqəm Tapmaca",
+        'btn_ai_sohbet': "🤖 AI Söhbət",
+        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nİstənilən sual ver, kömək edim!\n_Çıxmaq üçün: /start_",
+        'ai_thinking': "🤔 Düşünürəm...",
+        'ai_error': "❌ AI hal-hazırda əlçatan deyil. Yenidən cəhd et.",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -514,6 +522,10 @@ LANG_DATA = {
         'btn_sahte_veri': "🧪 Генератор тестовых данных",
         'btn_oyun_tkmk': "✊ Камень-Ножницы-Бумага",
         'btn_oyun_sayi': "🔢 Угадай число",
+        'btn_ai_sohbet': "🤖 AI Чат",
+        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nЗадай любой вопрос, помогу!\n_Для выхода: /start_",
+        'ai_thinking': "🤔 Думаю...",
+        'ai_error': "❌ AI сейчас недоступен. Попробуй ещё раз.",
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -603,6 +615,10 @@ LANG_DATA = {
         'btn_sahte_veri': "🧪 Fake Data Generator",
         'btn_oyun_tkmk': "✊ Rock-Paper-Scissors",
         'btn_oyun_sayi': "🔢 Number Guess Game",
+        'btn_ai_sohbet': "🤖 AI Chat",
+        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nAsk me anything, I'm here to help!\n_To exit: /start_",
+        'ai_thinking': "🤔 Thinking...",
+        'ai_error': "❌ AI is currently unavailable. Please try again.",
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -692,6 +708,10 @@ LANG_DATA = {
         'btn_sahte_veri': "🧪 Fake-Daten-Generator",
         'btn_oyun_tkmk': "✊ Stein-Schere-Papier",
         'btn_oyun_sayi': "🔢 Zahlen-Ratespiel",
+        'btn_ai_sohbet': "🤖 KI Chat",
+        'ai_welcome': "🤖 **AZRxGUARD KI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nStell mir eine Frage, ich helfe gerne!\n_Zum Beenden: /start_",
+        'ai_thinking': "🤔 Denke nach...",
+        'ai_error': "❌ KI ist derzeit nicht verfügbar. Bitte erneut versuchen.",
     },
     'ka': {
         'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
@@ -781,7 +801,21 @@ LANG_DATA = {
         'btn_sahte_veri': "🧪 Fake მონაცემების გენერატორი",
         'btn_oyun_tkmk': "✊ ქვა-ქაღალდი-მაკრატელი",
         'btn_oyun_sayi': "🔢 ნომრის გამოცნობა",
+        'btn_ai_sohbet': "🤖 AI Çat",
+        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nნებისმიერ კითხვას დაუსვი!\n_გასასვლელად: /start_",
+        'ai_thinking': "🤔 ვფიქრობ...",
+        'ai_error': "❌ AI ამჟამად მიუწვდომელია.",
     }
+}
+
+# AI_LANG_PROMPTS — per-language system prompt
+AI_LANG_PROMPTS = {
+    'tr': "Sen AZRxGUARD botunun yapay zeka asistanısın. Türkçe cevap ver. Kısa, net ve yardımsever ol. Markdown kullanabilirsin.",
+    'az': "Sən AZRxGUARD botunun süni intellekt assistantısan. Azərbaycan dilində cavab ver. Qısa, aydın və faydalı ol. Markdown istifadə edə bilərsən.",
+    'ru': "Ты ИИ-ассистент бота AZRxGUARD. Отвечай на русском языке. Будь краток, точен и полезен. Можешь использовать Markdown.",
+    'en': "You are the AI assistant of AZRxGUARD bot. Reply in English. Be concise, clear and helpful. You can use Markdown.",
+    'de': "Du bist der KI-Assistent des AZRxGUARD-Bots. Antworte auf Deutsch. Sei präzise und hilfreich. Du kannst Markdown verwenden.",
+    'ka': "შენ ხარ AZRxGUARD ბოტის AI ასისტენტი. უპასუხე ქართულად. იყავი ლაკონური, მკაფიო და სასარგებლო. შეგიძლია გამოიყენო Markdown.",
 }
 
 # --- YARDIMCI FONKSİYONLAR ---
@@ -812,6 +846,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton('📥 VİDEO İNDİRİCİ', callback_data='menu_indir')
+        ],
+        [
+            InlineKeyboardButton(strings.get('btn_ai_sohbet', '🤖 AI SOHBET'), callback_data='menu_ai')
         ],
     ]
     return InlineKeyboardMarkup(klavye)
@@ -3807,7 +3844,20 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
+    elif query.data == 'menu_ai':
+        context.user_data['durum'] = 'ai_bekliyor'
+        context.user_data['ai_gecmis'] = []
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            strings.get('ai_welcome', '🤖 **AZRxGUARD AI**\n\nBir şeyler sor, yardımcı olayım!\n_Çıkmak için: /start_'),
+            reply_markup=geri_klavye,
+            parse_mode='Markdown'
+        )
+
     elif query.data == 'go_home':
+        context.user_data['durum'] = None
         fid = get_font(context, user_id)
         await query.edit_message_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
 
@@ -4117,6 +4167,45 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             await update.message.reply_text(
                 f"{ipucu}\n🎯 {deneme}. deneme · {kalan} hak kaldı"
             )
+        return
+
+    # ── 🤖 AI SOHBET ──────────────────────────────────────────
+    if context.user_data.get('durum') == 'ai_bekliyor':
+        if not update.message or not update.message.text:
+            return
+        soru = update.message.text.strip()
+        gecmis = context.user_data.get('ai_gecmis', [])
+        bekle = await update.message.reply_text(
+            strings.get('ai_thinking', '🤔 Düşünüyorum...'),
+            parse_mode='Markdown'
+        )
+        try:
+            import google.genai as _genai
+            _client = _genai.Client(api_key=os.environ.get('GEMINI_API_KEY', ''))
+            sistem_prompt = AI_LANG_PROMPTS.get(lang, AI_LANG_PROMPTS['tr'])
+            icerik = [sistem_prompt]
+            for mesaj in gecmis[-10:]:
+                icerik.append(f"Kullanıcı: {mesaj['soru']}")
+                icerik.append(f"Asistan: {mesaj['cevap']}")
+            icerik.append(f"Kullanıcı: {soru}")
+            yanit = await asyncio.to_thread(
+                _client.models.generate_content,
+                model='gemini-2.5-flash',
+                contents='\n'.join(icerik)
+            )
+            cevap_metni = yanit.text or '...'
+            gecmis.append({'soru': soru, 'cevap': cevap_metni})
+            context.user_data['ai_gecmis'] = gecmis[-20:]
+            geri_klavye = InlineKeyboardMarkup([
+                [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+            ])
+            try:
+                await bekle.edit_text(cevap_metni, parse_mode='Markdown', reply_markup=geri_klavye)
+            except Exception:
+                await bekle.edit_text(cevap_metni, reply_markup=geri_klavye)
+        except Exception as e:
+            logger.error(f"AI hatası: {e}")
+            await bekle.edit_text(strings.get('ai_error', '❌ AI şu an kullanılamıyor.'))
         return
 
     # ── 📥 URL TESPİTİ — AZRxGUARD İNDİRİCİ ──────────────────
@@ -4603,6 +4692,24 @@ async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.reply_text(metin, parse_mode='Markdown')
 
 
+async def ai_sifirla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['ai_gecmis'] = []
+    context.user_data['durum'] = None
+    lang = get_lang(context, update.effective_user.id)
+    sifirlama_mesajlari = {
+        'tr': "🤖 **AI Sohbet Geçmişi Sıfırlandı!**\nYeni bir konuşmaya başlayabilirsin.",
+        'az': "🤖 **AI Söhbət Tarixi Sıfırlandı!**\nYeni bir söhbət başlada bilərsən.",
+        'ru': "🤖 **История чата AI сброшена!**\nМожешь начать новый разговор.",
+        'en': "🤖 **AI Chat History Cleared!**\nYou can start a fresh conversation.",
+        'de': "🤖 **KI-Chatverlauf gelöscht!**\nDu kannst ein neues Gespräch beginnen.",
+        'ka': "🤖 **AI ჩატის ისტორია გასუფთავდა!**\nახალი საუბარი შეგიძლია დაიწყო.",
+    }
+    await update.message.reply_text(
+        sifirlama_mesajlari.get(lang, sifirlama_mesajlari['tr']),
+        parse_mode='Markdown'
+    )
+
+
 def main():
     uyanik_tut()
     application = Application.builder().token(TOKEN).build()
@@ -4621,6 +4728,7 @@ def main():
     application.add_handler(CommandHandler("saat", saat_komutu))
     application.add_handler(CommandHandler("b64", b64_komutu))
     application.add_handler(CommandHandler("id", id_komutu))
+    application.add_handler(CommandHandler("ai_sifirla", ai_sifirla_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
