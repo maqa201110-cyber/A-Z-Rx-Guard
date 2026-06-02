@@ -811,7 +811,7 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings.get('btn_pro_araclar', '⚡ PRO ARAÇLAR'), callback_data='menu_pro_araclar')
         ],
         [
-            InlineKeyboardButton('📥 İNDİRİCİ', callback_data='menu_indir')
+            InlineKeyboardButton('📥 VİDEO İNDİRİCİ', callback_data='menu_indir')
         ],
     ]
     return InlineKeyboardMarkup(klavye)
