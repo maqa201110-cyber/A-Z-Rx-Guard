@@ -4225,7 +4225,14 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             bilgi = await asyncio.to_thread(_indir_bilgi_getir, url)
 
             if not bilgi['ok']:
-                await bekle.delete()
+                hata_mesaji = bilgi.get('hata', '❌ Video bilgisi alınamadı.')
+                geri_klavye = InlineKeyboardMarkup([
+                    [InlineKeyboardButton('📥 VİDEO İNDİRİCİ', callback_data='menu_indir')]
+                ])
+                try:
+                    await bekle.edit_text(hata_mesaji, reply_markup=geri_klavye)
+                except Exception:
+                    await bekle.edit_text(hata_mesaji)
                 return
 
             baslik = bilgi['baslik']
@@ -4692,6 +4699,77 @@ async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.reply_text(metin, parse_mode='Markdown')
 
 
+async def ai_medya_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if context.user_data.get('durum') != 'ai_bekliyor':
+        return
+    lang = get_lang(context, user_id)
+    strings = fs(context, user_id, lang)
+    mesaj = update.message
+
+    if not mesaj:
+        return
+
+    bekle = await mesaj.reply_text(strings.get('ai_thinking', '🤔 Düşünüyorum...'))
+
+    try:
+        import google.genai as _genai
+        from google.genai import types as _gtypes
+
+        _client = _genai.Client(api_key=os.environ.get('GEMINI_API_KEY', ''))
+        sistem_prompt = AI_LANG_PROMPTS.get(lang, AI_LANG_PROMPTS['tr'])
+
+        if mesaj.photo:
+            dosya = await mesaj.photo[-1].get_file()
+            mime = 'image/jpeg'
+        elif mesaj.video:
+            dosya = await mesaj.video.get_file()
+            mime = 'video/mp4'
+        elif mesaj.document and mesaj.document.mime_type and mesaj.document.mime_type.startswith('image/'):
+            dosya = await mesaj.document.get_file()
+            mime = mesaj.document.mime_type
+        else:
+            await bekle.edit_text(strings.get('ai_error', '❌ Bu dosya türü desteklenmiyor.'))
+            return
+
+        bayt_verisi = await dosya.download_as_bytearray()
+
+        kullanici_yazisi = mesaj.caption or (
+            'Bu görseli / videoyu açıkla ve analiz et.' if mime.startswith('image') else
+            'Bu videoyu tanımla ve içeriğini açıkla.'
+        )
+
+        gecmis = context.user_data.get('ai_gecmis', [])
+        icerik_parcalari = [sistem_prompt]
+        for m in gecmis[-6:]:
+            icerik_parcalari.append(f"Kullanıcı: {m['soru']}")
+            icerik_parcalari.append(f"Asistan: {m['cevap']}")
+
+        medya_parca = _gtypes.Part.from_bytes(data=bytes(bayt_verisi), mime_type=mime)
+        metin_parca = f"Kullanıcı: {kullanici_yazisi}"
+
+        yanit = await asyncio.to_thread(
+            _client.models.generate_content,
+            model='gemini-2.5-flash',
+            contents=['\n'.join(icerik_parcalari), medya_parca, metin_parca]
+        )
+        cevap_metni = yanit.text or '...'
+        gecmis.append({'soru': f'[Görsel] {kullanici_yazisi}', 'cevap': cevap_metni})
+        context.user_data['ai_gecmis'] = gecmis[-20:]
+
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ])
+        try:
+            await bekle.edit_text(cevap_metni, parse_mode='Markdown', reply_markup=geri_klavye)
+        except Exception:
+            await bekle.edit_text(cevap_metni, reply_markup=geri_klavye)
+
+    except Exception as e:
+        logger.error(f"AI medya hatası: {e}")
+        await bekle.edit_text(strings.get('ai_error', '❌ AI şu an kullanılamıyor.'))
+
+
 async def ai_sifirla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['ai_gecmis'] = []
     context.user_data['durum'] = None
@@ -4731,6 +4809,7 @@ def main():
     application.add_handler(CommandHandler("ai_sifirla", ai_sifirla_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
+    application.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO | filters.Document.IMAGE) & filters.ChatType.PRIVATE, ai_medya_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
     application.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, filigran_ekle), group=-1)
