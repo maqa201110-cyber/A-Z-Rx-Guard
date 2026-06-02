@@ -51,6 +51,7 @@ outputType = "webview"
 [agent]
 stack = "FLASK_VANILLA_JS"
 expertMode = true
+integrations = ["python_gemini_ai_integrations:1.0.0"]
 
 [postMerge]
 path = "scripts/post-merge.sh"
