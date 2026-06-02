@@ -330,6 +330,12 @@ LANG_DATA = {
         'yazi_tipi_welcome': "🔤 **BOT YAZI TİPİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nBir yazı tipi seçin:\n_Tüm bot yazıları seçtiğin tipte görünecek!_",
         'font_changed': "✅ Yazı tipi değiştirildi!",
         'font_active': "✅ Aktif",
+        'btn_siber_guvenlik': "🛡️ SİBER GÜVENLİK",
+        'siber_guvenlik_welcome': "🛡️ **SİBER GÜVENLİK MERKEZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nAraçlardan birini seçin:",
+        'btn_sifre_guc': "🔐 Şifre Güç Testi",
+        'btn_sahte_veri': "🧪 Sahte Veri Üretici",
+        'btn_oyun_tkmk': "✊ Taş-Kağıt-Makas",
+        'btn_oyun_sayi': "🔢 Sayı Tahmin Oyunu",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -413,6 +419,12 @@ LANG_DATA = {
         'yazi_tipi_welcome': "🔤 **BOT YAZI TİPİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nYazı tipi seçin:\n_Bütün bot yazıları seçdiyiniz tiplə görünəcək!_",
         'font_changed': "✅ Yazı tipi dəyişdirildi!",
         'font_active': "✅ Aktiv",
+        'btn_siber_guvenlik': "🛡️ KİBER TƏHLÜKƏSİZLİK",
+        'siber_guvenlik_welcome': "🛡️ **KİBER TƏHLÜKƏSİZLİK MƏRKƏZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nAlətlərdən birini seçin:",
+        'btn_sifre_guc': "🔐 Şifrə Gücü Testi",
+        'btn_sahte_veri': "🧪 Saxta Məlumat Yaradıcı",
+        'btn_oyun_tkmk': "✊ Daş-Kağız-Qayçı",
+        'btn_oyun_sayi': "🔢 Rəqəm Tapmaca",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -496,6 +508,12 @@ LANG_DATA = {
         'yazi_tipi_welcome': "🔤 **ШРИФТ БОТА**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите шрифт:\n_Весь текст бота будет отображаться в выбранном стиле!_",
         'font_changed': "✅ Шрифт изменён!",
         'font_active': "✅ Активен",
+        'btn_siber_guvenlik': "🛡️ КИБЕРБЕЗОПАСНОСТЬ",
+        'siber_guvenlik_welcome': "🛡️ **ЦЕНТР КИБЕРБЕЗОПАСНОСТИ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите инструмент:",
+        'btn_sifre_guc': "🔐 Тест надёжности пароля",
+        'btn_sahte_veri': "🧪 Генератор тестовых данных",
+        'btn_oyun_tkmk': "✊ Камень-Ножницы-Бумага",
+        'btn_oyun_sayi': "🔢 Угадай число",
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -579,6 +597,12 @@ LANG_DATA = {
         'yazi_tipi_welcome': "🔤 **BOT FONT STYLE**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChoose a font style:\n_All bot text will appear in the selected style!_",
         'font_changed': "✅ Font style changed!",
         'font_active': "✅ Active",
+        'btn_siber_guvenlik': "🛡️ CYBER SECURITY",
+        'siber_guvenlik_welcome': "🛡️ **CYBER SECURITY CENTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChoose a tool:",
+        'btn_sifre_guc': "🔐 Password Strength Test",
+        'btn_sahte_veri': "🧪 Fake Data Generator",
+        'btn_oyun_tkmk': "✊ Rock-Paper-Scissors",
+        'btn_oyun_sayi': "🔢 Number Guess Game",
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -662,6 +686,12 @@ LANG_DATA = {
         'yazi_tipi_welcome': "🔤 **BOT SCHRIFTART**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSchriftart wählen:\n_Alle Texte werden im gewählten Stil angezeigt!_",
         'font_changed': "✅ Schriftart geändert!",
         'font_active': "✅ Aktiv",
+        'btn_siber_guvenlik': "🛡️ CYBERSICHERHEIT",
+        'siber_guvenlik_welcome': "🛡️ **CYBERSICHERHEITSZENTRUM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nWählen Sie ein Tool:",
+        'btn_sifre_guc': "🔐 Passwort-Stärke-Test",
+        'btn_sahte_veri': "🧪 Fake-Daten-Generator",
+        'btn_oyun_tkmk': "✊ Stein-Schere-Papier",
+        'btn_oyun_sayi': "🔢 Zahlen-Ratespiel",
     },
     'ka': {
         'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
@@ -745,6 +775,12 @@ LANG_DATA = {
         'yazi_tipi_welcome': "🔤 **BOT შრიფტი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nშრიფტი აირჩიეთ:\n_ყველა ტექსტი არჩეულ სტილში გამოჩნდება!_",
         'font_changed': "✅ შრიფტი შეიცვალა!",
         'font_active': "✅ აქტიური",
+        'btn_siber_guvenlik': "🛡️ კიბერ უსაფრთხოება",
+        'siber_guvenlik_welcome': "🛡️ **კიბერ უსაფრთხოების ცენტრი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nაირჩიეთ ინსტრუმენტი:",
+        'btn_sifre_guc': "🔐 პაროლის სიძლიერის ტესტი",
+        'btn_sahte_veri': "🧪 Fake მონაცემების გენერატორი",
+        'btn_oyun_tkmk': "✊ ქვა-ქაღალდი-მაკრატელი",
+        'btn_oyun_sayi': "🔢 ნომრის გამოცნობა",
     }
 }
 
@@ -766,16 +802,10 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
         ],
         [
-            InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu')
+            InlineKeyboardButton(strings.get('btn_siber_guvenlik', '🛡️ SİBER GÜVENLİK'), callback_data='menu_siber_guvenlik')
         ],
         [
             InlineKeyboardButton(strings['btn_azr_special'], callback_data='menu_azr_special')
-        ],
-        [
-            InlineKeyboardButton(strings.get('btn_panel', '🔍 PANEL'), callback_data='menu_panel')
-        ],
-        [
-            InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ USERNAME HUNTER'), callback_data='menu_guvenli_sorgu')
         ],
         [
             InlineKeyboardButton(strings.get('btn_pro_araclar', '⚡ PRO ARAÇLAR'), callback_data='menu_pro_araclar')
@@ -832,109 +862,82 @@ def _platform_tespit(url: str) -> str:
             return isim
     return '🌐 Video'
 
-def _ytdlp_video_indir(url: str, tmp_dir: str, kalite: str = 'best') -> dict:
+def _ytdlp_video_indir(url: str, tmp_dir: str) -> dict:
     try:
         import yt_dlp
-        fmt = KALITE_FORMATLAR.get(kalite, KALITE_FORMATLAR['best'])
-        # Build ffmpeg location list - try multiple paths
-        ffmpeg_loc = FFMPEG_YOL if os.path.exists(FFMPEG_YOL) else None
         opts = {
-            'format': fmt,
-            'outtmpl': os.path.join(tmp_dir, '%(title).60s.%(ext)s'),
+            'format': 'bestvideo[ext=mp4][filesize<45M]+bestaudio[ext=m4a]/best[ext=mp4][filesize<45M]/best[filesize<45M]/best',
+            'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
             'merge_output_format': 'mp4',
             'quiet': True,
             'no_warnings': True,
+            'ffmpeg_location': FFMPEG_YOL,
             'noplaylist': True,
-            'socket_timeout': 60,
-            'retries': 3,
         }
-        if ffmpeg_loc:
-            opts['ffmpeg_location'] = ffmpeg_loc
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get('title', 'Video')[:80]
             duration = info.get('duration', 0)
             thumb = info.get('thumbnail', None)
-            height = info.get('height') or info.get('resolution', '')
-            dosyalar = [f for f in os.listdir(tmp_dir) if os.path.isfile(os.path.join(tmp_dir, f))]
+            dosyalar = [f for f in os.listdir(tmp_dir)]
             if not dosyalar:
-                return {'ok': False, 'hata': 'Dosya oluşturulamadı. Platform desteklenmiyor olabilir.'}
-            # Prefer mp4
-            mp4ler = [f for f in dosyalar if f.endswith('.mp4')]
-            sec = mp4ler[0] if mp4ler else dosyalar[0]
-            yol = os.path.join(tmp_dir, sec)
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
+            yol = os.path.join(tmp_dir, dosyalar[0])
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
-                boyut_mb = boyut // 1024 // 1024
-                return {'ok': False, 'hata': f'Dosya çok büyük: {boyut_mb} MB. Telegram limiti 50 MB.\n💡 Daha düşük kalite seçin (örn: 360p veya 480p).'}
-            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb, 'boyut': boyut, 'height': height}
+                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB). Telegram sınırı 49 MB.'}
+            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'thumb': thumb}
     except Exception as e:
         hata = str(e)
-        if 'Unsupported URL' in hata or 'No video formats' in hata or 'Unable to extract' in hata:
-            hata = '❌ Bu platform desteklenmiyor veya video bulunamadı.'
+        if 'Unsupported URL' in hata or 'No video formats' in hata:
+            hata = 'Bu platform desteklenmiyor veya video bulunamadı.'
         elif 'Private video' in hata or 'private' in hata.lower():
-            hata = '🔒 Video gizli/özel, indirilemiyor.'
+            hata = 'Video gizli/özel, indirilemiyor.'
         elif 'age' in hata.lower():
-            hata = '🔞 Yaş kısıtlı içerik, indirilemiyor.'
-        elif 'copyright' in hata.lower():
-            hata = '©️ Telif hakkı kısıtlaması nedeniyle indirilemiyor.'
-        elif 'Sign in' in hata or 'login' in hata.lower():
-            hata = '🔐 Bu içerik giriş gerektiriyor, indirilemiyor.'
-        elif 'ffmpeg' in hata.lower():
-            hata = '⚙️ Video dönüştürme hatası. Farklı kalite deneyin.'
-        return {'ok': False, 'hata': hata[:300]}
+            hata = 'Yaş kısıtlı içerik, indirilemiyor.'
+        return {'ok': False, 'hata': hata[:200]}
 
-def _ytdlp_ses_indir(url: str, tmp_dir: str, kalite: str = '192') -> dict:
+def _ytdlp_ses_indir(url: str, tmp_dir: str) -> dict:
     try:
         import yt_dlp
-        ses_kb = SES_KALITE.get(kalite, '192')
         ffmpeg_var = os.path.exists(FFMPEG_YOL)
         if ffmpeg_var:
             opts = {
                 'format': 'bestaudio/best',
-                'outtmpl': os.path.join(tmp_dir, '%(title).60s.%(ext)s'),
-                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': ses_kb}],
+                'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
                 'quiet': True,
                 'no_warnings': True,
                 'ffmpeg_location': FFMPEG_YOL,
                 'noplaylist': True,
-                'socket_timeout': 60,
-                'retries': 3,
             }
         else:
             opts = {
-                'format': 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio/best',
-                'outtmpl': os.path.join(tmp_dir, '%(title).60s.%(ext)s'),
+                'format': 'bestaudio[ext=m4a]/bestaudio/best',
+                'outtmpl': os.path.join(tmp_dir, '%(title).50s.%(ext)s'),
                 'quiet': True,
                 'no_warnings': True,
                 'noplaylist': True,
-                'socket_timeout': 60,
-                'retries': 3,
             }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get('title', 'Ses')[:80]
             duration = info.get('duration', 0)
-            dosyalar = [f for f in os.listdir(tmp_dir) if os.path.isfile(os.path.join(tmp_dir, f))]
+            dosyalar = [f for f in os.listdir(tmp_dir)]
             if not dosyalar:
-                return {'ok': False, 'hata': 'Ses dosyası oluşturulamadı.'}
+                return {'ok': False, 'hata': 'Dosya oluşturulamadı'}
             mp3ler = [f for f in dosyalar if f.endswith('.mp3')]
             sec = mp3ler[0] if mp3ler else dosyalar[0]
             yol = os.path.join(tmp_dir, sec)
             boyut = os.path.getsize(yol)
             if boyut > MAKS_DOSYA:
-                boyut_mb = boyut // 1024 // 1024
-                return {'ok': False, 'hata': f'Ses dosyası çok büyük: {boyut_mb} MB. Telegram limiti 50 MB.\n💡 Daha düşük kalite deneyin.'}
-            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration, 'boyut': boyut}
+                return {'ok': False, 'hata': f'Dosya çok büyük ({boyut // 1024 // 1024} MB).'}
+            return {'ok': True, 'yol': yol, 'baslik': title, 'sure': duration}
     except Exception as e:
         hata = str(e)
         if 'Unsupported URL' in hata:
-            hata = '❌ Bu platform desteklenmiyor.'
-        elif 'Private' in hata or 'private' in hata.lower():
-            hata = '🔒 Özel içerik, indirilemiyor.'
-        elif 'ffmpeg' in hata.lower():
-            hata = '⚙️ Ses dönüştürme hatası.'
-        return {'ok': False, 'hata': hata[:300]}
+            hata = 'Bu platform desteklenmiyor.'
+        return {'ok': False, 'hata': hata[:200]}
 
 def _sure_formatla(saniye) -> str:
     if not saniye:
@@ -3155,17 +3158,25 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(strings['ask_admin_msg'], parse_mode='Markdown')
     elif query.data == 'menu_fun':
         fun_klavye = [
-            [InlineKeyboardButton(strings['btn_roll_dice'], callback_data='roll_dice')],
+            [InlineKeyboardButton(strings['btn_roll_dice'], callback_data='roll_dice'),
+             InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
+            [InlineKeyboardButton(strings.get('btn_oyun_tkmk', '✊ Taş-Kağıt-Makas'), callback_data='oyun_tkmk')],
+            [InlineKeyboardButton(strings.get('btn_oyun_sayi', '🔢 Sayı Tahmin'), callback_data='oyun_sayi_baslat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
-        await query.edit_message_text(strings['fun_welcome'], reply_markup=InlineKeyboardMarkup(fun_klavye), parse_mode='Markdown')
+        await query.edit_message_text(
+            "🎮 **" + strings['btn_fun'] + "**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🎲 Zar · 🎱 Şans Topu · ✊ Taş-Kağıt-Makas · 🔢 Sayı Tahmin",
+            reply_markup=InlineKeyboardMarkup(fun_klavye),
+            parse_mode='Markdown'
+        )
     elif query.data == 'menu_ip_sorgu':
         ip_klavye = [
             [
                 InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
                 InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
             ],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
         ]
         await query.edit_message_text(
             strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
@@ -3214,7 +3225,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.delete()
         await query.message.chat.send_dice(emoji='🎲')
     elif query.data == 'menu_panel':
-        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]])
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
         context.user_data['durum'] = 'panel_sorgu_bekliyor'
         await query.edit_message_text(
             strings.get('panel_welcome', '🔍 **PANEL**\n\n@kullaniciadi veya ID yaz:'),
@@ -3224,12 +3235,112 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_guvenli_sorgu':
         gs_klavye = [
             [InlineKeyboardButton(strings.get('btn_username_checker', '🔎 Platform Kontrolü'), callback_data='menu_username_checker')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
         ]
         await query.edit_message_text(
             strings.get('guvenli_sorgu_welcome', '🕵️ **USERNAME HUNTER**\n\nKullanıcı adını 14 platformda tara:'),
             reply_markup=InlineKeyboardMarkup(gs_klavye),
             parse_mode='Markdown'
+        )
+    elif query.data == 'menu_siber_guvenlik':
+        siber_klavye = [
+            [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
+             InlineKeyboardButton(strings.get('btn_panel', '🔍 TG PANELİ'), callback_data='menu_panel')],
+            [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ USERNAME HUNTER'), callback_data='menu_guvenli_sorgu')],
+            [InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc'),
+             InlineKeyboardButton(strings.get('btn_sahte_veri', '🧪 Sahte Veri'), callback_data='siber_sahte_veri')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ]
+        await query.edit_message_text(
+            strings.get('siber_guvenlik_welcome', '🛡️ **SİBER GÜVENLİK**\n\nAraçlardan birini seçin:'),
+            reply_markup=InlineKeyboardMarkup(siber_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'siber_sifre_guc':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'sifre_guc_bekliyor'
+        await query.edit_message_text(
+            "🔐 **Şifre Güç Testi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Test etmek istediğin şifreyi yaz:\n"
+            "_(Şifren sadece sana görünür, hiçbir yerde saklanmaz)_",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'siber_sahte_veri':
+        import random, string
+        isimler = ['Ahmet','Mehmet','Ali','Ayşe','Fatma','Zeynep','Can','Cem','Elif','Deniz']
+        soyisimler = ['Yılmaz','Kaya','Demir','Çelik','Arslan','Doğan','Şahin','Aydın','Öztürk','Koç']
+        isim = random.choice(isimler)
+        soyisim = random.choice(soyisimler)
+        yil = random.randint(1980,2003)
+        ay = random.randint(1,12)
+        gun = random.randint(1,28)
+        tel = f"+90 5{random.randint(10,59)} {random.randint(100,999)} {random.randint(10,99)} {random.randint(10,99)}"
+        email_srv = random.choice(['gmail.com','yahoo.com','hotmail.com','outlook.com'])
+        email = f"{isim.lower()}.{soyisim.lower()}{random.randint(10,99)}@{email_srv}"
+        sifre_chars = string.ascii_letters + string.digits + '!@#$'
+        sifre = ''.join(random.choices(sifre_chars, k=12))
+        metin = (
+            f"🧪 **SAHTE TEST VERİSİ**\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"👤 **İsim:** {isim} {soyisim}\n"
+            f"🎂 **Doğum:** {gun:02d}/{ay:02d}/{yil}\n"
+            f"📞 **Tel:** `{tel}`\n"
+            f"📧 **E-posta:** `{email}`\n"
+            f"🔑 **Şifre:** `{sifre}`\n\n"
+            f"⚠️ _Bu veriler tamamen rastgele üretilmiştir._\n"
+            f"_Sadece test amaçlıdır, gerçek kişilere ait değildir._"
+        )
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Yeni Üret", callback_data='siber_sahte_veri')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
+        ])
+        await query.edit_message_text(metin, reply_markup=klavye, parse_mode='Markdown')
+    elif query.data == 'oyun_tkmk':
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🪨 Taş", callback_data='tkmk_tas'),
+             InlineKeyboardButton("📄 Kağıt", callback_data='tkmk_kagit'),
+             InlineKeyboardButton("✂️ Makas", callback_data='tkmk_makas')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+        ])
+        await query.edit_message_text(
+            "✊ **TAŞ-KAĞIT-MAKAS**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nSeçimini yap!",
+            reply_markup=klavye, parse_mode='Markdown'
+        )
+    elif query.data in ('tkmk_tas', 'tkmk_kagit', 'tkmk_makas'):
+        import random
+        secimler = {'tkmk_tas': '🪨 Taş', 'tkmk_kagit': '📄 Kağıt', 'tkmk_makas': '✂️ Makas'}
+        kazanan = {'tkmk_tas': 'tkmk_makas', 'tkmk_kagit': 'tkmk_tas', 'tkmk_makas': 'tkmk_kagit'}
+        kullanici = query.data
+        bot_sec = random.choice(list(secimler.keys()))
+        kullanici_ad = secimler[kullanici]
+        bot_ad = secimler[bot_sec]
+        if kullanici == bot_sec:
+            sonuc = "🤝 **Berabere!**"
+        elif kazanan[kullanici] == bot_sec:
+            sonuc = "🏆 **Kazandın!**"
+        else:
+            sonuc = "💀 **Kaybettin!**"
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Tekrar Oyna", callback_data='oyun_tkmk')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+        ])
+        await query.edit_message_text(
+            f"✊ **TAŞ-KAĞIT-MAKAS**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"👤 Sen: **{kullanici_ad}**\n"
+            f"🤖 Bot: **{bot_ad}**\n\n{sonuc}",
+            reply_markup=klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'oyun_sayi_baslat':
+        import random
+        gizli = random.randint(1, 100)
+        context.user_data['sayi_oyun'] = {'gizli': gizli, 'deneme': 0}
+        context.user_data['durum'] = 'sayi_tahmin_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ Oyunu Bitir", callback_data='menu_fun')]])
+        await query.edit_message_text(
+            "🔢 **SAYI TAHMİN OYUNU**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "1 ile 100 arasında bir sayı seçtim! 🎯\n\n"
+            "Tahminini mesaj olarak yaz:",
+            reply_markup=geri, parse_mode='Markdown'
         )
     elif query.data == 'menu_username_checker':
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_guvenli_sorgu')]])
@@ -3251,8 +3362,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(strings.get('btn_wiki_arac', '🌐 Wikipedia'), callback_data='pro_wiki')],
             [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not'),
              InlineKeyboardButton(strings.get('btn_gunsozu_arac', '💡 Günün Sözü'), callback_data='pro_gunsozu')],
-            [InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çevir'), callback_data='pro_birim'),
-             InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
+            [InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çevir'), callback_data='pro_birim')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -3563,27 +3673,24 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             sans_cevap_getir(),
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🎱 Tekrar Sor", callback_data='pro_sans')],
-                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
             ]),
             parse_mode='Markdown'
         )
     elif query.data == 'menu_video_indir':
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]])
         await query.edit_message_text(
-            ft(
-                "📥 **VİDEO & SES İNDİRİCİ**\n"
-                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "🌍 **1000+ platform destekleniyor:**\n"
-                "▶️ YouTube  ·  📸 Instagram  ·  🎵 TikTok\n"
-                "🐦 Twitter/X  ·  📘 Facebook  ·  🤖 Reddit\n"
-                "🎞️ Vimeo  ·  🎮 Twitch  ·  🎧 SoundCloud\n"
-                "📺 Bilibili  ·  💬 VK  ·  🌐 OK.ru  ·  ve daha fazlası\n\n"
-                "📌 **Kullanım:** Linki buraya **yapıştır** — kalite seçimi sana bırakılır! 🎯\n\n"
-                "📊 **Video kalite:** 360p / 480p / 720p / 1080p / En İyi\n"
-                "🎵 **Ses kalite:** 128 / 192 / 320 kbps\n\n"
-                "⚠️ _Telegram limiti: 50 MB. Büyük videolar için düşük kalite seçin._",
-                context, user_id
-            ),
+            "📥 **VİDEO & SES İNDİRİCİ**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🌍 **1000+ platform destekleniyor:**\n"
+            "▶️ YouTube · 📸 Instagram · 🎵 TikTok\n"
+            "🐦 Twitter/X · 📘 Facebook · 🤖 Reddit\n"
+            "🎞️ Vimeo · 🎮 Twitch · 🎧 SoundCloud\n"
+            "📺 Bilibili · 💬 VK · 🌐 OK.ru ve daha fazlası\n\n"
+            "📌 **Kullanım çok basit:**\n"
+            "Sadece video linkini buraya **yapıştır**,\n"
+            "ben video mu ses mi istediğini sorarım! 🎯\n\n"
+            "💡 _Maksimum dosya boyutu: 49 MB_",
             reply_markup=geri,
             parse_mode='Markdown'
         )
@@ -3591,104 +3698,53 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data in ('vid_video', 'vid_ses'):
         url = context.user_data.get('vid_url')
         if not url:
-            await query.answer('❌ Link bulunamadı! Önce bir video linki gönder.', show_alert=True)
+            await query.answer('❌ Link bulunamadı, tekrar gönder.', show_alert=True)
             return
-        is_video = query.data == 'vid_video'
+        tip = 'video' if query.data == 'vid_video' else 'ses'
         platform = _platform_tespit(url)
-        bekle_metni = ft(
-            f"⬇️ **{platform}** {'video' if is_video else 'ses'} indiriliyor...\n"
-            f"_Bu işlem 10-60 saniye sürebilir, lütfen bekleyin..._",
-            context, user_id
-        )
+        bekle_metni = f"⬇️ **{platform}** {'video' if tip == 'video' else 'ses'} indiriliyor...\n_Bu işlem birkaç saniye sürebilir._"
         bekle = await query.message.reply_text(bekle_metni, parse_mode='Markdown')
-        logger.info(f"İndirme başladı: user={user_id} is_video={is_video} url={url[:60]}")
         tmp_dir = tempfile.mkdtemp()
         try:
-            if is_video:
-                sonuc = await asyncio.wait_for(
-                    asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir, 'best'),
-                    timeout=300
-                )
+            if tip == 'video':
+                sonuc = await asyncio.to_thread(_ytdlp_video_indir, url, tmp_dir)
             else:
-                sonuc = await asyncio.wait_for(
-                    asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir, '192'),
-                    timeout=300
-                )
-
-            logger.info(f"İndirme sonucu: user={user_id} ok={sonuc.get('ok')} hata={sonuc.get('hata','')[:80]}")
+                sonuc = await asyncio.to_thread(_ytdlp_ses_indir, url, tmp_dir)
 
             if not sonuc['ok']:
-                await bekle.edit_text(
-                    ft(f"❌ **İndirme başarısız**\n\n{sonuc['hata']}", context, user_id),
-                    parse_mode='Markdown'
-                )
+                await bekle.edit_text(f"❌ **İndirme başarısız**\n\n`{html.escape(sonuc['hata'])}`", parse_mode='Markdown')
                 return
 
             dosya_yol = sonuc['yol']
             baslik = sonuc.get('baslik', 'İndirildi')
             sure_str = _sure_formatla(sonuc.get('sure', 0))
-            boyut_mb = sonuc.get('boyut', 0) // 1024 // 1024
-            caption = f"📥 **{html.escape(baslik[:200])}**"
+            caption = f"📥 **{html.escape(baslik)}**"
             if sure_str:
                 caption += f"\n⏱ {sure_str}"
-            if boyut_mb:
-                caption += f"\n💾 {boyut_mb} MB"
             caption += f"\n\n🤖 _AZRxGUARD İndirici_"
 
-            await bekle.edit_text(
-                ft(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", context, user_id),
-                parse_mode='Markdown'
-            )
+            await bekle.edit_text(f"📤 **Gönderiliyor...** `{html.escape(baslik[:50])}`", parse_mode='Markdown')
 
             with open(dosya_yol, 'rb') as f:
-                if is_video:
+                if tip == 'video':
                     await query.message.reply_video(
                         video=f,
                         caption=caption,
                         parse_mode='Markdown',
-                        supports_streaming=True,
-                        read_timeout=120,
-                        write_timeout=120,
-                        connect_timeout=30,
+                        supports_streaming=True
                     )
                 else:
                     await query.message.reply_audio(
                         audio=f,
                         caption=caption,
                         parse_mode='Markdown',
-                        title=baslik[:64],
-                        performer='AZRxGUARD',
-                        read_timeout=120,
-                        write_timeout=120,
-                        connect_timeout=30,
+                        title=baslik[:60],
+                        performer='AZRxGUARD'
                     )
             await bekle.delete()
-            logger.info(f"İndirme tamamlandı: user={user_id} baslik={baslik[:40]}")
-
-        except asyncio.TimeoutError:
-            logger.error(f"İndirme zaman aşımı: user={user_id} url={url[:60]}")
-            try:
-                await bekle.edit_text(
-                    ft("⏱️ **Zaman aşımı!**\n\nVideo çok uzun veya bağlantı yavaş. Tekrar deneyin.", context, user_id),
-                    parse_mode='Markdown'
-                )
-            except Exception:
-                pass
         except Exception as e:
-            logger.error(f"Video/ses indirme hatası: user={user_id} hata={e}")
-            err_msg = str(e)
-            if 'Request Entity Too Large' in err_msg or '413' in err_msg:
-                err_msg = '❌ Dosya 50 MB limitini aştı!'
-            elif 'timed out' in err_msg.lower():
-                err_msg = '⏱️ Zaman aşımı. Tekrar deneyin.'
-            elif 'NetworkError' in err_msg or 'network' in err_msg.lower():
-                err_msg = '🌐 Ağ hatası. Tekrar deneyin.'
-            else:
-                err_msg = f'❌ Hata: {err_msg[:200]}'
-            try:
-                await bekle.edit_text(ft(err_msg, context, user_id), parse_mode='Markdown')
-            except Exception:
-                pass
+            logger.error(f"Video indirme hatası: {e}")
+            await bekle.edit_text(f"❌ **Bir hata oluştu:**\n`{html.escape(str(e)[:200])}`", parse_mode='Markdown')
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
@@ -3932,17 +3988,85 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         )
         return
 
+    if context.user_data.get('durum') == 'sifre_guc_bekliyor':
+        context.user_data['durum'] = None
+        sifre = update.message.text.strip()
+        puan = 0
+        notlar = []
+        if len(sifre) >= 8: puan += 1
+        else: notlar.append("❌ En az 8 karakter olmalı")
+        if len(sifre) >= 12: puan += 1
+        if any(c.islower() for c in sifre): puan += 1
+        else: notlar.append("❌ Küçük harf ekle")
+        if any(c.isupper() for c in sifre): puan += 1
+        else: notlar.append("❌ Büyük harf ekle")
+        if any(c.isdigit() for c in sifre): puan += 1
+        else: notlar.append("❌ Rakam ekle")
+        if any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in sifre): puan += 1
+        else: notlar.append("❌ Özel karakter ekle (!@#$...)")
+        if len(sifre) >= 16: puan += 1
+        seviye = ['💀 Çok Zayıf','🔴 Zayıf','🟠 Orta','🟡 İyi','🟢 Güçlü','💪 Çok Güçlü','🛡️ Mükemmel'][min(puan,6)]
+        bar = '█' * puan + '░' * (7-puan)
+        rapor = (f"🔐 **ŞİFRE GÜÇ ANALİZİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                 f"📊 Güç: **{seviye}**\n"
+                 f"📈 Puan: `{bar}` {puan}/7\n"
+                 f"📏 Uzunluk: {len(sifre)} karakter\n")
+        if notlar:
+            rapor += "\n**İyileştirmeler:**\n" + "\n".join(notlar)
+        else:
+            rapor += "\n✅ Harika şifre!"
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Tekrar Test", callback_data='siber_sifre_guc')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
+        ])
+        await update.message.reply_text(rapor, parse_mode='Markdown', reply_markup=klavye)
+        return
+
+    if context.user_data.get('durum') == 'sayi_tahmin_bekliyor':
+        oyun = context.user_data.get('sayi_oyun', {})
+        gizli = oyun.get('gizli', 50)
+        deneme = oyun.get('deneme', 0) + 1
+        context.user_data['sayi_oyun']['deneme'] = deneme
+        try:
+            tahmin = int(update.message.text.strip())
+        except ValueError:
+            await update.message.reply_text("❌ Lütfen sadece bir sayı yaz (1-100)!")
+            return
+        if tahmin == gizli:
+            context.user_data['durum'] = None
+            klavye = InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tekrar Oyna", callback_data='oyun_sayi_baslat')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+            ])
+            await update.message.reply_text(
+                f"🎉 **TEBRİKLER!** `{gizli}` sayısını {deneme} denemede buldun!",
+                parse_mode='Markdown', reply_markup=klavye
+            )
+        elif deneme >= 10:
+            context.user_data['durum'] = None
+            klavye = InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tekrar Oyna", callback_data='oyun_sayi_baslat')],
+                [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+            ])
+            await update.message.reply_text(
+                f"😢 **Hakkın bitti!** Doğru sayı **{gizli}** idi.",
+                parse_mode='Markdown', reply_markup=klavye
+            )
+        else:
+            ipucu = "⬆️ Daha büyük!" if tahmin < gizli else "⬇️ Daha küçük!"
+            kalan = 10 - deneme
+            await update.message.reply_text(
+                f"{ipucu}\n🎯 {deneme}. deneme · {kalan} hak kaldı"
+            )
+        return
+
     # --- 📥 URL TESPİTİ — VİDEO İNDİRİCİ ---
     mesaj_metni = update.message.text.strip() if update.message and update.message.text else ''
     url_eslesmesi = URL_REGEX.search(mesaj_metni)
-    durum = context.user_data.get('durum')
-    if url_eslesmesi and (not durum or durum is None or durum == 'None'):
+    if url_eslesmesi and not context.user_data.get('durum'):
         url = url_eslesmesi.group(0).rstrip('.,!?;)')
-        # Clear any stale state
-        context.user_data['durum'] = None
         platform = _platform_tespit(url)
         context.user_data['vid_url'] = url
-        logger.info(f"URL tespiti: user={user_id} platform={platform} url={url[:60]}")
         indir_klavye = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton("📹 Video İndir", callback_data='vid_video'),
@@ -3951,12 +4075,9 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             [InlineKeyboardButton("❌ İptal", callback_data='go_home')]
         ])
         await update.message.reply_text(
-            ft(
-                f"🔗 **{platform} linki algılandı!**\n\n"
-                f"`{html.escape(url[:80])}{'...' if len(url) > 80 else ''}`\n\n"
-                f"📹 Video mu 🎵 Ses mi indirmek istiyorsun?",
-                context, user_id
-            ),
+            f"🔗 **{platform} linki algılandı!**\n\n"
+            f"`{html.escape(url[:80])}{'...' if len(url) > 80 else ''}`\n\n"
+            f"Ne indirmek istiyorsun?",
             parse_mode='Markdown',
             reply_markup=indir_klavye,
             disable_web_page_preview=True
