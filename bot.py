@@ -3598,19 +3598,112 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_video_olusturucu':
         vo_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🎬 VİDEO YAZI EKLEME", callback_data='vyo_baslat')],
+            [InlineKeyboardButton("📥 VİDEO İNDİRİCİ", callback_data='vindirici_baslat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ])
         await query.edit_message_text(
             "🎬 **VİDEO OLUŞTURUCU**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Videolarınıza yazı ekleyin, düzenleyin!\n\n"
             "📌 Özellikler:\n"
-            "• İstediğiniz yazıyı ekleyin\n"
-            "• 5 farklı konum seçeneği\n"
-            "• Hayalet veya normal yazı stili\n"
-            "• 15+ renk seçeneği",
+            "• 🎬 **Yazi Ekleme** — Videoya istediğin yazıyı ekle\n"
+            "• 📥 **Video İndirici** — TikTok, YouTube, Instagram ve daha fazlası",
             reply_markup=vo_klavye,
             parse_mode='Markdown'
         )
+    elif query.data == 'vindirici_baslat':
+        context.user_data['durum'] = 'vindirici_link_bekle'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]])
+        await query.edit_message_text(
+            "📥 **VİDEO İNDİRİCİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🔗 İndirmek istediğin **linki gönder:**\n\n"
+            "✅ _Desteklenen: TikTok, YouTube, Instagram, Twitter/X, Facebook ve 1000+ site_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('vindirici_tur_'):
+        tur = query.data.replace('vindirici_tur_', '')
+        url = context.user_data.get('vindirici_url', '')
+        if not url:
+            await query.edit_message_text("❌ Link bulunamadı. Tekrar deneyin.", parse_mode='Markdown')
+            return
+        context.user_data['durum'] = None
+        tur_adi = "📹 Video" if tur == 'video' else "🎵 Ses"
+        islem_msg = await query.edit_message_text(
+            f"⏳ **{tur_adi} indiriliyor...**\n\nBu işlem biraz sürebilir, lütfen bekleyin.",
+            parse_mode='Markdown'
+        )
+        try:
+            import tempfile, os as _os
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                ytdlp_yolu = '.pythonlibs/bin/yt-dlp'
+                import subprocess as _sp
+                if tur == 'video':
+                    cmd = [
+                        ytdlp_yolu, '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                        '--merge-output-format', 'mp4',
+                        '-o', f'{tmp_dir}/video.%(ext)s',
+                        '--max-filesize', '49m',
+                        '--no-playlist',
+                        url
+                    ]
+                else:
+                    cmd = [
+                        ytdlp_yolu, '-f', 'bestaudio[ext=m4a]/bestaudio',
+                        '-x', '--audio-format', 'mp3', '--audio-quality', '0',
+                        '-o', f'{tmp_dir}/ses.%(ext)s',
+                        '--max-filesize', '49m',
+                        '--no-playlist',
+                        url
+                    ]
+                result = await asyncio.to_thread(
+                    lambda: _sp.run(cmd, capture_output=True, text=True, timeout=120)
+                )
+                dosyalar = [f for f in _os.listdir(tmp_dir) if _os.path.isfile(f'{tmp_dir}/{f}')]
+                if not dosyalar:
+                    raise Exception(result.stderr[-300:] if result.stderr else "Dosya oluşturulamadı")
+                dosya_yolu = f"{tmp_dir}/{dosyalar[0]}"
+                boyut = _os.path.getsize(dosya_yolu)
+                if boyut > 49 * 1024 * 1024:
+                    raise Exception("Dosya 49 MB'den büyük")
+                geri_klavye = InlineKeyboardMarkup([[
+                    InlineKeyboardButton("📥 Yeni İndir", callback_data='vindirici_baslat'),
+                    InlineKeyboardButton("🏠 Ana Menü", callback_data='go_home')
+                ]])
+                if tur == 'video':
+                    with open(dosya_yolu, 'rb') as vf:
+                        await update.effective_chat.send_video(
+                            video=vf,
+                            caption="✅ **Video indirildi!**\n_AZRxGUARD Video İndirici_",
+                            parse_mode='Markdown',
+                            reply_markup=geri_klavye
+                        )
+                else:
+                    with open(dosya_yolu, 'rb') as af:
+                        await update.effective_chat.send_audio(
+                            audio=af,
+                            caption="✅ **Ses indirildi!**\n_AZRxGUARD Video İndirici_",
+                            parse_mode='Markdown',
+                            reply_markup=geri_klavye
+                        )
+                await islem_msg.delete()
+        except Exception as e:
+            logger.error(f"Vindirici hatası: {e}")
+            hata_str = str(e)
+            if 'HTTP Error 403' in hata_str or 'Sign in' in hata_str:
+                hata_mesaji = "❌ Bu video özel veya erişim kısıtlı."
+            elif 'Unsupported URL' in hata_str:
+                hata_mesaji = "❌ Bu platform desteklenmiyor."
+            elif '49 MB' in hata_str or 'File is larger' in hata_str:
+                hata_mesaji = "❌ Video çok büyük (maks 49 MB)."
+            else:
+                hata_mesaji = "❌ İndirme başarısız oldu. Farklı bir link deneyin."
+            await islem_msg.edit_text(
+                hata_mesaji,
+                reply_markup=InlineKeyboardMarkup([[
+                    InlineKeyboardButton("🔄 Tekrar Dene", callback_data='vindirici_baslat'),
+                    InlineKeyboardButton("🏠 Ana Menü", callback_data='go_home')
+                ]]),
+                parse_mode='Markdown'
+            )
     elif query.data == 'vyo_baslat':
         context.user_data['durum'] = 'vyo_video_bekle'
         context.user_data['vyo'] = {}
@@ -3621,6 +3714,27 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "⚠️ _Desteklenen formatlar: MP4, MOV, AVI, MKV_\n"
             "⚠️ _Maksimum boyut: 49 MB_",
             reply_markup=geri,
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('vyo_boyut_'):
+        boyut_kod = query.data.replace('vyo_boyut_', '')
+        boyut_map = {'kucuk': 28, 'orta': 48, 'buyuk': 70, 'dev': 96}
+        boyut_adi_map = {'kucuk': '🔡 Küçük', 'orta': '🔤 Orta', 'buyuk': '🔠 Büyük', 'dev': '💬 Dev'}
+        context.user_data.setdefault('vyo', {})['boyut'] = boyut_map.get(boyut_kod, 48)
+        boyut_adi = boyut_adi_map.get(boyut_kod, 'Orta')
+        konum_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("↗️ SAĞ YUKARI", callback_data='vyo_konum_sag_yukari'),
+             InlineKeyboardButton("↖️ SOL YUKARI", callback_data='vyo_konum_sol_yukari')],
+            [InlineKeyboardButton("↘️ SAĞ AŞAĞI", callback_data='vyo_konum_sag_asagi'),
+             InlineKeyboardButton("↙️ SOL AŞAĞI", callback_data='vyo_konum_sol_asagi')],
+            [InlineKeyboardButton("🎯 VİDEO ORTASI", callback_data='vyo_konum_orta')],
+            [InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]
+        ])
+        await query.edit_message_text(
+            f"🎬 **VİDEO YAZI EKLEME**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"✅ Boyut: **{boyut_adi}**\n\n"
+            "📍 **Yazının konumunu seçin:**",
+            reply_markup=konum_klavye,
             parse_mode='Markdown'
         )
     elif query.data.startswith('vyo_konum_'):
@@ -3713,7 +3827,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 cikti_yolu = tmp_out.name
 
             await dosya.download_to_drive(giris_yolu)
-            basari = await asyncio.to_thread(vyo_ffmpeg_yazi_ekle, giris_yolu, cikti_yolu, yazi, konum, stil, renk)
+            boyut = vyo.get('boyut', 52)
+            basari = await asyncio.to_thread(vyo_ffmpeg_yazi_ekle, giris_yolu, cikti_yolu, yazi, konum, stil, renk, boyut)
 
             if basari and _os.path.getsize(cikti_yolu) > 0:
                 with open(cikti_yolu, 'rb') as vf:
@@ -4227,6 +4342,27 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             await bekle.edit_text(f"❌ Ping hatası: {e}")
         return
 
+    # ── 📥 VİDEO İNDİRİCİ — LİNK GİRİŞ ──────────────────────
+    if context.user_data.get('durum') == 'vindirici_link_bekle':
+        url = (update.message.text or '').strip()
+        if not url.startswith('http'):
+            await update.message.reply_text("❌ Lütfen geçerli bir link gönderin (http ile başlamalı).")
+            return
+        context.user_data['vindirici_url'] = url
+        context.user_data['durum'] = None
+        tur_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📹 Video", callback_data='vindirici_tur_video'),
+             InlineKeyboardButton("🎵 Ses (MP3)", callback_data='vindirici_tur_ses')],
+            [InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]
+        ])
+        await update.message.reply_text(
+            "✅ **Link alındı!**\n\n"
+            "📥 **Ne indirmek istiyorsun?**",
+            reply_markup=tur_klavye,
+            parse_mode='Markdown'
+        )
+        return
+
     # ── 🎬 VİDEO YAZI EKLEME — YAZI GİRİŞ ────────────────────
     if context.user_data.get('durum') == 'vyo_yazi_bekle':
         yazi = (update.message.text or '').strip()
@@ -4235,18 +4371,17 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             return
         context.user_data.setdefault('vyo', {})['yazi'] = yazi
         context.user_data['durum'] = None
-        konum_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("↗️ SAĞ YUKARI", callback_data='vyo_konum_sag_yukari'),
-             InlineKeyboardButton("↖️ SOL YUKARI", callback_data='vyo_konum_sol_yukari')],
-            [InlineKeyboardButton("↘️ SAĞ AŞAĞI", callback_data='vyo_konum_sag_asagi'),
-             InlineKeyboardButton("↙️ SOL AŞAĞI", callback_data='vyo_konum_sol_asagi')],
-            [InlineKeyboardButton("🎯 VİDEO ORTASI", callback_data='vyo_konum_orta')],
+        boyut_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔡 Küçük", callback_data='vyo_boyut_kucuk'),
+             InlineKeyboardButton("🔤 Orta", callback_data='vyo_boyut_orta'),
+             InlineKeyboardButton("🔠 Büyük", callback_data='vyo_boyut_buyuk'),
+             InlineKeyboardButton("💬 Dev", callback_data='vyo_boyut_dev')],
             [InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]
         ])
         await update.message.reply_text(
             f"✅ **Yazı alındı:** `{html.escape(yazi)}`\n\n"
-            "📍 **Yazının konumunu seçin:**",
-            reply_markup=konum_klavye,
+            "🔡 **Yazı boyutunu seçin:**",
+            reply_markup=boyut_klavye,
             parse_mode='Markdown'
         )
         return
@@ -4654,7 +4789,7 @@ async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.reply_text(metin, parse_mode='Markdown')
 
 
-def vyo_ffmpeg_yazi_ekle(giris: str, cikti: str, yazi: str, konum: str, stil: str, renk: str) -> bool:
+def vyo_ffmpeg_yazi_ekle(giris: str, cikti: str, yazi: str, konum: str, stil: str, renk: str, boyut: int = 52) -> bool:
     import subprocess as _sp
     konum_map = {
         'sag_yukari': 'x=w-tw-30:y=30',
@@ -4683,13 +4818,13 @@ def vyo_ffmpeg_yazi_ekle(giris: str, cikti: str, yazi: str, konum: str, stil: st
             "%{eif\\:255*(0.5+0.5*sin(2*" + pi + "*t/3+4.189))\\:x\\:2}'"
         )
         drawtext = (
-            f"drawtext=text='{yazi_esc}':fontsize=52:{fc_expr}:{xy}"
+            f"drawtext=text='{yazi_esc}':fontsize={boyut}:{fc_expr}:{xy}"
             f":borderw=3:bordercolor=black@{alpha_border}"
         )
     else:
         fontcolor = renk_map.get(renk, 'white')
         drawtext = (
-            f"drawtext=text='{yazi_esc}':fontsize=52:fontcolor={fontcolor}@{alpha_yazi}"
+            f"drawtext=text='{yazi_esc}':fontsize={boyut}:fontcolor={fontcolor}@{alpha_yazi}"
             f":{xy}:borderw=3:bordercolor=black@{alpha_border}"
         )
     cmd = ['ffmpeg', '-i', giris, '-vf', drawtext, '-codec:a', 'copy', '-preset', 'fast', '-y', cikti]
