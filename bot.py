@@ -333,13 +333,14 @@ LANG_DATA = {
         'btn_siber_guvenlik': "🛡️ SİBER GÜVENLİK",
         'siber_guvenlik_welcome': "🛡️ **SİBER GÜVENLİK MERKEZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nAraçlardan birini seçin:",
         'btn_sifre_guc': "🔐 Şifre Güç Testi",
-        'btn_sahte_veri': "🧪 Sahte Veri Üretici",
         'btn_oyun_tkmk': "✊ Taş-Kağıt-Makas",
         'btn_oyun_sayi': "🔢 Sayı Tahmin Oyunu",
-        'btn_ai_sohbet': "🤖 AI Sohbet",
-        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nHerhangi bir soru sor, yardımcı olayım!\n_Çıkmak için: /start_",
-        'ai_thinking': "🤔 Düşünüyorum...",
-        'ai_error': "❌ AI şu an kullanılamıyor. Lütfen tekrar dene.",
+        'btn_dns_sorgu': "🌐 DNS Sorgu",
+        'btn_whois': "🔍 WHOIS Sorgu",
+        'btn_port_tara': "🔌 Port Tarama",
+        'btn_ssl_kontrol': "🔐 SSL Kontrol",
+        'btn_ping': "📡 Ping Test",
+        'btn_video_olusturucu': "🎬 Video Oluşturucu",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -426,13 +427,14 @@ LANG_DATA = {
         'btn_siber_guvenlik': "🛡️ KİBER TƏHLÜKƏSİZLİK",
         'siber_guvenlik_welcome': "🛡️ **KİBER TƏHLÜKƏSİZLİK MƏRKƏZİ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nAlətlərdən birini seçin:",
         'btn_sifre_guc': "🔐 Şifrə Gücü Testi",
-        'btn_sahte_veri': "🧪 Saxta Məlumat Yaradıcı",
         'btn_oyun_tkmk': "✊ Daş-Kağız-Qayçı",
         'btn_oyun_sayi': "🔢 Rəqəm Tapmaca",
-        'btn_ai_sohbet': "🤖 AI Söhbət",
-        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nİstənilən sual ver, kömək edim!\n_Çıxmaq üçün: /start_",
-        'ai_thinking': "🤔 Düşünürəm...",
-        'ai_error': "❌ AI hal-hazırda əlçatan deyil. Yenidən cəhd et.",
+        'btn_dns_sorgu': "🌐 DNS Sorğu",
+        'btn_whois': "🔍 WHOIS Sorğu",
+        'btn_port_tara': "🔌 Port Tarama",
+        'btn_ssl_kontrol': "🔐 SSL Yoxlama",
+        'btn_ping': "📡 Ping Test",
+        'btn_video_olusturucu': "🎬 Video Yaradıcı",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -519,13 +521,14 @@ LANG_DATA = {
         'btn_siber_guvenlik': "🛡️ КИБЕРБЕЗОПАСНОСТЬ",
         'siber_guvenlik_welcome': "🛡️ **ЦЕНТР КИБЕРБЕЗОПАСНОСТИ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nВыберите инструмент:",
         'btn_sifre_guc': "🔐 Тест надёжности пароля",
-        'btn_sahte_veri': "🧪 Генератор тестовых данных",
         'btn_oyun_tkmk': "✊ Камень-Ножницы-Бумага",
         'btn_oyun_sayi': "🔢 Угадай число",
-        'btn_ai_sohbet': "🤖 AI Чат",
-        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nЗадай любой вопрос, помогу!\n_Для выхода: /start_",
-        'ai_thinking': "🤔 Думаю...",
-        'ai_error': "❌ AI сейчас недоступен. Попробуй ещё раз.",
+        'btn_dns_sorgu': "🌐 DNS Запрос",
+        'btn_whois': "🔍 WHOIS Запрос",
+        'btn_port_tara': "🔌 Сканер Портов",
+        'btn_ssl_kontrol': "🔐 SSL Проверка",
+        'btn_ping': "📡 Ping Тест",
+        'btn_video_olusturucu': "🎬 Видео Редактор",
     },
     'en': {
         'welcome': "👋 **Welcome to AZRxGUARD!**\n\nPlease use the buttons below to proceed.",
@@ -612,13 +615,14 @@ LANG_DATA = {
         'btn_siber_guvenlik': "🛡️ CYBER SECURITY",
         'siber_guvenlik_welcome': "🛡️ **CYBER SECURITY CENTER**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nChoose a tool:",
         'btn_sifre_guc': "🔐 Password Strength Test",
-        'btn_sahte_veri': "🧪 Fake Data Generator",
         'btn_oyun_tkmk': "✊ Rock-Paper-Scissors",
         'btn_oyun_sayi': "🔢 Number Guess Game",
-        'btn_ai_sohbet': "🤖 AI Chat",
-        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nAsk me anything, I'm here to help!\n_To exit: /start_",
-        'ai_thinking': "🤔 Thinking...",
-        'ai_error': "❌ AI is currently unavailable. Please try again.",
+        'btn_dns_sorgu': "🌐 DNS Lookup",
+        'btn_whois': "🔍 WHOIS Lookup",
+        'btn_port_tara': "🔌 Port Scanner",
+        'btn_ssl_kontrol': "🔐 SSL Check",
+        'btn_ping': "📡 Ping Test",
+        'btn_video_olusturucu': "🎬 Video Creator",
     },
     'de': {
         'welcome': "👋 **Willkommen bei AZRxGUARD!**\n\nBitte nutzen Sie die folgenden Schaltflächen, um fortzufahren.",
@@ -705,13 +709,14 @@ LANG_DATA = {
         'btn_siber_guvenlik': "🛡️ CYBERSICHERHEIT",
         'siber_guvenlik_welcome': "🛡️ **CYBERSICHERHEITSZENTRUM**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nWählen Sie ein Tool:",
         'btn_sifre_guc': "🔐 Passwort-Stärke-Test",
-        'btn_sahte_veri': "🧪 Fake-Daten-Generator",
         'btn_oyun_tkmk': "✊ Stein-Schere-Papier",
         'btn_oyun_sayi': "🔢 Zahlen-Ratespiel",
-        'btn_ai_sohbet': "🤖 KI Chat",
-        'ai_welcome': "🤖 **AZRxGUARD KI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nStell mir eine Frage, ich helfe gerne!\n_Zum Beenden: /start_",
-        'ai_thinking': "🤔 Denke nach...",
-        'ai_error': "❌ KI ist derzeit nicht verfügbar. Bitte erneut versuchen.",
+        'btn_dns_sorgu': "🌐 DNS Abfrage",
+        'btn_whois': "🔍 WHOIS Abfrage",
+        'btn_port_tara': "🔌 Port-Scanner",
+        'btn_ssl_kontrol': "🔐 SSL-Prüfung",
+        'btn_ping': "📡 Ping-Test",
+        'btn_video_olusturucu': "🎬 Video-Editor",
     },
     'ka': {
         'welcome': "👋 **მოგესალმებით AZRxGUARD-ში!**\n\nგთხოვთ გამოიყენოთ ქვემოთ მოცემული ღილაკები.",
@@ -798,24 +803,15 @@ LANG_DATA = {
         'btn_siber_guvenlik': "🛡️ კიბერ უსაფრთხოება",
         'siber_guvenlik_welcome': "🛡️ **კიბერ უსაფრთხოების ცენტრი**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nაირჩიეთ ინსტრუმენტი:",
         'btn_sifre_guc': "🔐 პაროლის სიძლიერის ტესტი",
-        'btn_sahte_veri': "🧪 Fake მონაცემების გენერატორი",
         'btn_oyun_tkmk': "✊ ქვა-ქაღალდი-მაკრატელი",
         'btn_oyun_sayi': "🔢 ნომრის გამოცნობა",
-        'btn_ai_sohbet': "🤖 AI Çat",
-        'ai_welcome': "🤖 **AZRxGUARD AI**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nნებისმიერ კითხვას დაუსვი!\n_გასასვლელად: /start_",
-        'ai_thinking': "🤔 ვფიქრობ...",
-        'ai_error': "❌ AI ამჟამად მიუწვდომელია.",
+        'btn_dns_sorgu': "🌐 DNS მოთხოვნა",
+        'btn_whois': "🔍 WHOIS",
+        'btn_port_tara': "🔌 პორტის სკანერი",
+        'btn_ssl_kontrol': "🔐 SSL შემოწმება",
+        'btn_ping': "📡 Ping ტესტი",
+        'btn_video_olusturucu': "🎬 ვიდეო შემქმნელი",
     }
-}
-
-# AI_LANG_PROMPTS — per-language system prompt
-AI_LANG_PROMPTS = {
-    'tr': "Sen AZRxGUARD botunun yapay zeka asistanısın. Türkçe cevap ver. Kısa, net ve yardımsever ol. Markdown kullanabilirsin.",
-    'az': "Sən AZRxGUARD botunun süni intellekt assistantısan. Azərbaycan dilində cavab ver. Qısa, aydın və faydalı ol. Markdown istifadə edə bilərsən.",
-    'ru': "Ты ИИ-ассистент бота AZRxGUARD. Отвечай на русском языке. Будь краток, точен и полезен. Можешь использовать Markdown.",
-    'en': "You are the AI assistant of AZRxGUARD bot. Reply in English. Be concise, clear and helpful. You can use Markdown.",
-    'de': "Du bist der KI-Assistent des AZRxGUARD-Bots. Antworte auf Deutsch. Sei präzise und hilfreich. Du kannst Markdown verwenden.",
-    'ka': "შენ ხარ AZRxGUARD ბოტის AI ასისტენტი. უპასუხე ქართულად. იყავი ლაკონური, მკაფიო და სასარგებლო. შეგიძლია გამოიყენო Markdown.",
 }
 
 # --- YARDIMCI FONKSİYONLAR ---
@@ -845,7 +841,7 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings.get('btn_pro_araclar', '⚡ PRO ARAÇLAR'), callback_data='menu_pro_araclar')
         ],
         [
-            InlineKeyboardButton(strings.get('btn_ai_sohbet', '🤖 AI SOHBET'), callback_data='menu_ai')
+            InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
         ],
     ]
     return InlineKeyboardMarkup(klavye)
@@ -3150,7 +3146,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(strings.get('btn_panel', '🔍 TG PANELİ'), callback_data='menu_panel')],
             [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ USERNAME HUNTER'), callback_data='menu_guvenli_sorgu')],
             [InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc'),
-             InlineKeyboardButton(strings.get('btn_sahte_veri', '🧪 Sahte Veri'), callback_data='siber_sahte_veri')],
+             InlineKeyboardButton(strings.get('btn_dns_sorgu', '🌐 DNS Sorgu'), callback_data='siber_dns_sorgu')],
+            [InlineKeyboardButton(strings.get('btn_whois', '🔍 WHOIS Sorgu'), callback_data='siber_whois'),
+             InlineKeyboardButton(strings.get('btn_port_tara', '🔌 Port Tarama'), callback_data='siber_port_tara')],
+            [InlineKeyboardButton(strings.get('btn_ssl_kontrol', '🔐 SSL Kontrol'), callback_data='siber_ssl_kontrol'),
+             InlineKeyboardButton(strings.get('btn_ping', '📡 Ping Test'), callback_data='siber_ping')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -3167,36 +3167,51 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "_(Şifren sadece sana görünür, hiçbir yerde saklanmaz)_",
             reply_markup=geri, parse_mode='Markdown'
         )
-    elif query.data == 'siber_sahte_veri':
-        import random, string
-        isimler = ['Ahmet','Mehmet','Ali','Ayşe','Fatma','Zeynep','Can','Cem','Elif','Deniz']
-        soyisimler = ['Yılmaz','Kaya','Demir','Çelik','Arslan','Doğan','Şahin','Aydın','Öztürk','Koç']
-        isim = random.choice(isimler)
-        soyisim = random.choice(soyisimler)
-        yil = random.randint(1980,2003)
-        ay = random.randint(1,12)
-        gun = random.randint(1,28)
-        tel = f"+90 5{random.randint(10,59)} {random.randint(100,999)} {random.randint(10,99)} {random.randint(10,99)}"
-        email_srv = random.choice(['gmail.com','yahoo.com','hotmail.com','outlook.com'])
-        email = f"{isim.lower()}.{soyisim.lower()}{random.randint(10,99)}@{email_srv}"
-        sifre_chars = string.ascii_letters + string.digits + '!@#$'
-        sifre = ''.join(random.choices(sifre_chars, k=12))
-        metin = (
-            f"🧪 **SAHTE TEST VERİSİ**\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"👤 **İsim:** {isim} {soyisim}\n"
-            f"🎂 **Doğum:** {gun:02d}/{ay:02d}/{yil}\n"
-            f"📞 **Tel:** `{tel}`\n"
-            f"📧 **E-posta:** `{email}`\n"
-            f"🔑 **Şifre:** `{sifre}`\n\n"
-            f"⚠️ _Bu veriler tamamen rastgele üretilmiştir._\n"
-            f"_Sadece test amaçlıdır, gerçek kişilere ait değildir._"
+    elif query.data == 'siber_dns_sorgu':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'siber_dns_bekliyor'
+        await query.edit_message_text(
+            "🌐 **DNS SORGU**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Sorgulamak istediğin **alan adını** yaz:\n"
+            "_(Örnek: google.com, github.com)_",
+            reply_markup=geri, parse_mode='Markdown'
         )
-        klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔄 Yeni Üret", callback_data='siber_sahte_veri')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
-        ])
-        await query.edit_message_text(metin, reply_markup=klavye, parse_mode='Markdown')
+    elif query.data == 'siber_whois':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'siber_whois_bekliyor'
+        await query.edit_message_text(
+            "🔍 **WHOIS SORGU**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Sorgulamak istediğin **alan adını** yaz:\n"
+            "_(Örnek: google.com, example.org)_",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'siber_port_tara':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'siber_port_bekliyor'
+        await query.edit_message_text(
+            "🔌 **PORT TARAMA**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Taramak istediğin **IP adresi veya alan adını** yaz:\n"
+            "_(Yaygın portlar otomatik taranır: 21,22,23,25,53,80,443,8080,8443)_",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'siber_ssl_kontrol':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'siber_ssl_bekliyor'
+        await query.edit_message_text(
+            "🔐 **SSL SERTİFİKA KONTROL**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Kontrol etmek istediğin **alan adını** yaz:\n"
+            "_(Örnek: google.com, github.com)_",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'siber_ping':
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'siber_ping_bekliyor'
+        await query.edit_message_text(
+            "📡 **PİNG TEST**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Ping atmak istediğin **IP adresi veya alan adını** yaz:\n"
+            "_(Örnek: 8.8.8.8, google.com)_",
+            reply_markup=geri, parse_mode='Markdown'
+        )
     elif query.data == 'oyun_tkmk':
         klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🪨 Taş", callback_data='tkmk_tas'),
@@ -3580,17 +3595,170 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
 
-    elif query.data == 'menu_ai':
-        context.user_data['durum'] = 'ai_bekliyor'
-        context.user_data['ai_gecmis'] = []
-        geri_klavye = InlineKeyboardMarkup([
+    elif query.data == 'menu_video_olusturucu':
+        vo_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🎬 VİDEO YAZI EKLEME", callback_data='vyo_baslat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ])
         await query.edit_message_text(
-            strings.get('ai_welcome', '🤖 **AZRxGUARD AI**\n\nBir şeyler sor, yardımcı olayım!\n_Çıkmak için: /start_'),
-            reply_markup=geri_klavye,
+            "🎬 **VİDEO OLUŞTURUCU**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Videolarınıza yazı ekleyin, düzenleyin!\n\n"
+            "📌 Özellikler:\n"
+            "• İstediğiniz yazıyı ekleyin\n"
+            "• 5 farklı konum seçeneği\n"
+            "• Hayalet veya normal yazı stili\n"
+            "• 15+ renk seçeneği",
+            reply_markup=vo_klavye,
             parse_mode='Markdown'
         )
+    elif query.data == 'vyo_baslat':
+        context.user_data['durum'] = 'vyo_video_bekle'
+        context.user_data['vyo'] = {}
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]])
+        await query.edit_message_text(
+            "🎬 **VİDEO YAZI EKLEME**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "📹 **LÜTFEN FİLİGRAN EKLEMEK İSTEDİĞİNİZ VİDEOYU ATIN**\n\n"
+            "⚠️ _Desteklenen formatlar: MP4, MOV, AVI, MKV_\n"
+            "⚠️ _Maksimum boyut: 49 MB_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('vyo_konum_'):
+        konum = query.data.replace('vyo_konum_', '')
+        context.user_data.setdefault('vyo', {})['konum'] = konum
+        konum_adi = {
+            'sag_yukari': '📍 Sağ Yukarı', 'sol_yukari': '📍 Sol Yukarı',
+            'sag_asagi': '📍 Sağ Aşağı', 'sol_asagi': '📍 Sol Aşağı',
+            'orta': '📍 Video Ortası'
+        }.get(konum, konum)
+        stil_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("👻 HAYALET YAZI", callback_data='vyo_stil_hayalet'),
+             InlineKeyboardButton("✍️ NORMAL YAZI", callback_data='vyo_stil_normal')],
+            [InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]
+        ])
+        await query.edit_message_text(
+            f"🎬 **VİDEO YAZI EKLEME**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"✅ Konum: **{konum_adi}**\n\n"
+            "🖊️ **Yazı stilini seçin:**",
+            reply_markup=stil_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('vyo_stil_'):
+        stil = query.data.replace('vyo_stil_', '')
+        context.user_data.setdefault('vyo', {})['stil'] = stil
+        stil_adi = '👻 Hayalet Yazı' if stil == 'hayalet' else '✍️ Normal Yazı'
+        renk_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔴 Kırmızı", callback_data='vyo_renk_kirmizi'),
+             InlineKeyboardButton("🟠 Turuncu", callback_data='vyo_renk_turuncu'),
+             InlineKeyboardButton("🟡 Sarı", callback_data='vyo_renk_sari')],
+            [InlineKeyboardButton("🟢 Yeşil", callback_data='vyo_renk_yesil'),
+             InlineKeyboardButton("🔵 Mavi", callback_data='vyo_renk_mavi'),
+             InlineKeyboardButton("🟣 Mor", callback_data='vyo_renk_mor')],
+            [InlineKeyboardButton("🟤 Kahve", callback_data='vyo_renk_kahve'),
+             InlineKeyboardButton("⚫ Siyah", callback_data='vyo_renk_siyah'),
+             InlineKeyboardButton("⚪ Beyaz", callback_data='vyo_renk_beyaz')],
+            [InlineKeyboardButton("🩷 Pembe", callback_data='vyo_renk_pembe'),
+             InlineKeyboardButton("🩵 Cyan", callback_data='vyo_renk_cyan'),
+             InlineKeyboardButton("🩶 Gri", callback_data='vyo_renk_gri')],
+            [InlineKeyboardButton("🥇 Altın", callback_data='vyo_renk_altin'),
+             InlineKeyboardButton("🩻 Gümüş", callback_data='vyo_renk_gumus'),
+             InlineKeyboardButton("🟦 Lacivert", callback_data='vyo_renk_lacivert')],
+            [InlineKeyboardButton("🌈 RENKSİN", callback_data='vyo_renk_renksin')],
+            [InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]
+        ])
+        await query.edit_message_text(
+            f"🎬 **VİDEO YAZI EKLEME**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"✅ Stil: **{stil_adi}**\n\n"
+            "🎨 **Yazı rengini seçin:**",
+            reply_markup=renk_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data.startswith('vyo_renk_'):
+        renk = query.data.replace('vyo_renk_', '')
+        vyo = context.user_data.get('vyo', {})
+        vyo['renk'] = renk
+        context.user_data['vyo'] = vyo
+        context.user_data['durum'] = None
+
+        video_fid = vyo.get('video_fid')
+        yazi = vyo.get('yazi', '')
+        konum = vyo.get('konum', 'orta')
+        stil = vyo.get('stil', 'normal')
+
+        if not video_fid or not yazi:
+            await query.edit_message_text("❌ Bir hata oluştu. Lütfen tekrar deneyin.", parse_mode='Markdown')
+            return
+
+        renk_adi = {
+            'kirmizi':'🔴 Kırmızı','turuncu':'🟠 Turuncu','sari':'🟡 Sarı',
+            'yesil':'🟢 Yeşil','mavi':'🔵 Mavi','mor':'🟣 Mor',
+            'kahve':'🟤 Kahve','siyah':'⚫ Siyah','beyaz':'⚪ Beyaz',
+            'pembe':'🩷 Pembe','cyan':'🩵 Cyan','gri':'🩶 Gri',
+            'altin':'🥇 Altın','gumus':'🩻 Gümüş','lacivert':'🟦 Lacivert',
+            'renksin':'🌈 Renksin'
+        }.get(renk, renk)
+
+        islem_msg = await query.edit_message_text(
+            f"⚙️ **Video işleniyor...**\n\n"
+            f"🎨 Renk: {renk_adi}\n"
+            "⏳ Lütfen bekleyin...",
+            parse_mode='Markdown'
+        )
+        try:
+            dosya = await context.bot.get_file(video_fid)
+            import tempfile, os as _os
+            with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as tmp_in:
+                giris_yolu = tmp_in.name
+            with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as tmp_out:
+                cikti_yolu = tmp_out.name
+
+            await dosya.download_to_drive(giris_yolu)
+            basari = await asyncio.to_thread(vyo_ffmpeg_yazi_ekle, giris_yolu, cikti_yolu, yazi, konum, stil, renk)
+
+            if basari and _os.path.getsize(cikti_yolu) > 0:
+                with open(cikti_yolu, 'rb') as vf:
+                    await update.effective_chat.send_video(
+                        video=vf,
+                        caption="✅ **Yazı başarıyla eklendi!**\n\n"
+                                f"📝 Yazı: `{html.escape(yazi)}`\n"
+                                f"🎨 Renk: {renk_adi}",
+                        parse_mode='Markdown'
+                    )
+                await islem_msg.edit_text(
+                    "✅ **Video hazır!** Yukarıda görebilirsiniz.\n\n"
+                    "Yeni bir video için /start diyebilirsiniz.",
+                    reply_markup=InlineKeyboardMarkup([[
+                        InlineKeyboardButton("🎬 Yeni Video", callback_data='vyo_baslat'),
+                        InlineKeyboardButton("🏠 Ana Menü", callback_data='go_home')
+                    ]]),
+                    parse_mode='Markdown'
+                )
+            else:
+                await islem_msg.edit_text(
+                    "❌ **Video işlenirken hata oluştu.**\n"
+                    "Lütfen farklı bir video deneyin.",
+                    reply_markup=InlineKeyboardMarkup([[
+                        InlineKeyboardButton("🔄 Tekrar Dene", callback_data='vyo_baslat'),
+                        InlineKeyboardButton("🏠 Ana Menü", callback_data='go_home')
+                    ]]),
+                    parse_mode='Markdown'
+                )
+        except Exception as e:
+            logger.error(f"VYO ffmpeg hatası: {e}")
+            await islem_msg.edit_text(
+                "❌ **Bir hata oluştu.** Lütfen tekrar deneyin.",
+                reply_markup=InlineKeyboardMarkup([[
+                    InlineKeyboardButton("🔄 Tekrar Dene", callback_data='vyo_baslat'),
+                    InlineKeyboardButton("🏠 Ana Menü", callback_data='go_home')
+                ]]),
+                parse_mode='Markdown'
+            )
+        finally:
+            for p in [giris_yolu, cikti_yolu]:
+                try:
+                    _os.unlink(p)
+                except Exception:
+                    pass
 
     elif query.data == 'go_home':
         context.user_data['durum'] = None
@@ -3905,43 +4073,182 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             )
         return
 
-    # ── 🤖 AI SOHBET ──────────────────────────────────────────
-    if context.user_data.get('durum') == 'ai_bekliyor':
-        if not update.message or not update.message.text:
+    # ── 🌐 SİBER ARAÇLAR — METİN GİRİŞ HANDLERS ──────────────
+    siber_durum = context.user_data.get('durum', '')
+    if siber_durum == 'siber_dns_bekliyor':
+        context.user_data['durum'] = None
+        domain = (update.message.text or '').strip().lower().replace('http://', '').replace('https://', '').split('/')[0]
+        if not domain:
+            await update.message.reply_text("❌ Geçersiz alan adı.")
             return
-        soru = update.message.text.strip()
-        gecmis = context.user_data.get('ai_gecmis', [])
-        bekle = await update.message.reply_text(
-            strings.get('ai_thinking', '🤔 Düşünüyorum...'),
+        bekle = await update.message.reply_text("🌐 DNS sorgulanıyor...")
+        try:
+            import socket as _sock
+            sonuclar = []
+            try:
+                ip_listesi = _sock.getaddrinfo(domain, None)
+                ipler = list({r[4][0] for r in ip_listesi})
+                sonuclar.append(f"🔹 **A/AAAA:** {', '.join(ipler[:5])}")
+            except Exception:
+                sonuclar.append("🔹 **A/AAAA:** Bulunamadı")
+            metin = (
+                f"🌐 **DNS SORGU SONUCU**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"🌍 **Alan Adı:** `{domain}`\n\n"
+                + '\n'.join(sonuclar)
+            )
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Geri", callback_data='menu_siber_guvenlik')]])
+            await bekle.edit_text(metin, reply_markup=geri, parse_mode='Markdown')
+        except Exception as e:
+            await bekle.edit_text(f"❌ Hata: {e}")
+        return
+
+    if siber_durum == 'siber_whois_bekliyor':
+        context.user_data['durum'] = None
+        domain = (update.message.text or '').strip().lower().replace('http://', '').replace('https://', '').split('/')[0]
+        bekle = await update.message.reply_text("🔍 WHOIS sorgulanıyor...")
+        try:
+            import subprocess as _sp
+            result = await asyncio.to_thread(
+                lambda: _sp.run(['whois', domain], capture_output=True, text=True, timeout=15)
+            )
+            cikti = result.stdout[:1800] if result.stdout else "Sonuç bulunamadı."
+            satirlar = [s for s in cikti.splitlines() if s.strip() and not s.startswith('%') and ':' in s][:20]
+            ozet = '\n'.join(f"`{s.strip()}`" for s in satirlar) or "Bilgi bulunamadı."
+            metin = f"🔍 **WHOIS: {domain}**\n━━━━━━━━━━━━━━━━━━━━━━\n{ozet}"
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Geri", callback_data='menu_siber_guvenlik')]])
+            await bekle.edit_text(metin[:4000], reply_markup=geri, parse_mode='Markdown')
+        except Exception as e:
+            await bekle.edit_text(f"❌ Hata: {e}")
+        return
+
+    if siber_durum == 'siber_port_bekliyor':
+        context.user_data['durum'] = None
+        hedef = (update.message.text or '').strip()
+        bekle = await update.message.reply_text("🔌 Portlar taranıyor, lütfen bekleyin...")
+        try:
+            import socket as _sock, asyncio as _aio
+            portlar = [21, 22, 23, 25, 53, 80, 110, 143, 443, 3306, 3389, 5432, 8080, 8443, 27017]
+            try:
+                ip = _sock.gethostbyname(hedef)
+            except Exception:
+                ip = hedef
+            acik, kapali = [], []
+            def port_kontrol(port):
+                try:
+                    s = _sock.socket(_sock.AF_INET, _sock.SOCK_STREAM)
+                    s.settimeout(1.5)
+                    r = s.connect_ex((ip, port))
+                    s.close()
+                    return port, r == 0
+                except Exception:
+                    return port, False
+            sonuclar = await asyncio.to_thread(lambda: [port_kontrol(p) for p in portlar])
+            for port, is_open in sonuclar:
+                if is_open:
+                    acik.append(port)
+                else:
+                    kapali.append(port)
+            acik_str = ' '.join(f"`{p}`" for p in acik) if acik else "_Yok_"
+            metin = (
+                f"🔌 **PORT TARAMA SONUCU**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"🎯 **Hedef:** `{hedef}` → `{ip}`\n\n"
+                f"✅ **Açık Portlar ({len(acik)}):** {acik_str}\n"
+                f"🔒 **Kapalı:** {len(kapali)} port\n\n"
+                f"_Taranan: {len(portlar)} port_"
+            )
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Geri", callback_data='menu_siber_guvenlik')]])
+            await bekle.edit_text(metin, reply_markup=geri, parse_mode='Markdown')
+        except Exception as e:
+            await bekle.edit_text(f"❌ Hata: {e}")
+        return
+
+    if siber_durum == 'siber_ssl_bekliyor':
+        context.user_data['durum'] = None
+        domain = (update.message.text or '').strip().lower().replace('http://', '').replace('https://', '').split('/')[0]
+        bekle = await update.message.reply_text("🔐 SSL sertifikası kontrol ediliyor...")
+        try:
+            import ssl as _ssl, socket as _sock
+            ctx = _ssl.create_default_context()
+            def ssl_kontrol():
+                with _sock.create_connection((domain, 443), timeout=10) as sock:
+                    with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
+                        cert = ssock.getpeercert()
+                        return cert
+            cert = await asyncio.to_thread(ssl_kontrol)
+            from datetime import datetime as _dt
+            bitis = _dt.strptime(cert['notAfter'], '%b %d %H:%M:%S %Y %Z')
+            baslangic = _dt.strptime(cert['notBefore'], '%b %d %H:%M:%S %Y %Z')
+            kalan = (bitis - _dt.utcnow()).days
+            durum = "✅ GEÇERLİ" if kalan > 0 else "❌ SÜRESİ DOLMUŞ"
+            issuer = dict(x[0] for x in cert.get('issuer', []))
+            subject = dict(x[0] for x in cert.get('subject', []))
+            metin = (
+                f"🔐 **SSL SERTİFİKA RAPORU**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"🌍 **Alan Adı:** `{domain}`\n"
+                f"📋 **Durum:** {durum}\n"
+                f"📅 **Başlangıç:** {baslangic.strftime('%d.%m.%Y')}\n"
+                f"📅 **Bitiş:** {bitis.strftime('%d.%m.%Y')}\n"
+                f"⏳ **Kalan:** {kalan} gün\n"
+                f"🏢 **Sağlayıcı:** {issuer.get('organizationName', 'Bilinmiyor')}\n"
+                f"📛 **Konu:** {subject.get('commonName', domain)}"
+            )
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Geri", callback_data='menu_siber_guvenlik')]])
+            await bekle.edit_text(metin, reply_markup=geri, parse_mode='Markdown')
+        except Exception as e:
+            await bekle.edit_text(f"❌ SSL kontrol edilemedi: {type(e).__name__}")
+        return
+
+    if siber_durum == 'siber_ping_bekliyor':
+        context.user_data['durum'] = None
+        hedef = (update.message.text or '').strip()
+        bekle = await update.message.reply_text("📡 Ping atılıyor...")
+        try:
+            import subprocess as _sp
+            result = await asyncio.to_thread(
+                lambda: _sp.run(['ping', '-c', '4', '-W', '2', hedef], capture_output=True, text=True, timeout=15)
+            )
+            cikti = result.stdout or result.stderr
+            satirlar = [s for s in cikti.splitlines() if s.strip()]
+            ozet = '\n'.join(satirlar[-6:])
+            durum = "✅ Çevrimiçi" if result.returncode == 0 else "❌ Erişilemiyor"
+            metin = (
+                f"📡 **PİNG TEST SONUCU**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"🎯 **Hedef:** `{hedef}`\n"
+                f"📶 **Durum:** {durum}\n\n"
+                f"```\n{ozet}\n```"
+            )
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Geri", callback_data='menu_siber_guvenlik')]])
+            await bekle.edit_text(metin[:4000], reply_markup=geri, parse_mode='Markdown')
+        except Exception as e:
+            await bekle.edit_text(f"❌ Ping hatası: {e}")
+        return
+
+    # ── 🎬 VİDEO YAZI EKLEME — YAZI GİRİŞ ────────────────────
+    if context.user_data.get('durum') == 'vyo_yazi_bekle':
+        yazi = (update.message.text or '').strip()
+        if not yazi:
+            await update.message.reply_text("❌ Lütfen geçerli bir yazı girin.")
+            return
+        context.user_data.setdefault('vyo', {})['yazi'] = yazi
+        context.user_data['durum'] = None
+        konum_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("↗️ SAĞ YUKARI", callback_data='vyo_konum_sag_yukari'),
+             InlineKeyboardButton("↖️ SOL YUKARI", callback_data='vyo_konum_sol_yukari')],
+            [InlineKeyboardButton("↘️ SAĞ AŞAĞI", callback_data='vyo_konum_sag_asagi'),
+             InlineKeyboardButton("↙️ SOL AŞAĞI", callback_data='vyo_konum_sol_asagi')],
+            [InlineKeyboardButton("🎯 VİDEO ORTASI", callback_data='vyo_konum_orta')],
+            [InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]
+        ])
+        await update.message.reply_text(
+            f"✅ **Yazı alındı:** `{html.escape(yazi)}`\n\n"
+            "📍 **Yazının konumunu seçin:**",
+            reply_markup=konum_klavye,
             parse_mode='Markdown'
         )
-        try:
-            import google.genai as _genai
-            _client = _genai.Client(api_key=os.environ.get('GEMINI_API_KEY', ''))
-            sistem_prompt = AI_LANG_PROMPTS.get(lang, AI_LANG_PROMPTS['tr'])
-            icerik = [sistem_prompt]
-            for mesaj in gecmis[-10:]:
-                icerik.append(f"Kullanıcı: {mesaj['soru']}")
-                icerik.append(f"Asistan: {mesaj['cevap']}")
-            icerik.append(f"Kullanıcı: {soru}")
-            yanit = await asyncio.to_thread(
-                _client.models.generate_content,
-                model='gemini-2.5-flash',
-                contents='\n'.join(icerik)
-            )
-            cevap_metni = yanit.text or '...'
-            gecmis.append({'soru': soru, 'cevap': cevap_metni})
-            context.user_data['ai_gecmis'] = gecmis[-20:]
-            geri_klavye = InlineKeyboardMarkup([
-                [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
-            ])
-            try:
-                await bekle.edit_text(cevap_metni, parse_mode='Markdown', reply_markup=geri_klavye)
-            except Exception:
-                await bekle.edit_text(cevap_metni, reply_markup=geri_klavye)
-        except Exception as e:
-            logger.error(f"AI hatası: {e}")
-            await bekle.edit_text(strings.get('ai_error', '❌ AI şu an kullanılamıyor.'))
         return
 
 
@@ -4347,88 +4654,93 @@ async def id_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.reply_text(metin, parse_mode='Markdown')
 
 
-async def ai_medya_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if context.user_data.get('durum') != 'ai_bekliyor':
-        return
-    lang = get_lang(context, user_id)
-    strings = fs(context, user_id, lang)
-    mesaj = update.message
+def vyo_ffmpeg_yazi_ekle(giris: str, cikti: str, yazi: str, konum: str, stil: str, renk: str) -> bool:
+    import subprocess as _sp
+    konum_map = {
+        'sag_yukari': 'x=w-tw-30:y=30',
+        'sol_yukari': 'x=30:y=30',
+        'sag_asagi':  'x=w-tw-30:y=h-th-30',
+        'sol_asagi':  'x=30:y=h-th-30',
+        'orta':       'x=(w-tw)/2:y=(h-th)/2',
+    }
+    renk_map = {
+        'kirmizi': 'red',   'turuncu': 'orange',  'sari':    'yellow',
+        'yesil':   'green', 'mavi':    'blue',     'mor':     'purple',
+        'kahve':   'brown', 'siyah':   'black',    'beyaz':   'white',
+        'pembe':   'pink',  'cyan':    'cyan',      'gri':    'gray',
+        'altin':   'gold',  'gumus':   'silver',   'lacivert':'navy',
+    }
+    alpha_yazi  = '0.38' if stil == 'hayalet' else '1.0'
+    alpha_border = '0.25' if stil == 'hayalet' else '0.85'
+    xy = konum_map.get(konum, 'x=(w-tw)/2:y=(h-th)/2')
+    yazi_esc = yazi.replace('\\', '\\\\').replace("'", "\\'").replace(':', '\\:').replace('%', '\\%')
+    if renk == 'renksin':
+        pi = '3.14159'
+        fc_expr = (
+            "fontcolor_expr='0x"
+            "%{eif\\:255*(0.5+0.5*sin(2*" + pi + "*t/3+0))\\:x\\:2}"
+            "%{eif\\:255*(0.5+0.5*sin(2*" + pi + "*t/3+2.094))\\:x\\:2}"
+            "%{eif\\:255*(0.5+0.5*sin(2*" + pi + "*t/3+4.189))\\:x\\:2}'"
+        )
+        drawtext = (
+            f"drawtext=text='{yazi_esc}':fontsize=52:{fc_expr}:{xy}"
+            f":borderw=3:bordercolor=black@{alpha_border}"
+        )
+    else:
+        fontcolor = renk_map.get(renk, 'white')
+        drawtext = (
+            f"drawtext=text='{yazi_esc}':fontsize=52:fontcolor={fontcolor}@{alpha_yazi}"
+            f":{xy}:borderw=3:bordercolor=black@{alpha_border}"
+        )
+    cmd = ['ffmpeg', '-i', giris, '-vf', drawtext, '-codec:a', 'copy', '-preset', 'fast', '-y', cikti]
+    try:
+        r = _sp.run(cmd, capture_output=True, timeout=180)
+        return r.returncode == 0
+    except Exception:
+        return False
 
+
+async def medya_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not await kanal_takip_kontrol(update, context, user_id, get_lang(context, user_id)):
+        return
+    durum = context.user_data.get('durum', '')
+    mesaj = update.message
     if not mesaj:
         return
 
-    bekle = await mesaj.reply_text(strings.get('ai_thinking', '🤔 Düşünüyorum...'))
-
-    try:
-        import google.genai as _genai
-        from google.genai import types as _gtypes
-
-        _client = _genai.Client(api_key=os.environ.get('GEMINI_API_KEY', ''))
-        sistem_prompt = AI_LANG_PROMPTS.get(lang, AI_LANG_PROMPTS['tr'])
-
-        if mesaj.photo:
-            dosya = await mesaj.photo[-1].get_file()
-            mime = 'image/jpeg'
-        elif mesaj.video:
-            dosya = await mesaj.video.get_file()
-            mime = 'video/mp4'
-        elif mesaj.document and mesaj.document.mime_type and mesaj.document.mime_type.startswith('image/'):
-            dosya = await mesaj.document.get_file()
-            mime = mesaj.document.mime_type
-        else:
-            await bekle.edit_text(strings.get('ai_error', '❌ Bu dosya türü desteklenmiyor.'))
+    if durum == 'vyo_video_bekle':
+        video = mesaj.video or (mesaj.document if mesaj.document and mesaj.document.mime_type and mesaj.document.mime_type.startswith('video/') else None)
+        if not video:
+            await mesaj.reply_text("❌ Lütfen bir **video** gönderin (fotoğraf değil).\nTekrar deneyin veya /start yazın.", parse_mode='Markdown')
             return
-
-        bayt_verisi = await dosya.download_as_bytearray()
-
-        kullanici_yazisi = mesaj.caption or (
-            'Bu görseli / videoyu açıkla ve analiz et.' if mime.startswith('image') else
-            'Bu videoyu tanımla ve içeriğini açıkla.'
+        boyut = getattr(video, 'file_size', 0) or 0
+        if boyut > 49 * 1024 * 1024:
+            await mesaj.reply_text("❌ Video çok büyük! Maksimum 49 MB gönderin.")
+            return
+        context.user_data.setdefault('vyo', {})['video_fid'] = video.file_id
+        context.user_data['durum'] = 'vyo_yazi_bekle'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_video_olusturucu')]])
+        await mesaj.reply_text(
+            "✅ **Video alındı!**\n\n"
+            "✍️ **LÜTFEN EKLEMEK İSTEDİĞİNİZ ŞEYİ YAZIN**\n\n"
+            "_Örnek: AZRxGUARD, Merhaba Dünya, © 2025_",
+            reply_markup=geri,
+            parse_mode='Markdown'
         )
-
-        gecmis = context.user_data.get('ai_gecmis', [])
-        icerik_parcalari = [sistem_prompt]
-        for m in gecmis[-6:]:
-            icerik_parcalari.append(f"Kullanıcı: {m['soru']}")
-            icerik_parcalari.append(f"Asistan: {m['cevap']}")
-
-        medya_parca = _gtypes.Part.from_bytes(data=bytes(bayt_verisi), mime_type=mime)
-        metin_parca = f"Kullanıcı: {kullanici_yazisi}"
-
-        yanit = await asyncio.to_thread(
-            _client.models.generate_content,
-            model='gemini-2.5-flash',
-            contents=['\n'.join(icerik_parcalari), medya_parca, metin_parca]
-        )
-        cevap_metni = yanit.text or '...'
-        gecmis.append({'soru': f'[Görsel] {kullanici_yazisi}', 'cevap': cevap_metni})
-        context.user_data['ai_gecmis'] = gecmis[-20:]
-
-        geri_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
-        ])
-        try:
-            await bekle.edit_text(cevap_metni, parse_mode='Markdown', reply_markup=geri_klavye)
-        except Exception:
-            await bekle.edit_text(cevap_metni, reply_markup=geri_klavye)
-
-    except Exception as e:
-        logger.error(f"AI medya hatası: {e}")
-        await bekle.edit_text(strings.get('ai_error', '❌ AI şu an kullanılamıyor.'))
+        return
 
 
 async def ai_sifirla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['ai_gecmis'] = []
     context.user_data['durum'] = None
     lang = get_lang(context, update.effective_user.id)
     sifirlama_mesajlari = {
-        'tr': "🤖 **AI Sohbet Geçmişi Sıfırlandı!**\nYeni bir konuşmaya başlayabilirsin.",
-        'az': "🤖 **AI Söhbət Tarixi Sıfırlandı!**\nYeni bir söhbət başlada bilərsən.",
-        'ru': "🤖 **История чата AI сброшена!**\nМожешь начать новый разговор.",
-        'en': "🤖 **AI Chat History Cleared!**\nYou can start a fresh conversation.",
-        'de': "🤖 **KI-Chatverlauf gelöscht!**\nDu kannst ein neues Gespräch beginnen.",
-        'ka': "🤖 **AI ჩატის ისტორია გასუფთავდა!**\nახალი საუბარი შეგიძლია დაიწყო.",
+        'tr': "✅ Durum sıfırlandı. /start ile devam edebilirsin.",
+        'az': "✅ Vəziyyət sıfırlandı. /start ilə davam edə bilərsən.",
+        'ru': "✅ Состояние сброшено. Продолжай с /start.",
+        'en': "✅ State reset. Continue with /start.",
+        'de': "✅ Zustand zurückgesetzt. Weiter mit /start.",
+        'ka': "✅ მდგომარეობა გადაყენდა. გააგრძელე /start-ით.",
     }
     await update.message.reply_text(
         sifirlama_mesajlari.get(lang, sifirlama_mesajlari['tr']),
@@ -4454,10 +4766,10 @@ def main():
     application.add_handler(CommandHandler("saat", saat_komutu))
     application.add_handler(CommandHandler("b64", b64_komutu))
     application.add_handler(CommandHandler("id", id_komutu))
-    application.add_handler(CommandHandler("ai_sifirla", ai_sifirla_komutu))
+    application.add_handler(CommandHandler("sifirla", ai_sifirla_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
-    application.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO | filters.Document.IMAGE) & filters.ChatType.PRIVATE, ai_medya_yonet))
+    application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
     application.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, filigran_ekle), group=-1)
