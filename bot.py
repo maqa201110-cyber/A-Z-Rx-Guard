@@ -3858,12 +3858,31 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             cikis = video_path.replace('.mp4', f'_hiz_{hiz}.mp4')
             hiz_val = float(hiz_str)
             pts = round(1 / hiz_val, 4)
-            atempo = min(hiz_val, 2.0)
-            cmd = ['ffmpeg', '-i', video_path,
-                   '-filter_complex', f'[0:v]setpts={pts}*PTS[v];[0:a]atempo={atempo}[a]',
-                   '-map', '[v]', '-map', '[a]',
-                   '-c:v', 'libx264', '-preset', 'fast', '-c:a', 'aac',
-                   cikis, '-y']
+            # atempo filtresi yalnızca 0.5-2.0 arasını destekler; daha yüksek için zincirle
+            if hiz_val > 2.0:
+                atempo_str = 'atempo=2.0,atempo=' + str(round(hiz_val / 2.0, 6)).rstrip('0').rstrip('.')
+            elif hiz_val < 0.5:
+                atempo_str = 'atempo=0.5,atempo=' + str(round(hiz_val / 0.5, 6)).rstrip('0').rstrip('.')
+            else:
+                atempo_str = f'atempo={hiz_val}'
+            # Ses akışı var mı kontrol et
+            _probe = await asyncio.to_thread(lambda: _sp.run(
+                ['ffprobe', '-v', 'error', '-select_streams', 'a:0',
+                 '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', video_path],
+                capture_output=True, text=True, timeout=15
+            ))
+            has_audio = 'audio' in (_probe.stdout or '')
+            if has_audio:
+                cmd = ['ffmpeg', '-i', video_path,
+                       '-filter_complex', f'[0:v]setpts={pts}*PTS[v];[0:a]{atempo_str}[a]',
+                       '-map', '[v]', '-map', '[a]',
+                       '-c:v', 'libx264', '-preset', 'fast', '-c:a', 'aac',
+                       cikis, '-y']
+            else:
+                cmd = ['ffmpeg', '-i', video_path,
+                       '-vf', f'setpts={pts}*PTS',
+                       '-an', '-c:v', 'libx264', '-preset', 'fast',
+                       cikis, '-y']
             result = await asyncio.to_thread(lambda: _sp.run(cmd, capture_output=True, timeout=180))
             if result.returncode != 0 or not _os.path.exists(cikis):
                 raise Exception("FFmpeg başarısız")
@@ -3923,7 +3942,9 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             boyut_map = {'1080': '1920:1080', '720': '1280:720', '480': '854:480', '360': '640:360'}
             scale = boyut_map.get(boyut, '1280:720')
             cikis = video_path.replace('.mp4', f'_{boyut}p.mp4')
-            cmd = ['ffmpeg', '-i', video_path, '-vf', f'scale={scale}:force_original_aspect_ratio=decrease', '-c:a', 'copy', cikis, '-y']
+            cmd = ['ffmpeg', '-i', video_path, '-vf',
+                   f'scale={scale}:force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2',
+                   '-c:a', 'copy', cikis, '-y']
             result = await asyncio.to_thread(lambda: _sp.run(cmd, capture_output=True, timeout=180))
             if result.returncode != 0 or not _os.path.exists(cikis):
                 raise Exception("FFmpeg başarısız")
@@ -4260,8 +4281,21 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             logger.error(f"Kanala mesaj hatası: {e}")
         try:
             fid = get_font(context, user_id)
+            yas_bilgi = context.bot_data.get('yas_bilgi', {})
+            yas = yas_bilgi.get(user_id, 99)
             await update.message.reply_text(strings['msg_sent'], parse_mode='Markdown')
-            await update.message.reply_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
+            if yas <= 10:
+                await update.message.reply_text(
+                    ft(LANG_DATA[lang]['welcome'], context, user_id),
+                    reply_markup=cocuk_menu_klavye(),
+                    parse_mode='Markdown'
+                )
+            else:
+                await update.message.reply_text(
+                    ft(LANG_DATA[lang]['welcome'], context, user_id),
+                    reply_markup=ana_menu_klavye(lang, fid),
+                    parse_mode='Markdown'
+                )
         except Exception as e:
             logger.error(f"Cevap iletme hatası: {e}")
         context.user_data['durum'] = None
