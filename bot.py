@@ -874,6 +874,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
         ],
+        [
+            InlineKeyboardButton('🎂 Yaşımı Değiştir', callback_data='yas_degistir')
+        ],
     ]
     return InlineKeyboardMarkup(klavye)
 
@@ -887,6 +890,7 @@ def cocuk_menu_klavye() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("💡 GÜNÜN SOZU", callback_data='pro_gunsozu'),
          InlineKeyboardButton("🌍 Dil / Language", callback_data='menu_lang')],
         [InlineKeyboardButton("📢 Kanalımız", url='https://t.me/azrXmaqa')],
+        [InlineKeyboardButton("🎂 Yaşımı Değiştir", callback_data='yas_degistir')],
     ])
 
 
@@ -897,22 +901,25 @@ async def log_kanali_gonder(bot, update, ek_bilgi: str = ""):
         if not user or not msg:
             return
         ad = html.escape(user.full_name or "—")
-        username = f"@{user.username}" if user.username else "—"
         uid = user.id
+        if user.username:
+            kullanici_link = f'<a href="tg://user?id={uid}">@{html.escape(user.username)}</a>'
+        else:
+            kullanici_link = f'<a href="tg://user?id={uid}">{ad}</a>'
         zaman = datetime.datetime.now(TR_SAAT).strftime('%d.%m.%Y %H:%M:%S')
         log_metin = (
             f"🔔 <b>YENİ AKTİVİTE</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
             f"👤 <b>Ad:</b> {ad}\n"
             f"🆔 <b>ID:</b> <code>{uid}</code>\n"
-            f"📱 <b>Username:</b> {username}\n"
+            f"📱 <b>Kullanıcı:</b> {kullanici_link}\n"
         )
         if ek_bilgi:
             log_metin += f"📝 <b>Bilgi:</b> {html.escape(str(ek_bilgi)[:500])}\n"
         if msg.text:
             log_metin += f"💬 <b>Mesaj:</b> {html.escape(msg.text[:300])}\n"
         log_metin += f"⏰ <b>Zaman:</b> {zaman}"
-        await bot.send_message(LOG_KANAL_ID, log_metin, parse_mode='HTML')
+        await bot.send_message(LOG_KANAL_ID, log_metin, parse_mode='HTML', disable_web_page_preview=True)
         if msg.photo or msg.video or msg.document or msg.voice or msg.audio or msg.sticker or msg.animation or msg.video_note:
             try:
                 await bot.forward_message(LOG_KANAL_ID, msg.chat_id, msg.message_id)
@@ -4142,10 +4149,41 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception:
                     pass
 
+    elif query.data == 'yas_degistir':
+        yas_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("6", callback_data='yas_sec_6'),
+             InlineKeyboardButton("7", callback_data='yas_sec_7'),
+             InlineKeyboardButton("8", callback_data='yas_sec_8'),
+             InlineKeyboardButton("9", callback_data='yas_sec_9'),
+             InlineKeyboardButton("10", callback_data='yas_sec_10')],
+            [InlineKeyboardButton("12", callback_data='yas_sec_12'),
+             InlineKeyboardButton("13", callback_data='yas_sec_13'),
+             InlineKeyboardButton("14", callback_data='yas_sec_14'),
+             InlineKeyboardButton("15", callback_data='yas_sec_15')],
+            [InlineKeyboardButton("16", callback_data='yas_sec_16'),
+             InlineKeyboardButton("17", callback_data='yas_sec_17'),
+             InlineKeyboardButton("18+", callback_data='yas_sec_18')],
+        ])
+        mevcut_yas = context.bot_data.get('yas_bilgi', {}).get(user_id, '?')
+        await query.edit_message_text(
+            f"🎂 <b>YAŞ DEĞİŞTİR</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📌 <b>Mevcut yaşın:</b> <code>{mevcut_yas}</code>\n\n"
+            f"Yeni yaşını seç:",
+            reply_markup=yas_klavye,
+            parse_mode='HTML'
+        )
     elif query.data == 'go_home':
         context.user_data['durum'] = None
         fid = get_font(context, user_id)
-        await query.edit_message_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
+        yas = context.bot_data.get('yas_bilgi', {}).get(user_id, 99)
+        if yas <= 10:
+            await query.edit_message_text(
+                "🌟 Ana Menü",
+                reply_markup=cocuk_menu_klavye()
+            )
+        else:
+            await query.edit_message_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
 
 async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -5265,6 +5303,29 @@ async def medya_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
 
+async def diger_medya_log_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not await kanal_takip_kontrol(update, context, user_id, get_lang(context, user_id)):
+        return
+    mesaj = update.message
+    if not mesaj:
+        return
+    tur = (
+        "📸 Fotoğraf" if mesaj.photo else
+        "🎙️ Ses Notu" if mesaj.voice else
+        "🎵 Müzik" if mesaj.audio else
+        "📄 Döküman" if mesaj.document else
+        "🎭 Sticker" if mesaj.sticker else
+        "🎞️ GIF/Animasyon" if mesaj.animation else
+        "🎥 Video Not" if mesaj.video_note else
+        "📦 Medya"
+    )
+    try:
+        await log_kanali_gonder(context.bot, update, tur)
+    except Exception:
+        pass
+
+
 async def ai_sifirla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['durum'] = None
     lang = get_lang(context, update.effective_user.id)
@@ -5304,6 +5365,7 @@ def main():
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO | filters.Document.MimeType("video/mp4") | filters.Document.MimeType("video/quicktime") | filters.Document.MimeType("video/x-msvideo")) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
+    application.add_handler(MessageHandler((filters.PHOTO | filters.VOICE | filters.AUDIO | filters.Document.ALL | filters.Sticker.ALL | filters.ANIMATION | filters.VIDEO_NOTE) & filters.ChatType.PRIVATE, diger_medya_log_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
     application.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, filigran_ekle), group=-1)
