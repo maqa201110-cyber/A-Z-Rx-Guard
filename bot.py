@@ -16,6 +16,7 @@ import string
 import json
 import tempfile
 import shutil
+import urllib.parse
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, JobQueue
 
@@ -875,23 +876,411 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
         ],
         [
-            InlineKeyboardButton('🎂 Yaşımı Değiştir', callback_data='yas_degistir')
+            InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')
         ],
     ]
     return InlineKeyboardMarkup(klavye)
 
 
-def cocuk_menu_klavye() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎮 OYUNLAR", callback_data='cocuk_oyunlar'),
-         InlineKeyboardButton("🧮 HESAP MAKİNESİ", callback_data='pro_hesap')],
-        [InlineKeyboardButton("🌍 HAVA DURUMU", callback_data='pro_hava'),
-         InlineKeyboardButton("🎲 ZAR AT", callback_data='roll_dice')],
-        [InlineKeyboardButton("💡 GÜNÜN SOZU", callback_data='pro_gunsozu'),
-         InlineKeyboardButton("🌍 Dil / Language", callback_data='menu_lang')],
-        [InlineKeyboardButton("📢 Kanalımız", url='https://t.me/azrXmaqa')],
-        [InlineKeyboardButton("🎂 Yaşımı Değiştir", callback_data='yas_degistir')],
-    ])
+# ─────────────────────────────────────────────────────────────
+# 📱 TELEFON FİYATLARI VERİTABANI — 22 MARKA / 400+ MODEL
+# ─────────────────────────────────────────────────────────────
+TELEFON_VERITABANI = {
+    'sam': {'ad': 'Samsung', 'emoji': '📱', 'modeller': [
+        # Galaxy S Serisi
+        'Galaxy S24 Ultra','Galaxy S24+','Galaxy S24','Galaxy S24 FE',
+        'Galaxy S23 Ultra','Galaxy S23+','Galaxy S23','Galaxy S23 FE',
+        'Galaxy S22 Ultra','Galaxy S22+','Galaxy S22',
+        'Galaxy S21 Ultra','Galaxy S21+','Galaxy S21','Galaxy S21 FE',
+        'Galaxy S20 Ultra','Galaxy S20+','Galaxy S20','Galaxy S20 FE',
+        'Galaxy S10+','Galaxy S10','Galaxy S10e','Galaxy S10 5G',
+        'Galaxy S9+','Galaxy S9','Galaxy S8+','Galaxy S8','Galaxy S7 Edge','Galaxy S7',
+        # Note Serisi
+        'Galaxy Note 20 Ultra','Galaxy Note 20','Galaxy Note 10+','Galaxy Note 10','Galaxy Note 10 Lite',
+        'Galaxy Note 9','Galaxy Note 8','Galaxy Note 5',
+        # Z Serisi (Katlanabilir)
+        'Galaxy Z Fold 6','Galaxy Z Fold 5','Galaxy Z Fold 4','Galaxy Z Fold 3',
+        'Galaxy Z Flip 6','Galaxy Z Flip 5','Galaxy Z Flip 4','Galaxy Z Flip 3',
+        # A Serisi
+        'Galaxy A55 5G','Galaxy A54 5G','Galaxy A53 5G','Galaxy A52s 5G','Galaxy A52',
+        'Galaxy A35 5G','Galaxy A34 5G','Galaxy A33 5G','Galaxy A32','Galaxy A32 5G',
+        'Galaxy A25 5G','Galaxy A24','Galaxy A23 5G','Galaxy A23','Galaxy A22 5G','Galaxy A22',
+        'Galaxy A15 5G','Galaxy A15','Galaxy A14 5G','Galaxy A14','Galaxy A13','Galaxy A13 5G',
+        'Galaxy A05s','Galaxy A05','Galaxy A04s','Galaxy A04e','Galaxy A04','Galaxy A03s','Galaxy A03',
+        # M Serisi
+        'Galaxy M54 5G','Galaxy M53 5G','Galaxy M34 5G','Galaxy M33 5G','Galaxy M14 5G','Galaxy M13',
+        # F / Diğer
+        'Galaxy F54 5G','Galaxy F23','Galaxy F13',
+    ]},
+    'iph': {'ad': 'iPhone (Apple)', 'emoji': '🍎', 'modeller': [
+        'iPhone 15 Pro Max','iPhone 15 Pro','iPhone 15 Plus','iPhone 15',
+        'iPhone 14 Pro Max','iPhone 14 Pro','iPhone 14 Plus','iPhone 14',
+        'iPhone 13 Pro Max','iPhone 13 Pro','iPhone 13 mini','iPhone 13',
+        'iPhone 12 Pro Max','iPhone 12 Pro','iPhone 12 mini','iPhone 12',
+        'iPhone 11 Pro Max','iPhone 11 Pro','iPhone 11',
+        'iPhone XS Max','iPhone XS','iPhone XR','iPhone X',
+        'iPhone 8 Plus','iPhone 8','iPhone 7 Plus','iPhone 7',
+        'iPhone 6s Plus','iPhone 6s','iPhone SE (2022)','iPhone SE (2020)',
+    ]},
+    'xia': {'ad': 'Xiaomi', 'emoji': '📱', 'modeller': [
+        # Xiaomi Ana Serisi
+        'Xiaomi 14 Ultra','Xiaomi 14 Pro','Xiaomi 14',
+        'Xiaomi 13 Ultra','Xiaomi 13 Pro','Xiaomi 13','Xiaomi 13T Pro','Xiaomi 13T',
+        'Xiaomi 12 Pro','Xiaomi 12','Xiaomi 12T Pro','Xiaomi 12T',
+        'Xiaomi 11 Ultra','Xiaomi 11 Pro','Xiaomi 11','Xiaomi 11T Pro','Xiaomi 11T',
+        # Redmi Note Serisi
+        'Redmi Note 13 Pro+ 5G','Redmi Note 13 Pro 5G','Redmi Note 13 5G','Redmi Note 13',
+        'Redmi Note 12 Pro+ 5G','Redmi Note 12 Pro 5G','Redmi Note 12 5G','Redmi Note 12','Redmi Note 12s',
+        'Redmi Note 11 Pro+ 5G','Redmi Note 11 Pro','Redmi Note 11S 5G','Redmi Note 11S','Redmi Note 11','Redmi Note 11 5G',
+        'Redmi Note 10 Pro','Redmi Note 10','Redmi Note 10s','Redmi Note 10 5G',
+        # Redmi Serisi
+        'Redmi 13C 5G','Redmi 13C','Redmi 13','Redmi 12C','Redmi 12','Redmi 12 5G',
+        'Redmi 10C','Redmi 10','Redmi 10A','Redmi A3','Redmi A2+','Redmi A2','Redmi A1+',
+        # Xiaomi Pad
+        'Xiaomi Pad 6 Pro','Xiaomi Pad 6',
+    ]},
+    'poc': {'ad': 'POCO', 'emoji': '📱', 'modeller': [
+        'POCO X6 Pro 5G','POCO X6 5G','POCO X5 Pro 5G','POCO X5 5G',
+        'POCO X4 Pro 5G','POCO X4 GT','POCO X3 Pro','POCO X3 GT','POCO X3 NFC','POCO X3',
+        'POCO F6 Pro','POCO F6 5G','POCO F5 Pro 5G','POCO F5 5G','POCO F4 GT','POCO F4 5G','POCO F3','POCO F2 Pro',
+        'POCO M6 Pro 5G','POCO M6 5G','POCO M5s','POCO M5','POCO M4 Pro 5G','POCO M4 Pro','POCO M4 5G','POCO M3 Pro 5G',
+        'POCO C65','POCO C55','POCO C51','POCO C40',
+    ]},
+    'gpx': {'ad': 'Google Pixel', 'emoji': '🔵', 'modeller': [
+        'Pixel 9 Pro XL','Pixel 9 Pro','Pixel 9','Pixel 9 Pro Fold',
+        'Pixel 8 Pro','Pixel 8','Pixel 8a',
+        'Pixel 7 Pro','Pixel 7','Pixel 7a',
+        'Pixel 6 Pro','Pixel 6','Pixel 6a',
+        'Pixel 5','Pixel 5a 5G','Pixel 4a 5G','Pixel 4a',
+        'Pixel 4 XL','Pixel 4',
+    ]},
+    'tec': {'ad': 'Tecno', 'emoji': '📱', 'modeller': [
+        'Phantom V Fold 2 5G','Phantom V Flip 5G',
+        'Phantom X2 Pro','Phantom X2','Phantom X',
+        'Camon 30 Premier 5G','Camon 30 Pro 5G','Camon 30 5G','Camon 30',
+        'Camon 20 Premier 5G','Camon 20 Pro 5G','Camon 20 Pro','Camon 20','Camon 19 Pro','Camon 19',
+        'Spark 20 Pro+','Spark 20 Pro','Spark 20C','Spark 20','Spark 10 Pro','Spark 10','Spark 10C',
+        'Pova 6 Pro 5G','Pova 6 5G','Pova 5 Pro','Pova 5',
+        'Spark Go 2024','Spark Go 2023',
+    ]},
+    'hon': {'ad': 'Honor', 'emoji': '📱', 'modeller': [
+        'Honor Magic6 Pro','Honor Magic6','Honor Magic6 Lite',
+        'Honor Magic5 Pro','Honor Magic5 Lite',
+        'Honor 200 Pro','Honor 200','Honor 200 Lite',
+        'Honor 90 GT','Honor 90 Pro','Honor 90','Honor 90 Lite',
+        'Honor 80 Pro','Honor 80','Honor 80 Lite','Honor 80 SE',
+        'Honor X9b 5G','Honor X8b','Honor X7b','Honor X6b',
+        'Honor X9a 5G','Honor X8a','Honor X7a','Honor X6a',
+        'Honor X50 5G','Honor X40 5G','Honor X30i','Honor X20',
+        'Honor Play 8T','Honor Play 7T','Honor Pad 9',
+    ]},
+    'can': {'ad': 'CANE', 'emoji': '📱', 'modeller': [
+        'CANE P10 Pro','CANE P10','CANE P8 Pro','CANE P8',
+        'CANE X5 5G','CANE X5','CANE Note 10',
+        'CANE S6 Pro','CANE S6',
+    ]},
+    'hua': {'ad': 'Huawei', 'emoji': '📱', 'modeller': [
+        # Mate Serisi
+        'Huawei Mate 60 Pro+','Huawei Mate 60 Pro','Huawei Mate 60','Huawei Mate 60 RS',
+        'Huawei Mate 50 Pro','Huawei Mate 50','Huawei Mate 50E',
+        'Huawei Mate 40 Pro+','Huawei Mate 40 Pro','Huawei Mate 40',
+        # P Serisi
+        'Huawei P60 Pro','Huawei P60','Huawei P60 Art',
+        'Huawei P50 Pro','Huawei P50','Huawei P50 Pocket',
+        'Huawei P40 Pro+','Huawei P40 Pro','Huawei P40','Huawei P40 Lite',
+        'Huawei P30 Pro','Huawei P30','Huawei P30 Lite',
+        # Nova Serisi
+        'Huawei Nova 12 Pro','Huawei Nova 12','Huawei Nova 11 Pro','Huawei Nova 11',
+        'Huawei Nova 10 Pro','Huawei Nova 10','Huawei Nova 9','Huawei Nova 9 SE',
+        # Y Serisi & Diğer
+        'Huawei Y9s','Huawei Y9a','Huawei Y7a','Huawei Y6p',
+        'Huawei Pocket 2','Huawei Pocket S',
+    ]},
+    'lov': {'ad': 'LOVEIR', 'emoji': '📱', 'modeller': [
+        'LOVEIR X1 Pro','LOVEIR X1','LOVEIR V10 Pro','LOVEIR V10',
+        'LOVEIR Note 8 Pro','LOVEIR Note 8','LOVEIR S7',
+    ]},
+    'opp': {'ad': 'OPPO / Realme', 'emoji': '📱', 'modeller': [
+        # OPPO
+        'OPPO Find X7 Ultra','OPPO Find X7 Pro','OPPO Find X7',
+        'OPPO Find X6 Pro','OPPO Find X5 Pro','OPPO Find X5',
+        'OPPO Reno 12 Pro','OPPO Reno 12','OPPO Reno 11 Pro 5G','OPPO Reno 11',
+        'OPPO Reno 10 Pro+ 5G','OPPO Reno 10 Pro 5G','OPPO Reno 10 5G',
+        'OPPO Reno 9 Pro+','OPPO Reno 9','OPPO Reno 8 Pro','OPPO Reno 8',
+        'OPPO A79 5G','OPPO A78 5G','OPPO A58 5G','OPPO A38','OPPO A18',
+        # Realme
+        'Realme GT 6 Pro','Realme GT 6','Realme GT 5 Pro','Realme GT 5',
+        'Realme GT 2 Pro','Realme GT 2','Realme GT Master Edition',
+        'Realme 12 Pro+','Realme 12 Pro','Realme 12+','Realme 12',
+        'Realme 11 Pro+ 5G','Realme 11 Pro','Realme 11',
+        'Realme C65 5G','Realme C55','Realme C53','Realme C51','Realme C35',
+        'Realme Narzo 70 Pro','Realme Narzo 60 Pro','Realme Narzo 50',
+    ]},
+    'inf': {'ad': 'Infinix', 'emoji': '📱', 'modeller': [
+        'Infinix Zero 40 5G','Infinix Zero 40','Infinix Zero 30 5G','Infinix Zero 30','Infinix Zero 20',
+        'Infinix Note 40 Pro+ 5G','Infinix Note 40 Pro 5G','Infinix Note 40 Pro','Infinix Note 40',
+        'Infinix Note 30 Pro 5G','Infinix Note 30 VIP','Infinix Note 30 5G','Infinix Note 30',
+        'Infinix Note 12 Pro+','Infinix Note 12 Pro','Infinix Note 12 G96','Infinix Note 12 5G',
+        'Infinix Hot 40 Pro','Infinix Hot 40','Infinix Hot 40i',
+        'Infinix Hot 30 Play','Infinix Hot 30 5G','Infinix Hot 30',
+        'Infinix Hot 20 Pro','Infinix Hot 20',
+        'Infinix GT 20 Pro','Infinix GT 10 Pro',
+        'Infinix Smart 8 Plus','Infinix Smart 8',
+    ]},
+    'one': {'ad': 'OnePlus', 'emoji': '📱', 'modeller': [
+        'OnePlus 12R','OnePlus 12','OnePlus 11R','OnePlus 11 5G',
+        'OnePlus 10 Pro','OnePlus 10T 5G','OnePlus 10R',
+        'OnePlus 9 Pro','OnePlus 9','OnePlus 9R',
+        'OnePlus 8 Pro','OnePlus 8T','OnePlus 8',
+        'OnePlus Open',
+        'OnePlus Nord 4 5G','OnePlus Nord 3 5G','OnePlus Nord 2T 5G','OnePlus Nord 2 5G',
+        'OnePlus Nord CE 4','OnePlus Nord CE 3 Lite 5G','OnePlus Nord CE 3 5G',
+        'OnePlus Nord CE 2 Lite 5G','OnePlus Nord CE 2 5G',
+        'OnePlus Nord N30 5G','OnePlus Nord N20 5G',
+    ]},
+    'viv': {'ad': 'Vivo', 'emoji': '📱', 'modeller': [
+        'Vivo X100 Ultra','Vivo X100 Pro','Vivo X100+','Vivo X100',
+        'Vivo X90 Pro+','Vivo X90 Pro','Vivo X90',
+        'Vivo X80 Pro','Vivo X80',
+        'Vivo V30 Pro','Vivo V30','Vivo V29 Pro','Vivo V29',
+        'Vivo V27 Pro','Vivo V27','Vivo V25 Pro','Vivo V25',
+        'Vivo Y200 Pro 5G','Vivo Y200 5G','Vivo Y100 5G','Vivo Y100',
+        'Vivo Y78 5G','Vivo Y78+','Vivo Y56 5G','Vivo Y36 5G','Vivo Y36',
+        'Vivo Y27s','Vivo Y27 5G','Vivo Y17s',
+    ]},
+    'asd': {'ad': 'ASD', 'emoji': '📱', 'modeller': [
+        'ASD X9 Pro','ASD X9','ASD X7 Pro',
+        'ASD Note 12 Pro','ASD Note 12',
+        'ASD P9 Pro','ASD P7','ASD S8','ASD S6',
+    ]},
+    'nok': {'ad': 'Nokia / Motorola', 'emoji': '📱', 'modeller': [
+        # Nokia
+        'Nokia G42 5G','Nokia G21','Nokia G60 5G','Nokia G400 5G','Nokia G310 5G',
+        'Nokia X30 5G','Nokia XR21','Nokia C32','Nokia C22','Nokia C12',
+        'Nokia 3310 (2017)','Nokia 8110 4G',
+        # Motorola
+        'Motorola Edge 50 Ultra','Motorola Edge 50 Pro','Motorola Edge 50 Fusion','Motorola Edge 50',
+        'Motorola Edge 40 Neo','Motorola Edge 40 Pro','Motorola Edge 40',
+        'Motorola Edge 30 Ultra','Motorola Edge 30 Pro','Motorola Edge 30',
+        'Motorola Moto G85 5G','Motorola Moto G84 5G','Motorola Moto G73 5G',
+        'Motorola Moto G54 5G','Motorola Moto G34 5G','Motorola Moto G24',
+        'Motorola Moto G14','Motorola Moto G13','Motorola Moto G62 5G',
+        'Motorola Moto G52','Motorola Moto G32',
+    ]},
+    'gam': {'ad': 'Gaming Telefonlar 🎮', 'emoji': '🎮', 'modeller': [
+        'ASUS ROG Phone 8 Pro','ASUS ROG Phone 8','ASUS ROG Phone 7 Pro','ASUS ROG Phone 7 Ultimate',
+        'ASUS ROG Phone 7','ASUS ROG Phone 6 Pro','ASUS ROG Phone 6',
+        'Nubia RedMagic 9 Pro+','Nubia RedMagic 9 Pro','Nubia RedMagic 9S',
+        'Nubia RedMagic 8 Pro+','Nubia RedMagic 8 Pro','Nubia RedMagic 8S Pro',
+        'Nubia RedMagic 7 Pro','Nubia RedMagic 7',
+        'Xiaomi Black Shark 5 Pro','Xiaomi Black Shark 5',
+        'Lenovo Legion Phone 3 Pro','Lenovo Legion Phone 2 Pro',
+    ]},
+    'son': {'ad': 'Sony', 'emoji': '📱', 'modeller': [
+        'Sony Xperia 1 VI','Sony Xperia 1 V','Sony Xperia 1 IV','Sony Xperia 1 III',
+        'Sony Xperia 5 VI','Sony Xperia 5 V','Sony Xperia 5 IV','Sony Xperia 5 III',
+        'Sony Xperia 10 VI','Sony Xperia 10 V','Sony Xperia 10 IV','Sony Xperia 10 III',
+        'Sony Xperia Pro-I','Sony Xperia Pro',
+        'Sony Xperia L4','Sony Xperia Ace III',
+    ]},
+    'zte': {'ad': 'ZTE / Nubia', 'emoji': '📱', 'modeller': [
+        'ZTE Blade V60 Design','ZTE Blade V50 Design','ZTE Blade V50 Vita',
+        'ZTE Blade A75 5G','ZTE Blade A75','ZTE Blade A54','ZTE Blade A34','ZTE Blade A73 5G',
+        'Nubia Z60 Ultra','Nubia Z50S Pro','Nubia Z50 Ultra','Nubia Z50',
+        'Nubia Focus 5G','Nubia Neo 5G','Nubia Music',
+    ]},
+    'lav': {'ad': 'Lava', 'emoji': '📱', 'modeller': [
+        'Lava Agni 3 5G','Lava Agni 2 5G','Lava Agni 1 5G',
+        'Lava Blaze 2 5G','Lava Blaze Curve 5G','Lava Blaze 5G',
+        'Lava Storm 5G','Lava O2 5G','Lava X3 5G',
+        'Lava Yuva 3 Pro','Lava Yuva 2 Pro',
+    ]},
+    'sha': {'ad': 'Sharp / Meizu', 'emoji': '📱', 'modeller': [
+        # Sharp
+        'Sharp AQUOS R9','Sharp AQUOS R8 Pro','Sharp AQUOS R8',
+        'Sharp AQUOS R7','Sharp AQUOS sense8','Sharp AQUOS sense7',
+        'Sharp AQUOS wish3','Sharp AQUOS zero6',
+        # Meizu
+        'Meizu 21 Pro','Meizu 21','Meizu 21 Note',
+        'Meizu 20 Pro','Meizu 20','Meizu 20 Infinity',
+        'Meizu Note 21 Pro','Meizu Note 21','Meizu Blue Note 21S',
+    ]},
+    'dog': {'ad': 'Doogee / Ulefone', 'emoji': '📱', 'modeller': [
+        # Doogee
+        'Doogee V Max Pro','Doogee V Max','Doogee V30 Pro','Doogee V30','Doogee V20 Pro',
+        'Doogee S100 Pro','Doogee S100','Doogee S98 Pro','Doogee S98',
+        'Doogee N55 Pro','Doogee N40 Pro','Doogee X98 Pro','Doogee X98',
+        # Ulefone
+        'Ulefone Power Armor 23 Ultra','Ulefone Power Armor 23','Ulefone Power Armor 19T',
+        'Ulefone Armor 23 Ultra','Ulefone Armor 21','Ulefone Armor 20WT',
+        'Ulefone Note 17 Pro','Ulefone Note 16 Pro',
+    ]},
+}
+
+# Telefon detaylı özellikler (popüler modeller)
+TELEFON_SPECS_DB = {
+    'Samsung Galaxy S24 Ultra': {'5g': True, 'ram': '12 GB', 'depolama': '256/512/1TB', 'sim': 2, 'cikis': '2024 Ocak', 'islemci': 'Snapdragon 8 Gen 3', 'batarya': '5000 mAh', 'ekran': '6.8" QHD+ LTPO AMOLED 120Hz', 'kamera': '200MP+50MP+10MP+12MP', 'os': 'Android 14'},
+    'Samsung Galaxy S24+': {'5g': True, 'ram': '12 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2024 Ocak', 'islemci': 'Snapdragon 8 Gen 3', 'batarya': '4900 mAh', 'ekran': '6.7" QHD+ AMOLED 120Hz', 'kamera': '50MP+12MP+10MP', 'os': 'Android 14'},
+    'Samsung Galaxy S24': {'5g': True, 'ram': '8 GB', 'depolama': '128/256GB', 'sim': 2, 'cikis': '2024 Ocak', 'islemci': 'Snapdragon 8 Gen 3', 'batarya': '4000 mAh', 'ekran': '6.2" FHD+ AMOLED 120Hz', 'kamera': '50MP+12MP+10MP', 'os': 'Android 14'},
+    'Samsung Galaxy S23 Ultra': {'5g': True, 'ram': '8/12 GB', 'depolama': '256/512/1TB', 'sim': 2, 'cikis': '2023 Şubat', 'islemci': 'Snapdragon 8 Gen 2', 'batarya': '5000 mAh', 'ekran': '6.8" QHD+ LTPO AMOLED 120Hz', 'kamera': '200MP+12MP+10MP+10MP', 'os': 'Android 13→14'},
+    'Samsung Galaxy S23+': {'5g': True, 'ram': '8 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2023 Şubat', 'islemci': 'Snapdragon 8 Gen 2', 'batarya': '4700 mAh', 'ekran': '6.6" FHD+ AMOLED 120Hz', 'kamera': '50MP+12MP+10MP', 'os': 'Android 13→14'},
+    'Samsung Galaxy S23': {'5g': True, 'ram': '8 GB', 'depolama': '128/256GB', 'sim': 2, 'cikis': '2023 Şubat', 'islemci': 'Snapdragon 8 Gen 2', 'batarya': '3900 mAh', 'ekran': '6.1" FHD+ AMOLED 120Hz', 'kamera': '50MP+12MP+10MP', 'os': 'Android 13→14'},
+    'iPhone 15 Pro Max': {'5g': True, 'ram': '8 GB', 'depolama': '256/512/1TB', 'sim': 2, 'cikis': '2023 Eylül', 'islemci': 'Apple A17 Pro', 'batarya': '4422 mAh', 'ekran': '6.7" LTPO Super Retina XDR OLED 120Hz', 'kamera': '48MP+12MP+12MP', 'os': 'iOS 17'},
+    'iPhone 15 Pro': {'5g': True, 'ram': '8 GB', 'depolama': '128/256/512/1TB', 'sim': 2, 'cikis': '2023 Eylül', 'islemci': 'Apple A17 Pro', 'batarya': '3274 mAh', 'ekran': '6.1" LTPO Super Retina XDR OLED 120Hz', 'kamera': '48MP+12MP+12MP', 'os': 'iOS 17'},
+    'iPhone 15 Plus': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512GB', 'sim': 2, 'cikis': '2023 Eylül', 'islemci': 'Apple A16 Bionic', 'batarya': '4383 mAh', 'ekran': '6.7" Super Retina XDR OLED 60Hz', 'kamera': '48MP+12MP', 'os': 'iOS 17'},
+    'iPhone 15': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512GB', 'sim': 2, 'cikis': '2023 Eylül', 'islemci': 'Apple A16 Bionic', 'batarya': '3349 mAh', 'ekran': '6.1" Super Retina XDR OLED 60Hz', 'kamera': '48MP+12MP', 'os': 'iOS 17'},
+    'iPhone 14 Pro Max': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512/1TB', 'sim': 2, 'cikis': '2022 Eylül', 'islemci': 'Apple A16 Bionic', 'batarya': '4323 mAh', 'ekran': '6.7" LTPO Super Retina XDR OLED 120Hz', 'kamera': '48MP+12MP+12MP', 'os': 'iOS 16→17'},
+    'iPhone 14 Pro': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512/1TB', 'sim': 2, 'cikis': '2022 Eylül', 'islemci': 'Apple A16 Bionic', 'batarya': '3200 mAh', 'ekran': '6.1" LTPO Super Retina XDR OLED 120Hz', 'kamera': '48MP+12MP+12MP', 'os': 'iOS 16→17'},
+    'iPhone 14': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512GB', 'sim': 2, 'cikis': '2022 Eylül', 'islemci': 'Apple A15 Bionic', 'batarya': '3279 mAh', 'ekran': '6.1" Super Retina XDR OLED 60Hz', 'kamera': '12MP+12MP', 'os': 'iOS 16→17'},
+    'iPhone 13 Pro Max': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512/1TB', 'sim': 2, 'cikis': '2021 Eylül', 'islemci': 'Apple A15 Bionic', 'batarya': '4352 mAh', 'ekran': '6.7" LTPO Super Retina XDR OLED 120Hz', 'kamera': '12MP+12MP+12MP', 'os': 'iOS 15→17'},
+    'iPhone 13 Pro': {'5g': True, 'ram': '6 GB', 'depolama': '128/256/512/1TB', 'sim': 2, 'cikis': '2021 Eylül', 'islemci': 'Apple A15 Bionic', 'batarya': '3095 mAh', 'ekran': '6.1" LTPO Super Retina XDR OLED 120Hz', 'kamera': '12MP+12MP+12MP', 'os': 'iOS 15→17'},
+    'iPhone 13': {'5g': True, 'ram': '4 GB', 'depolama': '128/256/512GB', 'sim': 2, 'cikis': '2021 Eylül', 'islemci': 'Apple A15 Bionic', 'batarya': '3227 mAh', 'ekran': '6.1" Super Retina XDR OLED 60Hz', 'kamera': '12MP+12MP', 'os': 'iOS 15→17'},
+    'Xiaomi 14 Ultra': {'5g': True, 'ram': '16 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2024 Şubat', 'islemci': 'Snapdragon 8 Gen 3', 'batarya': '5300 mAh', 'ekran': '6.73" QHD+ LTPO AMOLED 120Hz', 'kamera': '50MP+50MP+50MP+50MP', 'os': 'Android 14 (MIUI 14)'},
+    'Xiaomi 14 Pro': {'5g': True, 'ram': '12/16 GB', 'depolama': '256/512/1TB', 'sim': 2, 'cikis': '2023 Ekim', 'islemci': 'Snapdragon 8 Gen 3', 'batarya': '4880 mAh', 'ekran': '6.73" QHD+ LTPO AMOLED 120Hz', 'kamera': '50MP+50MP+50MP', 'os': 'Android 14 (MIUI 14)'},
+    'Xiaomi 13 Ultra': {'5g': True, 'ram': '12/16 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2023 Nisan', 'islemci': 'Snapdragon 8 Gen 2', 'batarya': '5000 mAh', 'ekran': '6.73" QHD+ LTPO AMOLED 120Hz', 'kamera': '50MP+50MP+50MP+50MP', 'os': 'Android 13 (MIUI 14)'},
+    'Google Pixel 8 Pro': {'5g': True, 'ram': '12 GB', 'depolama': '128/256/1TB', 'sim': 2, 'cikis': '2023 Ekim', 'islemci': 'Google Tensor G3', 'batarya': '5050 mAh', 'ekran': '6.7" QHD+ LTPO OLED 120Hz', 'kamera': '50MP+48MP+48MP', 'os': 'Android 14'},
+    'Google Pixel 8': {'5g': True, 'ram': '8 GB', 'depolama': '128/256GB', 'sim': 2, 'cikis': '2023 Ekim', 'islemci': 'Google Tensor G3', 'batarya': '4575 mAh', 'ekran': '6.2" FHD+ OLED 120Hz', 'kamera': '50MP+12MP', 'os': 'Android 14'},
+    'OnePlus 12': {'5g': True, 'ram': '12/16 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2024 Ocak', 'islemci': 'Snapdragon 8 Gen 3', 'batarya': '5400 mAh', 'ekran': '6.82" QHD+ LTPO AMOLED 120Hz', 'kamera': '50MP+48MP+64MP', 'os': 'Android 14 (OxygenOS 14)'},
+    'Samsung Galaxy A54 5G': {'5g': True, 'ram': '6/8 GB', 'depolama': '128/256GB', 'sim': 2, 'cikis': '2023 Mart', 'islemci': 'Exynos 1380', 'batarya': '5000 mAh', 'ekran': '6.4" FHD+ Super AMOLED 120Hz', 'kamera': '50MP+12MP+5MP', 'os': 'Android 13→14'},
+    'Samsung Galaxy A34 5G': {'5g': True, 'ram': '6/8 GB', 'depolama': '128/256GB', 'sim': 2, 'cikis': '2023 Mart', 'islemci': 'MediaTek Dimensity 1080', 'batarya': '5000 mAh', 'ekran': '6.6" FHD+ Super AMOLED 120Hz', 'kamera': '48MP+8MP+5MP', 'os': 'Android 13→14'},
+    'Redmi Note 13 Pro+ 5G': {'5g': True, 'ram': '8/12 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2023 Eylül', 'islemci': 'MediaTek Dimensity 7200 Ultra', 'batarya': '5000 mAh', 'ekran': '6.67" FHD+ AMOLED 120Hz', 'kamera': '200MP+8MP+2MP', 'os': 'Android 13 (MIUI 14)'},
+    'POCO X6 Pro 5G': {'5g': True, 'ram': '8/12 GB', 'depolama': '256/512GB', 'sim': 2, 'cikis': '2024 Ocak', 'islemci': 'MediaTek Dimensity 8300 Ultra', 'batarya': '5000 mAh', 'ekran': '6.67" FHD+ AMOLED 120Hz', 'kamera': '64MP+8MP+2MP', 'os': 'Android 14 (MIUI 14)'},
+}
+
+# Oyun FPS Veritabanı (PUBG Mobile, COD Mobile, Genshin Impact, Free Fire)
+TELEFON_FPS_DB = {
+    'Samsung Galaxy S24 Ultra': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Samsung Galaxy S24+': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Yüksek', '120 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Samsung Galaxy S24': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '120 FPS'), 'genshin': ('Orta 60FPS', '60 FPS'), 'ff': ('Maks', '90 FPS')},
+    'Samsung Galaxy S23 Ultra': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Yüksek', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Samsung Galaxy S23': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '90 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'iPhone 15 Pro Max': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'iPhone 15 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'iPhone 15 Plus': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'iPhone 15': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'iPhone 14 Pro Max': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'iPhone 14 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'iPhone 14': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'iPhone 13 Pro Max': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '90 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '60 FPS')},
+    'iPhone 13 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '90 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '60 FPS')},
+    'iPhone 13': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'Xiaomi 14 Ultra': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Xiaomi 14 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Yüksek', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Xiaomi 13 Ultra': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Yüksek', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Google Pixel 8 Pro': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'Google Pixel 8': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Orta 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'OnePlus 12': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Yüksek', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Samsung Galaxy A54 5G': {'pubg': ('Smooth', '60 FPS'), 'cod': ('Orta', '60 FPS'), 'genshin': ('Orta 30FPS', '30 FPS'), 'ff': ('Normal', '60 FPS')},
+    'Redmi Note 13 Pro+ 5G': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '60 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '60 FPS')},
+    'POCO X6 Pro 5G': {'pubg': ('HDR', '60 FPS'), 'cod': ('Yüksek', '90 FPS'), 'genshin': ('Yüksek 60FPS', '60 FPS'), 'ff': ('Maks', '90 FPS')},
+    'ASUS ROG Phone 8 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+    'Nubia RedMagic 9 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
+}
+
+async def _tfn_sayfa_goster(query, context, mid: str, sayfa: int):
+    """Marka model listesini sayfalı gösterir (8/sayfa)."""
+    if mid not in TELEFON_VERITABANI:
+        await query.answer("❌ Marka bulunamadı", show_alert=True)
+        return
+    mdata = TELEFON_VERITABANI[mid]
+    modeller = mdata['modeller']
+    toplam = len(modeller)
+    sayfa_boyutu = 8
+    toplam_sayfa = max(1, math.ceil(toplam / sayfa_boyutu))
+    sayfa = max(0, min(sayfa, toplam_sayfa - 1))
+    baslangic = sayfa * sayfa_boyutu
+    bitis = min(baslangic + sayfa_boyutu, toplam)
+    sayfa_modeller = modeller[baslangic:bitis]
+
+    satir = []
+    for i, model in enumerate(sayfa_modeller):
+        gercek_idx = baslangic + i
+        satir.append([InlineKeyboardButton(f"📱 {model}", callback_data=f'tfn_s_{gercek_idx}')])
+
+    nav = []
+    if sayfa > 0:
+        nav.append(InlineKeyboardButton("⬅️ Önceki", callback_data=f'tfn_p_{mid}_{sayfa - 1}'))
+    if sayfa < toplam_sayfa - 1:
+        nav.append(InlineKeyboardButton("Sonraki ➡️", callback_data=f'tfn_p_{mid}_{sayfa + 1}'))
+    if nav:
+        satir.append(nav)
+    satir.append([InlineKeyboardButton("📱 Tüm Markalar", callback_data='menu_telefon_fiyatlari')])
+
+    await query.edit_message_text(
+        f"{mdata['emoji']} **{mdata['ad']} — Model Listesi**\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📌 Sayfa {sayfa + 1}/{toplam_sayfa} · Toplam {toplam} model\n\n"
+        f"Bir model seçin:",
+        reply_markup=InlineKeyboardMarkup(satir),
+        parse_mode='Markdown'
+    )
+
+
+async def zoommer_fiyat_getir(telefon_adi: str) -> str:
+    """Zoommer.ge'den telefon güncel fiyatını çeker."""
+    try:
+        sorgu = urllib.parse.quote(telefon_adi)
+        url = f"https://zoommer.ge/search?q={sorgu}"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'ka-GE,ka;q=0.9,en;q=0.8',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        }
+        resp = await asyncio.to_thread(
+            lambda: http_requests.get(url, headers=headers, timeout=15, allow_redirects=True)
+        )
+        text = resp.text
+
+        # JSON-LD üzerinden fiyat ara
+        json_lds = re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', text, re.DOTALL)
+        for jl in json_lds:
+            try:
+                data = json.loads(jl.strip())
+                if isinstance(data, list):
+                    data = data[0]
+                offers = data.get('offers') or data.get('Offers') or {}
+                if isinstance(offers, list):
+                    offers = offers[0]
+                price = offers.get('price') or offers.get('lowPrice')
+                currency = offers.get('priceCurrency', 'GEL')
+                if price:
+                    return f"💰 **{price} {currency}** _(Zoommer.ge)_"
+            except Exception:
+                pass
+
+        # __NEXT_DATA__ içinde ara
+        nd_match = re.search(r'id="__NEXT_DATA__"[^>]*>(.*?)</script>', text, re.DOTALL)
+        if nd_match:
+            try:
+                ndata = json.loads(nd_match.group(1))
+                page_props = ndata.get('props', {}).get('pageProps', {})
+                products = (page_props.get('products') or page_props.get('items') or
+                           page_props.get('data', {}).get('products', []))
+                if products and len(products) > 0:
+                    p = products[0]
+                    price = p.get('price') or p.get('salePrice') or p.get('currentPrice')
+                    if price:
+                        return f"💰 **{price} ₾** _(Zoommer.ge)_"
+            except Exception:
+                pass
+
+        # Genel fiyat regex
+        fiyat_esles = re.findall(r'(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:₾|GEL|ლარი)', text)
+        if fiyat_esles:
+            # En makul fiyatı seç (100-10000 arası)
+            for f in fiyat_esles:
+                try:
+                    f_num = float(f.replace(',', '.'))
+                    if 50 <= f_num <= 15000:
+                        return f"💰 **{f} ₾** _(Zoommer.ge)_"
+                except Exception:
+                    pass
+
+        return f"💰 **Fiyat bilgisi alınamadı** — [Zoommer.ge'de ara](https://zoommer.ge/search?q={sorgu})"
+    except Exception as e:
+        logger.debug(f"Zoommer scrape hatası: {e}")
+        sorgu = urllib.parse.quote(telefon_adi)
+        return f"💰 **Bağlantı hatası** — [Zoommer.ge'de ara](https://zoommer.ge/search?q={sorgu})"
 
 
 async def log_kanali_gonder(bot, update, ek_bilgi: str = ""):
@@ -902,17 +1291,19 @@ async def log_kanali_gonder(bot, update, ek_bilgi: str = ""):
             return
         ad = html.escape(user.full_name or "—")
         uid = user.id
+        # İsim her zaman tıklanabilir mavi link olarak gösterilir
+        tiklanabilir_ad = f'<a href="tg://user?id={uid}">{ad}</a>'
         if user.username:
-            kullanici_link = f'<a href="tg://user?id={uid}">@{html.escape(user.username)}</a>'
+            kullanici_bilgi = f'@{html.escape(user.username)}'
         else:
-            kullanici_link = f'<a href="tg://user?id={uid}">{ad}</a>'
+            kullanici_bilgi = f'<code>{uid}</code>'
         zaman = datetime.datetime.now(TR_SAAT).strftime('%d.%m.%Y %H:%M:%S')
         log_metin = (
             f"🔔 <b>YENİ AKTİVİTE</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"👤 <b>Ad:</b> {ad}\n"
+            f"👤 <b>Ad:</b> {tiklanabilir_ad}\n"
             f"🆔 <b>ID:</b> <code>{uid}</code>\n"
-            f"📱 <b>Kullanıcı:</b> {kullanici_link}\n"
+            f"📱 <b>Kullanıcı:</b> {kullanici_bilgi}\n"
         )
         if ek_bilgi:
             log_metin += f"📝 <b>Bilgi:</b> {html.escape(str(ek_bilgi)[:500])}\n"
@@ -3067,41 +3458,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-    yas_bilgi = context.bot_data.setdefault('yas_bilgi', {})
-    if user_id in yas_bilgi:
-        yas = yas_bilgi[user_id]
-        if yas <= 10:
-            await update.message.reply_text(
-                "👋 **AZRxGUARD'a hoş geldin!**\n\n🌟 Sana özel menü hazır!",
-                reply_markup=cocuk_menu_klavye(),
-                parse_mode='Markdown'
-            )
-        else:
-            await _bot_baslat_animasyon(update, context, user_id, lang)
-        return
-
-    yas_klavye = InlineKeyboardMarkup([
-        [InlineKeyboardButton("6", callback_data='yas_sec_6'),
-         InlineKeyboardButton("7", callback_data='yas_sec_7'),
-         InlineKeyboardButton("8", callback_data='yas_sec_8'),
-         InlineKeyboardButton("9", callback_data='yas_sec_9'),
-         InlineKeyboardButton("10", callback_data='yas_sec_10')],
-        [InlineKeyboardButton("12", callback_data='yas_sec_12'),
-         InlineKeyboardButton("13", callback_data='yas_sec_13'),
-         InlineKeyboardButton("14", callback_data='yas_sec_14'),
-         InlineKeyboardButton("15", callback_data='yas_sec_15')],
-        [InlineKeyboardButton("16", callback_data='yas_sec_16'),
-         InlineKeyboardButton("17", callback_data='yas_sec_17'),
-         InlineKeyboardButton("18+", callback_data='yas_sec_18')],
-    ])
-    await update.message.reply_text(
-        "👋 **AZRxGUARD'a hoş geldiniz!**\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "🎂 **Lütfen yaşınızı seçin:**\n\n"
-        "_Bu bilgi size uygun içerik sunmak için kullanılır._",
-        reply_markup=yas_klavye,
-        parse_mode='Markdown'
-    )
+    await _bot_baslat_animasyon(update, context, user_id, lang)
 
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -3175,61 +3532,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ana_menu_klavye(yeni_dil, fid),
             parse_mode='Markdown'
         )
-    elif query.data.startswith('yas_sec_'):
-        yas_str = query.data.replace('yas_sec_', '')
-        yas = 18 if yas_str == '18' else int(yas_str)
-        if yas <= 10:
-            context.bot_data.setdefault('yas_bilgi', {})[user_id] = yas
-            await query.edit_message_text(
-                f"🌟 **Merhaba!** {yas} yaşındasın.\n\n"
-                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "🎮 Sana özel oyunlar ve eğlenceli araçlar hazır!\n"
-                "_Harika bir vakit geçir!_ 🎉",
-                reply_markup=cocuk_menu_klavye(),
-                parse_mode='Markdown'
-            )
-        elif yas <= 13:
-            context.bot_data.setdefault('yas_bilgi', {})[user_id] = yas
-            fid = get_font(context, user_id)
-            await query.edit_message_text(
-                ft(LANG_DATA[lang]['welcome'], context, user_id),
-                reply_markup=ana_menu_klavye(lang, fid),
-                parse_mode='Markdown'
-            )
-        else:
-            context.user_data['yas_bekleyen'] = yas
-            context.user_data['durum'] = 'yas_mat_bekliyor'
-            await query.edit_message_text(
-                "🔐 **YAŞINI KANITLA!**\n\n"
-                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "Bu alana erişmek için şu soruyu cevapla:\n\n"
-                "❓ **100 - 50 - 25 + 25 KAÇ EDER?**\n\n"
-                "_Cevabını rakamla yaz:_",
-                parse_mode='Markdown'
-            )
-    elif query.data == 'cocuk_oyunlar':
-        oyun_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🪨 Taş-Kağıt-Makas", callback_data='oyun_tkmk')],
-            [InlineKeyboardButton("🔢 Sayı Tahmin Oyunu", callback_data='oyun_sayi_baslat')],
-            [InlineKeyboardButton("🎲 Zar At", callback_data='roll_dice')],
-            [InlineKeyboardButton("💡 Günün Sözü", callback_data='pro_gunsozu')],
-            [InlineKeyboardButton("❓ Bilmece", callback_data='pro_bilmece')],
-            [InlineKeyboardButton("🔤 Kelime Oyunu", callback_data='pro_kelime')],
-            [InlineKeyboardButton("⬅️ Geri", callback_data='cocuk_ana')],
-        ])
-        await query.edit_message_text(
-            "🎮 **ÇOCUK OYUNLARI**\n\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🌟 Hangi oyunu oynamak istiyorsun?",
-            reply_markup=oyun_klavye,
-            parse_mode='Markdown'
-        )
-    elif query.data == 'cocuk_ana':
-        await query.edit_message_text(
-            "🌟 **Hoş Geldiniz!**\n\nSana özel menü hazır! 🎉",
-            reply_markup=cocuk_menu_klavye(),
-            parse_mode='Markdown'
-        )
     elif query.data == 'menu_admin':
         context.user_data['durum'] = 'admin_mesaj_bekliyor'
         await query.edit_message_text(strings['ask_admin_msg'], parse_mode='Markdown')
@@ -3264,9 +3566,42 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
             [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
             [InlineKeyboardButton(strings.get('btn_hatirlat', '⏰ Hatırlatıcı'), callback_data='menu_hatirlat')],
+            [InlineKeyboardButton('🤖 INFO', callback_data='azr_bot_info')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['azr_welcome'], reply_markup=InlineKeyboardMarkup(azr_klavye), parse_mode='Markdown')
+    elif query.data == 'azr_bot_info':
+        su_an = datetime.datetime.now(AZ_SAAT)
+        bilgi = (
+            f"🤖 **AZRxGUARD — BOT BİLGİSİ**\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📛 **Bot Adı:** AZRxGUARD\n"
+            f"👑 **Kurucu / Owner:** @maqa\\_01 *(MAQA)*\n"
+            f"📅 **Kuruluş Tarihi:** Ocak 2024\n"
+            f"⚡ **Versiyon:** 2.0 *(Büyük Güncelleme)*\n"
+            f"🌍 **Desteklenen Diller:** 🇹🇷 TR · 🇦🇿 AZ · 🇷🇺 RU · 🇬🇧 EN · 🇩🇪 DE · 🇬🇪 KA\n\n"
+            f"⏰ **Şu An:** {su_an.strftime('%H:%M:%S')}\n"
+            f"📆 **Bugün:** {su_an.strftime('%d.%m.%Y')}\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔧 **Özellikler:**\n"
+            f"✅ 🎬 Video Editör — 10 güçlü efekt\n"
+            f"✅ 🛡️ Siber Güvenlik — IP Analiz, TG Panel, Hunter\n"
+            f"✅ ⚡ PRO Araçlar — Hesap, Hash, Hava, Döviz vb.\n"
+            f"✅ 📱 Telefon Fiyatları — 22 marka, Zoommer.ge\n"
+            f"✅ 🎮 Eğlence — Zar, TKM, Sayı Tahmin\n"
+            f"✅ 🌍 6 Dil Desteği\n"
+            f"✅ 📝 Not Defteri & Hatırlatıcı\n"
+            f"✅ 📊 Canlı İstatistik Sistemi\n"
+            f"✅ 🔒 Kanal Üyelik Koruması\n"
+            f"✅ 🌙 Gece Modu (22:00 — 08:00)\n"
+            f"✅ 📋 Log Sistemi\n"
+            f"✅ 🤖 AI Entegrasyonu\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"💡 _Bu bot MAQA tarafından sevgiyle yapıldı!_ ❤️\n"
+            f"📢 Kanal: @azrXmaqa"
+        )
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
+        await query.edit_message_text(bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'show_inline_stats':
         rapor_metni = istatistik_raporu_hazirla(context)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
@@ -3325,8 +3660,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(strings.get('btn_panel', '🔍 TG PANELİ'), callback_data='menu_panel')],
             [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ USERNAME HUNTER'), callback_data='menu_guvenli_sorgu')],
             [InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton(strings.get('btn_oyun_tkmk', '✊ Taş-Kağıt-Makas'), callback_data='oyun_tkmk'),
-             InlineKeyboardButton(strings.get('btn_oyun_sayi', '🔢 Sayı Tahmin'), callback_data='oyun_sayi_baslat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -3740,17 +4073,23 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton("🎨 Filtre Uygula", callback_data='ved_filtre_baslat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ])
-        await query.edit_message_text(
+        vo_metin = (
             "🎬 **VİDEO EDİTÖR — MONTAJ MERKEZİ**\n\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "📌 **10 Güçlü Özellik:**\n"
             "✂️ Kırp  •  ⚡ Hız  •  🔄 Döndür  •  🎵 Ses Çıkar\n"
             "🔇 Sessiz  •  📸 Kare Al  •  🎞️ GIF  •  📐 Boyut\n"
             "🎨 Filtre  •  🎬 Yazı Ekle\n\n"
-            "_Bir özellik seçin ve videoyu gönderin!_",
-            reply_markup=vo_klavye,
-            parse_mode='Markdown'
+            "_Bir özellik seçin ve videoyu gönderin!_"
         )
+        try:
+            await query.edit_message_text(vo_metin, reply_markup=vo_klavye, parse_mode='Markdown')
+        except Exception:
+            await query.message.reply_text(vo_metin, reply_markup=vo_klavye, parse_mode='Markdown')
+            try:
+                await query.message.delete()
+            except Exception:
+                pass
     elif query.data == 'ved_kirp_baslat':
         context.user_data['durum'] = 'ved_kirp_video_bekle'
         context.user_data['ved'] = {}
@@ -4170,41 +4509,136 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception:
                     pass
 
-    elif query.data == 'yas_degistir':
-        yas_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton("6", callback_data='yas_sec_6'),
-             InlineKeyboardButton("7", callback_data='yas_sec_7'),
-             InlineKeyboardButton("8", callback_data='yas_sec_8'),
-             InlineKeyboardButton("9", callback_data='yas_sec_9'),
-             InlineKeyboardButton("10", callback_data='yas_sec_10')],
-            [InlineKeyboardButton("12", callback_data='yas_sec_12'),
-             InlineKeyboardButton("13", callback_data='yas_sec_13'),
-             InlineKeyboardButton("14", callback_data='yas_sec_14'),
-             InlineKeyboardButton("15", callback_data='yas_sec_15')],
-            [InlineKeyboardButton("16", callback_data='yas_sec_16'),
-             InlineKeyboardButton("17", callback_data='yas_sec_17'),
-             InlineKeyboardButton("18+", callback_data='yas_sec_18')],
-        ])
-        mevcut_yas = context.bot_data.get('yas_bilgi', {}).get(user_id, '?')
+    # ─────────────────────────────────────────────────────────────
+    # 📱 TELEFON FİYATLARI KATEGORİSİ
+    # ─────────────────────────────────────────────────────────────
+    elif query.data == 'menu_telefon_fiyatlari':
+        satir = []
+        markalar = list(TELEFON_VERITABANI.items())
+        for i in range(0, len(markalar), 2):
+            sut = []
+            for mid, mdata in markalar[i:i+2]:
+                sut.append(InlineKeyboardButton(f"{mdata['emoji']} {mdata['ad']}", callback_data=f'tfn_m_{mid}'))
+            satir.append(sut)
+        satir.append([InlineKeyboardButton(strings['btn_back'], callback_data='go_home')])
         await query.edit_message_text(
-            f"🎂 <b>YAŞ DEĞİŞTİR</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📌 <b>Mevcut yaşın:</b> <code>{mevcut_yas}</code>\n\n"
-            f"Yeni yaşını seç:",
-            reply_markup=yas_klavye,
-            parse_mode='HTML'
+            "📱 **TELEFON FİYATLARI**\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🏪 **Zoommer.ge** güncel fiyatları\n"
+            "📊 Özellikler + Oyun FPS verileri\n\n"
+            "Marka seçin:",
+            reply_markup=InlineKeyboardMarkup(satir),
+            parse_mode='Markdown'
         )
+
+    elif query.data.startswith('tfn_m_'):
+        mid = query.data[6:]
+        if mid not in TELEFON_VERITABANI:
+            await query.answer("❌ Marka bulunamadı", show_alert=True)
+            return
+        mdata = TELEFON_VERITABANI[mid]
+        modeller = mdata['modeller']
+        context.user_data['tfn_liste'] = modeller
+        context.user_data['tfn_marka'] = mid
+        await _tfn_sayfa_goster(query, context, mid, 0)
+
+    elif query.data.startswith('tfn_p_'):
+        parca = query.data[6:].rsplit('_', 1)
+        if len(parca) != 2:
+            return
+        mid, sayfa_str = parca[0], parca[1]
+        try:
+            sayfa = int(sayfa_str)
+        except Exception:
+            sayfa = 0
+        await _tfn_sayfa_goster(query, context, mid, sayfa)
+
+    elif query.data.startswith('tfn_s_'):
+        idx_str = query.data[6:]
+        try:
+            idx = int(idx_str)
+        except Exception:
+            await query.answer("❌ Hata", show_alert=True)
+            return
+        liste = context.user_data.get('tfn_liste', [])
+        mid = context.user_data.get('tfn_marka', '')
+        if idx >= len(liste):
+            await query.answer("❌ Model bulunamadı", show_alert=True)
+            return
+        telefon_adi = liste[idx]
+        marka_adi = TELEFON_VERITABANI.get(mid, {}).get('ad', '')
+        tam_ad = f"{marka_adi} {telefon_adi}" if not telefon_adi.lower().startswith(marka_adi.lower().split()[0].lower()) else telefon_adi
+        bekle_msg = await query.edit_message_text(
+            f"⏳ **{html.escape(tam_ad)}**\n\nFiyat ve özellikler yükleniyor...",
+            parse_mode='Markdown'
+        )
+        fiyat_str = await zoommer_fiyat_getir(tam_ad)
+        specs = TELEFON_SPECS_DB.get(tam_ad) or TELEFON_SPECS_DB.get(telefon_adi)
+        fps_data = TELEFON_FPS_DB.get(tam_ad) or TELEFON_FPS_DB.get(telefon_adi)
+
+        metin = f"📱 **{html.escape(tam_ad)}**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        metin += f"🏷️ **FİYAT:**\n{fiyat_str}\n\n"
+        metin += f"━━━━━━━━━━━━━━━━━━━━━━\n"
+
+        if specs:
+            metin += f"⚙️ **TEKNİK ÖZELLİKLER:**\n"
+            metin += f"• 5G: {'✅ Var' if specs.get('5g') else '❌ Yok'}\n"
+            metin += f"• RAM: {specs.get('ram', '—')}\n"
+            metin += f"• Depolama: {specs.get('depolama', '—')}\n"
+            metin += f"• SIM: {specs.get('sim', '—')} slot\n"
+            metin += f"• İşlemci: {specs.get('islemci', '—')}\n"
+            metin += f"• Batarya: {specs.get('batarya', '—')}\n"
+            metin += f"• Ekran: {specs.get('ekran', '—')}\n"
+            metin += f"• Kamera: {specs.get('kamera', '—')}\n"
+            metin += f"• OS: {specs.get('os', '—')}\n"
+            metin += f"• Çıkış: {specs.get('cikis', '—')}\n"
+            metin += f"• IMEI: Çift ({'Dual SIM' if specs.get('sim', 1) >= 2 else 'Tek SIM'})\n"
+        else:
+            metin += f"⚙️ **TEKNİK ÖZELLİKLER:**\n"
+            metin += f"_Detaylı spec bilgisi için Zoommer.ge'yi ziyaret edin_\n"
+
+        metin += f"\n━━━━━━━━━━━━━━━━━━━━━━\n"
+
+        if fps_data:
+            metin += f"🎮 **OYUN PERFORMANSI:**\n"
+            metin += f"• 🔫 PUBG Mobile: **{fps_data['pubg'][0]}** — {fps_data['pubg'][1]}\n"
+            metin += f"• 🎖️ COD Mobile: **{fps_data['cod'][0]}** — {fps_data['cod'][1]}\n"
+            metin += f"• 🌸 Genshin Impact: **{fps_data['genshin'][0]}** — {fps_data['genshin'][1]}\n"
+            metin += f"• 🔥 Free Fire: **{fps_data['ff'][0]}** — {fps_data['ff'][1]}\n"
+        else:
+            metin += f"🎮 **OYUN PERFORMANSI:**\n"
+            metin += f"• 🔫 PUBG Mobile: _(Cihaza göre değişir)_\n"
+            metin += f"• 🎖️ COD Mobile: _(Cihaza göre değişir)_\n"
+            metin += f"• 🌸 Genshin Impact: _(Cihaza göre değişir)_\n"
+            metin += f"• 🔥 Free Fire: _(Cihaza göre değişir)_\n"
+
+        sorgu = urllib.parse.quote(tam_ad)
+        metin += f"\n━━━━━━━━━━━━━━━━━━━━━━\n"
+        metin += f"🛒 [Zoommer.ge'de İncele](https://zoommer.ge/search?q={sorgu})"
+
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton(f"⬅️ {TELEFON_VERITABANI.get(mid, {}).get('ad', 'Geri')}", callback_data=f'tfn_m_{mid}')],
+            [InlineKeyboardButton("📱 Tüm Markalar", callback_data='menu_telefon_fiyatlari')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')],
+        ])
+        try:
+            await bekle_msg.edit_text(metin, reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
+        except Exception:
+            await bekle_msg.edit_text(metin[:4096], reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
+
     elif query.data == 'go_home':
         context.user_data['durum'] = None
         fid = get_font(context, user_id)
-        yas = context.bot_data.get('yas_bilgi', {}).get(user_id, 99)
-        if yas <= 10:
-            await query.edit_message_text(
-                "🌟 Ana Menü",
-                reply_markup=cocuk_menu_klavye()
-            )
-        else:
-            await query.edit_message_text(ft(LANG_DATA[lang]['welcome'], context, user_id), reply_markup=ana_menu_klavye(lang, fid), parse_mode='Markdown')
+        metin = ft(LANG_DATA[lang]['welcome'], context, user_id)
+        klavye = ana_menu_klavye(lang, fid)
+        try:
+            await query.edit_message_text(metin, reply_markup=klavye, parse_mode='Markdown')
+        except Exception:
+            await query.message.reply_text(metin, reply_markup=klavye, parse_mode='Markdown')
+            try:
+                await query.message.delete()
+            except Exception:
+                pass
 
 async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -4217,46 +4651,6 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         await log_kanali_gonder(context.bot, update)
     except Exception:
         pass
-
-    if context.user_data.get('durum') == 'yas_mat_bekliyor':
-        cevap = (update.message.text or '').strip()
-        yas_beklenen = context.user_data.get('yas_bekleyen', 18)
-        if cevap == '50':
-            context.user_data['durum'] = None
-            context.bot_data.setdefault('yas_bilgi', {})[user_id] = yas_beklenen
-            fid = get_font(context, user_id)
-            def yuklenme_cubugu(yuzde: int) -> str:
-                dolu = yuzde // 10
-                bos  = 10 - dolu
-                return f"🚀 *AZRxGUARD Başlatılıyor...*\n\n{'█' * dolu}{'░' * bos}  {yuzde}%"
-            mesaj = await update.message.reply_text(
-                "✅ **Doğru!** Yaşın doğrulandı. 🎉\n\n" + yuklenme_cubugu(0),
-                parse_mode='Markdown'
-            )
-            for yuzde in [20, 40, 60, 80, 100]:
-                await asyncio.sleep(0.3)
-                try:
-                    await mesaj.edit_text(yuklenme_cubugu(yuzde), parse_mode='Markdown')
-                except Exception:
-                    pass
-            await asyncio.sleep(0.4)
-            await mesaj.edit_text(
-                ft(LANG_DATA[lang]['welcome'], context, user_id),
-                reply_markup=ana_menu_klavye(lang, fid),
-                parse_mode='Markdown'
-            )
-        else:
-            context.user_data['durum'] = None
-            context.bot_data.setdefault('yas_bilgi', {})[user_id] = 10
-            await update.message.reply_text(
-                "🚫 **SEN BİR ÇOCUKSUN!**\n\n"
-                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "❌ BURAYA GİRMENE İZİN YOK!\n\n"
-                "🌟 Sana uygun içerikler aşağıda seni bekliyor! ⬇️",
-                reply_markup=cocuk_menu_klavye(),
-                parse_mode='Markdown'
-            )
-        return
 
     if context.user_data.get('durum') == 'admin_mesaj_bekliyor':
         user = update.effective_user
@@ -4281,21 +4675,12 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             logger.error(f"Kanala mesaj hatası: {e}")
         try:
             fid = get_font(context, user_id)
-            yas_bilgi = context.bot_data.get('yas_bilgi', {})
-            yas = yas_bilgi.get(user_id, 99)
             await update.message.reply_text(strings['msg_sent'], parse_mode='Markdown')
-            if yas <= 10:
-                await update.message.reply_text(
-                    ft(LANG_DATA[lang]['welcome'], context, user_id),
-                    reply_markup=cocuk_menu_klavye(),
-                    parse_mode='Markdown'
-                )
-            else:
-                await update.message.reply_text(
-                    ft(LANG_DATA[lang]['welcome'], context, user_id),
-                    reply_markup=ana_menu_klavye(lang, fid),
-                    parse_mode='Markdown'
-                )
+            await update.message.reply_text(
+                ft(LANG_DATA[lang]['welcome'], context, user_id),
+                reply_markup=ana_menu_klavye(lang, fid),
+                parse_mode='Markdown'
+            )
         except Exception as e:
             logger.error(f"Cevap iletme hatası: {e}")
         context.user_data['durum'] = None
