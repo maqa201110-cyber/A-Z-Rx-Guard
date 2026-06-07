@@ -5839,7 +5839,7 @@ def main():
 
     application.add_error_handler(error_handler)
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
-    application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"])
+    application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"], drop_pending_updates=True)
 
 if __name__ == '__main__':
     main()
