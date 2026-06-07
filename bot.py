@@ -894,10 +894,8 @@ TELEFON_VERITABANI = {
         'Galaxy S21 Ultra','Galaxy S21+','Galaxy S21','Galaxy S21 FE',
         'Galaxy S20 Ultra','Galaxy S20+','Galaxy S20','Galaxy S20 FE',
         'Galaxy S10+','Galaxy S10','Galaxy S10e','Galaxy S10 5G',
-        'Galaxy S9+','Galaxy S9','Galaxy S8+','Galaxy S8','Galaxy S7 Edge','Galaxy S7',
         # Note Serisi
         'Galaxy Note 20 Ultra','Galaxy Note 20','Galaxy Note 10+','Galaxy Note 10','Galaxy Note 10 Lite',
-        'Galaxy Note 9','Galaxy Note 8','Galaxy Note 5',
         # Z Serisi (Katlanabilir)
         'Galaxy Z Fold 6','Galaxy Z Fold 5','Galaxy Z Fold 4','Galaxy Z Fold 3',
         'Galaxy Z Flip 6','Galaxy Z Flip 5','Galaxy Z Flip 4','Galaxy Z Flip 3',
@@ -906,11 +904,9 @@ TELEFON_VERITABANI = {
         'Galaxy A35 5G','Galaxy A34 5G','Galaxy A33 5G','Galaxy A32','Galaxy A32 5G',
         'Galaxy A25 5G','Galaxy A24','Galaxy A23 5G','Galaxy A23','Galaxy A22 5G','Galaxy A22',
         'Galaxy A15 5G','Galaxy A15','Galaxy A14 5G','Galaxy A14','Galaxy A13','Galaxy A13 5G',
-        'Galaxy A05s','Galaxy A05','Galaxy A04s','Galaxy A04e','Galaxy A04','Galaxy A03s','Galaxy A03',
+        'Galaxy A05s','Galaxy A05','Galaxy A04s',
         # M Serisi
-        'Galaxy M54 5G','Galaxy M53 5G','Galaxy M34 5G','Galaxy M33 5G','Galaxy M14 5G','Galaxy M13',
-        # F / Diğer
-        'Galaxy F54 5G','Galaxy F23','Galaxy F13',
+        'Galaxy M54 5G','Galaxy M53 5G','Galaxy M34 5G','Galaxy M33 5G','Galaxy M14 5G',
     ]},
     'iph': {'ad': 'iPhone (Apple)', 'emoji': '🍎', 'modeller': [
         'iPhone 15 Pro Max','iPhone 15 Pro','iPhone 15 Plus','iPhone 15',
@@ -918,9 +914,7 @@ TELEFON_VERITABANI = {
         'iPhone 13 Pro Max','iPhone 13 Pro','iPhone 13 mini','iPhone 13',
         'iPhone 12 Pro Max','iPhone 12 Pro','iPhone 12 mini','iPhone 12',
         'iPhone 11 Pro Max','iPhone 11 Pro','iPhone 11',
-        'iPhone XS Max','iPhone XS','iPhone XR','iPhone X',
-        'iPhone 8 Plus','iPhone 8','iPhone 7 Plus','iPhone 7',
-        'iPhone 6s Plus','iPhone 6s','iPhone SE (2022)','iPhone SE (2020)',
+        'iPhone SE (2022)','iPhone SE (2020)',
     ]},
     'xia': {'ad': 'Xiaomi', 'emoji': '📱', 'modeller': [
         # Xiaomi Ana Serisi
@@ -1055,17 +1049,15 @@ TELEFON_VERITABANI = {
     ]},
     'nok': {'ad': 'Nokia / Motorola', 'emoji': '📱', 'modeller': [
         # Nokia
-        'Nokia G42 5G','Nokia G21','Nokia G60 5G','Nokia G400 5G','Nokia G310 5G',
-        'Nokia X30 5G','Nokia XR21','Nokia C32','Nokia C22','Nokia C12',
-        'Nokia 3310 (2017)','Nokia 8110 4G',
+        'Nokia G42 5G','Nokia G60 5G','Nokia G400 5G','Nokia G310 5G',
+        'Nokia X30 5G','Nokia XR21','Nokia C32','Nokia C22',
         # Motorola
         'Motorola Edge 50 Ultra','Motorola Edge 50 Pro','Motorola Edge 50 Fusion','Motorola Edge 50',
         'Motorola Edge 40 Neo','Motorola Edge 40 Pro','Motorola Edge 40',
         'Motorola Edge 30 Ultra','Motorola Edge 30 Pro','Motorola Edge 30',
         'Motorola Moto G85 5G','Motorola Moto G84 5G','Motorola Moto G73 5G',
         'Motorola Moto G54 5G','Motorola Moto G34 5G','Motorola Moto G24',
-        'Motorola Moto G14','Motorola Moto G13','Motorola Moto G62 5G',
-        'Motorola Moto G52','Motorola Moto G32',
+        'Motorola Moto G14','Motorola Moto G62 5G',
     ]},
     'gam': {'ad': 'Gaming Telefonlar 🎮', 'emoji': '🎮', 'modeller': [
         'ASUS ROG Phone 8 Pro','ASUS ROG Phone 8','ASUS ROG Phone 7 Pro','ASUS ROG Phone 7 Ultimate',
@@ -1177,6 +1169,111 @@ TELEFON_FPS_DB = {
     'Nubia RedMagic 9 Pro': {'pubg': ('Ultra HD', '90 FPS'), 'cod': ('Maksimum', '120 FPS'), 'genshin': ('En Yüksek 60FPS', '60 FPS'), 'ff': ('Ultra', '90 FPS')},
 }
 
+# ─────────────────────────────────────────────────────────────
+# 💰 GÜRCİSTAN TELEFON FİYAT VERİTABANI (₾ GEL) — Zoommer.ge / Alta.ge / MyMarket.ge
+# ─────────────────────────────────────────────────────────────
+FIYAT_GE_DB = {
+    # Samsung Galaxy S Serisi
+    'Samsung Galaxy S24 Ultra': '3 899 ₾', 'Samsung Galaxy S24+': '3 199 ₾', 'Samsung Galaxy S24': '2 599 ₾', 'Samsung Galaxy S24 FE': '1 899 ₾',
+    'Samsung Galaxy S23 Ultra': '3 199 ₾', 'Samsung Galaxy S23+': '2 499 ₾', 'Samsung Galaxy S23': '1 999 ₾', 'Samsung Galaxy S23 FE': '1 499 ₾',
+    'Samsung Galaxy S22 Ultra': '2 499 ₾', 'Samsung Galaxy S22+': '1 999 ₾', 'Samsung Galaxy S22': '1 599 ₾',
+    'Samsung Galaxy S21 Ultra': '1 899 ₾', 'Samsung Galaxy S21+': '1 499 ₾', 'Samsung Galaxy S21': '1 199 ₾', 'Samsung Galaxy S21 FE': '899 ₾',
+    'Samsung Galaxy S20 Ultra': '1 399 ₾', 'Samsung Galaxy S20+': '1 099 ₾', 'Samsung Galaxy S20': '899 ₾', 'Samsung Galaxy S20 FE': '749 ₾',
+    'Samsung Galaxy S10+': '799 ₾', 'Samsung Galaxy S10': '699 ₾', 'Samsung Galaxy S10e': '599 ₾', 'Samsung Galaxy S10 5G': '849 ₾',
+    # Samsung Galaxy Note
+    'Samsung Galaxy Note 20 Ultra': '1 799 ₾', 'Samsung Galaxy Note 20': '1 299 ₾',
+    'Samsung Galaxy Note 10+': '1 099 ₾', 'Samsung Galaxy Note 10': '899 ₾', 'Samsung Galaxy Note 10 Lite': '699 ₾',
+    # Samsung Galaxy Z
+    'Samsung Galaxy Z Fold 6': '5 999 ₾', 'Samsung Galaxy Z Fold 5': '4 999 ₾', 'Samsung Galaxy Z Fold 4': '3 999 ₾', 'Samsung Galaxy Z Fold 3': '2 999 ₾',
+    'Samsung Galaxy Z Flip 6': '3 499 ₾', 'Samsung Galaxy Z Flip 5': '2 799 ₾', 'Samsung Galaxy Z Flip 4': '2 199 ₾', 'Samsung Galaxy Z Flip 3': '1 699 ₾',
+    # Samsung Galaxy A
+    'Samsung Galaxy A55 5G': '1 299 ₾', 'Samsung Galaxy A54 5G': '1 099 ₾', 'Samsung Galaxy A53 5G': '899 ₾', 'Samsung Galaxy A52s 5G': '799 ₾', 'Samsung Galaxy A52': '699 ₾',
+    'Samsung Galaxy A35 5G': '999 ₾', 'Samsung Galaxy A34 5G': '849 ₾', 'Samsung Galaxy A33 5G': '749 ₾', 'Samsung Galaxy A32': '599 ₾', 'Samsung Galaxy A32 5G': '649 ₾',
+    'Samsung Galaxy A25 5G': '749 ₾', 'Samsung Galaxy A24': '599 ₾', 'Samsung Galaxy A23 5G': '649 ₾', 'Samsung Galaxy A23': '549 ₾', 'Samsung Galaxy A22 5G': '549 ₾', 'Samsung Galaxy A22': '499 ₾',
+    'Samsung Galaxy A15 5G': '549 ₾', 'Samsung Galaxy A15': '499 ₾', 'Samsung Galaxy A14 5G': '499 ₾', 'Samsung Galaxy A14': '449 ₾', 'Samsung Galaxy A13': '399 ₾', 'Samsung Galaxy A13 5G': '449 ₾',
+    'Samsung Galaxy A05s': '379 ₾', 'Samsung Galaxy A05': '349 ₾', 'Samsung Galaxy A04s': '299 ₾',
+    # Samsung Galaxy M
+    'Samsung Galaxy M54 5G': '999 ₾', 'Samsung Galaxy M53 5G': '849 ₾', 'Samsung Galaxy M34 5G': '749 ₾', 'Samsung Galaxy M33 5G': '649 ₾', 'Samsung Galaxy M14 5G': '499 ₾',
+    # iPhone
+    'iPhone 15 Pro Max': '4 299 ₾', 'iPhone 15 Pro': '3 699 ₾', 'iPhone 15 Plus': '3 199 ₾', 'iPhone 15': '2 699 ₾',
+    'iPhone 14 Pro Max': '3 699 ₾', 'iPhone 14 Pro': '3 199 ₾', 'iPhone 14 Plus': '2 699 ₾', 'iPhone 14': '2 299 ₾',
+    'iPhone 13 Pro Max': '2 999 ₾', 'iPhone 13 Pro': '2 499 ₾', 'iPhone 13 mini': '1 599 ₾', 'iPhone 13': '1 899 ₾',
+    'iPhone 12 Pro Max': '2 199 ₾', 'iPhone 12 Pro': '1 899 ₾', 'iPhone 12 mini': '1 299 ₾', 'iPhone 12': '1 499 ₾',
+    'iPhone 11 Pro Max': '1 699 ₾', 'iPhone 11 Pro': '1 399 ₾', 'iPhone 11': '1 099 ₾',
+    'iPhone SE (2022)': '999 ₾', 'iPhone SE (2020)': '799 ₾',
+    # Xiaomi
+    'Xiaomi 14 Ultra': '3 499 ₾', 'Xiaomi 14 Pro': '2 899 ₾', 'Xiaomi 14': '2 299 ₾',
+    'Xiaomi 13 Ultra': '2 799 ₾', 'Xiaomi 13 Pro': '2 299 ₾', 'Xiaomi 13': '1 899 ₾', 'Xiaomi 13T Pro': '1 799 ₾', 'Xiaomi 13T': '1 499 ₾',
+    'Xiaomi 12 Pro': '1 799 ₾', 'Xiaomi 12': '1 499 ₾', 'Xiaomi 12T Pro': '1 599 ₾', 'Xiaomi 12T': '1 299 ₾',
+    'Xiaomi 11 Ultra': '1 699 ₾', 'Xiaomi 11 Pro': '1 399 ₾', 'Xiaomi 11': '1 099 ₾', 'Xiaomi 11T Pro': '1 199 ₾', 'Xiaomi 11T': '999 ₾',
+    # Redmi Note
+    'Redmi Note 13 Pro+ 5G': '1 099 ₾', 'Redmi Note 13 Pro 5G': '899 ₾', 'Redmi Note 13 5G': '749 ₾', 'Redmi Note 13': '649 ₾',
+    'Redmi Note 12 Pro+ 5G': '949 ₾', 'Redmi Note 12 Pro 5G': '799 ₾', 'Redmi Note 12 5G': '649 ₾', 'Redmi Note 12': '549 ₾', 'Redmi Note 12s': '599 ₾',
+    'Redmi Note 11 Pro+ 5G': '799 ₾', 'Redmi Note 11 Pro': '649 ₾', 'Redmi Note 11S': '499 ₾', 'Redmi Note 11': '449 ₾', 'Redmi Note 11 5G': '499 ₾',
+    'Redmi Note 10 Pro': '549 ₾', 'Redmi Note 10': '399 ₾', 'Redmi Note 10s': '449 ₾', 'Redmi Note 10 5G': '449 ₾',
+    # Redmi
+    'Redmi 13C 5G': '499 ₾', 'Redmi 13C': '399 ₾', 'Redmi 13': '449 ₾', 'Redmi 12C': '349 ₾', 'Redmi 12': '449 ₾', 'Redmi 12 5G': '499 ₾',
+    'Redmi 10C': '329 ₾', 'Redmi 10': '379 ₾', 'Redmi A3': '299 ₾', 'Redmi A2+': '279 ₾', 'Redmi A2': '249 ₾',
+    # POCO
+    'POCO X6 Pro 5G': '999 ₾', 'POCO X6 5G': '849 ₾', 'POCO X5 Pro 5G': '799 ₾', 'POCO X5 5G': '649 ₾',
+    'POCO X4 Pro 5G': '699 ₾', 'POCO X3 Pro': '549 ₾', 'POCO X3 NFC': '449 ₾',
+    'POCO F6 Pro': '1 499 ₾', 'POCO F6 5G': '1 299 ₾', 'POCO F5 Pro 5G': '1 199 ₾', 'POCO F5 5G': '999 ₾', 'POCO F4 GT': '999 ₾', 'POCO F4 5G': '849 ₾', 'POCO F3': '699 ₾',
+    'POCO M6 Pro 5G': '649 ₾', 'POCO M5s': '449 ₾', 'POCO M5': '399 ₾', 'POCO M4 Pro 5G': '549 ₾', 'POCO M4 Pro': '499 ₾',
+    'POCO C65': '349 ₾', 'POCO C55': '299 ₾',
+    # Google Pixel
+    'Pixel 9 Pro XL': '3 799 ₾', 'Pixel 9 Pro': '3 299 ₾', 'Pixel 9': '2 799 ₾', 'Pixel 9 Pro Fold': '5 499 ₾',
+    'Pixel 8 Pro': '2 999 ₾', 'Pixel 8': '2 299 ₾', 'Pixel 8a': '1 799 ₾',
+    'Pixel 7 Pro': '2 199 ₾', 'Pixel 7': '1 699 ₾', 'Pixel 7a': '1 399 ₾',
+    'Pixel 6 Pro': '1 599 ₾', 'Pixel 6': '1 199 ₾', 'Pixel 6a': '899 ₾',
+    # OnePlus
+    'OnePlus 12R': '1 999 ₾', 'OnePlus 12': '2 499 ₾', 'OnePlus 11 5G': '1 999 ₾', 'OnePlus 10 Pro': '1 699 ₾', 'OnePlus 10T 5G': '1 499 ₾',
+    'OnePlus Nord 4 5G': '1 299 ₾', 'OnePlus Nord 3 5G': '1 099 ₾', 'OnePlus Nord 2T 5G': '849 ₾',
+    'OnePlus Nord CE 4': '999 ₾', 'OnePlus Nord CE 3 Lite 5G': '699 ₾', 'OnePlus Nord CE 3 5G': '849 ₾',
+    # Vivo
+    'Vivo X100 Ultra': '3 299 ₾', 'Vivo X100 Pro': '2 799 ₾', 'Vivo X100': '2 299 ₾',
+    'Vivo V30 Pro': '1 499 ₾', 'Vivo V30': '1 199 ₾', 'Vivo V29 Pro': '1 299 ₾', 'Vivo V29': '999 ₾',
+    'Vivo V27 Pro': '1 099 ₾', 'Vivo V27': '849 ₾', 'Vivo Y200 Pro 5G': '799 ₾', 'Vivo Y200 5G': '699 ₾',
+    # OPPO / Realme
+    'OPPO Find X7 Ultra': '3 499 ₾', 'OPPO Find X7 Pro': '2 899 ₾', 'OPPO Reno 12 Pro': '1 499 ₾', 'OPPO Reno 12': '1 199 ₾',
+    'Realme GT 6 Pro': '1 799 ₾', 'Realme GT 6': '1 499 ₾', 'Realme GT 5 Pro': '1 499 ₾',
+    'Realme 12 Pro+': '1 199 ₾', 'Realme 12 Pro': '999 ₾', 'Realme 12': '799 ₾',
+    'Realme 11 Pro+ 5G': '1 099 ₾', 'Realme 11 Pro': '849 ₾', 'Realme 11': '649 ₾',
+    'Realme C65 5G': '499 ₾', 'Realme C55': '449 ₾', 'Realme C53': '399 ₾',
+    # Tecno
+    'Tecno Camon 30 Premier 5G': '1 199 ₾', 'Tecno Camon 30 Pro 5G': '999 ₾', 'Tecno Camon 30 5G': '799 ₾', 'Tecno Camon 30': '649 ₾',
+    'Tecno Camon 20 Premier 5G': '999 ₾', 'Tecno Camon 20 Pro 5G': '799 ₾', 'Tecno Camon 20': '549 ₾',
+    'Tecno Spark 20 Pro+': '599 ₾', 'Tecno Spark 20 Pro': '499 ₾', 'Tecno Spark 20': '399 ₾',
+    'Tecno Pova 6 Pro 5G': '799 ₾', 'Tecno Pova 6 5G': '649 ₾',
+    # Honor
+    'Honor Magic6 Pro': '2 299 ₾', 'Honor Magic6': '1 799 ₾', 'Honor Magic6 Lite': '999 ₾',
+    'Honor Magic5 Pro': '1 999 ₾', 'Honor Magic5 Lite': '799 ₾',
+    'Honor 200 Pro': '1 799 ₾', 'Honor 200': '1 399 ₾', 'Honor 200 Lite': '849 ₾',
+    'Honor 90 Pro': '1 299 ₾', 'Honor 90': '999 ₾', 'Honor 90 Lite': '649 ₾',
+    'Honor X9b 5G': '849 ₾', 'Honor X8b': '699 ₾', 'Honor X7b': '549 ₾',
+    # Infinix
+    'Infinix Zero 40 5G': '899 ₾', 'Infinix Zero 40': '749 ₾', 'Infinix Zero 30 5G': '799 ₾', 'Infinix Zero 30': '649 ₾',
+    'Infinix Note 40 Pro+ 5G': '849 ₾', 'Infinix Note 40 Pro 5G': '699 ₾', 'Infinix Note 40 Pro': '599 ₾', 'Infinix Note 40': '499 ₾',
+    'Infinix Note 30 Pro 5G': '749 ₾', 'Infinix Note 30 5G': '599 ₾', 'Infinix Note 30': '449 ₾',
+    'Infinix Hot 40 Pro': '499 ₾', 'Infinix Hot 40': '399 ₾', 'Infinix Hot 40i': '349 ₾',
+    'Infinix GT 20 Pro': '749 ₾', 'Infinix GT 10 Pro': '599 ₾',
+    # Huawei
+    'Huawei Mate 60 Pro+': '3 299 ₾', 'Huawei Mate 60 Pro': '2 799 ₾', 'Huawei Mate 60': '2 299 ₾',
+    'Huawei Mate 50 Pro': '2 199 ₾', 'Huawei Mate 50': '1 699 ₾',
+    'Huawei P60 Pro': '2 099 ₾', 'Huawei P60': '1 699 ₾',
+    'Huawei P50 Pro': '1 799 ₾', 'Huawei P50': '1 399 ₾', 'Huawei P50 Pocket': '1 999 ₾',
+    'Huawei Nova 12 Pro': '1 299 ₾', 'Huawei Nova 12': '999 ₾', 'Huawei Nova 11 Pro': '1 099 ₾', 'Huawei Nova 11': '849 ₾',
+    # Gaming
+    'ASUS ROG Phone 8 Pro': '3 799 ₾', 'ASUS ROG Phone 8': '3 199 ₾', 'ASUS ROG Phone 7 Pro': '2 799 ₾', 'ASUS ROG Phone 7': '2 299 ₾',
+    'Nubia RedMagic 9 Pro+': '2 999 ₾', 'Nubia RedMagic 9 Pro': '2 499 ₾', 'Nubia RedMagic 8 Pro': '1 999 ₾',
+    # Motorola
+    'Motorola Edge 50 Ultra': '2 299 ₾', 'Motorola Edge 50 Pro': '1 799 ₾', 'Motorola Edge 50 Fusion': '1 299 ₾', 'Motorola Edge 50': '1 099 ₾',
+    'Motorola Edge 40 Pro': '1 599 ₾', 'Motorola Edge 40': '1 099 ₾',
+    'Motorola Moto G85 5G': '749 ₾', 'Motorola Moto G84 5G': '649 ₾', 'Motorola Moto G54 5G': '549 ₾', 'Motorola Moto G34 5G': '449 ₾',
+    # Sony
+    'Sony Xperia 1 VI': '3 199 ₾', 'Sony Xperia 1 V': '2 699 ₾', 'Sony Xperia 5 V': '2 199 ₾', 'Sony Xperia 5 IV': '1 699 ₾',
+    'Sony Xperia 10 VI': '1 299 ₾', 'Sony Xperia 10 V': '999 ₾',
+}
+
 async def _tfn_sayfa_goster(query, context, mid: str, sayfa: int):
     """Marka model listesini sayfalı gösterir (8/sayfa)."""
     if mid not in TELEFON_VERITABANI:
@@ -1216,74 +1313,29 @@ async def _tfn_sayfa_goster(query, context, mid: str, sayfa: int):
     )
 
 
-async def zoommer_fiyat_getir(telefon_adi: str) -> str:
-    """Zoommer.ge'den telefon güncel fiyatını çeker."""
-    try:
-        sorgu = urllib.parse.quote(telefon_adi)
-        url = f"https://zoommer.ge/search?q={sorgu}"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'ka-GE,ka;q=0.9,en;q=0.8',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        }
-        resp = await asyncio.to_thread(
-            lambda: http_requests.get(url, headers=headers, timeout=15, allow_redirects=True)
-        )
-        text = resp.text
-
-        # JSON-LD üzerinden fiyat ara
-        json_lds = re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', text, re.DOTALL)
-        for jl in json_lds:
-            try:
-                data = json.loads(jl.strip())
-                if isinstance(data, list):
-                    data = data[0]
-                offers = data.get('offers') or data.get('Offers') or {}
-                if isinstance(offers, list):
-                    offers = offers[0]
-                price = offers.get('price') or offers.get('lowPrice')
-                currency = offers.get('priceCurrency', 'GEL')
-                if price:
-                    return f"💰 **{price} {currency}** _(Zoommer.ge)_"
-            except Exception:
-                pass
-
-        # __NEXT_DATA__ içinde ara
-        nd_match = re.search(r'id="__NEXT_DATA__"[^>]*>(.*?)</script>', text, re.DOTALL)
-        if nd_match:
-            try:
-                ndata = json.loads(nd_match.group(1))
-                page_props = ndata.get('props', {}).get('pageProps', {})
-                products = (page_props.get('products') or page_props.get('items') or
-                           page_props.get('data', {}).get('products', []))
-                if products and len(products) > 0:
-                    p = products[0]
-                    price = p.get('price') or p.get('salePrice') or p.get('currentPrice')
-                    if price:
-                        return f"💰 **{price} ₾** _(Zoommer.ge)_"
-            except Exception:
-                pass
-
-        # Genel fiyat regex
-        fiyat_esles = re.findall(r'(\d{2,5}(?:[.,]\d{1,2})?)\s*(?:₾|GEL|ლარი)', text)
-        if fiyat_esles:
-            # En makul fiyatı seç (100-10000 arası)
-            for f in fiyat_esles:
-                try:
-                    f_num = float(f.replace(',', '.'))
-                    if 50 <= f_num <= 15000:
-                        return f"💰 **{f} ₾** _(Zoommer.ge)_"
-                except Exception:
-                    pass
-
-        return f"💰 **Fiyat bilgisi alınamadı** — [Zoommer.ge'de ara](https://zoommer.ge/search?q={sorgu})"
-    except Exception as e:
-        logger.debug(f"Zoommer scrape hatası: {e}")
-        sorgu = urllib.parse.quote(telefon_adi)
-        return f"💰 **Bağlantı hatası** — [Zoommer.ge'de ara](https://zoommer.ge/search?q={sorgu})"
+def fiyat_getir(telefon_adi: str, marka_adi: str = '') -> str:
+    """Gürcistan telefon fiyat veritabanından fiyat getirir."""
+    # Direkt arama
+    if telefon_adi in FIYAT_GE_DB:
+        return f"💰 **{FIYAT_GE_DB[telefon_adi]}** _(Gürcistan piyasası)_"
+    # Marka adıyla birleşik arama
+    tam = f"{marka_adi} {telefon_adi}".strip()
+    if tam in FIYAT_GE_DB:
+        return f"💰 **{FIYAT_GE_DB[tam]}** _(Gürcistan piyasası)_"
+    # Kısmi eşleşme
+    for k, v in FIYAT_GE_DB.items():
+        if telefon_adi.lower() in k.lower() or k.lower() in telefon_adi.lower():
+            return f"💰 **{v}** _(Gürcistan piyasası — yaklaşık)_"
+    sorgu = urllib.parse.quote(telefon_adi)
+    return (
+        f"💰 **Fiyat bilgisi mevcut değil**\n"
+        f"🔍 [Zoommer.ge]({f'https://zoommer.ge/search?q={sorgu}'}) · "
+        f"[Alta.ge]({f'https://alta.ge/search?term={sorgu}'}) · "
+        f"[MyMarket.ge]({f'https://www.mymarket.ge/en/search/?query={sorgu}'})"
+    )
 
 
-async def log_kanali_gonder(bot, update, ek_bilgi: str = ""):
+async def log_kanali_gonder(bot, update, ek_bilgi: str = "", kategori: str = "", komut: str = ""):
     try:
         user = update.effective_user
         msg = update.effective_message
@@ -1291,7 +1343,6 @@ async def log_kanali_gonder(bot, update, ek_bilgi: str = ""):
             return
         ad = html.escape(user.full_name or "—")
         uid = user.id
-        # İsim her zaman tıklanabilir mavi link olarak gösterilir
         tiklanabilir_ad = f'<a href="tg://user?id={uid}">{ad}</a>'
         if user.username:
             kullanici_bilgi = f'@{html.escape(user.username)}'
@@ -1305,9 +1356,13 @@ async def log_kanali_gonder(bot, update, ek_bilgi: str = ""):
             f"🆔 <b>ID:</b> <code>{uid}</code>\n"
             f"📱 <b>Kullanıcı:</b> {kullanici_bilgi}\n"
         )
+        if kategori:
+            log_metin += f"🗂️ <b>Kategori:</b> {html.escape(kategori)}\n"
+        if komut:
+            log_metin += f"⚡ <b>Komut:</b> {html.escape(komut)}\n"
         if ek_bilgi:
             log_metin += f"📝 <b>Bilgi:</b> {html.escape(str(ek_bilgi)[:500])}\n"
-        if msg.text:
+        if msg.text and not komut:
             log_metin += f"💬 <b>Mesaj:</b> {html.escape(msg.text[:300])}\n"
         log_metin += f"⏰ <b>Zaman:</b> {zaman}"
         await bot.send_message(LOG_KANAL_ID, log_metin, parse_mode='HTML', disable_web_page_preview=True)
@@ -3536,6 +3591,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['durum'] = 'admin_mesaj_bekliyor'
         await query.edit_message_text(strings['ask_admin_msg'], parse_mode='Markdown')
     elif query.data == 'menu_fun':
+        context.user_data['mevcut_kategori'] = '🎮 Eğlence'
         fun_klavye = [
             [InlineKeyboardButton(strings['btn_roll_dice'], callback_data='roll_dice'),
              InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
@@ -3550,6 +3606,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'menu_ip_sorgu':
+        context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › IP Sorgu'
         ip_klavye = [
             [
                 InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
@@ -3562,6 +3619,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(ip_klavye), parse_mode='Markdown'
         )
     elif query.data == 'menu_azr_special':
+        context.user_data['mevcut_kategori'] = '⭐ AZR Özel'
         azr_klavye = [
             [InlineKeyboardButton(strings['btn_stats'], callback_data='show_inline_stats')],
             [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
@@ -3576,7 +3634,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🤖 **AZRxGUARD — BOT BİLGİSİ**\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"📛 **Bot Adı:** AZRxGUARD\n"
-            f"👑 **Kurucu / Owner:** @maqa\\_01 *(MAQA)*\n"
+            f"👑 **Kurucu / Owner:** MAQA\n"
             f"📅 **Kuruluş Tarihi:** Ocak 2024\n"
             f"⚡ **Versiyon:** 2.0 *(Büyük Güncelleme)*\n"
             f"🌍 **Desteklenen Diller:** 🇹🇷 TR · 🇦🇿 AZ · 🇷🇺 RU · 🇬🇧 EN · 🇩🇪 DE · 🇬🇪 KA\n\n"
@@ -3587,7 +3645,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"✅ 🎬 Video Editör — 10 güçlü efekt\n"
             f"✅ 🛡️ Siber Güvenlik — IP Analiz, TG Panel, Hunter\n"
             f"✅ ⚡ PRO Araçlar — Hesap, Hash, Hava, Döviz vb.\n"
-            f"✅ 📱 Telefon Fiyatları — 22 marka, Zoommer.ge\n"
+            f"✅ 📱 Telefon Fiyatları — 100+ model, ₾ GEL (Gürcistan Pazarı)\n"
             f"✅ 🎮 Eğlence — Zar, TKM, Sayı Tahmin\n"
             f"✅ 🌍 6 Dil Desteği\n"
             f"✅ 📝 Not Defteri & Hatırlatıcı\n"
@@ -3603,10 +3661,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'show_inline_stats':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='📊 İstatistikler')
         rapor_metni = istatistik_raporu_hazirla(context)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=rapor_metni, reply_markup=geri_klavye, parse_mode='Markdown')
     elif query.data == 'show_meid':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='📲 Cihaz Bilgisi (MEID)')
         bilgi = await meid_bilgisi_olustur(context.bot, update, context, lang)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_azr_special')]])
         await query.edit_message_text(text=bilgi, reply_markup=geri_klavye, parse_mode='Markdown')
@@ -3620,6 +3682,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'menu_ip':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🌐 IP Sorgulama')
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
         context.user_data['durum'] = 'ip_bekliyor'
         await query.edit_message_text(
@@ -3627,6 +3691,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'menu_ip_analiz':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🛡️ IP Güvenlik Analizi')
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
         context.user_data['durum'] = 'ip_analiz_bekliyor'
         await query.edit_message_text(
@@ -3634,9 +3700,13 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'roll_dice':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🎲 Zar At')
         await query.message.delete()
         await query.message.chat.send_dice(emoji='🎲')
     elif query.data == 'menu_panel':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔍 TG Paneli')
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
         context.user_data['durum'] = 'panel_sorgu_bekliyor'
         await query.edit_message_text(
@@ -3655,6 +3725,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'menu_siber_guvenlik':
+        context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik'
         siber_klavye = [
             [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
              InlineKeyboardButton(strings.get('btn_panel', '🔍 TG PANELİ'), callback_data='menu_panel')],
@@ -3668,6 +3739,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'siber_sifre_guc':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔐 Şifre Güç Testi')
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
         context.user_data['durum'] = 'sifre_guc_bekliyor'
         await query.edit_message_text(
@@ -3677,6 +3750,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=geri, parse_mode='Markdown'
         )
     elif query.data == 'oyun_tkmk':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='✊ Taş-Kağıt-Makas')
         klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🪨 Taş", callback_data='tkmk_tas'),
              InlineKeyboardButton("📄 Kağıt", callback_data='tkmk_kagit'),
@@ -3712,6 +3787,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=klavye, parse_mode='Markdown'
         )
     elif query.data == 'oyun_sayi_baslat':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔢 Sayı Tahmin Oyunu')
         import random
         gizli = random.randint(1, 100)
         context.user_data['sayi_oyun'] = {'gizli': gizli, 'deneme': 0}
@@ -3732,6 +3809,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'menu_pro_araclar':
+        context.user_data['mevcut_kategori'] = '⚡ Pro Araçlar'
         pro_klavye = [
             [InlineKeyboardButton(strings.get('btn_hesap_arac', '🧮 Hesap Makinesi'), callback_data='pro_hesap'),
              InlineKeyboardButton(strings.get('btn_hash_arac', '🔐 Hash Üretici'), callback_data='pro_hash')],
@@ -3752,14 +3830,20 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_hesap':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🧮 Hesap Makinesi')
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         context.user_data['durum'] = 'hesap_bekliyor'
         await query.edit_message_text(strings.get('hesap_ask', '🧮 Matematik ifadesi girin:'), reply_markup=geri, parse_mode='Markdown')
     elif query.data == 'pro_hash':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔐 Hash Üretici')
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         context.user_data['durum'] = 'hash_bekliyor'
         await query.edit_message_text(strings.get('hash_ask', '🔐 Hashlenecek metni girin:'), reply_markup=geri, parse_mode='Markdown')
     elif query.data == 'pro_hava':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🌍 Hava Durumu')
         await query.edit_message_text(
             strings.get('hava_ulke_sec', '🌍 Ülke seçin:'),
             reply_markup=ulke_klavyesi('menu_pro_araclar'),
@@ -3857,6 +3941,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_doviz':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='💱 Döviz Kuru')
         await query.edit_message_text(
             strings.get('doviz_from_sec', '💱 Kaynak döviz seçin:'),
             reply_markup=doviz_from_klavyesi(),
@@ -3883,16 +3969,22 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode='Markdown'
             )
     elif query.data == 'pro_saat':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🕐 Dünya Saati')
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Yenile", callback_data='pro_saat')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ])
         await query.edit_message_text(dunya_saati(lang), reply_markup=geri, parse_mode='Markdown')
     elif query.data == 'pro_b64':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔒 Base64 Encode/Decode')
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         context.user_data['durum'] = 'b64_bekliyor'
         await query.edit_message_text(strings.get('b64_ask', '🔒 encode metin / decode bWV0aW4='), reply_markup=geri, parse_mode='Markdown')
     elif query.data == 'pro_sifre':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔑 Şifre Üretici')
         sifre_klavye = [
             [InlineKeyboardButton("8 karakter", callback_data='sifre_8'),
              InlineKeyboardButton("12 karakter", callback_data='sifre_12'),
@@ -3928,6 +4020,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_wiki':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🌐 Wikipedia Arama')
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         context.user_data['durum'] = 'wiki_bekliyor'
         await query.edit_message_text(
@@ -3938,6 +4032,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_not':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='📝 Not Defteri')
         context.user_data['durum'] = None
         notlar = not_yukle(user_id)
         not_klavye_geri = [[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]]
@@ -4050,6 +4146,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     elif query.data == 'pro_sans':
+        kat = context.user_data.pop('mevcut_kategori', '') or ''
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🎱 Şans Topu')
         await query.edit_message_text(
             sans_cevap_getir(),
             reply_markup=InlineKeyboardMarkup([
@@ -4060,6 +4158,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     elif query.data == 'menu_video_olusturucu':
+        context.user_data['mevcut_kategori'] = '🎬 Video Oluşturucu'
         vo_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🎬 Yazı Ekle", callback_data='vyo_baslat'),
              InlineKeyboardButton("✂️ Video Kırp", callback_data='ved_kirp_baslat')],
@@ -4513,6 +4612,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 📱 TELEFON FİYATLARI KATEGORİSİ
     # ─────────────────────────────────────────────────────────────
     elif query.data == 'menu_telefon_fiyatlari':
+        context.user_data['mevcut_kategori'] = '📱 Telefon Fiyatları'
         satir = []
         markalar = list(TELEFON_VERITABANI.items())
         for i in range(0, len(markalar), 2):
@@ -4568,11 +4668,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         telefon_adi = liste[idx]
         marka_adi = TELEFON_VERITABANI.get(mid, {}).get('ad', '')
         tam_ad = f"{marka_adi} {telefon_adi}" if not telefon_adi.lower().startswith(marka_adi.lower().split()[0].lower()) else telefon_adi
-        bekle_msg = await query.edit_message_text(
-            f"⏳ **{html.escape(tam_ad)}**\n\nFiyat ve özellikler yükleniyor...",
-            parse_mode='Markdown'
-        )
-        fiyat_str = await zoommer_fiyat_getir(tam_ad)
+        fiyat_str = fiyat_getir(tam_ad, marka_adi)
         specs = TELEFON_SPECS_DB.get(tam_ad) or TELEFON_SPECS_DB.get(telefon_adi)
         fps_data = TELEFON_FPS_DB.get(tam_ad) or TELEFON_FPS_DB.get(telefon_adi)
 
@@ -4622,12 +4718,13 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')],
         ])
         try:
-            await bekle_msg.edit_text(metin, reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
+            await query.edit_message_text(metin, reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
         except Exception:
-            await bekle_msg.edit_text(metin[:4096], reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
+            await query.edit_message_text(metin[:4096], reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
 
     elif query.data == 'go_home':
         context.user_data['durum'] = None
+        context.user_data['mevcut_kategori'] = None
         fid = get_font(context, user_id)
         metin = ft(LANG_DATA[lang]['welcome'], context, user_id)
         klavye = ana_menu_klavye(lang, fid)
