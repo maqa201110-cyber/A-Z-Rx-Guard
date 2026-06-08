@@ -4782,6 +4782,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not'),
              InlineKeyboardButton(strings.get('btn_gunsozu_arac', '💡 Günün Sözü'), callback_data='pro_gunsozu')],
             [InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çevir'), callback_data='pro_birim')],
+            [InlineKeyboardButton("── 🆕 2.0 ARAÇLAR ──", callback_data='noop')],
+            [InlineKeyboardButton("🏓 Ping", callback_data='pro20_ping'),
+             InlineKeyboardButton("🎨 Renk Çevir", callback_data='pro20_renk')],
+            [InlineKeyboardButton("📊 Metin Analiz", callback_data='pro20_metin'),
+             InlineKeyboardButton("🎲 Rastgele", callback_data='pro20_rastgele')],
+            [InlineKeyboardButton("🔠 Şifrele", callback_data='pro20_sifrele'),
+             InlineKeyboardButton("💪 BMI", callback_data='pro20_bmi'),
+             InlineKeyboardButton("💯 Yüzde", callback_data='pro20_yuzde')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -5105,6 +5113,133 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]),
             parse_mode='Markdown'
         )
+    # ── 🆕 AZRxGUARD 2.0 ARAÇLAR ──────────────────────────────
+    elif query.data == 'noop':
+        await query.answer()
+        return
+    elif query.data == 'pro20_ping':
+        await query.answer("🏓 Ölçülüyor...", show_alert=False)
+        import time as _time
+        t = _time.time()
+        gecikme = (_time.time() - t) * 1000
+        await query.edit_message_text(
+            f"🏓 **Pong!**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"⚡ **Gecikme:** `{gecikme:.1f} ms`\n"
+            f"🟢 **Bot Durumu:** Aktif & Çalışıyor\n"
+            f"🕐 **Saat (TR):** `{datetime.datetime.now(TR_SAAT).strftime('%H:%M:%S')}`\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n_AZRxGUARD 2.0_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro20_renk':
+        context.user_data['durum'] = 'renk_bekliyor'
+        await query.edit_message_text(
+            "🎨 **RENK DÖNÜŞTÜRÜCÜ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Renk girin:\n\n"
+            "• **HEX:** `#FF5733`\n"
+            "• **RGB:** `255 87 51` _(3 sayı boşlukla)_\n\n"
+            "_Çıkmak için /iptal yazın_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_pro_araclar')]]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro20_metin':
+        context.user_data['durum'] = 'metin_analiz_bekliyor'
+        await query.edit_message_text(
+            "📊 **METİN ANALİZÖRÜ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Analiz etmek istediğiniz metni yazın:\n\n"
+            "_Çıkmak için /iptal yazın_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_pro_araclar')]]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro20_rastgele':
+        await query.edit_message_text(
+            "🎲 **RASTGELE ARAÇLAR**\n━━━━━━━━━━━━━━━━━━━━━━\n\nNe yapmak istersiniz?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔢 Sayı Üret (1–100)", callback_data='r20_sayi'),
+                 InlineKeyboardButton("🪙 Para Yüzü", callback_data='r20_para')],
+                [InlineKeyboardButton("🎲 Zar At (d6)", callback_data='r20_zar6'),
+                 InlineKeyboardButton("🎲 Zar At (d20)", callback_data='r20_zar20')],
+                [InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'r20_sayi':
+        sonuc = random.randint(1, 100)
+        await query.edit_message_text(
+            f"🔢 **RASTGELE SAYI (1–100)**\n━━━━━━━━━━━━━━━━━━━━━━\n\n🎯 **Sonuç: `{sonuc}`**",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tekrar", callback_data='r20_sayi'),
+                 InlineKeyboardButton("⬅️ Geri", callback_data='pro20_rastgele')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'r20_para':
+        sonuc = random.choice(['🟡 **YAZI**', '🔵 **TURA**'])
+        await query.edit_message_text(
+            f"🪙 **PARA ATIŞI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n💫 **Sonuç: {sonuc}**",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tekrar", callback_data='r20_para'),
+                 InlineKeyboardButton("⬅️ Geri", callback_data='pro20_rastgele')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'r20_zar6':
+        sonuc = random.randint(1, 6)
+        await query.edit_message_text(
+            f"🎲 **ZAR ATIŞI (d6)**\n━━━━━━━━━━━━━━━━━━━━━━\n\n🎯 **Sonuç: `{sonuc}`**",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tekrar", callback_data='r20_zar6'),
+                 InlineKeyboardButton("⬅️ Geri", callback_data='pro20_rastgele')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'r20_zar20':
+        sonuc = random.randint(1, 20)
+        await query.edit_message_text(
+            f"🎲 **ZAR ATIŞI (d20)**\n━━━━━━━━━━━━━━━━━━━━━━\n\n🎯 **Sonuç: `{sonuc}`**",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tekrar", callback_data='r20_zar20'),
+                 InlineKeyboardButton("⬅️ Geri", callback_data='pro20_rastgele')]
+            ]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro20_sifrele':
+        context.user_data['durum'] = 'sifrele_bekliyor'
+        await query.edit_message_text(
+            "🔠 **ŞİFRELEME ARAÇLARI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Şifreleme türü ve metni girin:\n\n"
+            "• `rot13 Merhaba` — ROT-13\n"
+            "• `ters Merhaba` — Ters çevir\n"
+            "• `morse SOS` — Morse kodu\n"
+            "• `caesar 3 Merhaba` — Caesar (kaydırma)\n\n"
+            "_Çıkmak için /iptal yazın_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_pro_araclar')]]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro20_bmi':
+        context.user_data['durum'] = 'bmi_bekliyor'
+        await query.edit_message_text(
+            "💪 **BMI HESAPLAYICI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Boy (cm) ve kiloyu (kg) boşlukla girin:\n\n"
+            "Örnek: `175 70`\n\n"
+            "_Çıkmak için /iptal yazın_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_pro_araclar')]]),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'pro20_yuzde':
+        context.user_data['durum'] = 'yuzde_bekliyor'
+        await query.edit_message_text(
+            "💯 **YÜZDE HESAPLAYICI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Hesaplamak istediğiniz işlemi girin:\n\n"
+            "• `%20 500` — 500'ün %20'si\n"
+            "• `75 150` — 75, 150'nin %kaçı?\n"
+            "• `artis 200 250` — % artış\n"
+            "• `azalis 300 240` — % azalış\n\n"
+            "_Çıkmak için /iptal yazın_",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_pro_araclar')]]),
+            parse_mode='Markdown'
+        )
+    # ── END 2.0 ARAÇLAR ────────────────────────────────────────
     elif query.data == 'pro_sans':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🎱 Şans Topu')
@@ -6013,6 +6148,226 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
                 f"{ipucu}\n🎯 {deneme}. deneme · {kalan} hak kaldı"
             )
         return
+
+    # ── 🆕 2.0 ARAÇLAR — GİRİŞ HANDLER'LARI ─────────────────
+    if context.user_data.get('durum') == 'renk_bekliyor':
+        context.user_data['durum'] = None
+        girdi = update.message.text.strip()
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("🎨 Tekrar", callback_data='pro20_renk'),
+                                       InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]])
+        r = g = b = None
+        hex_str = None
+        parcalar = girdi.split()
+        if girdi.startswith('#') or (len(girdi.lstrip('#')) in (3, 6) and all(c in '0123456789abcdefABCDEF' for c in girdi.lstrip('#'))):
+            res = _hex_to_rgb(girdi)
+            if res:
+                r, g, b = res
+                h_raw = girdi.lstrip('#').upper()
+                hex_str = ''.join(c*2 for c in h_raw) if len(h_raw) == 3 else h_raw
+        elif len(parcalar) == 3:
+            try:
+                r, g, b = int(parcalar[0]), int(parcalar[1]), int(parcalar[2])
+                if not all(0 <= x <= 255 for x in (r, g, b)): raise ValueError
+                hex_str = f"{r:02X}{g:02X}{b:02X}"
+            except ValueError:
+                await update.message.reply_text("❌ RGB değerleri 0-255 arasında olmalı!", reply_markup=geri, parse_mode='Markdown')
+                return
+        if r is None:
+            await update.message.reply_text("❌ Geçersiz format!\nÖrnek: `#FF5733` veya `255 87 51`", reply_markup=geri, parse_mode='Markdown')
+            return
+        h, s, lv = _rgb_to_hsl(r, g, b)
+        if   r > 180 and g < 100 and b < 100: ton = "🔴 Kırmızı tonu"
+        elif r < 100 and g > 150 and b < 100: ton = "🟢 Yeşil tonu"
+        elif r < 100 and g < 100 and b > 150: ton = "🔵 Mavi tonu"
+        elif r > 200 and g > 200 and b < 80:  ton = "🟡 Sarı tonu"
+        elif r > 200 and g > 100 and b < 80:  ton = "🟠 Turuncu tonu"
+        elif r > 100 and g < 80  and b > 150: ton = "🟣 Mor tonu"
+        elif r > 200 and g > 200 and b > 200: ton = "⬜ Beyaz / Açık"
+        elif r < 60  and g < 60  and b < 60:  ton = "⬛ Siyah / Koyu"
+        else: ton = "🎨 Karma renk"
+        await update.message.reply_text(
+            f"🎨 **RENK ANALİZİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🔷 **HEX:** `#{hex_str}`\n"
+            f"🔴🟢🔵 **RGB:** `rgb({r}, {g}, {b})`\n"
+            f"🌈 **HSL:** `hsl({h}°, {s}%, {lv}%)`\n\n"
+            f"🎯 **Renk Tonu:** {ton}",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+        return
+
+    if context.user_data.get('durum') == 'metin_analiz_bekliyor':
+        context.user_data['durum'] = None
+        metin = update.message.text.strip()
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("📊 Tekrar", callback_data='pro20_metin'),
+                                       InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]])
+        kelimeler   = metin.split()
+        satir_sayi  = len(metin.splitlines())
+        karakter    = len(metin)
+        bosluksuz   = len(metin.replace(' ', '').replace('\n', ''))
+        kelime_sayi = len(kelimeler)
+        freq = {}
+        for k in kelimeler:
+            k2 = k.lower().strip('.,!?;:()[]{}"\'-')
+            if len(k2) > 2: freq[k2] = freq.get(k2, 0) + 1
+        en_sik = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:5]
+        en_sik_str = '\n'.join(f"  `{k}` → {v}x" for k, v in en_sik) if en_sik else "  —"
+        ort_uzunluk = sum(len(k) for k in kelimeler) / max(kelime_sayi, 1)
+        okuma_sn = (kelime_sayi / 200) * 60
+        okuma_str = f"{int(okuma_sn)} saniye" if okuma_sn < 60 else f"{okuma_sn/60:.1f} dakika"
+        await update.message.reply_text(
+            f"📊 **METİN ANALİZİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🔤 **Karakter:** `{karakter}` (boşluksuz: `{bosluksuz}`)\n"
+            f"📝 **Kelime:** `{kelime_sayi}`\n"
+            f"📄 **Satır:** `{satir_sayi}`\n"
+            f"📏 **Ort. Kelime Uzunluğu:** `{ort_uzunluk:.1f}`\n"
+            f"⏱️ **Tahmini Okuma:** `{okuma_str}`\n\n"
+            f"🔝 **En Sık Kelimeler:**\n{en_sik_str}",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+        return
+
+    if context.user_data.get('durum') == 'sifrele_bekliyor':
+        context.user_data['durum'] = None
+        girdi = update.message.text.strip()
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("🔠 Tekrar", callback_data='pro20_sifrele'),
+                                       InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]])
+        parcalar = girdi.split(None, 2)
+        mod = parcalar[0].lower() if parcalar else ''
+        if mod == 'rot13':
+            metin = ' '.join(parcalar[1:]) if len(parcalar) > 1 else ''
+            if not metin:
+                await update.message.reply_text("❌ Metin eksik! Örnek: `rot13 Merhaba`", reply_markup=geri, parse_mode='Markdown')
+                return
+            await update.message.reply_text(
+                f"🔄 **ROT-13**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📥 **Giriş:** `{html.escape(metin)}`\n"
+                f"📤 **ROT-13:** `{html.escape(_caesar(metin, 13))}`",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        elif mod == 'ters':
+            metin = ' '.join(parcalar[1:]) if len(parcalar) > 1 else ''
+            if not metin:
+                await update.message.reply_text("❌ Metin eksik! Örnek: `ters Merhaba`", reply_markup=geri, parse_mode='Markdown')
+                return
+            await update.message.reply_text(
+                f"🔃 **METİN TERSİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📥 **Giriş:** `{html.escape(metin)}`\n"
+                f"📤 **Ters:** `{html.escape(metin[::-1])}`",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        elif mod == 'morse':
+            metin = ' '.join(parcalar[1:]).upper() if len(parcalar) > 1 else ''
+            if not metin:
+                await update.message.reply_text("❌ Metin eksik! Örnek: `morse SOS`", reply_markup=geri, parse_mode='Markdown')
+                return
+            morse = ' '.join(_MORSE.get(c, '?') for c in metin)
+            await update.message.reply_text(
+                f"📡 **MORSE KODU**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📥 **Giriş:** `{html.escape(metin)}`\n"
+                f"📤 **Morse:**\n`{morse}`",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        elif mod == 'caesar':
+            try:
+                n = int(parcalar[1])
+                metin = parcalar[2] if len(parcalar) > 2 else ''
+                if not metin: raise ValueError
+                await update.message.reply_text(
+                    f"🔠 **CAESAR ŞİFRE**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📥 **Giriş:** `{html.escape(metin)}`\n"
+                    f"🔢 **Kaydırma:** `{n}`\n\n"
+                    f"🔒 **Şifreli:** `{html.escape(_caesar(metin, n))}`\n"
+                    f"🔓 **Çözülmüş:** `{html.escape(_caesar(metin, -n))}`",
+                    reply_markup=geri, parse_mode='Markdown'
+                )
+            except Exception:
+                await update.message.reply_text("❌ Format: `caesar 3 Merhaba`", reply_markup=geri, parse_mode='Markdown')
+        else:
+            await update.message.reply_text(
+                "❌ Tanınmayan mod!\n`rot13` · `ters` · `morse` · `caesar`",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        return
+
+    if context.user_data.get('durum') == 'bmi_bekliyor':
+        context.user_data['durum'] = None
+        girdi = update.message.text.strip().split()
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("💪 Tekrar", callback_data='pro20_bmi'),
+                                       InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]])
+        try:
+            boy, kilo = float(girdi[0]), float(girdi[1])
+            if not (50 <= boy <= 300 and 10 <= kilo <= 500): raise ValueError
+            boy_m = boy / 100
+            bmi = kilo / (boy_m ** 2)
+            if   bmi < 18.5: durum_bmi = "🔵 Zayıf";       tavsiye = "Daha fazla kalori ve güç antrenmanı önerilir."
+            elif bmi < 25:   durum_bmi = "🟢 Normal";       tavsiye = "Harika! Mevcut yaşam tarzını sürdür."
+            elif bmi < 30:   durum_bmi = "🟡 Fazla Kilolu"; tavsiye = "Hafif egzersiz ve dengeli beslenme önerilir."
+            elif bmi < 35:   durum_bmi = "🟠 Obez I";       tavsiye = "Düzenli egzersiz ve diyet programı önerilir."
+            else:             durum_bmi = "🔴 Obez II+";     tavsiye = "Bir sağlık uzmanıyla görüşmeniz önerilir."
+            ideal_alt = 18.5 * (boy_m ** 2)
+            ideal_ust = 24.9 * (boy_m ** 2)
+            await update.message.reply_text(
+                f"💪 **BMI ANALİZİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📏 **Boy:** `{boy} cm`  |  ⚖️ **Kilo:** `{kilo} kg`\n"
+                f"📊 **BMI:** **`{bmi:.1f}`**\n\n"
+                f"🏷️ **Durum:** {durum_bmi}\n"
+                f"💡 **Tavsiye:** _{tavsiye}_\n\n"
+                f"🎯 **İdeal Kilo:** `{ideal_alt:.1f} — {ideal_ust:.1f} kg`\n\n"
+                f"⚠️ _Yalnızca bilgilendirme amaçlıdır._",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        except (ValueError, IndexError):
+            await update.message.reply_text("❌ Format: `175 70` (boy cm · kilo kg)", reply_markup=geri, parse_mode='Markdown')
+        return
+
+    if context.user_data.get('durum') == 'yuzde_bekliyor':
+        context.user_data['durum'] = None
+        girdi = update.message.text.strip().split()
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton("💯 Tekrar", callback_data='pro20_yuzde'),
+                                       InlineKeyboardButton("⬅️ Geri", callback_data='menu_pro_araclar')]])
+        try:
+            mod = girdi[0].lower()
+            if mod in ('artis', 'artış'):
+                a, b = float(girdi[1]), float(girdi[2])
+                oran = ((b - a) / a) * 100
+                emoji = "📈" if oran >= 0 else "📉"
+                await update.message.reply_text(
+                    f"💯 **YÜZDE DEĞİŞİM**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"🔢 `{a}` → `{b}`\n{emoji} **Değişim:** `{oran:+.2f}%`",
+                    reply_markup=geri, parse_mode='Markdown'
+                )
+            elif mod in ('azalis', 'azalış'):
+                a, b = float(girdi[1]), float(girdi[2])
+                oran = ((a - b) / a) * 100
+                await update.message.reply_text(
+                    f"💯 **YÜZDE DEĞİŞİM**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"🔢 `{a}` → `{b}`\n📉 **Azalış:** `{oran:.2f}%`",
+                    reply_markup=geri, parse_mode='Markdown'
+                )
+            elif '%' in mod:
+                yv = float(mod.replace('%', ''))
+                sayi = float(girdi[1])
+                sonuc = (yv / 100) * sayi
+                await update.message.reply_text(
+                    f"💯 **YÜZDE HESABI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📥 `{sayi}`'nin `%{yv}`'i = **`{sonuc:.4g}`**",
+                    reply_markup=geri, parse_mode='Markdown'
+                )
+            else:
+                parca, toplam = float(girdi[0]), float(girdi[1])
+                oran = (parca / toplam) * 100
+                await update.message.reply_text(
+                    f"💯 **YÜZDE HESABI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📥 `{parca}`, `{toplam}`'nin → **`%{oran:.2f}`**",
+                    reply_markup=geri, parse_mode='Markdown'
+                )
+        except (ValueError, IndexError, ZeroDivisionError):
+            await update.message.reply_text(
+                "❌ Geçersiz format!\nÖrnek: `%20 500` · `75 150` · `artis 200 250`",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        return
+    # ── END 2.0 ARAÇLAR GİRİŞ HANDLER'LARI ───────────────────
 
     # ── ✂️ VİDEO EDİTÖR — METİN GİRİŞ HANDLERS ──────────────
     if context.user_data.get('durum') == 'ved_kirp_sure_bekle':
