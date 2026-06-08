@@ -59,8 +59,8 @@ KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
-TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))
-AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))
+TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
+AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
 FILIGRAN_METNI = (
     "__________________________________\n"
@@ -2270,14 +2270,21 @@ async def log_kanali_gonder(bot, update, ek_bilgi: str = "", kategori: str = "",
             rname = html.escape(r.from_user.full_name or "?") if r.from_user else "?"
             log_metin += f"↩️ <b>Yanıtladığı:</b> <a href='tg://user?id={ruid}'>{rname}</a> (msg: <code>{r.message_id}</code>)\n"
 
-        # İletilen mesaj bilgisi
-        if msg.forward_origin or msg.forward_from or msg.forward_from_chat:
-            ff = msg.forward_from
-            ffc = msg.forward_from_chat
-            if ff:
-                log_metin += f"🔁 <b>İletilen:</b> <a href='tg://user?id={ff.id}'>{html.escape(ff.full_name or '?')}</a>\n"
-            elif ffc:
-                log_metin += f"🔁 <b>İletilen Kanal:</b> {html.escape(ffc.title or '?')} (<code>{ffc.id}</code>)\n"
+        # İletilen mesaj bilgisi (PTB v22 — forward_origin kullanır)
+        if msg.forward_origin:
+            fo = msg.forward_origin
+            if hasattr(fo, 'sender_user') and fo.sender_user:
+                ff_id   = fo.sender_user.id
+                ff_name = html.escape(fo.sender_user.full_name or '?')
+                log_metin += f"🔁 <b>İletilen:</b> <a href='tg://user?id={ff_id}'>{ff_name}</a>\n"
+            elif hasattr(fo, 'sender_user_name') and fo.sender_user_name:
+                log_metin += f"🔁 <b>İletilen:</b> {html.escape(fo.sender_user_name)} (gizli kullanıcı)\n"
+            elif hasattr(fo, 'chat') and fo.chat:
+                log_metin += f"🔁 <b>İletilen Kanal:</b> {html.escape(fo.chat.title or '?')} (<code>{fo.chat.id}</code>)\n"
+            elif hasattr(fo, 'broadcaster_user') and fo.broadcaster_user:
+                ff_id   = fo.broadcaster_user.id
+                ff_name = html.escape(fo.broadcaster_user.full_name or '?')
+                log_metin += f"🔁 <b>İletilen Kanal:</b> <a href='tg://user?id={ff_id}'>{ff_name}</a>\n"
 
         # Medya tipi
         medya_tipler = []
@@ -4750,7 +4757,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=klavye, parse_mode='Markdown'
         )
     elif query.data in ('tkmk_tas', 'tkmk_kagit', 'tkmk_makas'):
-        import random
         secimler = {'tkmk_tas': '🪨 Taş', 'tkmk_kagit': '📄 Kağıt', 'tkmk_makas': '✂️ Makas'}
         kazanan = {'tkmk_tas': 'tkmk_makas', 'tkmk_kagit': 'tkmk_tas', 'tkmk_makas': 'tkmk_kagit'}
         kullanici = query.data
@@ -4776,7 +4782,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'oyun_sayi_baslat':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔢 Sayı Tahmin Oyunu')
-        import random
         gizli = random.randint(1, 100)
         context.user_data['sayi_oyun'] = {'gizli': gizli, 'deneme': 0}
         context.user_data['durum'] = 'sayi_tahmin_bekliyor'
@@ -7670,6 +7675,33 @@ def main():
             pass
 
     application.add_error_handler(error_handler)
+
+    # ── Bot başladığında gece modu durumunu düzelt ─────────────
+    async def baslangic_gece_modu_kontrol(app):
+        """Bot restart olduğunda grup kilidi kalmışsa anında açar."""
+        if not gece_modu_aktif_mi():
+            try:
+                await app.bot.set_chat_permissions(
+                    chat_id=ZAMANLI_KANAL_ID,
+                    permissions=ChatPermissions(
+                        can_send_messages=True, can_send_audios=True,
+                        can_send_documents=True, can_send_photos=True,
+                        can_send_videos=True, can_send_video_notes=True,
+                        can_send_voice_notes=True, can_send_polls=True,
+                        can_send_other_messages=True,
+                        can_add_web_page_previews=True,
+                        can_invite_users=True
+                    )
+                )
+                logger.info("Başlangıç: Gece modu değil — grup izinleri açıldı.")
+            except Exception as e:
+                logger.warning(f"Başlangıç gece modu kontrol hatası: {e}")
+        else:
+            logger.info("Başlangıç: Gece modu aktif — grup kilitli kalıyor.")
+
+    application.post_init = baslangic_gece_modu_kontrol
+    # ──────────────────────────────────────────────────────────
+
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
     application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"], drop_pending_updates=True)
 
