@@ -4482,6 +4482,33 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     strings = fs(context, user_id, lang)
     await query.answer()
 
+    # ── Her buton basışını logla ──────────────────────────────
+    _SESSIZ_CALLBACKLER = {'noop', 'go_home', 'bot_yazi_tipi', 'menu_lang', 'menu_bot_ayarlari'}
+    if query.data not in _SESSIZ_CALLBACKLER:
+        try:
+            # Callback verisinden okunabilir buton adı üret
+            _cb_etiket = {
+                'menu_fun': '🎮 Eğlence Menüsü', 'menu_admin': '👑 Admin', 'menu_siber_guvenlik': '🛡️ Siber Güvenlik',
+                'menu_azr_special': '⭐ AZR Özel', 'menu_pro_araclar': '⚡ Pro Araçlar',
+                'menu_video_olusturucu': '🎬 Video Editör', 'menu_telefon_fiyatlari': '📱 Telefon Fiyatları',
+                'menu_ip_sorgu': '🌐 IP Sorgu', 'menu_hatirlat': '⏰ Hatırlatıcı',
+                'pro_hesap': '🧮 Hesap Makinesi', 'pro_hash': '🔐 Hash Üretici',
+                'pro_hava': '🌍 Hava Durumu', 'pro_doviz': '💱 Döviz Kuru',
+                'pro_saat': '🕐 Dünya Saati', 'pro_b64': '🔒 Base64',
+                'pro_sifre': '🔑 Şifre Üretici', 'pro_wiki': '🌐 Wikipedia',
+                'pro_not': '📝 Not Defteri', 'pro_gunsozu': '💡 Günün Sözü',
+                'pro_birim': '📐 Birim Çevir', 'pro_sans': '🎱 Şans Topu',
+                'pro20_ping': '🏓 Ping', 'pro20_renk': '🎨 Renk Çevir',
+                'pro20_metin': '📊 Metin Analiz', 'pro20_rastgele': '🎲 Rastgele',
+                'pro20_sifrele': '🔠 Şifrele', 'pro20_bmi': '💪 BMI',
+                'pro20_yuzde': '💯 Yüzde', 'r20_sayi': '🔢 Rastgele Sayı',
+                'r20_para': '🪙 Para Yüzü', 'r20_zar6': '🎲 Zar d6', 'r20_zar20': '🎲 Zar d20',
+            }.get(query.data) or f"📲 {query.data}"
+            await log_kanali_gonder(context.bot, update, komut=_cb_etiket)
+        except Exception:
+            pass
+    # ─────────────────────────────────────────────────────────
+
     if not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
@@ -4782,7 +4809,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not'),
              InlineKeyboardButton(strings.get('btn_gunsozu_arac', '💡 Günün Sözü'), callback_data='pro_gunsozu')],
             [InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çevir'), callback_data='pro_birim')],
-            [InlineKeyboardButton("── 🆕 2.0 ARAÇLAR ──", callback_data='noop')],
             [InlineKeyboardButton("🏓 Ping", callback_data='pro20_ping'),
              InlineKeyboardButton("🎨 Renk Çevir", callback_data='pro20_renk')],
             [InlineKeyboardButton("📊 Metin Analiz", callback_data='pro20_metin'),
@@ -5114,9 +5140,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
     # ── 🆕 AZRxGUARD 2.0 ARAÇLAR ──────────────────────────────
-    elif query.data == 'noop':
-        await query.answer()
-        return
     elif query.data == 'pro20_ping':
         await query.answer("🏓 Ölçülüyor...", show_alert=False)
         import time as _time
