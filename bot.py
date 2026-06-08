@@ -26,10 +26,26 @@ def uyanik_tut():
     pass
 
 # --- LOG AYARLARI ---
+import logging.handlers as _log_handlers
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=logging.DEBUG
 )
+# Kalıcı dosya logu — tüm bilgiler, sınır yok
+_file_handler = _log_handlers.RotatingFileHandler(
+    'azrxguard.log', maxBytes=10 * 1024 * 1024, backupCount=5, encoding='utf-8'
+)
+_file_handler.setLevel(logging.DEBUG)
+_file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s | %(levelname)-8s | %(name)s | %(funcName)s:%(lineno)d | %(message)s'
+))
+logging.getLogger().addHandler(_file_handler)
+
+# 3. parti kütüphaneleri sadece WARNING ve üstü göstersin (konsol kirlenmesi önlenir)
+for _noisy in ('httpx', 'httpcore', 'telegram.ext', 'apscheduler'):
+    logging.getLogger(_noisy).setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 # --- AYARLAR ---
@@ -887,64 +903,115 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
 # ─────────────────────────────────────────────────────────────
 TELEFON_VERITABANI = {
     'sam': {'ad': 'Samsung', 'emoji': '📱', 'modeller': [
-        # Galaxy S Serisi
+        # Galaxy S25 Serisi (2025)
+        'Galaxy S25 Ultra','Galaxy S25+','Galaxy S25','Galaxy S25 Edge',
+        # Galaxy S24 Serisi
         'Galaxy S24 Ultra','Galaxy S24+','Galaxy S24','Galaxy S24 FE',
+        # Galaxy S23 Serisi
         'Galaxy S23 Ultra','Galaxy S23+','Galaxy S23','Galaxy S23 FE',
+        # Galaxy S22 Serisi
         'Galaxy S22 Ultra','Galaxy S22+','Galaxy S22',
+        # Galaxy S21 Serisi
         'Galaxy S21 Ultra','Galaxy S21+','Galaxy S21','Galaxy S21 FE',
+        # Galaxy S20 Serisi
         'Galaxy S20 Ultra','Galaxy S20+','Galaxy S20','Galaxy S20 FE',
+        # Galaxy S10 Serisi
         'Galaxy S10+','Galaxy S10','Galaxy S10e','Galaxy S10 5G',
         # Note Serisi
         'Galaxy Note 20 Ultra','Galaxy Note 20','Galaxy Note 10+','Galaxy Note 10','Galaxy Note 10 Lite',
         # Z Serisi (Katlanabilir)
         'Galaxy Z Fold 6','Galaxy Z Fold 5','Galaxy Z Fold 4','Galaxy Z Fold 3',
         'Galaxy Z Flip 6','Galaxy Z Flip 5','Galaxy Z Flip 4','Galaxy Z Flip 3',
+        # A Serisi (2025 — Yeni)
+        'Galaxy A56 5G','Galaxy A36 5G','Galaxy A26 5G','Galaxy A16 5G','Galaxy A06',
         # A Serisi
         'Galaxy A55 5G','Galaxy A54 5G','Galaxy A53 5G','Galaxy A52s 5G','Galaxy A52',
         'Galaxy A35 5G','Galaxy A34 5G','Galaxy A33 5G','Galaxy A32','Galaxy A32 5G',
         'Galaxy A25 5G','Galaxy A24','Galaxy A23 5G','Galaxy A23','Galaxy A22 5G','Galaxy A22',
         'Galaxy A15 5G','Galaxy A15','Galaxy A14 5G','Galaxy A14','Galaxy A13','Galaxy A13 5G',
-        'Galaxy A05s','Galaxy A05','Galaxy A04s',
+        'Galaxy A05s','Galaxy A05','Galaxy A04s','Galaxy A03s','Galaxy A03',
+        # F Serisi
+        'Galaxy F55 5G','Galaxy F35 5G','Galaxy F15 5G',
+        # M Serisi (2025)
+        'Galaxy M55 5G','Galaxy M35 5G',
         # M Serisi
         'Galaxy M54 5G','Galaxy M53 5G','Galaxy M34 5G','Galaxy M33 5G','Galaxy M14 5G',
     ]},
     'iph': {'ad': 'iPhone (Apple)', 'emoji': '🍎', 'modeller': [
+        # iPhone 16 Serisi (2024)
+        'iPhone 16 Pro Max','iPhone 16 Pro','iPhone 16 Plus','iPhone 16','iPhone 16e',
+        # iPhone 15 Serisi
         'iPhone 15 Pro Max','iPhone 15 Pro','iPhone 15 Plus','iPhone 15',
+        # iPhone 14 Serisi
         'iPhone 14 Pro Max','iPhone 14 Pro','iPhone 14 Plus','iPhone 14',
+        # iPhone 13 Serisi
         'iPhone 13 Pro Max','iPhone 13 Pro','iPhone 13 mini','iPhone 13',
+        # iPhone 12 Serisi
         'iPhone 12 Pro Max','iPhone 12 Pro','iPhone 12 mini','iPhone 12',
+        # iPhone 11 Serisi
         'iPhone 11 Pro Max','iPhone 11 Pro','iPhone 11',
+        # iPhone X Serisi
+        'iPhone XS Max','iPhone XS','iPhone XR','iPhone X',
+        # iPhone SE
         'iPhone SE (2022)','iPhone SE (2020)',
     ]},
     'xia': {'ad': 'Xiaomi', 'emoji': '📱', 'modeller': [
-        # Xiaomi Ana Serisi
-        'Xiaomi 14 Ultra','Xiaomi 14 Pro','Xiaomi 14',
+        # Xiaomi 15 Serisi (2025 — Yeni)
+        'Xiaomi 15 Ultra','Xiaomi 15 Pro','Xiaomi 15','Xiaomi 15 Ultra Manga',
+        # Xiaomi 14 Serisi
+        'Xiaomi 14 Ultra','Xiaomi 14 Pro','Xiaomi 14','Xiaomi 14T Pro','Xiaomi 14T','Xiaomi 14C',
+        # Xiaomi 13 Serisi
         'Xiaomi 13 Ultra','Xiaomi 13 Pro','Xiaomi 13','Xiaomi 13T Pro','Xiaomi 13T',
-        'Xiaomi 12 Pro','Xiaomi 12','Xiaomi 12T Pro','Xiaomi 12T',
-        'Xiaomi 11 Ultra','Xiaomi 11 Pro','Xiaomi 11','Xiaomi 11T Pro','Xiaomi 11T',
-        # Redmi Note Serisi
-        'Redmi Note 13 Pro+ 5G','Redmi Note 13 Pro 5G','Redmi Note 13 5G','Redmi Note 13',
-        'Redmi Note 12 Pro+ 5G','Redmi Note 12 Pro 5G','Redmi Note 12 5G','Redmi Note 12','Redmi Note 12s',
+        # Xiaomi 12 Serisi
+        'Xiaomi 12 Pro','Xiaomi 12','Xiaomi 12T Pro','Xiaomi 12T','Xiaomi 12 Lite',
+        # Xiaomi 11 Serisi
+        'Xiaomi 11 Ultra','Xiaomi 11 Pro','Xiaomi 11','Xiaomi 11T Pro','Xiaomi 11T','Xiaomi 11 Lite 5G NE',
+        # Redmi Note 14 Serisi (2025 — Yeni)
+        'Redmi Note 14 Pro+ 5G','Redmi Note 14 Pro 5G','Redmi Note 14 5G','Redmi Note 14','Redmi Note 14 Pro',
+        # Redmi Note 13 Serisi
+        'Redmi Note 13 Pro+ 5G','Redmi Note 13 Pro 5G','Redmi Note 13 5G','Redmi Note 13','Redmi Note 13 Pro',
+        # Redmi Note 12 Serisi
+        'Redmi Note 12 Pro+ 5G','Redmi Note 12 Pro 5G','Redmi Note 12 5G','Redmi Note 12','Redmi Note 12s','Redmi Note 12 Turbo',
+        # Redmi Note 11 Serisi
         'Redmi Note 11 Pro+ 5G','Redmi Note 11 Pro','Redmi Note 11S 5G','Redmi Note 11S','Redmi Note 11','Redmi Note 11 5G',
-        'Redmi Note 10 Pro','Redmi Note 10','Redmi Note 10s','Redmi Note 10 5G',
+        # Redmi Note 10 Serisi
+        'Redmi Note 10 Pro Max','Redmi Note 10 Pro','Redmi Note 10','Redmi Note 10s','Redmi Note 10 5G',
+        # Redmi Serisi (2025)
+        'Redmi 14C','Redmi 14 5G',
         # Redmi Serisi
         'Redmi 13C 5G','Redmi 13C','Redmi 13','Redmi 12C','Redmi 12','Redmi 12 5G',
         'Redmi 10C','Redmi 10','Redmi 10A','Redmi A3','Redmi A2+','Redmi A2','Redmi A1+',
         # Xiaomi Pad
-        'Xiaomi Pad 6 Pro','Xiaomi Pad 6',
+        'Xiaomi Pad 7 Pro','Xiaomi Pad 7','Xiaomi Pad 6 Pro','Xiaomi Pad 6',
     ]},
     'poc': {'ad': 'POCO', 'emoji': '📱', 'modeller': [
-        'POCO X6 Pro 5G','POCO X6 5G','POCO X5 Pro 5G','POCO X5 5G',
+        # POCO X7 Serisi (2025 — Yeni)
+        'POCO X7 Pro 5G','POCO X7 5G',
+        # POCO X6 Serisi
+        'POCO X6 Pro 5G','POCO X6 5G',
+        # POCO X5 Serisi
+        'POCO X5 Pro 5G','POCO X5 5G',
+        # POCO X4/X3 Serisi
         'POCO X4 Pro 5G','POCO X4 GT','POCO X3 Pro','POCO X3 GT','POCO X3 NFC','POCO X3',
+        # POCO F Serisi
         'POCO F6 Pro','POCO F6 5G','POCO F5 Pro 5G','POCO F5 5G','POCO F4 GT','POCO F4 5G','POCO F3','POCO F2 Pro',
+        # POCO M Serisi
         'POCO M6 Pro 5G','POCO M6 5G','POCO M5s','POCO M5','POCO M4 Pro 5G','POCO M4 Pro','POCO M4 5G','POCO M3 Pro 5G',
-        'POCO C65','POCO C55','POCO C51','POCO C40',
+        # POCO C Serisi
+        'POCO C75','POCO C65','POCO C55','POCO C51','POCO C40',
     ]},
     'gpx': {'ad': 'Google Pixel', 'emoji': '🔵', 'modeller': [
+        # Pixel 9 Serisi (2024)
         'Pixel 9 Pro XL','Pixel 9 Pro','Pixel 9','Pixel 9 Pro Fold',
+        # Pixel 9a (2025)
+        'Pixel 9a',
+        # Pixel 8 Serisi
         'Pixel 8 Pro','Pixel 8','Pixel 8a',
+        # Pixel 7 Serisi
         'Pixel 7 Pro','Pixel 7','Pixel 7a',
+        # Pixel 6 Serisi
         'Pixel 6 Pro','Pixel 6','Pixel 6a',
+        # Pixel 5 ve öncesi
         'Pixel 5','Pixel 5a 5G','Pixel 4a 5G','Pixel 4a',
         'Pixel 4 XL','Pixel 4',
     ]},
@@ -1022,13 +1089,23 @@ TELEFON_VERITABANI = {
         'Infinix Smart 8 Plus','Infinix Smart 8',
     ]},
     'one': {'ad': 'OnePlus', 'emoji': '📱', 'modeller': [
-        'OnePlus 12R','OnePlus 12','OnePlus 11R','OnePlus 11 5G',
+        # OnePlus 13 Serisi (2025 — Yeni)
+        'OnePlus 13','OnePlus 13R',
+        # OnePlus 12 Serisi
+        'OnePlus 12R','OnePlus 12',
+        # OnePlus 11 Serisi
+        'OnePlus 11R','OnePlus 11 5G',
+        # OnePlus 10 Serisi
         'OnePlus 10 Pro','OnePlus 10T 5G','OnePlus 10R',
+        # OnePlus 9 Serisi
         'OnePlus 9 Pro','OnePlus 9','OnePlus 9R',
+        # OnePlus 8 Serisi
         'OnePlus 8 Pro','OnePlus 8T','OnePlus 8',
-        'OnePlus Open',
+        # OnePlus Open (Katlanabilir)
+        'OnePlus Open','OnePlus Open 2',
+        # Nord Serisi
         'OnePlus Nord 4 5G','OnePlus Nord 3 5G','OnePlus Nord 2T 5G','OnePlus Nord 2 5G',
-        'OnePlus Nord CE 4','OnePlus Nord CE 3 Lite 5G','OnePlus Nord CE 3 5G',
+        'OnePlus Nord CE 4 Lite 5G','OnePlus Nord CE 4','OnePlus Nord CE 3 Lite 5G','OnePlus Nord CE 3 5G',
         'OnePlus Nord CE 2 Lite 5G','OnePlus Nord CE 2 5G',
         'OnePlus Nord N30 5G','OnePlus Nord N20 5G',
     ]},
@@ -1954,6 +2031,8 @@ TELEFON_FPS_DB = {
 # 💰 GÜRCİSTAN TELEFON FİYAT VERİTABANI (₾ GEL) — Zoommer.ge / Alta.ge / MyMarket.ge
 # ─────────────────────────────────────────────────────────────
 FIYAT_GE_DB = {
+    # Samsung Galaxy S25 Serisi (2025 — Yeni)
+    'Samsung Galaxy S25 Ultra': '4 499 ₾', 'Samsung Galaxy S25+': '3 499 ₾', 'Samsung Galaxy S25': '2 799 ₾', 'Samsung Galaxy S25 Edge': '3 799 ₾',
     # Samsung Galaxy S Serisi
     'Samsung Galaxy S24 Ultra': '3 899 ₾', 'Samsung Galaxy S24+': '3 199 ₾', 'Samsung Galaxy S24': '2 599 ₾', 'Samsung Galaxy S24 FE': '1 899 ₾',
     'Samsung Galaxy S23 Ultra': '3 199 ₾', 'Samsung Galaxy S23+': '2 499 ₾', 'Samsung Galaxy S23': '1 999 ₾', 'Samsung Galaxy S23 FE': '1 499 ₾',
@@ -1972,29 +2051,48 @@ FIYAT_GE_DB = {
     'Samsung Galaxy A35 5G': '999 ₾', 'Samsung Galaxy A34 5G': '849 ₾', 'Samsung Galaxy A33 5G': '749 ₾', 'Samsung Galaxy A32': '599 ₾', 'Samsung Galaxy A32 5G': '649 ₾',
     'Samsung Galaxy A25 5G': '749 ₾', 'Samsung Galaxy A24': '599 ₾', 'Samsung Galaxy A23 5G': '649 ₾', 'Samsung Galaxy A23': '549 ₾', 'Samsung Galaxy A22 5G': '549 ₾', 'Samsung Galaxy A22': '499 ₾',
     'Samsung Galaxy A15 5G': '549 ₾', 'Samsung Galaxy A15': '499 ₾', 'Samsung Galaxy A14 5G': '499 ₾', 'Samsung Galaxy A14': '449 ₾', 'Samsung Galaxy A13': '399 ₾', 'Samsung Galaxy A13 5G': '449 ₾',
-    'Samsung Galaxy A05s': '379 ₾', 'Samsung Galaxy A05': '349 ₾', 'Samsung Galaxy A04s': '299 ₾',
+    'Samsung Galaxy A05s': '379 ₾', 'Samsung Galaxy A05': '349 ₾', 'Samsung Galaxy A04s': '299 ₾', 'Samsung Galaxy A03s': '249 ₾', 'Samsung Galaxy A03': '229 ₾',
+    # Samsung Galaxy A Serisi (2025 — Yeni)
+    'Samsung Galaxy A56 5G': '1 399 ₾', 'Samsung Galaxy A36 5G': '1 099 ₾', 'Samsung Galaxy A26 5G': '849 ₾', 'Samsung Galaxy A16 5G': '599 ₾', 'Samsung Galaxy A06': '299 ₾',
+    # Samsung Galaxy F Serisi
+    'Samsung Galaxy F55 5G': '999 ₾', 'Samsung Galaxy F35 5G': '749 ₾', 'Samsung Galaxy F15 5G': '499 ₾',
+    # Samsung Galaxy M (2025)
+    'Samsung Galaxy M55 5G': '1 099 ₾', 'Samsung Galaxy M35 5G': '849 ₾',
     # Samsung Galaxy M
     'Samsung Galaxy M54 5G': '999 ₾', 'Samsung Galaxy M53 5G': '849 ₾', 'Samsung Galaxy M34 5G': '749 ₾', 'Samsung Galaxy M33 5G': '649 ₾', 'Samsung Galaxy M14 5G': '499 ₾',
+    # iPhone 16 Serisi (2024 — Yeni)
+    'iPhone 16 Pro Max': '4 999 ₾', 'iPhone 16 Pro': '4 399 ₾', 'iPhone 16 Plus': '3 699 ₾', 'iPhone 16': '3 199 ₾', 'iPhone 16e': '2 299 ₾',
     # iPhone
     'iPhone 15 Pro Max': '4 299 ₾', 'iPhone 15 Pro': '3 699 ₾', 'iPhone 15 Plus': '3 199 ₾', 'iPhone 15': '2 699 ₾',
     'iPhone 14 Pro Max': '3 699 ₾', 'iPhone 14 Pro': '3 199 ₾', 'iPhone 14 Plus': '2 699 ₾', 'iPhone 14': '2 299 ₾',
     'iPhone 13 Pro Max': '2 999 ₾', 'iPhone 13 Pro': '2 499 ₾', 'iPhone 13 mini': '1 599 ₾', 'iPhone 13': '1 899 ₾',
     'iPhone 12 Pro Max': '2 199 ₾', 'iPhone 12 Pro': '1 899 ₾', 'iPhone 12 mini': '1 299 ₾', 'iPhone 12': '1 499 ₾',
     'iPhone 11 Pro Max': '1 699 ₾', 'iPhone 11 Pro': '1 399 ₾', 'iPhone 11': '1 099 ₾',
+    'iPhone XS Max': '899 ₾', 'iPhone XS': '799 ₾', 'iPhone XR': '699 ₾', 'iPhone X': '599 ₾',
     'iPhone SE (2022)': '999 ₾', 'iPhone SE (2020)': '799 ₾',
+    # Xiaomi 15 Serisi (2025 — Yeni)
+    'Xiaomi 15 Ultra': '3 999 ₾', 'Xiaomi 15 Pro': '3 299 ₾', 'Xiaomi 15': '2 699 ₾',
     # Xiaomi
-    'Xiaomi 14 Ultra': '3 499 ₾', 'Xiaomi 14 Pro': '2 899 ₾', 'Xiaomi 14': '2 299 ₾',
+    'Xiaomi 14 Ultra': '3 499 ₾', 'Xiaomi 14 Pro': '2 899 ₾', 'Xiaomi 14': '2 299 ₾', 'Xiaomi 14T Pro': '2 099 ₾', 'Xiaomi 14T': '1 799 ₾', 'Xiaomi 14C': '849 ₾',
     'Xiaomi 13 Ultra': '2 799 ₾', 'Xiaomi 13 Pro': '2 299 ₾', 'Xiaomi 13': '1 899 ₾', 'Xiaomi 13T Pro': '1 799 ₾', 'Xiaomi 13T': '1 499 ₾',
     'Xiaomi 12 Pro': '1 799 ₾', 'Xiaomi 12': '1 499 ₾', 'Xiaomi 12T Pro': '1 599 ₾', 'Xiaomi 12T': '1 299 ₾',
     'Xiaomi 11 Ultra': '1 699 ₾', 'Xiaomi 11 Pro': '1 399 ₾', 'Xiaomi 11': '1 099 ₾', 'Xiaomi 11T Pro': '1 199 ₾', 'Xiaomi 11T': '999 ₾',
+    # Redmi Note 14 Serisi (2025 — Yeni)
+    'Redmi Note 14 Pro+ 5G': '1 199 ₾', 'Redmi Note 14 Pro 5G': '999 ₾', 'Redmi Note 14 Pro': '949 ₾', 'Redmi Note 14 5G': '799 ₾', 'Redmi Note 14': '699 ₾',
+    # Redmi Note 14C
+    'Redmi 14C': '449 ₾', 'Redmi 14 5G': '549 ₾',
     # Redmi Note
-    'Redmi Note 13 Pro+ 5G': '1 099 ₾', 'Redmi Note 13 Pro 5G': '899 ₾', 'Redmi Note 13 5G': '749 ₾', 'Redmi Note 13': '649 ₾',
+    'Redmi Note 13 Pro+ 5G': '1 099 ₾', 'Redmi Note 13 Pro 5G': '899 ₾', 'Redmi Note 13 5G': '749 ₾', 'Redmi Note 13': '649 ₾', 'Redmi Note 13 Pro': '849 ₾',
     'Redmi Note 12 Pro+ 5G': '949 ₾', 'Redmi Note 12 Pro 5G': '799 ₾', 'Redmi Note 12 5G': '649 ₾', 'Redmi Note 12': '549 ₾', 'Redmi Note 12s': '599 ₾',
     'Redmi Note 11 Pro+ 5G': '799 ₾', 'Redmi Note 11 Pro': '649 ₾', 'Redmi Note 11S': '499 ₾', 'Redmi Note 11': '449 ₾', 'Redmi Note 11 5G': '499 ₾',
     'Redmi Note 10 Pro': '549 ₾', 'Redmi Note 10': '399 ₾', 'Redmi Note 10s': '449 ₾', 'Redmi Note 10 5G': '449 ₾',
     # Redmi
     'Redmi 13C 5G': '499 ₾', 'Redmi 13C': '399 ₾', 'Redmi 13': '449 ₾', 'Redmi 12C': '349 ₾', 'Redmi 12': '449 ₾', 'Redmi 12 5G': '499 ₾',
     'Redmi 10C': '329 ₾', 'Redmi 10': '379 ₾', 'Redmi A3': '299 ₾', 'Redmi A2+': '279 ₾', 'Redmi A2': '249 ₾',
+    # POCO X7 Serisi (2025 — Yeni)
+    'POCO X7 Pro 5G': '1 199 ₾', 'POCO X7 5G': '999 ₾',
+    # POCO C75 (Yeni)
+    'POCO C75': '399 ₾',
     # POCO
     'POCO X6 Pro 5G': '999 ₾', 'POCO X6 5G': '849 ₾', 'POCO X5 Pro 5G': '799 ₾', 'POCO X5 5G': '649 ₾',
     'POCO X4 Pro 5G': '699 ₾', 'POCO X3 Pro': '549 ₾', 'POCO X3 NFC': '449 ₾',
@@ -2003,9 +2101,12 @@ FIYAT_GE_DB = {
     'POCO C65': '349 ₾', 'POCO C55': '299 ₾',
     # Google Pixel
     'Pixel 9 Pro XL': '3 799 ₾', 'Pixel 9 Pro': '3 299 ₾', 'Pixel 9': '2 799 ₾', 'Pixel 9 Pro Fold': '5 499 ₾',
+    'Pixel 9a': '1 999 ₾',
     'Pixel 8 Pro': '2 999 ₾', 'Pixel 8': '2 299 ₾', 'Pixel 8a': '1 799 ₾',
     'Pixel 7 Pro': '2 199 ₾', 'Pixel 7': '1 699 ₾', 'Pixel 7a': '1 399 ₾',
     'Pixel 6 Pro': '1 599 ₾', 'Pixel 6': '1 199 ₾', 'Pixel 6a': '899 ₾',
+    # OnePlus 13 Serisi (2025 — Yeni)
+    'OnePlus 13': '2 999 ₾', 'OnePlus 13R': '2 199 ₾',
     # OnePlus
     'OnePlus 12R': '1 999 ₾', 'OnePlus 12': '2 499 ₾', 'OnePlus 11 5G': '1 999 ₾', 'OnePlus 10 Pro': '1 699 ₾', 'OnePlus 10T 5G': '1 499 ₾',
     'OnePlus Nord 4 5G': '1 299 ₾', 'OnePlus Nord 3 5G': '1 099 ₾', 'OnePlus Nord 2T 5G': '849 ₾',
@@ -2119,41 +2220,119 @@ def fiyat_getir(telefon_adi: str, marka_adi: str = '') -> str:
 async def log_kanali_gonder(bot, update, ek_bilgi: str = "", kategori: str = "", komut: str = ""):
     try:
         user = update.effective_user
-        msg = update.effective_message
+        msg  = update.effective_message
+        chat = update.effective_chat
         if not user or not msg:
             return
-        ad = html.escape(user.full_name or "—")
-        uid = user.id
+
+        # ── Kullanıcı Bilgileri ──
+        ad   = html.escape(user.full_name or "—")
+        uid  = user.id
         tiklanabilir_ad = f'<a href="tg://user?id={uid}">{ad}</a>'
-        if user.username:
-            kullanici_bilgi = f'@{html.escape(user.username)}'
-        else:
-            kullanici_bilgi = f'<code>{uid}</code>'
-        zaman = datetime.datetime.now(TR_SAAT).strftime('%d.%m.%Y %H:%M:%S')
+        kullanici_bilgi = f'@{html.escape(user.username)}' if user.username else f'<code>{uid}</code>'
+        dil_kodu  = user.language_code or "—"
+        is_bot    = "🤖 Evet" if user.is_bot else "👤 Hayır"
+        is_premium = "💎 Evet" if getattr(user, 'is_premium', False) else "—"
+
+        # ── Sohbet / Chat Bilgileri ──
+        chat_id   = chat.id if chat else "—"
+        chat_tip  = chat.type if chat else "—"
+        chat_tip_emoji = {"private": "💬", "group": "👥", "supergroup": "👥", "channel": "📢"}.get(chat_tip, "❓")
+        chat_adi  = html.escape(chat.title or chat.full_name or "—") if chat else "—"
+
+        # ── Mesaj Meta ──
+        msg_id    = msg.message_id
+        zaman     = datetime.datetime.now(TR_SAAT).strftime('%d.%m.%Y %H:%M:%S')
+
+        # ── Log Metni ──
         log_metin = (
-            f"🔔 <b>YENİ AKTİVİTE</b>\n"
+            f"🔔 <b>YENİ AKTİVİTE — AZRxGUARD</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━━\n"
             f"👤 <b>Ad:</b> {tiklanabilir_ad}\n"
             f"🆔 <b>ID:</b> <code>{uid}</code>\n"
             f"📱 <b>Kullanıcı:</b> {kullanici_bilgi}\n"
+            f"🌐 <b>Dil:</b> <code>{dil_kodu}</code>  |  🤖 Bot: {is_bot}  |  💎 Premium: {is_premium}\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"{chat_tip_emoji} <b>Sohbet:</b> {chat_adi}\n"
+            f"🏠 <b>Chat ID:</b> <code>{chat_id}</code>  |  <b>Tip:</b> {chat_tip}\n"
+            f"📩 <b>Mesaj ID:</b> <code>{msg_id}</code>\n"
         )
+
         if kategori:
-            log_metin += f"🗂️ <b>Kategori:</b> {html.escape(kategori)}\n"
+            log_metin += f"🗂️ <b>Kategori:</b> {html.escape(str(kategori))}\n"
         if komut:
-            log_metin += f"⚡ <b>Komut:</b> {html.escape(komut)}\n"
+            log_metin += f"⚡ <b>Komut:</b> <code>{html.escape(str(komut))}</code>\n"
+
+        # Alıntı / Yanıtlanan mesaj
+        if msg.reply_to_message:
+            r = msg.reply_to_message
+            ruid = r.from_user.id if r.from_user else "?"
+            rname = html.escape(r.from_user.full_name or "?") if r.from_user else "?"
+            log_metin += f"↩️ <b>Yanıtladığı:</b> <a href='tg://user?id={ruid}'>{rname}</a> (msg: <code>{r.message_id}</code>)\n"
+
+        # İletilen mesaj bilgisi
+        if msg.forward_origin or msg.forward_from or msg.forward_from_chat:
+            ff = msg.forward_from
+            ffc = msg.forward_from_chat
+            if ff:
+                log_metin += f"🔁 <b>İletilen:</b> <a href='tg://user?id={ff.id}'>{html.escape(ff.full_name or '?')}</a>\n"
+            elif ffc:
+                log_metin += f"🔁 <b>İletilen Kanal:</b> {html.escape(ffc.title or '?')} (<code>{ffc.id}</code>)\n"
+
+        # Medya tipi
+        medya_tipler = []
+        if msg.photo: medya_tipler.append("📷 Fotoğraf")
+        if msg.video: medya_tipler.append("🎬 Video")
+        if msg.document: medya_tipler.append(f"📄 Dosya ({html.escape(msg.document.file_name or '?')})")
+        if msg.voice: medya_tipler.append("🎙️ Ses Notu")
+        if msg.audio: medya_tipler.append("🎵 Ses")
+        if msg.sticker: medya_tipler.append(f"🎭 Sticker ({msg.sticker.emoji or '?'})")
+        if msg.animation: medya_tipler.append("🖼️ GIF")
+        if msg.video_note: medya_tipler.append("📹 Video Not")
+        if msg.location: medya_tipler.append("📍 Konum")
+        if msg.contact: medya_tipler.append("👤 Kişi")
+        if msg.poll: medya_tipler.append("📊 Anket")
+        if medya_tipler:
+            log_metin += f"📦 <b>Medya:</b> {', '.join(medya_tipler)}\n"
+
+        # Mesaj içeriği — sınırsız
         if ek_bilgi:
-            log_metin += f"📝 <b>Bilgi:</b> {html.escape(str(ek_bilgi)[:500])}\n"
+            ek_str = html.escape(str(ek_bilgi))
+            # Telegram mesaj limiti 4096, büyük içerikleri böl
+            log_metin += f"📝 <b>Bilgi:</b> {ek_str[:3800]}\n"
+            if len(ek_str) > 3800:
+                log_metin += f"   <i>... ({len(ek_str)} karakter toplam)</i>\n"
         if msg.text and not komut:
-            log_metin += f"💬 <b>Mesaj:</b> {html.escape(msg.text[:300])}\n"
+            metin_str = html.escape(msg.text)
+            log_metin += f"💬 <b>Mesaj ({len(msg.text)} kr):</b> {metin_str[:3000]}\n"
+            if len(msg.text) > 3000:
+                log_metin += f"   <i>... ({len(msg.text)} karakter toplam, kesildi)</i>\n"
+        if msg.caption:
+            log_metin += f"📝 <b>Açıklama:</b> {html.escape(msg.caption[:1000])}\n"
+
         log_metin += f"⏰ <b>Zaman:</b> {zaman}"
+
+        # Log kanalına gönder (Telegram 4096 karakter limiti)
+        if len(log_metin) > 4096:
+            log_metin = log_metin[:4090] + "\n[...]"
         await bot.send_message(LOG_KANAL_ID, log_metin, parse_mode='HTML', disable_web_page_preview=True)
+
+        # Medya içeren mesajları ilet
         if msg.photo or msg.video or msg.document or msg.voice or msg.audio or msg.sticker or msg.animation or msg.video_note:
             try:
                 await bot.forward_message(LOG_KANAL_ID, msg.chat_id, msg.message_id)
             except Exception:
                 pass
+
+        # Dosya logu — tam içerik sınırsız
+        logger.debug(
+            f"LOG | uid={uid} | chat={chat_id} | tip={chat_tip} | "
+            f"komut={komut or '—'} | kategori={kategori or '—'} | "
+            f"bilgi={str(ek_bilgi)[:200] if ek_bilgi else '—'}"
+        )
+
     except Exception as e:
-        logger.debug(f"Log kanalı hatası: {e}")
+        logger.warning(f"Log kanalı hatası: {e}")
 
 
 # --- 🔍 TG PANELİ — GELİŞMİŞ KULLANICI/GRUP/KANAL SORGU FONKSİYONU ---
@@ -6640,6 +6819,395 @@ async def ai_sifirla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ══════════════════════════════════════════════════════
+# 🆕 AZRxGUARD 2.0 — YENİ KOMUTLAR
+# ══════════════════════════════════════════════════════
+
+# --- 🏓 PING ---
+async def ping_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    baslangic = datetime.datetime.now()
+    msg = await update.message.reply_text("🏓 Ölçülüyor...")
+    gecikme = (datetime.datetime.now() - baslangic).total_seconds() * 1000
+    await msg.edit_text(
+        f"🏓 **Pong!**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"⚡ **Gecikme:** `{gecikme:.1f} ms`\n"
+        f"🟢 **Bot Durumu:** Aktif & Çalışıyor\n"
+        f"🕐 **Saat (TR):** `{datetime.datetime.now(TR_SAAT).strftime('%H:%M:%S')}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"_AZRxGUARD 2.0_",
+        parse_mode='Markdown'
+    )
+
+# --- 🎨 RENK DÖNÜŞTÜRÜCÜ ---
+def _hex_to_rgb(hex_str: str):
+    hex_str = hex_str.lstrip('#')
+    if len(hex_str) == 3:
+        hex_str = ''.join(c*2 for c in hex_str)
+    if len(hex_str) != 6:
+        return None
+    try:
+        return int(hex_str[0:2], 16), int(hex_str[2:4], 16), int(hex_str[4:6], 16)
+    except ValueError:
+        return None
+
+def _rgb_to_hsl(r, g, b):
+    r, g, b = r/255, g/255, b/255
+    cmax, cmin = max(r, g, b), min(r, g, b)
+    delta = cmax - cmin
+    l = (cmax + cmin) / 2
+    if delta == 0:
+        h = s = 0.0
+    else:
+        s = delta / (1 - abs(2*l - 1))
+        if cmax == r:   h = 60 * (((g - b) / delta) % 6)
+        elif cmax == g: h = 60 * ((b - r) / delta + 2)
+        else:           h = 60 * ((r - g) / delta + 4)
+    return round(h), round(s*100), round(l*100)
+
+async def renk_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "🎨 **Renk Dönüştürücü**\n\n"
+            "**Kullanım:**\n"
+            "`/renk #FF5733` — HEX → RGB + HSL\n"
+            "`/renk 255 87 51` — RGB → HEX + HSL\n\n"
+            "**Örnek:** `/renk #1a2b3c` veya `/renk 255 0 128`",
+            parse_mode='Markdown'
+        )
+        return
+    girdi = ' '.join(context.args).strip()
+    r = g = b = None
+    hex_str = None
+    if girdi.startswith('#') or (len(girdi.lstrip('#')) in (3, 6) and all(c in '0123456789abcdefABCDEF' for c in girdi.lstrip('#'))):
+        res = _hex_to_rgb(girdi)
+        if res:
+            r, g, b = res
+            h_raw = girdi.lstrip('#').upper()
+            hex_str = ''.join(c*2 for c in h_raw) if len(h_raw) == 3 else h_raw
+    elif len(context.args) == 3:
+        try:
+            r, g, b = int(context.args[0]), int(context.args[1]), int(context.args[2])
+            if not all(0 <= x <= 255 for x in (r, g, b)):
+                raise ValueError
+            hex_str = f"{r:02X}{g:02X}{b:02X}"
+        except ValueError:
+            await update.message.reply_text("❌ RGB değerleri 0-255 arasında olmalı!", parse_mode='Markdown')
+            return
+    if r is None:
+        await update.message.reply_text("❌ Geçersiz format!\n`/renk #FF5733` veya `/renk 255 87 51`", parse_mode='Markdown')
+        return
+    h, s, lv = _rgb_to_hsl(r, g, b)
+    if   r > 180 and g < 100 and b < 100: ton = "🔴 Kırmızı tonu"
+    elif r < 100 and g > 150 and b < 100: ton = "🟢 Yeşil tonu"
+    elif r < 100 and g < 100 and b > 150: ton = "🔵 Mavi tonu"
+    elif r > 200 and g > 200 and b < 80:  ton = "🟡 Sarı tonu"
+    elif r > 200 and g > 100 and b < 80:  ton = "🟠 Turuncu tonu"
+    elif r > 100 and g < 80  and b > 150: ton = "🟣 Mor tonu"
+    elif r > 200 and g > 200 and b > 200: ton = "⬜ Beyaz / Açık"
+    elif r < 60  and g < 60  and b < 60:  ton = "⬛ Siyah / Koyu"
+    else: ton = "🎨 Karma renk"
+    await update.message.reply_text(
+        f"🎨 **RENK ANALİZİ**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔷 **HEX:** `#{hex_str}`\n"
+        f"🔴🟢🔵 **RGB:** `rgb({r}, {g}, {b})`\n"
+        f"🌈 **HSL:** `hsl({h}°, {s}%, {lv}%)`\n\n"
+        f"🎯 **Renk Tonu:** {ton}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"_AZRxGUARD 2.0 Renk Motoru_",
+        parse_mode='Markdown'
+    )
+
+# --- 📊 METİN ANALİZÖRÜ ---
+async def metin_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.message
+    metin = None
+    if msg.reply_to_message and msg.reply_to_message.text:
+        metin = msg.reply_to_message.text
+    elif context.args:
+        metin = ' '.join(context.args)
+    if not metin:
+        await msg.reply_text(
+            "📊 **Metin Analizörü**\n\n"
+            "Bir mesajı **yanıtlayarak** `/metin` yaz\n"
+            "veya: `/metin Analiz edilecek metin`",
+            parse_mode='Markdown'
+        )
+        return
+    kelimeler   = metin.split()
+    satirlar    = metin.splitlines()
+    karakter    = len(metin)
+    bosluksuz   = len(metin.replace(' ', '').replace('\n', ''))
+    kelime_sayi = len(kelimeler)
+    satir_sayi  = len(satirlar)
+    freq = {}
+    for k in kelimeler:
+        k2 = k.lower().strip('.,!?;:()[]{}"\'-')
+        if len(k2) > 2:
+            freq[k2] = freq.get(k2, 0) + 1
+    en_sik = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:5]
+    en_sik_str = '\n'.join(f"  `{k}` → {v}x" for k, v in en_sik) if en_sik else "  —"
+    ort_uzunluk = sum(len(k) for k in kelimeler) / max(kelime_sayi, 1)
+    okuma_sn = (kelime_sayi / 200) * 60
+    okuma_str = f"{int(okuma_sn)} saniye" if okuma_sn < 60 else f"{okuma_sn/60:.1f} dakika"
+    await msg.reply_text(
+        f"📊 **METİN ANALİZİ**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔤 **Karakter:** `{karakter}` (boşluksuz: `{bosluksuz}`)\n"
+        f"📝 **Kelime:** `{kelime_sayi}`\n"
+        f"📄 **Satır:** `{satir_sayi}`\n"
+        f"📏 **Ort. Kelime Uzunluğu:** `{ort_uzunluk:.1f}`\n"
+        f"⏱️ **Tahmini Okuma:** `{okuma_str}`\n\n"
+        f"🔝 **En Sık Kelimeler:**\n{en_sik_str}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"_AZRxGUARD 2.0 Metin Motoru_",
+        parse_mode='Markdown'
+    )
+
+# --- 🎲 RASTGELE ARAÇLAR ---
+async def rastgele_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "🎲 **Rastgele Araçlar**\n\n"
+            "`/rastgele sayi 1 100` — Sayı üret\n"
+            "`/rastgele zar` — 1d6 zar at\n"
+            "`/rastgele zar 2 20` — 2×d20 zar\n"
+            "`/rastgele para` — Yazı / Tura\n"
+            "`/rastgele sec elma muz çilek` — Listeden seç",
+            parse_mode='Markdown'
+        )
+        return
+    mod = context.args[0].lower()
+    if mod in ('sayi', 'sayı', 'number'):
+        try:
+            alt = int(context.args[1]) if len(context.args) > 1 else 1
+            ust = int(context.args[2]) if len(context.args) > 2 else 100
+            if alt >= ust: raise ValueError
+            sonuc = random.randint(alt, ust)
+            await update.message.reply_text(
+                f"🎲 **RASTGELE SAYI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"🔢 **Aralık:** `{alt}` — `{ust}`\n"
+                f"🎯 **Sonuç:** **`{sonuc}`**\n\n━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+        except (ValueError, IndexError):
+            await update.message.reply_text("❌ Kullanım: `/rastgele sayi 1 100`", parse_mode='Markdown')
+    elif mod in ('zar', 'dice'):
+        try:
+            adet = min(int(context.args[1]) if len(context.args) > 1 else 1, 20)
+            yuze = min(int(context.args[2]) if len(context.args) > 2 else 6, 1000)
+            if adet < 1 or yuze < 2: raise ValueError
+            atislar = [random.randint(1, yuze) for _ in range(adet)]
+            toplam  = sum(atislar)
+            atislar_str = ' + '.join(f'`{a}`' for a in atislar)
+            await update.message.reply_text(
+                f"🎲 **ZAR ATIŞI — {adet}d{yuze}**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📊 **Sonuçlar:** {atislar_str}\n"
+                f"✨ **Toplam:** **`{toplam}`**\n\n━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+        except (ValueError, IndexError):
+            await update.message.reply_text("❌ Kullanım: `/rastgele zar 2 6`", parse_mode='Markdown')
+    elif mod in ('para', 'coin'):
+        sonuc = random.choice(['🟡 **YAZI**', '🔵 **TURA**'])
+        await update.message.reply_text(
+            f"🪙 **PARA ATIŞI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"💫 **Sonuç:** {sonuc}\n\n━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode='Markdown'
+        )
+    elif mod in ('sec', 'seç', 'pick'):
+        secenekler = context.args[1:]
+        if len(secenekler) < 2:
+            await update.message.reply_text("❌ En az 2 seçenek gir! Örnek: `/rastgele sec elma muz çilek`", parse_mode='Markdown')
+            return
+        secilen = random.choice(secenekler)
+        await update.message.reply_text(
+            f"🎯 **RASTGELE SEÇİM**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📋 **Seçenekler:** {' · '.join(f'`{s}`' for s in secenekler)}\n"
+            f"✨ **Seçilen:** **`{secilen}`**\n\n━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode='Markdown'
+        )
+    else:
+        await update.message.reply_text("❌ Geçersiz mod! `/rastgele` yazarak yardım al.", parse_mode='Markdown')
+
+# --- 🔠 ŞİFRELEME ARAÇLARI ---
+_MORSE = {
+    'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....',
+    'I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-',
+    'R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+    '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+    '6':'-....','7':'--...','8':'---..','9':'----.', ' ':'/'
+}
+
+def _caesar(metin: str, n: int) -> str:
+    return ''.join(
+        chr((ord(c) - (ord('A') if c.isupper() else ord('a')) + n) % 26 + (ord('A') if c.isupper() else ord('a')))
+        if c.isalpha() else c
+        for c in metin
+    )
+
+async def sifrele_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "🔠 **Şifreleme Araçları**\n\n"
+            "`/sifrele caesar 13 metin` — Caesar şifre\n"
+            "`/sifrele rot13 metin` — ROT-13\n"
+            "`/sifrele ters metin` — Ters çevir\n"
+            "`/sifrele morse metin` — Morse kodu\n\n"
+            "**Örnek:** `/sifrele caesar 3 Merhaba`",
+            parse_mode='Markdown'
+        )
+        return
+    mod = context.args[0].lower()
+    if mod == 'caesar':
+        try:
+            n = int(context.args[1])
+            metin = ' '.join(context.args[2:])
+            if not metin: raise ValueError
+            await update.message.reply_text(
+                f"🔠 **CAESAR ŞİFRE**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📥 **Giriş:** `{html.escape(metin)}`\n"
+                f"🔢 **Kaydırma:** `{n}`\n\n"
+                f"🔒 **Şifreli:** `{html.escape(_caesar(metin, n))}`\n"
+                f"🔓 **Çözülmüş (-{n}):** `{html.escape(_caesar(metin, -n))}`\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+        except (ValueError, IndexError):
+            await update.message.reply_text("❌ Kullanım: `/sifrele caesar 13 Merhaba`", parse_mode='Markdown')
+    elif mod == 'rot13':
+        metin = ' '.join(context.args[1:])
+        if not metin:
+            await update.message.reply_text("❌ Metin gir!", parse_mode='Markdown')
+            return
+        await update.message.reply_text(
+            f"🔄 **ROT-13**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📥 **Giriş:** `{html.escape(metin)}`\n"
+            f"📤 **ROT-13:** `{html.escape(_caesar(metin, 13))}`\n\n"
+            f"💡 _Tekrar aynı komutla geri alınır_\n━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode='Markdown'
+        )
+    elif mod == 'ters':
+        metin = ' '.join(context.args[1:])
+        if not metin:
+            await update.message.reply_text("❌ Metin gir!", parse_mode='Markdown')
+            return
+        await update.message.reply_text(
+            f"🔃 **METİN TERSİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📥 **Giriş:** `{html.escape(metin)}`\n"
+            f"📤 **Ters:** `{html.escape(metin[::-1])}`\n\n━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode='Markdown'
+        )
+    elif mod == 'morse':
+        metin = ' '.join(context.args[1:]).upper()
+        if not metin:
+            await update.message.reply_text("❌ Metin gir!", parse_mode='Markdown')
+            return
+        morse = ' '.join(_MORSE.get(c, '?') for c in metin)
+        await update.message.reply_text(
+            f"📡 **MORSE KODU**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📥 **Giriş:** `{html.escape(metin)}`\n"
+            f"📤 **Morse:**\n`{morse}`\n\n━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode='Markdown'
+        )
+    else:
+        await update.message.reply_text("❌ Geçersiz mod! `/sifrele` yazarak yardım al.", parse_mode='Markdown')
+
+# --- 💪 BMI HESAPLAYICI ---
+async def bmi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if len(context.args) < 2:
+        await update.message.reply_text(
+            "💪 **BMI Hesaplayıcı**\n\n"
+            "**Kullanım:** `/bmi <boy_cm> <kilo_kg>`\n"
+            "**Örnek:** `/bmi 175 70`",
+            parse_mode='Markdown'
+        )
+        return
+    try:
+        boy, kilo = float(context.args[0]), float(context.args[1])
+        if not (50 <= boy <= 300 and 10 <= kilo <= 500):
+            await update.message.reply_text("❌ Geçersiz değer! Boy: 50-300 cm, Kilo: 10-500 kg")
+            return
+        boy_m = boy / 100
+        bmi   = kilo / (boy_m ** 2)
+        if   bmi < 18.5: durum = "🔵 Zayıf"; tavsiye = "Daha fazla kalori ve güç antrenmanı önerilir."
+        elif bmi < 25:   durum = "🟢 Normal"; tavsiye = "Mevcut yaşam tarzını sürdür. Harika!"
+        elif bmi < 30:   durum = "🟡 Fazla Kilolu"; tavsiye = "Hafif egzersiz ve dengeli beslenme önerilir."
+        elif bmi < 35:   durum = "🟠 Obez I"; tavsiye = "Düzenli egzersiz ve diyet programı önerilir."
+        else:            durum = "🔴 Obez II+"; tavsiye = "Bir sağlık uzmanıyla görüşmeniz önerilir."
+        ideal_alt = 18.5 * (boy_m ** 2)
+        ideal_ust = 24.9 * (boy_m ** 2)
+        await update.message.reply_text(
+            f"💪 **BMI ANALİZİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📏 **Boy:** `{boy} cm`  |  ⚖️ **Kilo:** `{kilo} kg`\n"
+            f"📊 **BMI:** **`{bmi:.1f}`**\n\n"
+            f"🏷️ **Durum:** {durum}\n"
+            f"💡 **Tavsiye:** _{tavsiye}_\n\n"
+            f"🎯 **İdeal Kilo Aralığı:** `{ideal_alt:.1f} — {ideal_ust:.1f} kg`\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⚠️ _Yalnızca bilgilendirme amaçlıdır._",
+            parse_mode='Markdown'
+        )
+    except (ValueError, IndexError):
+        await update.message.reply_text("❌ Kullanım: `/bmi 175 70`", parse_mode='Markdown')
+
+# --- 💯 YÜZDE HESAPLAYICI ---
+async def yuzde_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "💯 **Yüzde Hesaplayıcı**\n\n"
+            "`/yuzde 20% 500` — 500'ün %20'si\n"
+            "`/yuzde 75 150` — 75, 150'nin %kaçı?\n"
+            "`/yuzde artis 200 250` — % artış\n"
+            "`/yuzde azalis 300 240` — % azalış\n\n"
+            "**Örnek:** `/yuzde 15% 1200`",
+            parse_mode='Markdown'
+        )
+        return
+    try:
+        mod = context.args[0].lower()
+        if mod in ('artis', 'artış'):
+            a, b = float(context.args[1]), float(context.args[2])
+            oran = ((b - a) / a) * 100
+            emoji = "📈" if oran >= 0 else "📉"
+            await update.message.reply_text(
+                f"💯 **YÜZDE DEĞİŞİM**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"🔢 `{a}` → `{b}`\n"
+                f"{emoji} **Değişim:** `{oran:+.2f}%`\n\n━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+        elif mod in ('azalis', 'azalış'):
+            a, b = float(context.args[1]), float(context.args[2])
+            oran = ((a - b) / a) * 100
+            await update.message.reply_text(
+                f"💯 **YÜZDE DEĞİŞİM**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"🔢 `{a}` → `{b}`\n"
+                f"📉 **Azalış:** `{oran:.2f}%`\n\n━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+        elif '%' in mod:
+            yv = float(mod.replace('%', ''))
+            sayi = float(context.args[1])
+            sonuc = (yv / 100) * sayi
+            await update.message.reply_text(
+                f"💯 **YÜZDE HESABI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📥 `{sayi}`'nin `%{yv}`'i = **`{sonuc:.4g}`**\n\n━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+        else:
+            parca, toplam = float(context.args[0]), float(context.args[1])
+            oran = (parca / toplam) * 100
+            await update.message.reply_text(
+                f"💯 **YÜZDE HESABI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📥 `{parca}`, `{toplam}`'nin → **`%{oran:.2f}`**\n\n━━━━━━━━━━━━━━━━━━━━━━",
+                parse_mode='Markdown'
+            )
+    except (ValueError, IndexError, ZeroDivisionError):
+        await update.message.reply_text("❌ Geçersiz format! `/yuzde` yazarak yardım al.", parse_mode='Markdown')
+
+# ══════════════════════════════════════════════════════
+
 def main():
     uyanik_tut()
     application = Application.builder().token(TOKEN).build()
@@ -6659,6 +7227,14 @@ def main():
     application.add_handler(CommandHandler("b64", b64_komutu))
     application.add_handler(CommandHandler("id", id_komutu))
     application.add_handler(CommandHandler("sifirla", ai_sifirla_komutu))
+    # ⚡ AZRxGUARD 2.0 — Yeni Komutlar
+    application.add_handler(CommandHandler("ping", ping_komutu))
+    application.add_handler(CommandHandler("renk", renk_komutu))
+    application.add_handler(CommandHandler("metin", metin_komutu))
+    application.add_handler(CommandHandler("rastgele", rastgele_komutu))
+    application.add_handler(CommandHandler("sifrele", sifrele_komutu))
+    application.add_handler(CommandHandler("bmi", bmi_komutu))
+    application.add_handler(CommandHandler("yuzde", yuzde_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO | filters.Document.MimeType("video/mp4") | filters.Document.MimeType("video/quicktime") | filters.Document.MimeType("video/x-msvideo")) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
