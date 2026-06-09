@@ -4494,7 +4494,19 @@ async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         )
 
     elif adim == 'dosya_bekliyor':
-        _GECERLI_UZANTILAR = {'.zip', '.jar', '.obb', '.config', '.apk', '.tar', '.gz', '.rar', '.zz'}
+        _GECERLI_UZANTILAR = {
+            # Oyun / Android
+            '.apk', '.obb', '.xapk', '.apks', '.aab', '.dex', '.odex', '.vdex', '.so', '.jar',
+            # Arşiv
+            '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zz', '.z', '.lz4',
+            # Konfig / Veri
+            '.config', '.cfg', '.ini', '.xml', '.json', '.yaml', '.yml', '.toml',
+            '.txt', '.dat', '.db', '.sqlite', '.sqlite3', '.pak', '.bin', '.bak',
+            # Script / Kod
+            '.lua', '.js', '.py', '.sh', '.bat', '.cs', '.java',
+            # Diğer
+            '.patch', '.diff', '.mod', '.vpk', '.unity3d', '.asset',
+        }
         # Dosya tipini tespit et
         file_id = None
         file_type = None
@@ -4572,8 +4584,6 @@ async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.channel_post:
         channel_post = update.channel_post
-        logger.info(f"[DEBUG] channel_post geldi → chat_id={channel_post.chat_id} | metin={repr((channel_post.text or '')[:40])}")
-
         # ── APK-OBB-CONFİG yükleme kanalı — her zaman önce işle ──
         if channel_post.chat_id == _APK_KANAL_ID:
             await _apk_kanal_isle(context, channel_post)
@@ -6068,26 +6078,27 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_apk_obb':
         dosyalar = apk_dosyalari_yukle()
         if not dosyalar:
-            await query.edit_message_text(
-                "📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "📭 Henüz hiç dosya yüklenmemiş.",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]]),
-                parse_mode='Markdown'
-            )
+            _apk_kb = InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]])
+            _apk_txt = "📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n📭 Henüz hiç dosya yüklenmemiş."
         else:
-            dosya_satirlari = []
+            _apk_satirlar = []
             for uid, bilgi in dosyalar.items():
-                dosya_satirlari.append([
-                    InlineKeyboardButton(f"📦 {bilgi['isim']}", callback_data=f'apk_dl_{uid}')
-                ])
-            dosya_satirlari.append([InlineKeyboardButton("⬅️ Geri", callback_data='go_home')])
-            await query.edit_message_text(
+                _apk_satirlar.append([InlineKeyboardButton(f"📦 {bilgi['isim']}", callback_data=f'apk_dl_{uid}')])
+            _apk_satirlar.append([InlineKeyboardButton("⬅️ Geri", callback_data='go_home')])
+            _apk_kb = InlineKeyboardMarkup(_apk_satirlar)
+            _apk_txt = (
                 f"📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
                 f"📁 **{len(dosyalar)} dosya mevcut.**\n"
-                f"İndir­mek istediğin dosyayı seç:",
-                reply_markup=InlineKeyboardMarkup(dosya_satirlari),
-                parse_mode='Markdown'
+                f"İndirmek istediğin dosyayı seç:"
             )
+        try:
+            await query.edit_message_text(_apk_txt, reply_markup=_apk_kb, parse_mode='Markdown')
+        except Exception:
+            try:
+                await query.message.reply_text(_apk_txt, reply_markup=_apk_kb, parse_mode='Markdown')
+                await query.message.delete()
+            except Exception:
+                await query.message.reply_text(_apk_txt, reply_markup=_apk_kb, parse_mode='Markdown')
 
     elif query.data.startswith('apk_dl_'):
         dosya_uuid = query.data[7:]
