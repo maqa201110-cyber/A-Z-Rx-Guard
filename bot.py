@@ -17,7 +17,7 @@ import json
 import tempfile
 import shutil
 import urllib.parse
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions, BotCommand, BotCommandScopeAllGroupChats, BotCommandScopeAllPrivateChats, BotCommandScopeDefault
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, JobQueue
 
 # --- 7/24 UYANIK TUTMA SİSTEMİ ---
@@ -4605,6 +4605,110 @@ async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
             await cp.reply_text(f"❌ `{metin}` isimli dosya bulunamadı.\n/dosyalarım ile mevcut dosyaları görün.", parse_mode='Markdown')
 
 
+# ═══════════════════════════════════════════════════════════════
+# 👥 GRUP ÜYE TAKİP SİSTEMİ  (/atag için)
+# ═══════════════════════════════════════════════════════════════
+_GRUP_UYELER_YOL = 'grup_uyeler.json'
+
+def grup_uyeleri_yukle() -> dict:
+    try:
+        with open(_GRUP_UYELER_YOL, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def grup_uyeleri_kaydet(data: dict):
+    try:
+        with open(_GRUP_UYELER_YOL, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False)
+    except Exception:
+        pass
+
+def grup_uye_ekle(chat_id: int, user):
+    """Gelen mesajdan kullanıcıyı gruba kaydet."""
+    if not user or user.is_bot:
+        return
+    veriler = grup_uyeleri_yukle()
+    cid = str(chat_id)
+    uid = str(user.id)
+    if cid not in veriler:
+        veriler[cid] = {}
+    veriler[cid][uid] = {
+        'isim': user.first_name or '',
+        'kullanici_adi': user.username or ''
+    }
+    grup_uyeleri_kaydet(veriler)
+
+
+async def atag_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Gruptaki tüm bilinen üyeleri etiketler. Sadece gruplarda çalışır."""
+    msg = update.effective_message
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if not chat or chat.type not in ('group', 'supergroup'):
+        await msg.reply_text("⚠️ Bu komut sadece gruplarda çalışır.")
+        return
+
+    # Admin kontrolü
+    try:
+        admins = await context.bot.get_chat_administrators(chat.id)
+        admin_idler = {a.user.id for a in admins}
+    except Exception:
+        admin_idler = set()
+
+    if user.id not in admin_idler:
+        await msg.reply_text("⛔ Bu komutu sadece grup yöneticileri kullanabilir.")
+        return
+
+    ek_mesaj = ' '.join(context.args) if context.args else ''
+
+    veriler = grup_uyeleri_yukle()
+    uyeler = veriler.get(str(chat.id), {})
+
+    if not uyeler:
+        # Hiç üye takip edilmemişse adminleri etiketle
+        satirlar = []
+        for a in admins:
+            if not a.user.is_bot:
+                if a.user.username:
+                    satirlar.append(f"@{a.user.username}")
+                else:
+                    satirlar.append(f"<a href='tg://user?id={a.user.id}'>{html.escape(a.user.first_name or '?')}</a>")
+        if not satirlar:
+            await msg.reply_text("📭 Henüz etiketlenecek üye bulunamadı.")
+            return
+        metin = ("📢 " + ek_mesaj + "\n\n" if ek_mesaj else "📢\n\n") + " ".join(satirlar)
+        await msg.reply_text(metin, parse_mode='HTML')
+        return
+
+    # Bilinen üyeleri etiketle (en fazla 50, Telegram limiti)
+    etiketler = []
+    for uid, bilgi in list(uyeler.items())[:50]:
+        if bilgi.get('kullanici_adi'):
+            etiketler.append(f"@{bilgi['kullanici_adi']}")
+        else:
+            isim = html.escape(bilgi.get('isim', '?') or '?')
+            etiketler.append(f"<a href='tg://user?id={uid}'>{isim}</a>")
+
+    metin = ("📢 " + ek_mesaj + "\n\n" if ek_mesaj else "📢\n\n") + " ".join(etiketler)
+
+    # 4096 karakter sınırı — gerekirse böl
+    if len(metin) <= 4096:
+        await msg.reply_text(metin, parse_mode='HTML')
+    else:
+        parca = ""
+        for e in etiketler:
+            if len(parca) + len(e) + 1 > 4000:
+                await msg.reply_text(("📢 " + ek_mesaj + "\n\n" if ek_mesaj else "") + parca, parse_mode='HTML')
+                parca = e + " "
+                ek_mesaj = ""
+            else:
+                parca += e + " "
+        if parca.strip():
+            await msg.reply_text(parca, parse_mode='HTML')
+
+
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.channel_post:
         channel_post = update.channel_post
@@ -4635,6 +4739,10 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
     elif update.message:
         if update.message.from_user and update.message.from_user.is_bot:
             return
+
+        # Üye takibi — gruplarda mesaj atan herkesi kaydet
+        if update.message.chat.type in ('group', 'supergroup') and update.message.from_user:
+            grup_uye_ekle(update.message.chat_id, update.message.from_user)
 
         # Gece modu: ZAMANLI_KANAL_ID grubundaki tüm mesajları max 2 saniyede sil
         if update.message.chat_id == ZAMANLI_KANAL_ID and gece_modu_aktif_mi():
@@ -7918,6 +8026,7 @@ def main():
     application.add_handler(CommandHandler("sifrele", sifrele_komutu))
     application.add_handler(CommandHandler("bmi", bmi_komutu))
     application.add_handler(CommandHandler("yuzde", yuzde_komutu))
+    application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO | filters.Document.MimeType("video/mp4") | filters.Document.MimeType("video/quicktime") | filters.Document.MimeType("video/x-msvideo")) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
@@ -7999,7 +8108,25 @@ def main():
         else:
             logger.info("Başlangıç: Gece modu aktif — grup kilitli kalıyor.")
 
-    application.post_init = baslangic_gece_modu_kontrol
+    async def baslangic_komut_listesi(app):
+        await baslangic_gece_modu_kontrol(app)
+        # Grup komutları görünür yap
+        try:
+            grup_komutlari = [
+                BotCommand("atag",     "Tüm üyeleri etiketle"),
+                BotCommand("ping",     "Bot gecikme testi"),
+                BotCommand("hava",     "Hava durumu — /hava İstanbul"),
+                BotCommand("kur",      "Döviz kuru — /kur USD"),
+                BotCommand("saat",     "Dünya saati"),
+                BotCommand("ip",       "IP sorgula"),
+                BotCommand("id",       "Kullanıcı/Grup ID"),
+            ]
+            await app.bot.set_my_commands(grup_komutlari, scope=BotCommandScopeAllGroupChats())
+            logger.info("Grup komut listesi ayarlandı.")
+        except Exception as e:
+            logger.warning(f"Grup komut listesi ayarlanamadı: {e}")
+
+    application.post_init = baslangic_komut_listesi
     # ──────────────────────────────────────────────────────────
 
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
