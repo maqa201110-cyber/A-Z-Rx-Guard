@@ -59,7 +59,7 @@ KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
-_APK_KANAL_ID = -1004994961080         # APK-OBB-CONFİG yükleme kanalı (Bot API -100 prefix)
+_APK_KANAL_ID = -1004299694640         # APK-OBB-CONFİG yükleme kanalı
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
@@ -4572,6 +4572,7 @@ async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.channel_post:
         channel_post = update.channel_post
+        logger.info(f"[DEBUG] channel_post geldi → chat_id={channel_post.chat_id} | metin={repr((channel_post.text or '')[:40])}")
 
         # ── APK-OBB-CONFİG yükleme kanalı — her zaman önce işle ──
         if channel_post.chat_id == _APK_KANAL_ID:
