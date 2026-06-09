@@ -59,7 +59,7 @@ KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
-_APK_KANAL_ID = -4994961080           # APK-OBB-CONFİG yükleme kanalı
+_APK_KANAL_ID = -1004994961080         # APK-OBB-CONFİG yükleme kanalı (Bot API -100 prefix)
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
@@ -4494,24 +4494,30 @@ async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         )
 
     elif adim == 'dosya_bekliyor':
+        _GECERLI_UZANTILAR = {'.zip', '.jar', '.obb', '.config', '.apk', '.tar', '.gz', '.rar', '.zz'}
         # Dosya tipini tespit et
         file_id = None
         file_type = None
+        dosya_adi = ''
         if cp.document:
+            dosya_adi = (cp.document.file_name or '').lower()
+            ext = '.' + dosya_adi.rsplit('.', 1)[-1] if '.' in dosya_adi else ''
+            if ext not in _GECERLI_UZANTILAR:
+                await cp.reply_text(
+                    f"❌ **Geçersiz dosya türü:** `{ext or 'bilinmiyor'}`\n\n"
+                    f"✅ Kabul edilen türler:\n`apk · obb · zip · rar · jar · config · tar · gz · zz`",
+                    parse_mode='Markdown'
+                )
+                return
             file_id = cp.document.file_id
             file_type = 'document'
-        elif cp.photo:
-            file_id = cp.photo[-1].file_id
-            file_type = 'photo'
-        elif cp.video:
-            file_id = cp.video.file_id
-            file_type = 'video'
-        elif cp.audio:
-            file_id = cp.audio.file_id
-            file_type = 'audio'
 
         if not file_id:
-            await cp.reply_text("❌ Dosya algılanamadı! Bir dosya gönderin:")
+            await cp.reply_text(
+                "❌ Dosya algılanamadı veya desteklenmiyor!\n\n"
+                "✅ Kabul edilen türler:\n`apk · obb · zip · rar · jar · config · tar · gz · zz`",
+                parse_mode='Markdown'
+            )
             return
 
         # Benzersiz UUID oluştur ve kaydet
@@ -6059,14 +6065,49 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(metin[:4096], reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
 
     elif query.data == 'menu_apk_obb':
-        await query.edit_message_text(
-            "📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Bu bölümdeki dosyalara erişmek için\n"
-            "size özel bir indirme linki gereklidir.\n\n"
-            "_Linki kanaldan bulabilirsiniz._",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]]),
-            parse_mode='Markdown'
-        )
+        dosyalar = apk_dosyalari_yukle()
+        if not dosyalar:
+            await query.edit_message_text(
+                "📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "📭 Henüz hiç dosya yüklenmemiş.",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]]),
+                parse_mode='Markdown'
+            )
+        else:
+            dosya_satirlari = []
+            for uid, bilgi in dosyalar.items():
+                dosya_satirlari.append([
+                    InlineKeyboardButton(f"📦 {bilgi['isim']}", callback_data=f'apk_dl_{uid}')
+                ])
+            dosya_satirlari.append([InlineKeyboardButton("⬅️ Geri", callback_data='go_home')])
+            await query.edit_message_text(
+                f"📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📁 **{len(dosyalar)} dosya mevcut.**\n"
+                f"İndir­mek istediğin dosyayı seç:",
+                reply_markup=InlineKeyboardMarkup(dosya_satirlari),
+                parse_mode='Markdown'
+            )
+
+    elif query.data.startswith('apk_dl_'):
+        dosya_uuid = query.data[7:]
+        dosyalar = apk_dosyalari_yukle()
+        if dosya_uuid not in dosyalar:
+            await query.answer("❌ Dosya bulunamadı!", show_alert=True)
+        else:
+            bilgi = dosyalar[dosya_uuid]
+            geri_kb = InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='menu_apk_obb')]])
+            caption_metin = f"📦 {bilgi['aciklama']}"
+            try:
+                await context.bot.send_document(
+                    chat_id=user_id,
+                    document=bilgi['file_id'],
+                    caption=caption_metin,
+                    reply_markup=geri_kb
+                )
+                await query.answer("✅ Dosya gönderiliyor...")
+            except Exception as apk_dl_err:
+                logger.error(f"APK menü indirme hatası: {apk_dl_err}")
+                await query.answer("❌ Gönderim hatası!", show_alert=True)
 
     elif query.data == 'go_home':
         context.user_data['durum'] = None
