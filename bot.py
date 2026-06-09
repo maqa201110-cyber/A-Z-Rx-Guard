@@ -59,6 +59,7 @@ KONTROL_KANAL_USER = "@azrXmaqa"
 YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
+_APK_KANAL_ID = -4994961080           # APK-OBB-CONFİG yükleme kanalı
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
@@ -893,6 +894,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')
+        ],
+        [
+            InlineKeyboardButton('📦 APK-OBB-CONFİG', callback_data='menu_apk_obb')
         ],
     ]
     return InlineKeyboardMarkup(klavye)
@@ -4387,9 +4391,187 @@ async def _toplu_gonderim_yap(bot, channel_post, rapor_chat_id):
     except Exception:
         pass
 
+# ═══════════════════════════════════════════════════════════════
+# 📦 APK-OBB-CONFİG SİSTEMİ
+# ═══════════════════════════════════════════════════════════════
+_APK_DOSYALAR_YOL = 'apk_dosyalar.json'
+_apk_yukleme_oturum: dict = {}          # {chat_id: {'adim': ..., 'isim': ..., 'aciklama': ...}}
+
+
+def apk_dosyalari_yukle() -> dict:
+    try:
+        with open(_APK_DOSYALAR_YOL, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def apk_dosyalari_kaydet(data: dict):
+    with open(_APK_DOSYALAR_YOL, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
+    """APK kanalındaki mesajları ve komutları işler."""
+    metin = (cp.text or cp.caption or '').strip()
+    komut = metin.split()[0].lower().split('@')[0] if metin else ''
+
+    # ── Komutlar ────────────────────────────────────────────
+    if komut in ('/yükle', '/yukle', '/y\u00fckle'):
+        _apk_yukleme_oturum[_APK_KANAL_ID] = {'adim': 'isim_bekliyor'}
+        await cp.reply_text(
+            "📦 **APK-OBB-CONFİG YÜKLEME**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "📝 Dosya için bir **isim** girin:\n"
+            "_(Bu isim sadece hafızada kalır, /sil komutuyla silersiniz)_\n\n"
+            "_İptal: /iptal_",
+            parse_mode='Markdown'
+        )
+        return
+
+    if komut in ('/sil',):
+        _apk_yukleme_oturum[_APK_KANAL_ID] = {'adim': 'sil_isim_bekliyor'}
+        await cp.reply_text(
+            "🗑 **DOSYA SİL**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Silmek istediğiniz dosyanın **ismini** yazın:\n\n"
+            "_İptal: /iptal_",
+            parse_mode='Markdown'
+        )
+        return
+
+    if komut in ('/dosyalarım', '/dosyalarim'):
+        dosyalar = apk_dosyalari_yukle()
+        if not dosyalar:
+            await cp.reply_text("📭 Henüz hiç dosya yüklenmemiş.")
+            return
+        bot_username = context.bot.username
+        satirlar = ["📦 **YÜKLENEN DOSYALAR**\n━━━━━━━━━━━━━━━━━━━━━━\n"]
+        for i, (uid, bilgi) in enumerate(dosyalar.items(), 1):
+            link = f"https://t.me/{bot_username}?start=apk_{uid}"
+            satirlar.append(
+                f"**{i}.** `{bilgi['isim']}`\n"
+                f"   📅 {bilgi['tarih']}\n"
+                f"   🔗 {link}\n"
+            )
+        await cp.reply_text('\n'.join(satirlar), parse_mode='Markdown', disable_web_page_preview=True)
+        return
+
+    if komut == '/iptal':
+        if _APK_KANAL_ID in _apk_yukleme_oturum:
+            _apk_yukleme_oturum.pop(_APK_KANAL_ID)
+            await cp.reply_text("✅ İşlem iptal edildi.")
+        return
+
+    # ── Durum makinesi ───────────────────────────────────────
+    oturum = _apk_yukleme_oturum.get(_APK_KANAL_ID)
+    if not oturum:
+        return
+
+    adim = oturum.get('adim')
+
+    if adim == 'isim_bekliyor':
+        if not metin or metin.startswith('/'):
+            await cp.reply_text("❌ İsim boş olamaz! Tekrar yazın:")
+            return
+        oturum['isim'] = metin
+        oturum['adim'] = 'aciklama_bekliyor'
+        await cp.reply_text(
+            f"✅ **İsim kaydedildi:** `{metin}`\n\n"
+            f"📝 Şimdi **açıklamayı** girin:\n"
+            f"_(Kullanıcılar bu açıklamayı görecek)_",
+            parse_mode='Markdown'
+        )
+
+    elif adim == 'aciklama_bekliyor':
+        if not metin or metin.startswith('/'):
+            await cp.reply_text("❌ Açıklama boş olamaz! Tekrar yazın:")
+            return
+        oturum['aciklama'] = metin
+        oturum['adim'] = 'dosya_bekliyor'
+        await cp.reply_text(
+            f"✅ **Açıklama kaydedildi.**\n\n"
+            f"📁 Şimdi **dosyayı gönderin:**",
+            parse_mode='Markdown'
+        )
+
+    elif adim == 'dosya_bekliyor':
+        # Dosya tipini tespit et
+        file_id = None
+        file_type = None
+        if cp.document:
+            file_id = cp.document.file_id
+            file_type = 'document'
+        elif cp.photo:
+            file_id = cp.photo[-1].file_id
+            file_type = 'photo'
+        elif cp.video:
+            file_id = cp.video.file_id
+            file_type = 'video'
+        elif cp.audio:
+            file_id = cp.audio.file_id
+            file_type = 'audio'
+
+        if not file_id:
+            await cp.reply_text("❌ Dosya algılanamadı! Bir dosya gönderin:")
+            return
+
+        # Benzersiz UUID oluştur ve kaydet
+        dosya_uuid = ''.join(random.choices(string.ascii_lowercase + string.digits, k=14))
+        dosyalar = apk_dosyalari_yukle()
+        tarih = datetime.datetime.now(TR_SAAT).strftime('%d.%m.%Y %H:%M')
+        dosyalar[dosya_uuid] = {
+            'isim': oturum['isim'],
+            'aciklama': oturum['aciklama'],
+            'file_id': file_id,
+            'file_type': file_type,
+            'tarih': tarih
+        }
+        apk_dosyalari_kaydet(dosyalar)
+
+        # Linki oluştur
+        bot_username = context.bot.username
+        link = f"https://t.me/{bot_username}?start=apk_{dosya_uuid}"
+
+        _apk_yukleme_oturum.pop(_APK_KANAL_ID, None)
+
+        await cp.reply_text(
+            f"✅ **DOSYA KAYDEDİLDİ!**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📦 **İsim:** `{oturum['isim']}`\n"
+            f"📝 **Açıklama:** {oturum['aciklama']}\n"
+            f"📅 **Tarih:** {tarih}\n\n"
+            f"🔗 **Yönlendirme Linki:**\n`{link}`\n\n"
+            f"_Bu linki kanala at — tıklayanlar dosyayı doğrudan alır!_",
+            parse_mode='Markdown',
+            disable_web_page_preview=True
+        )
+
+    elif adim == 'sil_isim_bekliyor':
+        if not metin or metin.startswith('/'):
+            await cp.reply_text("❌ İsim boş olamaz! Tekrar yazın:")
+            return
+        dosyalar = apk_dosyalari_yukle()
+        silindi = False
+        for uid, bilgi in list(dosyalar.items()):
+            if bilgi['isim'].lower() == metin.lower():
+                del dosyalar[uid]
+                apk_dosyalari_kaydet(dosyalar)
+                silindi = True
+                break
+        _apk_yukleme_oturum.pop(_APK_KANAL_ID, None)
+        if silindi:
+            await cp.reply_text(f"✅ `{metin}` isimli dosya tamamen silindi.", parse_mode='Markdown')
+        else:
+            await cp.reply_text(f"❌ `{metin}` isimli dosya bulunamadı.\n/dosyalarım ile mevcut dosyaları görün.", parse_mode='Markdown')
+
+
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.channel_post:
         channel_post = update.channel_post
+
+        # ── APK-OBB-CONFİG yükleme kanalı — her zaman önce işle ──
+        if channel_post.chat_id == _APK_KANAL_ID:
+            await _apk_kanal_isle(context, channel_post)
+            return
+        # ──────────────────────────────────────────────────────────
 
         if channel_post.chat_id == YONETIM_KANAL_ID:
             await _toplu_gonderim_yap(context.bot, channel_post, YONETIM_KANAL_ID)
@@ -4474,6 +4656,37 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await kanal_takip_kontrol(update, context, user_id, lang):
         return
+
+    # ── APK deep link kontrolü ────────────────────────────────
+    if context.args and context.args[0].startswith('apk_'):
+        dosya_uuid = context.args[0][4:]
+        dosyalar = apk_dosyalari_yukle()
+        if dosya_uuid in dosyalar:
+            bilgi = dosyalar[dosya_uuid]
+            geri_kb = InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]])
+            caption_metin = f"📦 {bilgi['aciklama']}"
+            try:
+                ft_map = {
+                    'document': context.bot.send_document,
+                    'photo':    context.bot.send_photo,
+                    'video':    context.bot.send_video,
+                    'audio':    context.bot.send_audio,
+                }
+                send_fn = ft_map.get(bilgi.get('file_type', 'document'), context.bot.send_document)
+                kwarg_key = bilgi.get('file_type', 'document')
+                await send_fn(
+                    chat_id=user_id,
+                    **{kwarg_key: bilgi['file_id']},
+                    caption=caption_metin,
+                    reply_markup=geri_kb
+                )
+            except Exception as apk_err:
+                logger.error(f"APK dosya gönderme hatası: {apk_err}")
+                await update.message.reply_text("❌ Dosya gönderilirken hata oluştu.", reply_markup=geri_kb)
+        else:
+            await _bot_baslat_animasyon(update, context, user_id, lang)
+        return
+    # ─────────────────────────────────────────────────────────
 
     try:
         await log_kanali_gonder(context.bot, update, "📲 /start komutu")
@@ -5844,6 +6057,16 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(metin, reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
         except Exception:
             await query.edit_message_text(metin[:4096], reply_markup=geri_klavye, parse_mode='Markdown', disable_web_page_preview=True)
+
+    elif query.data == 'menu_apk_obb':
+        await query.edit_message_text(
+            "📦 **APK-OBB-CONFİG**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Bu bölümdeki dosyalara erişmek için\n"
+            "size özel bir indirme linki gereklidir.\n\n"
+            "_Linki kanaldan bulabilirsiniz._",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data='go_home')]]),
+            parse_mode='Markdown'
+        )
 
     elif query.data == 'go_home':
         context.user_data['durum'] = None
