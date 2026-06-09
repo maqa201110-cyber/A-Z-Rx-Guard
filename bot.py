@@ -3798,6 +3798,9 @@ async def kanala_veya_gruba_yeni_uye_katildi(update: Update, context: ContextTyp
         chat_member_update = update.chat_member
         if chat_member_update.new_chat_member.status == "member":
             yeni_uye = chat_member_update.new_chat_member.user
+            # Yeni üyeyi /atag için kaydet (botlar hariç)
+            if not yeni_uye.is_bot:
+                grup_uye_ekle(chat_member_update.chat.id, yeni_uye)
             if yeni_uye.is_bot:
                 return
             guvenli_isim = html.escape(yeni_uye.first_name) if yeni_uye.first_name else "Yeni Üye"
@@ -8074,32 +8077,41 @@ def _kufur_tespit(metin: str) -> bool:
             return True
     return False
 
-async def _kufur_uyari_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, msg_id: int, bekle: int = 25) -> None:
-    await asyncio.sleep(bekle)
+async def _kufur_cift_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, kufur_id: int, uyari_id: int) -> None:
+    """1.5 saniye sonra küfürlü mesajı ve uyarıyı birlikte siler."""
+    await asyncio.sleep(1.5)
+    for mid in (kufur_id, uyari_id):
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=mid)
+        except Exception:
+            pass
+
+async def _kufur_tekli_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, msg_id: int) -> None:
+    """1.5 saniye sonra tek mesajı siler."""
+    await asyncio.sleep(1.5)
     try:
         await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
     except Exception:
         pass
 
 async def kufur_kalkani_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Sessiz küfür kalkanı — sadece gruplarda çalışır, mevcut sistemlerle çakışmaz."""
+    """Sessiz küfür kalkanı — gruplar + ZAMANLI_KANAL, mevcut sistemlerle çakışmaz."""
     msg = update.effective_message
     if not msg or not msg.text:
         return
     chat = update.effective_chat
     user = update.effective_user
-    if not chat or chat.type not in ('group', 'supergroup'):
+    if not chat:
+        return
+    # Gruplar VE özel olarak eklenen ZAMANLI_KANAL_ID
+    if chat.type not in ('group', 'supergroup') and chat.id != ZAMANLI_KANAL_ID:
         return
     if not user or user.is_bot:
         return
     if not _kufur_tespit(msg.text):
         return
 
-    # Mesajı sil
-    try:
-        await context.bot.delete_message(chat_id=chat.id, message_id=msg.message_id)
-    except Exception:
-        pass
+    kufur_msg_id = msg.message_id
 
     # Mention
     if user.username:
@@ -8115,6 +8127,7 @@ async def kufur_kalkani_handler(update: Update, context: ContextTypes.DEFAULT_TY
     ihlal = _CEZA_PUANLARI[ck][uk]
 
     if ihlal <= 2:
+        # Önce uyarıyı gönder, sonra 1.5sn içinde ikisini birden sil
         uyari = await context.bot.send_message(
             chat_id=chat.id,
             text=(
@@ -8123,9 +8136,11 @@ async def kufur_kalkani_handler(update: Update, context: ContextTypes.DEFAULT_TY
             ),
             parse_mode='HTML'
         )
-        asyncio.create_task(_kufur_uyari_sil(context, chat.id, uyari.message_id, 25))
+        asyncio.create_task(_kufur_cift_sil(context, chat.id, kufur_msg_id, uyari.message_id))
     else:
         _CEZA_PUANLARI[ck][uk] = 0
+        # Küfürlü mesajı 1.5sn sonra sil
+        asyncio.create_task(_kufur_tekli_sil(context, chat.id, kufur_msg_id))
         mute_sure = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
         try:
             await context.bot.restrict_chat_member(
@@ -8177,9 +8192,14 @@ def main():
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
-    # 🛡️ Küfür Kalkanı — grup mesajlarında sessizce çalışır (group=1 → mevcut handlerlarla çakışmaz)
+    # 🛡️ Küfür Kalkanı — gruplar + ZAMANLI_KANAL (group=1 → mevcut handlerlarla çakışmaz)
     application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, kufur_kalkani_handler),
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND & (
+                filters.ChatType.GROUPS | filters.Chat(chat_id=ZAMANLI_KANAL_ID)
+            ),
+            kufur_kalkani_handler
+        ),
         group=1
     )
     application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO | filters.Document.MimeType("video/mp4") | filters.Document.MimeType("video/quicktime") | filters.Document.MimeType("video/x-msvideo")) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
