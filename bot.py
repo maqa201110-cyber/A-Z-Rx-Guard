@@ -4695,8 +4695,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.bot_data['lang'] = {}
     context.bot_data['lang'][user_id] = lang
 
-    # ── APK deep link kontrolü — kanal zorunluluğundan ÖNCE ──
-    # Linke basan herkes (botu hiç açmamış bile olsa) dosyayı alır
+    if not await kanal_takip_kontrol(update, context, user_id, lang):
+        return
+
+    # ── APK deep link kontrolü ────────────────────────────────
     if context.args and context.args[0].startswith('apk_'):
         dosya_uuid = context.args[0][4:]
         dosyalar = apk_dosyalari_yukle()
@@ -4726,9 +4728,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Bu link geçersiz veya dosya silinmiş.")
         return
     # ─────────────────────────────────────────────────────────
-
-    if not await kanal_takip_kontrol(update, context, user_id, lang):
-        return
 
     try:
         await log_kanali_gonder(context.bot, update, "📲 /start komutu")
