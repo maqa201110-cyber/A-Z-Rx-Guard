@@ -13,5 +13,4 @@ dependencies = [
     "psycopg2-binary>=2.9.12",
     "python-telegram-bot[job-queue]>=22.7",
     "requests>=2.34.2",
-    "telegram>=0.0.1",
 ]
