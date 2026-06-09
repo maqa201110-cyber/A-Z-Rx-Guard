@@ -4811,16 +4811,24 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
         if update.message.chat.type in ('group', 'supergroup') and update.message.from_user:
             grup_uye_ekle(update.message.chat_id, update.message.from_user)
 
-        # Gece modu: ZAMANLI_KANAL_ID grubundaki tüm mesajları max 2 saniyede sil
+        # Gece modu: ZAMANLI_KANAL_ID grubundaki mesajları sil (admin mesajlarına dokunma)
         if update.message.chat_id == ZAMANLI_KANAL_ID and gece_modu_aktif_mi():
-            await asyncio.sleep(1.5)
+            # Adminlerin gece modunda da mesaj atabilmesi için admin kontrolü
+            _is_admin = False
             try:
-                await context.bot.delete_message(
-                    chat_id=ZAMANLI_KANAL_ID,
-                    message_id=update.message.message_id
-                )
+                _uye = await context.bot.get_chat_member(ZAMANLI_KANAL_ID, update.message.from_user.id)
+                _is_admin = _uye.status in ('administrator', 'creator')
             except Exception:
                 pass
+            if not _is_admin:
+                await asyncio.sleep(1.5)
+                try:
+                    await context.bot.delete_message(
+                        chat_id=ZAMANLI_KANAL_ID,
+                        message_id=update.message.message_id
+                    )
+                except Exception:
+                    pass
             return
 
         if update.message.text and update.message.text.startswith('/'):
@@ -6331,9 +6339,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton(strings.get('btn_sa_kimlik', '🎭 Sahte Kimlik'), callback_data='sa_kimlik'),
                 InlineKeyboardButton(strings.get('btn_sa_tarih', '📅 Yaş/Tarih'), callback_data='sa_tarih'),
             ],
-            [
-                InlineKeyboardButton(strings.get('btn_sa_sans', '🎰 Şans Oyunları'), callback_data='sa_sans'),
-            ],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')],
         ])
         await query.edit_message_text(
@@ -6366,46 +6371,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
         await query.edit_message_text(
             ft(strings.get('sa_tarih_ask', '📅 Doğum tarihinizi girin (GG.AA.YYYY):'), context, user_id),
-            reply_markup=geri, parse_mode='Markdown'
-        )
-    elif query.data == 'sa_sans':
-        sans_klavye = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(strings.get('btn_sa_yazi_tura', '🪙 Yazı/Tura'), callback_data='sa_yazi_tura'),
-                InlineKeyboardButton(strings.get('btn_sa_zar', '🎲 Zar At'), callback_data='sa_zar'),
-            ],
-            [
-                InlineKeyboardButton(strings.get('btn_sa_8top', '🎱 8-Top'), callback_data='sa_8top'),
-            ],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')],
-        ])
-        await query.edit_message_text(
-            ft(strings.get('sa_sans_welcome', '🎰 **ŞANS OYUNLARI**\n\nBir oyun seç:'), context, user_id),
-            reply_markup=sans_klavye, parse_mode='Markdown'
-        )
-    elif query.data == 'sa_yazi_tura':
-        sonuc = random.choice(['🪙 **YAZI!**', '🪙 **TURA!**'])
-        yeni_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton('🔄 Tekrar At', callback_data='sa_yazi_tura')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='sa_sans')],
-        ])
-        await query.edit_message_text(f"🪙 **Para Atıldı!**\n\n{sonuc}", reply_markup=yeni_klavye, parse_mode='Markdown')
-    elif query.data == 'sa_zar':
-        zar = random.randint(1, 6)
-        emojiler = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
-        yeni_klavye = InlineKeyboardMarkup([
-            [InlineKeyboardButton('🔄 Tekrar At', callback_data='sa_zar')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='sa_sans')],
-        ])
-        await query.edit_message_text(
-            f"🎲 **Zar Atıldı!**\n\n{emojiler[zar]} **{zar}** çıktı!",
-            reply_markup=yeni_klavye, parse_mode='Markdown'
-        )
-    elif query.data == 'sa_8top':
-        context.user_data['durum'] = 'sa_8top_bekliyor'
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='sa_sans')]])
-        await query.edit_message_text(
-            ft(strings.get('sa_8top_ask', '🎱 Sorunuzu yazın:'), context, user_id),
             reply_markup=geri, parse_mode='Markdown'
         )
     elif query.data == 'go_home':
@@ -7145,22 +7110,6 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             )
         return
 
-    if context.user_data.get('durum') == 'sa_8top_bekliyor':
-        context.user_data['durum'] = None
-        soru = (update.message.text or '').strip()
-        cevap = random.choice(_SOHBET_8BALL)
-        geri = InlineKeyboardMarkup([
-            [InlineKeyboardButton('🎱 Tekrar Sor', callback_data='sa_8top')],
-            [InlineKeyboardButton('⬅️ Geri', callback_data='sa_sans')],
-        ])
-        await update.message.reply_text(
-            f"🎱 <b>8-TOP</b>\n\n"
-            f"❓ <i>{html.escape(soru)}</i>\n\n"
-            f"{'─'*20}\n\n"
-            f"{cevap}",
-            reply_markup=geri, parse_mode='HTML'
-        )
-        return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
 FILIGRAN_KANALLARI = {-1003775055611, -1003930940829}
@@ -8276,12 +8225,19 @@ def _uyari_kaydet(veri: dict) -> None:
         logger.warning(f"Uyarı kaydedilemedi: {e}")
 
 async def _admin_mi(update: Update, context) -> bool:
-    """Komutu kullanan kişi admin/creator mi?"""
+    """Komutu kullanan kişi admin/creator mi? Anonim adminleri de destekler."""
+    user = update.effective_user
+    if not user:
+        return False
+    # Anonim admin — Telegram'da admin mesajları grup adıyla görünebilir
+    if getattr(user, 'is_anonymous', False):
+        return True
     try:
-        uye = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
+        uye = await context.bot.get_chat_member(update.effective_chat.id, user.id)
         return uye.status in ('administrator', 'creator')
     except Exception:
-        return False
+        # get_chat_member başarısız olursa (gizlilik ayarı vs.) işlemi Telegram API'ye bırak
+        return True
 
 async def _hedef_al(update: Update, context) -> tuple:
     """(user_id, display_name) döndürür. Reply veya @mention veya ID'den alır."""
@@ -8339,9 +8295,11 @@ async def ban_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='HTML'
         )
         return
-    sebep_baslangic = 2 if (update.message.reply_to_message and update.message.reply_to_message.from_user) else 1
-    sebep_args = context.args[sebep_baslangic - 1:] if len(context.args) >= sebep_baslangic else []
-    sebep = html.escape(' '.join(sebep_args)) if sebep_args else "Sebep belirtilmedi"
+    # Reply ile kullanıldıysa tüm args sebep, mention ile kullanıldıysa args[1:] sebep
+    if update.message.reply_to_message and update.message.reply_to_message.from_user:
+        sebep = html.escape(' '.join(context.args)) if context.args else "Sebep belirtilmedi"
+    else:
+        sebep = html.escape(' '.join(context.args[1:])) if len(context.args) > 1 else "Sebep belirtilmedi"
     try:
         await context.bot.ban_chat_member(update.effective_chat.id, uid)
         await update.message.reply_text(
@@ -8539,6 +8497,8 @@ async def temizle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except (ValueError, IndexError):
         n = 10
     cmd_id = update.message.message_id
+    # Sadece komutun ÖNÜNDEKI n mesajı sil, komut mesajını da dahil et
+    # cmd_id+1'den YUKARI doğru HİÇ silme — kullanıcının yeni mesajlarına dokunma
     silinecekler = list(range(cmd_id, cmd_id - n - 1, -1))
     silindi = 0
     for mid in silinecekler:
@@ -8548,14 +8508,10 @@ async def temizle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await asyncio.sleep(0.05)
         except Exception:
             pass
-    bilgi = await update.effective_chat.send_message(
-        f"🗑️ <b>{silindi} mesaj silindi!</b>", parse_mode='HTML'
+    # Onay mesajı gönder — otomatik SİLME YOK, sabit kalıyor
+    await update.effective_chat.send_message(
+        f"🗑️ <b>{silindi} mesaj temizlendi.</b> ✅", parse_mode='HTML'
     )
-    await asyncio.sleep(4)
-    try:
-        await bilgi.delete()
-    except Exception:
-        pass
 
 # ─────────────────────────────────────────────────────────────
 # 💬 SOHBET ARAÇLARI — QR Kod / URL Kısalt / Sahte Kimlik / Şans
@@ -8579,11 +8535,6 @@ _SOHBET_MESLEKLER = [
     "Yazılım Geliştirici","Grafik Tasarımcı","Öğretmen","Mühendis","Doktor",
     "Muhasebeci","Pazarlama Uzmanı","Gazeteci","Mimar","Hemşire",
     "Eczacı","Avukat","Fotoğrafçı","Müzisyen","Girişimci",
-]
-_SOHBET_8BALL = [
-    "✅ Kesinlikle evet!","✅ Buna güvenebilirsin.","✅ Çok muhtemelen öyle.",
-    "🤷 Belirsiz, tekrar sor.","🤷 Şu an cevap veremem.","🤷 Daha sonra tekrar dene.",
-    "❌ Pek sanmıyorum.","❌ Cevabım hayır.","❌ Görünüşe göre hayır.",
 ]
 
 def sahte_kimlik_uret(lang: str = 'tr') -> str:
