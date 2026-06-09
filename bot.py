@@ -8028,13 +8028,36 @@ _KUFUR_URLS = [
 ]
 
 _KUFUR_YEDEK: set = {
+    # İngilizce
     "fuck", "shit", "bitch", "ass", "asshole", "bastard", "dick", "pussy",
     "cock", "cunt", "whore", "slut", "nigger", "nigga", "faggot",
     "motherfucker", "bullshit", "wank", "twat", "prick",
+    # Türkçe
+    "sik", "siktir", "sikerim", "sikis", "amk", "amina", "bok", "orospu",
+    "orospunun", "got", "göt", "ibne", "kaltak", "pic", "piç", "oruspu",
+    "kahpe", "serefsiz", "şerefsiz", "osfur", "meme", "yarrak", "yarak",
+    "götveren", "ananı", "ananın", "sikeyim", "sikiş", "amcık", "amcik",
+    "sikim", "sikik", "orosbuçocugu", "gavat", "bok", "oğlan",
+    # Azerbaycanca
+    "sik", "got", "siktir", "amk",
 }
 
 KUFUR_SETI: set = set()
 _CEZA_PUANLARI: dict = {}
+
+def _metin_normalize(metin: str) -> str:
+    """Kurnazlıkları önleyen normalizer — Türkçe harfleri korur.
+    k.ü.f.ü.r → küfür | KüFüR → küfür | küüüfürrr → küfür
+    """
+    # Küçük harfe çevir (NFKD YOK — Türkçe ğ/ü/ş/ö/ç/ı korunur)
+    metin = metin.lower()
+    # Harf ve rakam dışındaki her şeyi sil (emojiler, noktalama, boşluk)
+    metin = re.sub(r'[^\w]', '', metin, flags=re.UNICODE)
+    # Rakamları sil
+    metin = re.sub(r'[0-9_]', '', metin)
+    # Peş peşe gelen aynı harfleri teke indir (küüüfürrrr → küfür)
+    metin = re.sub(r'(.)\1+', r'\1', metin)
+    return metin
 
 def canli_kufur_listesi_yukle() -> None:
     global KUFUR_SETI
@@ -8043,37 +8066,36 @@ def canli_kufur_listesi_yukle() -> None:
         try:
             r = http_requests.get(url, timeout=6)
             if r.status_code == 200:
-                toplam.update(
-                    k.strip().lower()
-                    for k in r.text.splitlines()
-                    if k.strip() and not k.startswith('#') and len(k.strip()) >= 3
-                )
+                for k in r.text.splitlines():
+                    k = k.strip()
+                    if k and not k.startswith('#') and len(k) >= 3:
+                        # Listedeki kelimeleri de aynı normalizer'dan geçir
+                        normalized = _metin_normalize(k)
+                        if normalized:
+                            toplam.add(normalized)
         except Exception as e:
             logger.warning(f"Küfür listesi çekilemedi ({url}): {e}")
+    # Yedek listeyi de normalize ederek ekle (her zaman dahil)
+    for k in _KUFUR_YEDEK:
+        normalized = _metin_normalize(k)
+        if normalized:
+            toplam.add(normalized)
     if toplam:
         KUFUR_SETI = toplam
-        logger.info(f"🛡️ Küfür Kalkanı aktif: {len(KUFUR_SETI)} kelime internetten yüklendi.")
+        logger.info(f"🛡️ Küfür Kalkanı aktif: {len(KUFUR_SETI)} kelime yüklendi.")
     else:
-        KUFUR_SETI = set(_KUFUR_YEDEK)
-        logger.warning(f"🛡️ İnternet yok — yedek liste devrede ({len(KUFUR_SETI)} kelime).")
+        KUFUR_SETI = {_metin_normalize(k) for k in _KUFUR_YEDEK if k}
+        logger.warning(f"🛡️ Yedek liste devrede ({len(KUFUR_SETI)} kelime).")
 
 canli_kufur_listesi_yukle()
 
-def _metin_normalize(metin: str) -> str:
-    """Nokta, büyük harf, emoji ve tekrar eden harfleri temizler."""
-    metin = _ucd.normalize('NFKD', metin).lower()
-    metin = ''.join(
-        c for c in metin
-        if _ucd.category(c) not in ('So', 'Sm', 'Sk', 'Sc', 'Mn')
-    )
-    metin = re.sub(r'[^a-z0-9ğüşıöçâîûàáéèêëïôùú]', '', metin)
-    metin = re.sub(r'(.)\1{2,}', r'\1\1', metin)
-    return metin
-
 def _kufur_tespit(metin: str) -> bool:
+    """Normalleştirilmiş metinde yasaklı kelime kök araması yapar."""
     temiz = _metin_normalize(metin)
+    if not temiz:
+        return False
     for kelime in KUFUR_SETI:
-        if kelime and len(kelime) >= 3 and kelime in temiz:
+        if kelime and len(kelime) >= 2 and kelime in temiz:
             return True
     return False
 
