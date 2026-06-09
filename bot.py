@@ -17,7 +17,7 @@ import json
 import tempfile
 import shutil
 import urllib.parse
-import unicodedata as _ucd
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions, BotCommand, BotCommandScopeAllGroupChats, BotCommandScopeAllPrivateChats, BotCommandScopeDefault
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, JobQueue
 
@@ -366,6 +366,29 @@ LANG_DATA = {
         'btn_ved_boyut': "📐 Boyutlandır",
         'btn_ved_filtre': "🎨 Filtre Uygula",
         'btn_ved_yazi': "🎬 Yazı Ekle",
+        'btn_sohbet_araclari': "💬 SOHBET ARAÇLARI",
+        'sohbet_araclari_welcome': (
+            "💬 **SOHBET ARAÇLARI**\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Günlük hayatı kolaylaştıran araçlar:"
+        ),
+        'btn_sa_qr': "📱 QR Kod Üret",
+        'btn_sa_url': "🌐 URL Kısalt",
+        'btn_sa_kimlik': "🎭 Sahte Kimlik",
+        'btn_sa_tarih': "📅 Yaş / Tarih Hesapla",
+        'btn_sa_sans': "🎰 Şans Oyunları",
+        'sa_qr_ask': "📱 **QR Kod Üretici**\n\nQR koda dönüştürmek istediğiniz metin veya linki girin:\nÖrnek: `https://t.me/azrXmaqa`",
+        'sa_url_ask': "🌐 **URL Kısaltıcı**\n\nKısaltmak istediğiniz URL'yi girin:\nÖrnek: `https://example.com/cok/uzun/bir/link`",
+        'sa_tarih_ask': "📅 **Yaş / Tarih Hesaplayıcı**\n\nDoğum tarihinizi girin (GG.AA.YYYY):\nÖrnek: `15.03.1995`",
+        'sa_sans_welcome': (
+            "🎰 **ŞANS OYUNLARI**\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Bir şans oyunu seç:"
+        ),
+        'btn_sa_yazi_tura': "🪙 Yazı / Tura",
+        'btn_sa_zar': "🎲 Zar At",
+        'btn_sa_8top': "🎱 8-Top Sorgula",
+        'sa_8top_ask': "🎱 **8-Top**\n\nSorunuzu yazın, 8-Top cevaplasın:",
     },
     'az': {
         'welcome': "👋 **AZRxGUARD-a xoş gəldiniz!**\n\nXahiş edirik əməliyyat aparmaq üçün aşağıdakı düymələrdən istifadə edin.",
@@ -465,6 +488,29 @@ LANG_DATA = {
         'btn_ved_boyut': "📐 Ölçüləndir",
         'btn_ved_filtre': "🎨 Filtr Tətbiq Et",
         'btn_ved_yazi': "🎬 Yazı Əlavə Et",
+        'btn_sohbet_araclari': "💬 SÖHBƏT ALƏTLƏRI",
+        'sohbet_araclari_welcome': (
+            "💬 **SÖHBƏT ALƏTLƏRI**\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Gündəlik həyatı asanlaşdıran alətlər:"
+        ),
+        'btn_sa_qr': "📱 QR Kod Yarat",
+        'btn_sa_url': "🌐 URL Qısalt",
+        'btn_sa_kimlik': "🎭 Saxta Kimlik",
+        'btn_sa_tarih': "📅 Yaş / Tarix Hesabla",
+        'btn_sa_sans': "🎰 Şans Oyunları",
+        'sa_qr_ask': "📱 **QR Kod Yaradıcı**\n\nQR koda çevirmək istədiyiniz mətn və ya linki daxil edin:",
+        'sa_url_ask': "🌐 **URL Qısaldıcı**\n\nQısaltmaq istədiyiniz URL-i daxil edin:",
+        'sa_tarih_ask': "📅 **Yaş / Tarix Hesabçısı**\n\nDoğum tarixinizi daxil edin (GG.AA.YYYY):\nNümunə: `15.03.1995`",
+        'sa_sans_welcome': (
+            "🎰 **ŞANS OYUNLARI**\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Bir şans oyunu seç:"
+        ),
+        'btn_sa_yazi_tura': "🪙 Yazı / Tura",
+        'btn_sa_zar': "🎲 Zər At",
+        'btn_sa_8top': "🎱 8-Top Sorğu",
+        'sa_8top_ask': "🎱 **8-Top**\n\nSualınızı yazın, 8-Top cavablasın:",
     },
     'ru': {
         'welcome': "👋 **Добро пожаловать в AZRxGUARD!**\n\nПожалуйста, используйте кнопки ниже для выполнения действий.",
@@ -892,6 +938,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
+        ],
+        [
+            InlineKeyboardButton(strings.get('btn_sohbet_araclari', '💬 SOHBET ARAÇLARI'), callback_data='menu_sohbet_araclari')
         ],
         [
             InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')
@@ -6271,6 +6320,94 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 logger.error(f"APK menü indirme hatası: {apk_dl_err}")
                 await query.answer("❌ Gönderim hatası!", show_alert=True)
 
+    elif query.data == 'menu_sohbet_araclari':
+        context.user_data['mevcut_kategori'] = '💬 Sohbet Araçları'
+        sa_klavye = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(strings.get('btn_sa_qr', '📱 QR Kod'), callback_data='sa_qr'),
+                InlineKeyboardButton(strings.get('btn_sa_url', '🌐 URL Kısalt'), callback_data='sa_url'),
+            ],
+            [
+                InlineKeyboardButton(strings.get('btn_sa_kimlik', '🎭 Sahte Kimlik'), callback_data='sa_kimlik'),
+                InlineKeyboardButton(strings.get('btn_sa_tarih', '📅 Yaş/Tarih'), callback_data='sa_tarih'),
+            ],
+            [
+                InlineKeyboardButton(strings.get('btn_sa_sans', '🎰 Şans Oyunları'), callback_data='sa_sans'),
+            ],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')],
+        ])
+        await query.edit_message_text(
+            ft(strings.get('sohbet_araclari_welcome', '💬 **SOHBET ARAÇLARI**\n\nBir araç seç:'), context, user_id),
+            reply_markup=sa_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'sa_qr':
+        context.user_data['durum'] = 'sa_qr_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
+        await query.edit_message_text(
+            ft(strings.get('sa_qr_ask', '📱 QR kod için metin girin:'), context, user_id),
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'sa_url':
+        context.user_data['durum'] = 'sa_url_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
+        await query.edit_message_text(
+            ft(strings.get('sa_url_ask', '🌐 URL girin:'), context, user_id),
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'sa_kimlik':
+        kimlik = sahte_kimlik_uret(lang)
+        yeni_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Yeni Kimlik', callback_data='sa_kimlik')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')],
+        ])
+        await query.edit_message_text(kimlik, reply_markup=yeni_klavye, parse_mode='HTML')
+    elif query.data == 'sa_tarih':
+        context.user_data['durum'] = 'sa_tarih_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
+        await query.edit_message_text(
+            ft(strings.get('sa_tarih_ask', '📅 Doğum tarihinizi girin (GG.AA.YYYY):'), context, user_id),
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'sa_sans':
+        sans_klavye = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(strings.get('btn_sa_yazi_tura', '🪙 Yazı/Tura'), callback_data='sa_yazi_tura'),
+                InlineKeyboardButton(strings.get('btn_sa_zar', '🎲 Zar At'), callback_data='sa_zar'),
+            ],
+            [
+                InlineKeyboardButton(strings.get('btn_sa_8top', '🎱 8-Top'), callback_data='sa_8top'),
+            ],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')],
+        ])
+        await query.edit_message_text(
+            ft(strings.get('sa_sans_welcome', '🎰 **ŞANS OYUNLARI**\n\nBir oyun seç:'), context, user_id),
+            reply_markup=sans_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'sa_yazi_tura':
+        sonuc = random.choice(['🪙 **YAZI!**', '🪙 **TURA!**'])
+        yeni_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Tekrar At', callback_data='sa_yazi_tura')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='sa_sans')],
+        ])
+        await query.edit_message_text(f"🪙 **Para Atıldı!**\n\n{sonuc}", reply_markup=yeni_klavye, parse_mode='Markdown')
+    elif query.data == 'sa_zar':
+        zar = random.randint(1, 6)
+        emojiler = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
+        yeni_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Tekrar At', callback_data='sa_zar')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='sa_sans')],
+        ])
+        await query.edit_message_text(
+            f"🎲 **Zar Atıldı!**\n\n{emojiler[zar]} **{zar}** çıktı!",
+            reply_markup=yeni_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'sa_8top':
+        context.user_data['durum'] = 'sa_8top_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='sa_sans')]])
+        await query.edit_message_text(
+            ft(strings.get('sa_8top_ask', '🎱 Sorunuzu yazın:'), context, user_id),
+            reply_markup=geri, parse_mode='Markdown'
+        )
     elif query.data == 'go_home':
         context.user_data['durum'] = None
         context.user_data['mevcut_kategori'] = None
@@ -6926,6 +7063,104 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         )
         return
 
+    # ─── 💬 SOHBET ARAÇLARI STATE'LERİ ───
+    if context.user_data.get('durum') == 'sa_qr_bekliyor':
+        context.user_data['durum'] = None
+        metin = (update.message.text or '').strip()
+        if not metin:
+            await update.message.reply_text("❌ Boş metin gönderilemez.")
+            return
+        bekle = await update.message.reply_text("⏳ QR kod oluşturuluyor...")
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Yeni QR', callback_data='sa_qr')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_sohbet_araclari')],
+        ])
+        await bekle.delete()
+        await qr_url_gonder(context.bot, update.effective_chat.id, metin, reply_markup=geri)
+        return
+
+    if context.user_data.get('durum') == 'sa_url_bekliyor':
+        context.user_data['durum'] = None
+        url_girdisi = (update.message.text or '').strip()
+        if not url_girdisi.startswith('http'):
+            url_girdisi = 'https://' + url_girdisi
+        bekle = await update.message.reply_text("⏳ URL kısaltılıyor...")
+        try:
+            encoded = urllib.parse.quote(url_girdisi, safe='')
+            r = await asyncio.to_thread(
+                lambda: http_requests.get(
+                    f"https://tinyurl.com/api-create.php?url={encoded}", timeout=8
+                )
+            )
+            kisaltilmis = r.text.strip() if r.status_code == 200 and r.text.startswith('http') else url_girdisi
+        except Exception:
+            kisaltilmis = url_girdisi
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Başka URL Kısalt', callback_data='sa_url')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_sohbet_araclari')],
+        ])
+        await bekle.edit_text(
+            f"🌐 <b>URL KISALTILDI!</b>\n\n"
+            f"📎 Orijinal:\n<code>{html.escape(url_girdisi[:120])}</code>\n\n"
+            f"✅ Kısa link:\n<b>{html.escape(kisaltilmis)}</b>",
+            reply_markup=geri, parse_mode='HTML'
+        )
+        return
+
+    if context.user_data.get('durum') == 'sa_tarih_bekliyor':
+        context.user_data['durum'] = None
+        tarih_str = (update.message.text or '').strip()
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Tekrar Hesapla', callback_data='sa_tarih')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_sohbet_araclari')],
+        ])
+        try:
+            parca = tarih_str.replace('/', '.').replace('-', '.').split('.')
+            gun, ay, yil = int(parca[0]), int(parca[1]), int(parca[2])
+            dogum = datetime.date(yil, ay, gun)
+            bugun = datetime.date.today()
+            if dogum > bugun:
+                raise ValueError("Gelecek tarih")
+            delta = bugun - dogum
+            yas = bugun.year - dogum.year - ((bugun.month, bugun.day) < (dogum.month, dogum.day))
+            sonraki_dogum = dogum.replace(year=bugun.year)
+            if sonraki_dogum < bugun:
+                sonraki_dogum = dogum.replace(year=bugun.year + 1)
+            kalan = (sonraki_dogum - bugun).days
+            toplam_ay = yas * 12 + (bugun.month - dogum.month)
+            await update.message.reply_text(
+                f"📅 <b>YAŞ / TARİH HESAPLAYICI</b>\n\n"
+                f"🎂 Doğum Tarihi: <b>{gun:02d}.{ay:02d}.{yil}</b>\n"
+                f"📆 Bugün: <b>{bugun.strftime('%d.%m.%Y')}</b>\n\n"
+                f"🎯 <b>Yaşın: {yas}</b>\n"
+                f"📊 Toplam ay: <b>{toplam_ay}</b>\n"
+                f"📊 Toplam gün: <b>{delta.days:,}</b>\n"
+                f"🎊 Doğum gününe <b>{kalan}</b> gün kaldı!",
+                reply_markup=geri, parse_mode='HTML'
+            )
+        except Exception:
+            await update.message.reply_text(
+                "❌ Geçersiz format! GG.AA.YYYY şeklinde girin.\nÖrnek: `15.03.1995`",
+                reply_markup=geri, parse_mode='Markdown'
+            )
+        return
+
+    if context.user_data.get('durum') == 'sa_8top_bekliyor':
+        context.user_data['durum'] = None
+        soru = (update.message.text or '').strip()
+        cevap = random.choice(_SOHBET_8BALL)
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🎱 Tekrar Sor', callback_data='sa_8top')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='sa_sans')],
+        ])
+        await update.message.reply_text(
+            f"🎱 <b>8-TOP</b>\n\n"
+            f"❓ <i>{html.escape(soru)}</i>\n\n"
+            f"{'─'*20}\n\n"
+            f"{cevap}",
+            reply_markup=geri, parse_mode='HTML'
+        )
+        return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
 FILIGRAN_KANALLARI = {-1003775055611, -1003930940829}
@@ -8016,171 +8251,392 @@ async def yuzde_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Geçersiz format! `/yuzde` yazarak yardım al.", parse_mode='Markdown')
 
 # ══════════════════════════════════════════════════════
-# 🛡️ GELİŞMİŞ KÜFÜR KALKANI — AZRxGUARD Shield v2.0
+# 💬 SOHBET ARAÇLARI & 🛡️ GRUP YÖNETİMİ — AZRxGUARD v3.0
 # ══════════════════════════════════════════════════════
 
-_KUFUR_URLS = [
-    "https://raw.githubusercontent.com/GreatPaymaster/profanity-turkish/main/turkish.txt",
-    "https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/tr",
-    "https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en",
-    "https://raw.githubusercontent.com/nickelc/grawlix/master/words.txt",
-    "https://raw.githubusercontent.com/RobertJGabriel/Google-profanity-words/master/list.txt",
-]
 
-_KUFUR_YEDEK: set = {
-    # İngilizce
-    "fuck", "shit", "bitch", "ass", "asshole", "bastard", "dick", "pussy",
-    "cock", "cunt", "whore", "slut", "nigger", "nigga", "faggot",
-    "motherfucker", "bullshit", "wank", "twat", "prick",
-    # Türkçe
-    "sik", "siktir", "sikerim", "sikis", "amk", "amina", "bok", "orospu",
-    "orospunun", "got", "göt", "ibne", "kaltak", "pic", "piç", "oruspu",
-    "kahpe", "serefsiz", "şerefsiz", "osfur", "meme", "yarrak", "yarak",
-    "götveren", "ananı", "ananın", "sikeyim", "sikiş", "amcık", "amcik",
-    "sikim", "sikik", "orosbuçocugu", "gavat", "bok", "oğlan",
-    # Azerbaycanca
-    "sik", "got", "siktir", "amk",
-}
+# ─────────────────────────────────────────────────────────────
+# 🛡️ GRUP YÖNETİM ARAÇLARI — Ban / Kick / Mute / Warn / Temizle
+# ─────────────────────────────────────────────────────────────
 
-KUFUR_SETI: set = set()
-_CEZA_PUANLARI: dict = {}
+_UYARI_DOSYASI = "grup_uyarilari.json"
 
-def _metin_normalize(metin: str) -> str:
-    """Kurnazlıkları önleyen normalizer — Türkçe harfleri korur.
-    k.ü.f.ü.r → küfür | KüFüR → küfür | küüüfürrr → küfür
-    """
-    # Küçük harfe çevir (NFKD YOK — Türkçe ğ/ü/ş/ö/ç/ı korunur)
-    metin = metin.lower()
-    # Harf ve rakam dışındaki her şeyi sil (emojiler, noktalama, boşluk)
-    metin = re.sub(r'[^\w]', '', metin, flags=re.UNICODE)
-    # Rakamları sil
-    metin = re.sub(r'[0-9_]', '', metin)
-    # Peş peşe gelen aynı harfleri teke indir (küüüfürrrr → küfür)
-    metin = re.sub(r'(.)\1+', r'\1', metin)
-    return metin
+def _uyari_yukle() -> dict:
+    try:
+        with open(_UYARI_DOSYASI, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
-def canli_kufur_listesi_yukle() -> None:
-    global KUFUR_SETI
-    toplam: set = set()
-    for url in _KUFUR_URLS:
-        try:
-            r = http_requests.get(url, timeout=6)
-            if r.status_code == 200:
-                for k in r.text.splitlines():
-                    k = k.strip()
-                    if k and not k.startswith('#') and len(k) >= 3:
-                        # Listedeki kelimeleri de aynı normalizer'dan geçir
-                        normalized = _metin_normalize(k)
-                        if normalized:
-                            toplam.add(normalized)
-        except Exception as e:
-            logger.warning(f"Küfür listesi çekilemedi ({url}): {e}")
-    # Yedek listeyi de normalize ederek ekle (her zaman dahil)
-    for k in _KUFUR_YEDEK:
-        normalized = _metin_normalize(k)
-        if normalized:
-            toplam.add(normalized)
-    if toplam:
-        KUFUR_SETI = toplam
-        logger.info(f"🛡️ Küfür Kalkanı aktif: {len(KUFUR_SETI)} kelime yüklendi.")
-    else:
-        KUFUR_SETI = {_metin_normalize(k) for k in _KUFUR_YEDEK if k}
-        logger.warning(f"🛡️ Yedek liste devrede ({len(KUFUR_SETI)} kelime).")
+def _uyari_kaydet(veri: dict) -> None:
+    try:
+        with open(_UYARI_DOSYASI, 'w', encoding='utf-8') as f:
+            json.dump(veri, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.warning(f"Uyarı kaydedilemedi: {e}")
 
-canli_kufur_listesi_yukle()
-
-def _kufur_tespit(metin: str) -> bool:
-    """Normalleştirilmiş metinde yasaklı kelime kök araması yapar."""
-    temiz = _metin_normalize(metin)
-    if not temiz:
+async def _admin_mi(update: Update, context) -> bool:
+    """Komutu kullanan kişi admin/creator mi?"""
+    try:
+        uye = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
+        return uye.status in ('administrator', 'creator')
+    except Exception:
         return False
-    for kelime in KUFUR_SETI:
-        if kelime and len(kelime) >= 2 and kelime in temiz:
-            return True
-    return False
 
-async def _kufur_cift_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, kufur_id: int, uyari_id: int) -> None:
-    """1.5 saniye sonra küfürlü mesajı ve uyarıyı birlikte siler."""
-    await asyncio.sleep(1.5)
-    for mid in (kufur_id, uyari_id):
+async def _hedef_al(update: Update, context) -> tuple:
+    """(user_id, display_name) döndürür. Reply veya @mention veya ID'den alır."""
+    msg = update.effective_message
+    # 1) Reply
+    if msg.reply_to_message and msg.reply_to_message.from_user:
+        u = msg.reply_to_message.from_user
+        return u.id, f"<a href='tg://user?id={u.id}'>{html.escape(u.first_name or str(u.id))}</a>"
+    # 2) @mention veya sayısal ID argümanı
+    if context.args:
+        arg = context.args[0]
         try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=mid)
+            uid = int(arg)
+            return uid, f"<code>{uid}</code>"
+        except ValueError:
+            username = arg.lstrip('@')
+            try:
+                uye = await context.bot.get_chat_member(update.effective_chat.id, f"@{username}")
+                u = uye.user
+                return u.id, f"<a href='tg://user?id={u.id}'>{html.escape(u.first_name or username)}</a>"
+            except Exception:
+                return None, None
+    return None, None
+
+def _sure_cozumle(arg: str) -> int | None:
+    """'30d'→1800, '2s'→7200, '1g'→86400 saniye döndürür. None=sonsuza dek."""
+    if not arg:
+        return None
+    arg = arg.strip().lower()
+    m = re.match(r'^(\d+)([dsgh]?)$', arg)
+    if not m:
+        return None
+    sayi, birim = int(m.group(1)), m.group(2)
+    if birim == 'd':
+        return sayi * 60
+    elif birim == 's':
+        return sayi * 3600
+    elif birim == 'g':
+        return sayi * 86400
+    elif birim == 'h':
+        return sayi * 3600
+    else:
+        return sayi * 60
+
+async def ban_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    if not uid:
+        await update.message.reply_text(
+            "ℹ️ Kullanım:\n<code>/ban @kullanici [sebep]</code>\nveya bir mesaja yanıt vererek\n<code>/ban [sebep]</code>",
+            parse_mode='HTML'
+        )
+        return
+    sebep_baslangic = 2 if (update.message.reply_to_message and update.message.reply_to_message.from_user) else 1
+    sebep_args = context.args[sebep_baslangic - 1:] if len(context.args) >= sebep_baslangic else []
+    sebep = html.escape(' '.join(sebep_args)) if sebep_args else "Sebep belirtilmedi"
+    try:
+        await context.bot.ban_chat_member(update.effective_chat.id, uid)
+        await update.message.reply_text(
+            f"🔨 <b>BANLANDI!</b>\n\n👤 Kullanıcı: {display}\n🆔 ID: <code>{uid}</code>\n📝 Sebep: {sebep}",
+            parse_mode='HTML'
+        )
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ban işlemi başarısız: <code>{html.escape(str(e))}</code>", parse_mode='HTML')
+
+async def unban_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    if not uid:
+        await update.message.reply_text("ℹ️ Kullanım: <code>/unban @kullanici</code>", parse_mode='HTML')
+        return
+    try:
+        await context.bot.unban_chat_member(update.effective_chat.id, uid, only_if_banned=True)
+        await update.message.reply_text(
+            f"✅ <b>BAN KALDIRILDI!</b>\n\n👤 Kullanıcı: {display}\n🆔 ID: <code>{uid}</code>",
+            parse_mode='HTML'
+        )
+    except Exception as e:
+        await update.message.reply_text(f"❌ Unban başarısız: <code>{html.escape(str(e))}</code>", parse_mode='HTML')
+
+async def kick_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    if not uid:
+        await update.message.reply_text("ℹ️ Kullanım: <code>/kick @kullanici</code>", parse_mode='HTML')
+        return
+    try:
+        await context.bot.ban_chat_member(update.effective_chat.id, uid)
+        await context.bot.unban_chat_member(update.effective_chat.id, uid)
+        await update.message.reply_text(
+            f"👢 <b>GRUPTAN ATILDI!</b>\n\n👤 Kullanıcı: {display}\n🆔 ID: <code>{uid}</code>\n_(Tekrar katılabilir)_",
+            parse_mode='HTML'
+        )
+    except Exception as e:
+        await update.message.reply_text(f"❌ Kick başarısız: <code>{html.escape(str(e))}</code>", parse_mode='HTML')
+
+async def mute_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    if not uid:
+        await update.message.reply_text(
+            "ℹ️ Kullanım:\n<code>/mute @kullanici 30d</code> — 30 dakika\n"
+            "<code>/mute @kullanici 2s</code> — 2 saat\n"
+            "<code>/mute @kullanici 1g</code> — 1 gün\n"
+            "<code>/mute @kullanici</code> — süresiz",
+            parse_mode='HTML'
+        )
+        return
+    sure_arg = None
+    if context.args:
+        son = context.args[-1]
+        if re.match(r'^\d+[dsgh]?$', son):
+            sure_arg = son
+    saniye = _sure_cozumle(sure_arg) if sure_arg else None
+    until = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=saniye) if saniye else None
+    sure_metin = sure_arg if sure_arg else "Süresiz"
+    try:
+        await context.bot.restrict_chat_member(
+            update.effective_chat.id, uid,
+            permissions=ChatPermissions(can_send_messages=False),
+            until_date=until
+        )
+        await update.message.reply_text(
+            f"🔇 <b>SESSİZE ALINDI!</b>\n\n👤 Kullanıcı: {display}\n⏱️ Süre: {sure_metin}",
+            parse_mode='HTML'
+        )
+    except Exception as e:
+        await update.message.reply_text(f"❌ Mute başarısız: <code>{html.escape(str(e))}</code>", parse_mode='HTML')
+
+async def unmute_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    if not uid:
+        await update.message.reply_text("ℹ️ Kullanım: <code>/unmute @kullanici</code>", parse_mode='HTML')
+        return
+    try:
+        await context.bot.restrict_chat_member(
+            update.effective_chat.id, uid,
+            permissions=ChatPermissions(
+                can_send_messages=True, can_send_audios=True,
+                can_send_documents=True, can_send_photos=True,
+                can_send_videos=True, can_send_video_notes=True,
+                can_send_voice_notes=True, can_send_polls=True,
+                can_send_other_messages=True, can_add_web_page_previews=True
+            )
+        )
+        await update.message.reply_text(
+            f"🔊 <b>SESİ AÇILDI!</b>\n\n👤 Kullanıcı: {display}",
+            parse_mode='HTML'
+        )
+    except Exception as e:
+        await update.message.reply_text(f"❌ Unmute başarısız: <code>{html.escape(str(e))}</code>", parse_mode='HTML')
+
+async def warn_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    if not uid:
+        await update.message.reply_text(
+            "ℹ️ Kullanım: <code>/warn @kullanici [sebep]</code>\nveya mesaja yanıt ver.",
+            parse_mode='HTML'
+        )
+        return
+    ck = str(update.effective_chat.id)
+    uk = str(uid)
+    sebep_args = context.args[1:] if context.args and not update.message.reply_to_message else context.args
+    sebep = html.escape(' '.join(sebep_args)) if sebep_args else "Sebep belirtilmedi"
+    veri = _uyari_yukle()
+    veri.setdefault(ck, {}).setdefault(uk, [])
+    veri[ck][uk].append({'sebep': sebep, 'tarih': datetime.datetime.now().strftime('%d.%m.%Y %H:%M')})
+    _uyari_kaydet(veri)
+    sayi = len(veri[ck][uk])
+    if sayi >= 3:
+        try:
+            await context.bot.ban_chat_member(update.effective_chat.id, uid)
+            veri[ck][uk] = []
+            _uyari_kaydet(veri)
+            await update.message.reply_text(
+                f"🔨 <b>3. UYARI — OTOMATIK BAN!</b>\n\n👤 Kullanıcı: {display}\n"
+                f"📝 Son sebep: {sebep}\n⚠️ 3 uyarı dolunca sistem otomatik ban uyguladı.",
+                parse_mode='HTML'
+            )
+        except Exception as e:
+            await update.message.reply_text(f"⚠️ 3 uyarı doldu ama ban başarısız: <code>{html.escape(str(e))}</code>", parse_mode='HTML')
+    else:
+        await update.message.reply_text(
+            f"⚠️ <b>UYARI VERİLDİ! ({sayi}/3)</b>\n\n👤 Kullanıcı: {display}\n📝 Sebep: {sebep}\n"
+            f"{'⚠️ Bir daha uyarılırsa ban!' if sayi == 2 else ''}",
+            parse_mode='HTML'
+        )
+
+async def uyarilar_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    uid, display = await _hedef_al(update, context)
+    ck = str(update.effective_chat.id)
+    veri = _uyari_yukle()
+    if uid:
+        uk = str(uid)
+        uyarilar = veri.get(ck, {}).get(uk, [])
+        if not uyarilar:
+            await update.message.reply_text(f"✅ {display} için kayıtlı uyarı yok.", parse_mode='HTML')
+        else:
+            metin = f"⚠️ <b>Uyarı Listesi:</b> {display}\n\n"
+            for i, u in enumerate(uyarilar, 1):
+                metin += f"{i}. 📝 {u.get('sebep','?')} — {u.get('tarih','?')}\n"
+            metin += f"\nToplam: {len(uyarilar)}/3"
+            await update.message.reply_text(metin, parse_mode='HTML')
+    else:
+        grup_uyarilari = veri.get(ck, {})
+        if not grup_uyarilari:
+            await update.message.reply_text("✅ Bu grupta kayıtlı uyarı yok.")
+            return
+        metin = "⚠️ <b>Grup Uyarı Özeti:</b>\n\n"
+        for uk2, liste in grup_uyarilari.items():
+            if liste:
+                metin += f"👤 ID <code>{uk2}</code>: {len(liste)} uyarı\n"
+        await update.message.reply_text(metin, parse_mode='HTML')
+
+async def temizle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type not in ('group', 'supergroup'):
+        return
+    if not await _admin_mi(update, context):
+        await update.message.reply_text("❌ Bu komut sadece adminler içindir.")
+        return
+    try:
+        n = int(context.args[0]) if context.args else 10
+        n = max(1, min(n, 100))
+    except (ValueError, IndexError):
+        n = 10
+    cmd_id = update.message.message_id
+    silinecekler = list(range(cmd_id, cmd_id - n - 1, -1))
+    silindi = 0
+    for mid in silinecekler:
+        try:
+            await context.bot.delete_message(update.effective_chat.id, mid)
+            silindi += 1
+            await asyncio.sleep(0.05)
         except Exception:
             pass
-
-async def _kufur_tekli_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, msg_id: int) -> None:
-    """1.5 saniye sonra tek mesajı siler."""
-    await asyncio.sleep(1.5)
+    bilgi = await update.effective_chat.send_message(
+        f"🗑️ <b>{silindi} mesaj silindi!</b>", parse_mode='HTML'
+    )
+    await asyncio.sleep(4)
     try:
-        await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+        await bilgi.delete()
     except Exception:
         pass
 
-async def kufur_kalkani_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Sessiz küfür kalkanı — gruplar + ZAMANLI_KANAL, mevcut sistemlerle çakışmaz."""
-    msg = update.effective_message
-    if not msg or not msg.text:
-        return
-    chat = update.effective_chat
-    user = update.effective_user
-    if not chat:
-        return
-    # Gruplar VE özel olarak eklenen ZAMANLI_KANAL_ID
-    if chat.type not in ('group', 'supergroup') and chat.id != ZAMANLI_KANAL_ID:
-        return
-    if not user or user.is_bot:
-        return
-    if not _kufur_tespit(msg.text):
-        return
+# ─────────────────────────────────────────────────────────────
+# 💬 SOHBET ARAÇLARI — QR Kod / URL Kısalt / Sahte Kimlik / Şans
+# ─────────────────────────────────────────────────────────────
 
-    kufur_msg_id = msg.message_id
+_SOHBET_TR_ISIMLER = [
+    ("Ahmet","Yılmaz"),("Mehmet","Kaya"),("Mustafa","Demir"),("Ali","Şahin"),
+    ("Hüseyin","Çelik"),("İbrahim","Arslan"),("Hasan","Doğan"),("Ömer","Kılıç"),
+    ("Yusuf","Aslan"),("Burak","Çetin"),("Emre","Koç"),("Serkan","Kurt"),
+    ("Fatma","Öztürk"),("Emine","Aydın"),("Zeynep","Özdemir"),("Hatice","Şimşek"),
+    ("Ayşe","Erdoğan"),("Elif","Yıldız"),("Merve","Güneş"),("Selin","Polat"),
+]
+_SOHBET_AZ_ISIMLER = [
+    ("Əli","Həsənov"),("Rəşad","Məmmədov"),("Nicat","Əliyev"),("Tural","İsmayılov"),
+    ("Kamran","Hüseynov"),("Elçin","Quliyev"),("Anar","Babayev"),("Müşfiq","Rəhimov"),
+    ("Günay","Xəlilova"),("Sevinc","Məmmədzadə"),("Lalə","Əsgərova"),("Aytən","Nəsirov"),
+]
+_SOHBET_SEHIRLER_TR = ["İstanbul","Ankara","İzmir","Bursa","Antalya","Adana","Konya","Trabzon","Kayseri","Mersin"]
+_SOHBET_SEHIRLER_AZ = ["Bakı","Gəncə","Sumqayıt","Mingəçevir","Naxçıvan","Lənkəran","Şəki","Şirvan"]
+_SOHBET_MESLEKLER = [
+    "Yazılım Geliştirici","Grafik Tasarımcı","Öğretmen","Mühendis","Doktor",
+    "Muhasebeci","Pazarlama Uzmanı","Gazeteci","Mimar","Hemşire",
+    "Eczacı","Avukat","Fotoğrafçı","Müzisyen","Girişimci",
+]
+_SOHBET_8BALL = [
+    "✅ Kesinlikle evet!","✅ Buna güvenebilirsin.","✅ Çok muhtemelen öyle.",
+    "🤷 Belirsiz, tekrar sor.","🤷 Şu an cevap veremem.","🤷 Daha sonra tekrar dene.",
+    "❌ Pek sanmıyorum.","❌ Cevabım hayır.","❌ Görünüşe göre hayır.",
+]
 
-    # Mention
-    if user.username:
-        mention = f"@{user.username}"
-    else:
-        mention = f"<a href='tg://user?id={user.id}'>{html.escape(user.first_name or '?')}</a>"
+def sahte_kimlik_uret(lang: str = 'tr') -> str:
+    isimler = _SOHBET_AZ_ISIMLER if lang == 'az' else _SOHBET_TR_ISIMLER
+    sehirler = _SOHBET_SEHIRLER_AZ if lang == 'az' else _SOHBET_SEHIRLER_TR
+    ad, soyad = random.choice(isimler)
+    sehir = random.choice(sehirler)
+    yas = random.randint(18, 55)
+    meslek = random.choice(_SOHBET_MESLEKLER)
+    telefon = f"+9{random.choice(['0','4'])}{random.randint(100,999)}{random.randint(100,999)}{random.randint(10,99)}{random.randint(10,99)}"
+    email_ad = f"{ad.lower().replace('ş','s').replace('ğ','g').replace('ü','u').replace('ö','o').replace('ı','i').replace('ç','c').replace('ə','e').replace('ğ','g')}"
+    email = f"{email_ad}{random.randint(10,99)}@{'gmail' if random.random()>0.5 else 'hotmail'}.com"
+    return (
+        f"🎭 <b>SAHTE KİMLİK</b>\n\n"
+        f"👤 Ad Soyad: <b>{ad} {soyad}</b>\n"
+        f"🎂 Yaş: <b>{yas}</b>\n"
+        f"🏙️ Şehir: <b>{sehir}</b>\n"
+        f"💼 Meslek: <b>{meslek}</b>\n"
+        f"📞 Telefon: <code>{telefon}</code>\n"
+        f"📧 E-posta: <code>{email}</code>\n\n"
+        f"<i>⚠️ Bu kimlik tamamen sahte ve rastgele üretilmiştir!</i>"
+    )
 
-    # Ceza sayacı
-    ck = str(chat.id)
-    uk = str(user.id)
-    _CEZA_PUANLARI.setdefault(ck, {})
-    _CEZA_PUANLARI[ck][uk] = _CEZA_PUANLARI[ck].get(uk, 0) + 1
-    ihlal = _CEZA_PUANLARI[ck][uk]
-
-    if ihlal <= 2:
-        # Önce uyarıyı gönder, sonra 1.5sn içinde ikisini birden sil
-        uyari = await context.bot.send_message(
-            chat_id=chat.id,
-            text=(
-                f"⚠️ Hop orada dur reis! {mention}, sohbet tarzımız bu gruba yakışmadı. "
-                f"Kendini düzelt! (Uyarı: {ihlal}/3)"
-            ),
-            parse_mode='HTML'
-        )
-        asyncio.create_task(_kufur_cift_sil(context, chat.id, kufur_msg_id, uyari.message_id))
-    else:
-        _CEZA_PUANLARI[ck][uk] = 0
-        # Küfürlü mesajı 1.5sn sonra sil
-        asyncio.create_task(_kufur_tekli_sil(context, chat.id, kufur_msg_id))
-        mute_sure = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
-        try:
-            await context.bot.restrict_chat_member(
-                chat_id=chat.id,
-                user_id=user.id,
-                permissions=ChatPermissions(can_send_messages=False),
-                until_date=mute_sure
+async def qr_url_gonder(bot, chat_id: int, metin: str, reply_markup=None) -> None:
+    encoded = urllib.parse.quote(metin, safe='')
+    url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded}&size=400x400&margin=10&format=png"
+    try:
+        r = http_requests.get(url, timeout=10)
+        if r.status_code == 200:
+            import io
+            foto = io.BytesIO(r.content)
+            foto.name = "qr.png"
+            await bot.send_photo(
+                chat_id=chat_id,
+                photo=foto,
+                caption=f"📱 <b>QR KOD</b>\n\n<code>{html.escape(metin[:100])}</code>",
+                parse_mode='HTML',
+                reply_markup=reply_markup
             )
-        except Exception as e:
-            logger.warning(f"Mute yapılamadı ({user.id}): {e}")
-        await context.bot.send_message(
-            chat_id=chat.id,
-            text=(
-                f"🤫 Racon Kesildi! {mention} 3 kez kural ihlali yaptığı için "
-                f"sistem tarafından 2 saat sessize alındı!"
-            ),
-            parse_mode='HTML'
-        )
+        else:
+            await bot.send_message(chat_id, "❌ QR kod oluşturulamadı.", reply_markup=reply_markup)
+    except Exception as e:
+        await bot.send_message(chat_id, f"❌ Hata: {html.escape(str(e))}", reply_markup=reply_markup)
+
+async def url_kisalt(url: str) -> str:
+    try:
+        encoded = urllib.parse.quote(url, safe='')
+        r = http_requests.get(f"https://tinyurl.com/api-create.php?url={encoded}", timeout=8)
+        if r.status_code == 200 and r.text.startswith('http'):
+            return r.text.strip()
+    except Exception:
+        pass
+    return url
 
 # ══════════════════════════════════════════════════════
 
@@ -8214,16 +8670,15 @@ def main():
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
-    # 🛡️ Küfür Kalkanı — gruplar + ZAMANLI_KANAL (group=1 → mevcut handlerlarla çakışmaz)
-    application.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND & (
-                filters.ChatType.GROUPS | filters.Chat(chat_id=ZAMANLI_KANAL_ID)
-            ),
-            kufur_kalkani_handler
-        ),
-        group=1
-    )
+    # 🛡️ GRUP YÖNETİM KOMUTLARI
+    application.add_handler(CommandHandler("ban", ban_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("unban", unban_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("kick", kick_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("mute", mute_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("unmute", unmute_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("warn", warn_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("uyarilar", uyarilar_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("temizle", temizle_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO | filters.Document.MimeType("video/mp4") | filters.Document.MimeType("video/quicktime") | filters.Document.MimeType("video/x-msvideo")) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
     application.add_handler(MessageHandler((filters.PHOTO | filters.VOICE | filters.AUDIO | filters.Document.ALL | filters.Sticker.ALL | filters.ANIMATION | filters.VIDEO_NOTE) & filters.ChatType.PRIVATE, diger_medya_log_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
@@ -8309,6 +8764,14 @@ def main():
         try:
             grup_komutlari = [
                 BotCommand("atag", "Herkesi etiketle — /atag mesajın"),
+                BotCommand("ban", "Kullanıcı/bot ban — /ban @user"),
+                BotCommand("unban", "Ban kaldır — /unban @user"),
+                BotCommand("kick", "Gruptan at — /kick @user"),
+                BotCommand("mute", "Sustur — /mute @user 30d/2s/1g"),
+                BotCommand("unmute", "Sesi aç — /unmute @user"),
+                BotCommand("warn", "Uyarı ver — /warn @user sebep"),
+                BotCommand("uyarilar", "Uyarıları gör — /uyarilar @user"),
+                BotCommand("temizle", "Mesaj sil — /temizle 20"),
             ]
             await app.bot.set_my_commands(grup_komutlari, scope=BotCommandScopeAllGroupChats())
             logger.info("Grup komut listesi ayarlandı.")
