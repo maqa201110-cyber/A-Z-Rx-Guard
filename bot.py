@@ -17,6 +17,7 @@ import json
 import tempfile
 import shutil
 import urllib.parse
+import unicodedata as _ucd
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions, BotCommand, BotCommandScopeAllGroupChats, BotCommandScopeAllPrivateChats, BotCommandScopeDefault
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, JobQueue
 
@@ -4641,7 +4642,7 @@ def grup_uye_ekle(chat_id: int, user):
 
 
 async def atag_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Gruptaki tüm bilinen üyeleri etiketler. Sadece gruplarda çalışır."""
+    """Gruptaki TÜM üyeleri (adminler + kullanıcılar + botlar) etiketler. Sadece gruplarda çalışır."""
     msg = update.effective_message
     chat = update.effective_chat
     user = update.effective_user
@@ -4655,6 +4656,7 @@ async def atag_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         admins = await context.bot.get_chat_administrators(chat.id)
         admin_idler = {a.user.id for a in admins}
     except Exception:
+        admins = []
         admin_idler = set()
 
     if user.id not in admin_idler:
@@ -4663,50 +4665,63 @@ async def atag_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ek_mesaj = ' '.join(context.args) if context.args else ''
 
+    # Tüm etiketleri topla: önce adminler (botlar dahil), sonra takip edilen üyeler
+    eklenen_idler: set = set()
+    etiketler: list = []
+
+    # 1) Adminler ve botlar
+    for a in admins:
+        u = a.user
+        eklenen_idler.add(u.id)
+        if u.username:
+            etiketler.append(f"@{u.username}")
+        else:
+            etiketler.append(f"<a href='tg://user?id={u.id}'>{html.escape(u.first_name or '?')}</a>")
+
+    # 2) Takip edilen tüm üyeler (sınır yok)
     veriler = grup_uyeleri_yukle()
     uyeler = veriler.get(str(chat.id), {})
-
-    if not uyeler:
-        # Hiç üye takip edilmemişse adminleri etiketle
-        satirlar = []
-        for a in admins:
-            if not a.user.is_bot:
-                if a.user.username:
-                    satirlar.append(f"@{a.user.username}")
-                else:
-                    satirlar.append(f"<a href='tg://user?id={a.user.id}'>{html.escape(a.user.first_name or '?')}</a>")
-        if not satirlar:
-            await msg.reply_text("📭 Henüz etiketlenecek üye bulunamadı.")
-            return
-        metin = ("📢 " + ek_mesaj + "\n\n" if ek_mesaj else "📢\n\n") + " ".join(satirlar)
-        await msg.reply_text(metin, parse_mode='HTML')
-        return
-
-    # Bilinen üyeleri etiketle (en fazla 50, Telegram limiti)
-    etiketler = []
-    for uid, bilgi in list(uyeler.items())[:50]:
+    for uid_str, bilgi in uyeler.items():
+        try:
+            uid_int = int(uid_str)
+        except ValueError:
+            continue
+        if uid_int in eklenen_idler:
+            continue
+        eklenen_idler.add(uid_int)
         if bilgi.get('kullanici_adi'):
             etiketler.append(f"@{bilgi['kullanici_adi']}")
         else:
             isim = html.escape(bilgi.get('isim', '?') or '?')
-            etiketler.append(f"<a href='tg://user?id={uid}'>{isim}</a>")
+            etiketler.append(f"<a href='tg://user?id={uid_str}'>{isim}</a>")
 
-    metin = ("📢 " + ek_mesaj + "\n\n" if ek_mesaj else "📢\n\n") + " ".join(etiketler)
+    if not etiketler:
+        await msg.reply_text("📭 Henüz etiketlenecek üye bulunamadı.")
+        return
 
-    # 4096 karakter sınırı — gerekirse böl
-    if len(metin) <= 4096:
+    baslik = f"📢 {ek_mesaj}\n\n" if ek_mesaj else "📢\n\n"
+
+    # 4096 karakter sınırı — gerekirse parçalara böl
+    async def _gonder_parca(parca_etiketler: list, ilk: bool):
+        on = baslik if ilk else ""
+        metin = on + " ".join(parca_etiketler)
         await msg.reply_text(metin, parse_mode='HTML')
-    else:
-        parca = ""
-        for e in etiketler:
-            if len(parca) + len(e) + 1 > 4000:
-                await msg.reply_text(("📢 " + ek_mesaj + "\n\n" if ek_mesaj else "") + parca, parse_mode='HTML')
-                parca = e + " "
-                ek_mesaj = ""
-            else:
-                parca += e + " "
-        if parca.strip():
-            await msg.reply_text(parca, parse_mode='HTML')
+
+    parca: list = []
+    parca_uzunluk = len(baslik)
+    ilk_parca = True
+    for e in etiketler:
+        eklenecek = len(e) + 1
+        if parca_uzunluk + eklenecek > 4000 and parca:
+            await _gonder_parca(parca, ilk_parca)
+            ilk_parca = False
+            parca = [e]
+            parca_uzunluk = eklenecek
+        else:
+            parca.append(e)
+            parca_uzunluk += eklenecek
+    if parca:
+        await _gonder_parca(parca, ilk_parca)
 
 
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -7998,6 +8013,139 @@ async def yuzde_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Geçersiz format! `/yuzde` yazarak yardım al.", parse_mode='Markdown')
 
 # ══════════════════════════════════════════════════════
+# 🛡️ GELİŞMİŞ KÜFÜR KALKANI — AZRxGUARD Shield v2.0
+# ══════════════════════════════════════════════════════
+
+_KUFUR_URLS = [
+    "https://raw.githubusercontent.com/GreatPaymaster/profanity-turkish/main/turkish.txt",
+    "https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/tr",
+    "https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en",
+    "https://raw.githubusercontent.com/nickelc/grawlix/master/words.txt",
+    "https://raw.githubusercontent.com/RobertJGabriel/Google-profanity-words/master/list.txt",
+]
+
+_KUFUR_YEDEK: set = {
+    "fuck", "shit", "bitch", "ass", "asshole", "bastard", "dick", "pussy",
+    "cock", "cunt", "whore", "slut", "nigger", "nigga", "faggot",
+    "motherfucker", "bullshit", "wank", "twat", "prick",
+}
+
+KUFUR_SETI: set = set()
+_CEZA_PUANLARI: dict = {}
+
+def canli_kufur_listesi_yukle() -> None:
+    global KUFUR_SETI
+    toplam: set = set()
+    for url in _KUFUR_URLS:
+        try:
+            r = http_requests.get(url, timeout=6)
+            if r.status_code == 200:
+                toplam.update(
+                    k.strip().lower()
+                    for k in r.text.splitlines()
+                    if k.strip() and not k.startswith('#') and len(k.strip()) >= 3
+                )
+        except Exception as e:
+            logger.warning(f"Küfür listesi çekilemedi ({url}): {e}")
+    if toplam:
+        KUFUR_SETI = toplam
+        logger.info(f"🛡️ Küfür Kalkanı aktif: {len(KUFUR_SETI)} kelime internetten yüklendi.")
+    else:
+        KUFUR_SETI = set(_KUFUR_YEDEK)
+        logger.warning(f"🛡️ İnternet yok — yedek liste devrede ({len(KUFUR_SETI)} kelime).")
+
+canli_kufur_listesi_yukle()
+
+def _metin_normalize(metin: str) -> str:
+    """Nokta, büyük harf, emoji ve tekrar eden harfleri temizler."""
+    metin = _ucd.normalize('NFKD', metin).lower()
+    metin = ''.join(
+        c for c in metin
+        if _ucd.category(c) not in ('So', 'Sm', 'Sk', 'Sc', 'Mn')
+    )
+    metin = re.sub(r'[^a-z0-9ğüşıöçâîûàáéèêëïôùú]', '', metin)
+    metin = re.sub(r'(.)\1{2,}', r'\1\1', metin)
+    return metin
+
+def _kufur_tespit(metin: str) -> bool:
+    temiz = _metin_normalize(metin)
+    for kelime in KUFUR_SETI:
+        if kelime and len(kelime) >= 3 and kelime in temiz:
+            return True
+    return False
+
+async def _kufur_uyari_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, msg_id: int, bekle: int = 25) -> None:
+    await asyncio.sleep(bekle)
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+    except Exception:
+        pass
+
+async def kufur_kalkani_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sessiz küfür kalkanı — sadece gruplarda çalışır, mevcut sistemlerle çakışmaz."""
+    msg = update.effective_message
+    if not msg or not msg.text:
+        return
+    chat = update.effective_chat
+    user = update.effective_user
+    if not chat or chat.type not in ('group', 'supergroup'):
+        return
+    if not user or user.is_bot:
+        return
+    if not _kufur_tespit(msg.text):
+        return
+
+    # Mesajı sil
+    try:
+        await context.bot.delete_message(chat_id=chat.id, message_id=msg.message_id)
+    except Exception:
+        pass
+
+    # Mention
+    if user.username:
+        mention = f"@{user.username}"
+    else:
+        mention = f"<a href='tg://user?id={user.id}'>{html.escape(user.first_name or '?')}</a>"
+
+    # Ceza sayacı
+    ck = str(chat.id)
+    uk = str(user.id)
+    _CEZA_PUANLARI.setdefault(ck, {})
+    _CEZA_PUANLARI[ck][uk] = _CEZA_PUANLARI[ck].get(uk, 0) + 1
+    ihlal = _CEZA_PUANLARI[ck][uk]
+
+    if ihlal <= 2:
+        uyari = await context.bot.send_message(
+            chat_id=chat.id,
+            text=(
+                f"⚠️ Hop orada dur reis! {mention}, sohbet tarzımız bu gruba yakışmadı. "
+                f"Kendini düzelt! (Uyarı: {ihlal}/3)"
+            ),
+            parse_mode='HTML'
+        )
+        asyncio.create_task(_kufur_uyari_sil(context, chat.id, uyari.message_id, 25))
+    else:
+        _CEZA_PUANLARI[ck][uk] = 0
+        mute_sure = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
+        try:
+            await context.bot.restrict_chat_member(
+                chat_id=chat.id,
+                user_id=user.id,
+                permissions=ChatPermissions(can_send_messages=False),
+                until_date=mute_sure
+            )
+        except Exception as e:
+            logger.warning(f"Mute yapılamadı ({user.id}): {e}")
+        await context.bot.send_message(
+            chat_id=chat.id,
+            text=(
+                f"🤫 Racon Kesildi! {mention} 3 kez kural ihlali yaptığı için "
+                f"sistem tarafından 2 saat sessize alındı!"
+            ),
+            parse_mode='HTML'
+        )
+
+# ══════════════════════════════════════════════════════
 
 def main():
     uyanik_tut()
@@ -8029,6 +8177,11 @@ def main():
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
+    # 🛡️ Küfür Kalkanı — grup mesajlarında sessizce çalışır (group=1 → mevcut handlerlarla çakışmaz)
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, kufur_kalkani_handler),
+        group=1
+    )
     application.add_handler(MessageHandler((filters.VIDEO | filters.Document.VIDEO | filters.Document.MimeType("video/mp4") | filters.Document.MimeType("video/quicktime") | filters.Document.MimeType("video/x-msvideo")) & filters.ChatType.PRIVATE, medya_mesaj_yonet))
     application.add_handler(MessageHandler((filters.PHOTO | filters.VOICE | filters.AUDIO | filters.Document.ALL | filters.Sticker.ALL | filters.ANIMATION | filters.VIDEO_NOTE) & filters.ChatType.PRIVATE, diger_medya_log_yonet))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kanala_veya_gruba_yeni_uye_katildi))
@@ -8113,13 +8266,7 @@ def main():
         # Grup komutları görünür yap
         try:
             grup_komutlari = [
-                BotCommand("atag",     "Tüm üyeleri etiketle"),
-                BotCommand("ping",     "Bot gecikme testi"),
-                BotCommand("hava",     "Hava durumu — /hava İstanbul"),
-                BotCommand("kur",      "Döviz kuru — /kur USD"),
-                BotCommand("saat",     "Dünya saati"),
-                BotCommand("ip",       "IP sorgula"),
-                BotCommand("id",       "Kullanıcı/Grup ID"),
+                BotCommand("atag", "Herkesi etiketle — /atag mesajın"),
             ]
             await app.bot.set_my_commands(grup_komutlari, scope=BotCommandScopeAllGroupChats())
             logger.info("Grup komut listesi ayarlandı.")
