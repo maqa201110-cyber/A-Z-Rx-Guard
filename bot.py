@@ -4455,6 +4455,30 @@ async def _apk_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         await cp.reply_text('\n'.join(satirlar), parse_mode='Markdown', disable_web_page_preview=True)
         return
 
+    if komut in ('/info', '/komutlar', '/yardim'):
+        await cp.reply_text(
+            "📦 **APK-OBB-CONFİG — KANAL KOMUTLARI**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "📤 `/yükle` — Yeni dosya yükle\n"
+            "   ↳ İsim → Açıklama → Dosya → Link\n\n"
+            "🗑 `/sil` — Dosya sil (ismiyle)\n"
+            "   ↳ İsim yaz → tamamen silinir\n\n"
+            "📋 `/dosyalarım` — Tüm dosyaları listele\n"
+            "   ↳ İsim + tarih + indirme linki\n\n"
+            "ℹ️ `/info` — Bu yardım mesajı\n\n"
+            "❌ `/iptal` — Aktif işlemi iptal et\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n"
+            "✅ **Desteklenen uzantılar:**\n"
+            "`apk · obb · zip · rar · 7z · jar`\n"
+            "`config · cfg · ini · xml · json · lua`\n"
+            "`txt · dat · bin · pak · so · dex`\n"
+            "`tar · gz · bz2 · xz · zz · lz4`\n"
+            "`yaml · toml · db · sqlite · bak`\n"
+            "`patch · mod · unity3d · asset · vpk`",
+            parse_mode='Markdown'
+        )
+        return
+
     if komut == '/iptal':
         if _APK_KANAL_ID in _apk_yukleme_oturum:
             _apk_yukleme_oturum.pop(_APK_KANAL_ID)
