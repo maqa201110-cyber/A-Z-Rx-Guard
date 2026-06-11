@@ -13,8 +13,15 @@
         "ip": "aliyev7080.aternos.me",
         "port": 25565,
         "edition": "java"
+      },
+      "3": {
+        "id": "3",
+        "isim": "Smkkkm",
+        "ip": "aliyev7080.aternos.me",
+        "port": 25565,
+        "edition": "java"
       }
     }
   },
-  "sonraki_id": 3
+  "sonraki_id": 4
 }

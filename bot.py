@@ -6649,6 +6649,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton('1️⃣ BOT BAĞLANTISINI KES', callback_data=f'mc_kes_{bot_id}')],
             [InlineKeyboardButton('2️⃣ BOTU BAĞLA', callback_data=f'mc_bag_{bot_id}')],
             [InlineKeyboardButton('3️⃣ BOTU YENİDEN BAĞLA', callback_data=f'mc_yen_{bot_id}')],
+            [InlineKeyboardButton('🗑️ BOTU SİL', callback_data=f'mc_sil_{bot_id}')],
             [InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_v_{bot_id}')],
         ]
         await query.edit_message_text(
@@ -6657,6 +6658,40 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"📡 Sunucu: <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n"
             f"📶 Durum: <b>{durum_yazi}</b>\n\n"
             f"Bir işlem seç:",
+            reply_markup=InlineKeyboardMarkup(klavye),
+            parse_mode='HTML'
+        )
+    elif query.data.startswith('mc_silonay_'):
+        bot_id = query.data[11:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot zaten silinmiş!', show_alert=True)
+            return
+        await mc_bot_durdur(user_id, bot_id)
+        edition = bilgi.get('edition', MC_EDITION_JAVA)
+        isim_yedek = bilgi.get('isim', '?')
+        mc_bot_sil(user_id, bot_id)
+        geri_cb = 'menu_mc_j' if edition == MC_EDITION_JAVA else 'menu_mc_b'
+        await query.edit_message_text(
+            f"✅ <b>Bot Silindi</b>\n\n"
+            f"🤖 <b>{html.escape(isim_yedek)}</b> kalıcı olarak silindi.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('⬅️ Bot Listesine Dön', callback_data=geri_cb)]]),
+            parse_mode='HTML'
+        )
+    elif query.data.startswith('mc_sil_'):
+        bot_id = query.data[7:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        klavye = [
+            [InlineKeyboardButton('✅ Evet, Sil!', callback_data=f'mc_silonay_{bot_id}')],
+            [InlineKeyboardButton('❌ İptal', callback_data=f'mc_ayar_{bot_id}')],
+        ]
+        await query.edit_message_text(
+            f"🗑️ <b>Botu Sil</b>\n\n"
+            f"🤖 <b>{html.escape(bilgi['isim'])}</b> adlı botu silmek istediğinden emin misin?\n\n"
+            f"⚠️ Bu işlem geri alınamaz!",
             reply_markup=InlineKeyboardMarkup(klavye),
             parse_mode='HTML'
         )
@@ -6688,24 +6723,25 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             f"🔄 <b>Bot bağlanıyor...</b>\n\n"
             f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
-            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>",
+            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n\n"
+            f"<i>⏳ Sunucu yanıtı bekleniyor (maks 20sn)...</i>",
             parse_mode='HTML'
         )
-        basarili = await mc_bot_baslat(user_id, bot_id, context.bot)
+        basarili, hata = await mc_bot_baslat(user_id, bot_id, context.bot)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_ayar_{bot_id}')]])
         if basarili:
-            await asyncio.sleep(2)
             await query.edit_message_text(
-                f"✅ <b>Bot bağlandı!</b>\n\n"
+                f"✅ <b>Bot sunucuya bağlandı!</b>\n\n"
                 f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
                 f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n\n"
-                f"🟢 Sunucuya giriş yapıldı. TPA istekleri otomatik reddedilecek.",
+                f"🟢 Sunucuda aktif. TPA istekleri otomatik reddedilecek.",
                 reply_markup=geri_klavye, parse_mode='HTML'
             )
         else:
             await query.edit_message_text(
-                f"❌ <b>Bağlantı başlatılamadı!</b>\n\n"
-                f"Node.js ve mineflayer kurulu olduğundan emin ol.",
+                f"❌ <b>Bağlantı başarısız!</b>\n\n"
+                f"📋 Hata: <code>{html.escape(hata)}</code>\n\n"
+                f"💡 Sunucunun açık olduğundan ve IP/port'un doğru olduğundan emin ol.",
                 reply_markup=geri_klavye, parse_mode='HTML'
             )
     elif query.data.startswith('mc_yen_'):
@@ -6717,15 +6753,15 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             f"🔄 <b>Bot yeniden bağlanıyor...</b>\n\n"
             f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
-            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>",
+            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n\n"
+            f"<i>⏳ Sunucu yanıtı bekleniyor (maks 20sn)...</i>",
             parse_mode='HTML'
         )
         await mc_bot_durdur(user_id, bot_id)
         await asyncio.sleep(1)
-        basarili = await mc_bot_baslat(user_id, bot_id, context.bot)
+        basarili, hata = await mc_bot_baslat(user_id, bot_id, context.bot)
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_ayar_{bot_id}')]])
         if basarili:
-            await asyncio.sleep(2)
             await query.edit_message_text(
                 f"✅ <b>Bot yeniden bağlandı!</b>\n\n"
                 f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
@@ -6735,7 +6771,9 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             await query.edit_message_text(
-                f"❌ <b>Yeniden bağlantı başlatılamadı!</b>",
+                f"❌ <b>Yeniden bağlantı başarısız!</b>\n\n"
+                f"📋 Hata: <code>{html.escape(hata)}</code>\n\n"
+                f"💡 Sunucunun açık olduğundan emin ol.",
                 reply_markup=geri_klavye, parse_mode='HTML'
             )
     elif query.data.startswith('mc_mod_h_'):
@@ -9222,6 +9260,18 @@ def mc_bot_ekle(user_id: int, isim: str, ip: str, port: int, edition: str = MC_E
     return bot_id
 
 
+def mc_bot_sil(user_id: int, bot_id: str) -> bool:
+    """Kullanıcının MC botunu kalıcı olarak siler."""
+    veri = _mc_veri_yukle()
+    user_key = str(user_id)
+    bot_id = str(bot_id)
+    if user_key in veri['botlar'] and bot_id in veri['botlar'][user_key]:
+        del veri['botlar'][user_key][bot_id]
+        _mc_veri_kaydet(veri)
+        return True
+    return False
+
+
 def mc_durum_emoji(user_id: int, bot_id: str) -> str:
     key = (user_id, str(bot_id))
     proc = _MC_PROSESLER.get(key)
@@ -9275,11 +9325,12 @@ async def _mc_monitor(user_id: int, bot_id: str, process, tg_bot):
         _MC_GOREVLER.pop(key, None)
 
 
-async def mc_bot_baslat(user_id: int, bot_id: str, tg_bot) -> bool:
-    """MC AFK botunu subprocess olarak başlatır. Edition'a göre doğru worker seçer."""
+async def mc_bot_baslat(user_id: int, bot_id: str, tg_bot) -> tuple[bool, str]:
+    """MC AFK botunu başlatır; gerçek sunucu bağlantısını 20sn bekler.
+    Returns (success, hata_mesajı)."""
     bilgi = mc_bot_bilgi(user_id, bot_id)
     if not bilgi:
-        return False
+        return False, 'Bot bilgisi bulunamadı'
     key = (user_id, str(bot_id))
     await mc_bot_durdur(user_id, bot_id)
     edition = bilgi.get('edition', MC_EDITION_JAVA)
@@ -9293,12 +9344,39 @@ async def mc_bot_baslat(user_id: int, bot_id: str, tg_bot) -> bool:
             stdin=asyncio.subprocess.PIPE,
         )
         _MC_PROSESLER[key] = process
-        task = asyncio.create_task(_mc_monitor(user_id, bot_id, process, tg_bot))
-        _MC_GOREVLER[key] = task
-        return True
+        # Gerçek sunucu bağlantısını bekle (20 saniye)
+        try:
+            async with asyncio.timeout(20):
+                while True:
+                    line = await process.stdout.readline()
+                    if not line:
+                        _MC_PROSESLER.pop(key, None)
+                        return False, 'Sunucu bağlantı isteğini kapattı'
+                    try:
+                        data = json.loads(line.decode().strip())
+                    except Exception:
+                        continue
+                    event = data.get('event')
+                    if event == 'connected':
+                        logger.info(f"MC Bot gerçek bağlantı: user={user_id} bot_id={bot_id}")
+                        task = asyncio.create_task(_mc_monitor(user_id, bot_id, process, tg_bot))
+                        _MC_GOREVLER[key] = task
+                        return True, ''
+                    elif event in ('kicked', 'error', 'disconnected'):
+                        reason = data.get('reason') or data.get('message') or 'Bilinmeyen hata'
+                        _MC_PROSESLER.pop(key, None)
+                        return False, str(reason)[:300]
+        except asyncio.TimeoutError:
+            try:
+                process.kill()
+            except Exception:
+                pass
+            _MC_PROSESLER.pop(key, None)
+            return False, '⏱ Zaman aşımı (20sn) — sunucu kapalı, IP/port yanlış veya online-mode aktif olabilir'
     except Exception as e:
         logger.error(f"MC bot başlatma hatası: {e}")
-        return False
+        _MC_PROSESLER.pop(key, None)
+        return False, str(e)[:200]
 
 
 async def mc_bot_durdur(user_id: int, bot_id: str):
