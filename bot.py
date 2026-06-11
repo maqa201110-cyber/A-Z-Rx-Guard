@@ -7294,8 +7294,8 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         if not girdi:
             await update.message.reply_text("❌ Boş metin gönderilemez!")
             return
-        if len(girdi) > 60:
-            await update.message.reply_text("❌ Metin en fazla 60 karakter olabilir.")
+        if len(girdi) > 500:
+            await update.message.reply_text("❌ Metin en fazla 500 karakter olabilir.")
             return
         satirlar = [f"🔤 <b>İSİM FONTU</b> — <code>{html.escape(girdi)}</code>\n{'─'*22}"]
         for i, (stil_id, stil_adi) in enumerate(_ISIM_FONTU_LISTESI, 1):
@@ -8464,10 +8464,18 @@ async def _hedef_al(update: Update, context) -> tuple:
             return uid, f"<code>{uid}</code>"
         except ValueError:
             username = arg.lstrip('@')
+            # Önce grup üyeleri içinde ara
             try:
                 uye = await context.bot.get_chat_member(update.effective_chat.id, f"@{username}")
                 u = uye.user
                 return u.id, f"<a href='tg://user?id={u.id}'>{html.escape(u.first_name or username)}</a>"
+            except Exception:
+                pass
+            # Grup üyeleri içinde bulunamazsa Telegram global arama
+            try:
+                chat = await context.bot.get_chat(f"@{username}")
+                isim = getattr(chat, 'first_name', None) or getattr(chat, 'title', None) or username
+                return chat.id, f"<a href='tg://user?id={chat.id}'>{html.escape(isim)}</a>"
             except Exception:
                 return None, None
     return None, None
