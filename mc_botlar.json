@@ -1,27 +1,6 @@
 {
   "botlar": {
-    "5730924995": {
-      "1": {
-        "id": "1",
-        "isim": "Mmm",
-        "ip": "aliyev7080.aternos.me",
-        "port": 19132
-      },
-      "2": {
-        "id": "2",
-        "isim": "AMA",
-        "ip": "aliyev7080.aternos.me",
-        "port": 25565,
-        "edition": "java"
-      },
-      "3": {
-        "id": "3",
-        "isim": "Smkkkm",
-        "ip": "aliyev7080.aternos.me",
-        "port": 25565,
-        "edition": "java"
-      }
-    }
+    "5730924995": {}
   },
-  "sonraki_id": 4
+  "sonraki_id": 5
 }

@@ -6591,11 +6591,35 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(satirlar),
             parse_mode='HTML'
         )
+    elif query.data == 'mc_jport_def':
+        mc_yeni = context.user_data.get('mc_yeni', {})
+        mc_yeni['port'] = 25565
+        context.user_data['mc_yeni'] = mc_yeni
+        context.user_data['durum'] = 'mc_isim_bekle'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data='menu_mc_j')]])
+        await query.edit_message_text(
+            f"✅ IP: <code>{html.escape(mc_yeni.get('ip', ''))}</code>\n"
+            f"✅ Port: <code>25565</code> (Java varsayılanı)\n\n"
+            f"🤖 <b>3/3 — Bot için bir isim gir:</b>\n"
+            f"<i>Bu isim Minecraft'ta oyuncu adı olarak görünür.\n"
+            f"3-16 karakter, harf/rakam/alt çizgi.</i>",
+            reply_markup=geri, parse_mode='HTML'
+        )
+    elif query.data == 'mc_jport_custom':
+        mc_yeni = context.user_data.get('mc_yeni', {})
+        context.user_data['durum'] = 'mc_port_bekle'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data='menu_mc_j')]])
+        await query.edit_message_text(
+            f"✅ IP: <code>{html.escape(mc_yeni.get('ip', ''))}</code>\n\n"
+            f"🔢 <b>2/3 — Sunucu Port numarasını gir:</b>\n"
+            f"<i>☕ Java varsayılanı: <b>25565</b></i>",
+            reply_markup=geri, parse_mode='HTML'
+        )
     elif query.data in ('mc_yeni_j', 'mc_yeni_b'):
         edition = MC_EDITION_JAVA if query.data == 'mc_yeni_j' else MC_EDITION_BEDROCK
         if edition == MC_EDITION_JAVA:
             baslik = '☕ Yeni Java AFK Bot'
-            adim = '1/2'
+            adim = '1/3'
         else:
             baslik = '🪨 Yeni Bedrock AFK Bot'
             adim = '1/3'
@@ -6849,22 +6873,23 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         edition = mc_yeni.get('edition', MC_EDITION_JAVA)
         mc_yeni['ip'] = ip_girdisi
         geri_cb = 'menu_mc_j' if edition == MC_EDITION_JAVA else 'menu_mc_b'
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data=geri_cb)]])
         if edition == MC_EDITION_JAVA:
-            # Java: port yok — direkt isim adımına geç
-            mc_yeni['port'] = 25565
-            context.user_data['durum'] = 'mc_isim_bekle'
+            # Java: iki seçenek sun — varsayılan port veya özel port
+            context.user_data['durum'] = 'mc_java_port_sec'
+            klavye = InlineKeyboardMarkup([
+                [InlineKeyboardButton('✅ Varsayılan Port (25565)', callback_data='mc_jport_def')],
+                [InlineKeyboardButton('🔢 Özel Port Gir', callback_data='mc_jport_custom')],
+                [InlineKeyboardButton('❌ İptal', callback_data=geri_cb)],
+            ])
             await update.message.reply_text(
-                f"✅ IP: <code>{html.escape(ip_girdisi)}</code>\n"
-                f"🔒 Port: <code>25565</code> <i>(Java varsayılanı, değiştirilemez)</i>\n\n"
-                f"🤖 <b>2/2 — Bot için bir isim gir:</b>\n"
-                f"<i>Bu isim Minecraft'ta oyuncu adı olarak görünür.\n"
-                f"3-16 karakter, harf/rakam/alt çizgi.</i>",
-                reply_markup=geri, parse_mode='HTML'
+                f"✅ IP: <code>{html.escape(ip_girdisi)}</code>\n\n"
+                f"🔢 <b>2/3 — Port seçin:</b>",
+                reply_markup=klavye, parse_mode='HTML'
             )
         else:
             # Bedrock: port sor
             context.user_data['durum'] = 'mc_port_bekle'
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data=geri_cb)]])
             await update.message.reply_text(
                 f"✅ IP: <code>{html.escape(ip_girdisi)}</code>\n\n"
                 f"🔢 <b>2/3 — Sunucu Port numarasını gir:</b>\n"
@@ -6887,7 +6912,8 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             return
         mc_yeni = context.user_data.setdefault('mc_yeni', {})
         mc_yeni['port'] = port_val
-        geri_cb = 'menu_mc_b'
+        edition = mc_yeni.get('edition', MC_EDITION_JAVA)
+        geri_cb = 'menu_mc_j' if edition == MC_EDITION_JAVA else 'menu_mc_b'
         context.user_data['durum'] = 'mc_isim_bekle'
         geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data=geri_cb)]])
         await update.message.reply_text(
