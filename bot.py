@@ -7304,21 +7304,29 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             except Exception:
                 donusmus = girdi
             satirlar.append(f"{i:02d}. {donusmus}  <i>— {stil_adi}</i>")
-        satirlar.append(f"\n{'─'*22}\n📋 <i>Beğendiğin fontu kopyalayabilirsin!</i>")
-        sonuc = '\n'.join(satirlar)
+        satirlar.append(f"{'─'*22}\n📋 <i>Beğendiğin fontu kopyalayabilirsin!</i>")
         geri_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton('🔄 Yeni Metin', callback_data='pro_isim_fontu')],
             [InlineKeyboardButton('⬅️ Geri', callback_data='menu_pro_araclar')],
         ])
-        # Mesaj çok uzunsa ikiye böl
-        if len(sonuc) > 4000:
-            yarim = len(_ISIM_FONTU_LISTESI) // 2
-            kisim1 = '\n'.join(satirlar[:yarim+1])
-            kisim2 = '\n'.join(satirlar[yarim+1:])
-            await update.message.reply_text(kisim1, parse_mode='HTML')
-            await update.message.reply_text(kisim2, reply_markup=geri_klavye, parse_mode='HTML')
-        else:
-            await update.message.reply_text(sonuc, reply_markup=geri_klavye, parse_mode='HTML')
+        # Unicode matematik harfleri Telegram'da 2 UTF-16 birimi sayılır.
+        # Güvenli bölme: UTF-16 uzunluğunu gerçek hesapla, maks 3000 birim/mesaj.
+        def _utf16(s: str) -> int:
+            return sum(2 if ord(c) > 0xFFFF else 1 for c in s)
+        MAX_UTF16 = 3000
+        parcalar: list[list[str]] = [[]]
+        parca_uzun = 0
+        for satir in satirlar:
+            satir_utf16 = _utf16(satir) + 1  # +1 newline
+            if parca_uzun + satir_utf16 > MAX_UTF16 and parcalar[-1]:
+                parcalar.append([])
+                parca_uzun = 0
+            parcalar[-1].append(satir)
+            parca_uzun += satir_utf16
+        for idx, parca in enumerate(parcalar):
+            metin = '\n'.join(parca)
+            klavye = geri_klavye if idx == len(parcalar) - 1 else None
+            await update.message.reply_text(metin, reply_markup=klavye, parse_mode='HTML')
         return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
