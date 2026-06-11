@@ -132,6 +132,36 @@ YAZI_TIPI_HARITASI: dict = {
         'ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ'),
 }
 
+# ─── İSİM FONTU — EK KARAKTER HARİTALARI ────────────────────────
+_IF_EK_HARITALAR: dict = {
+    'sans_serif':   _harita_olustur(
+        '𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹',
+        '𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓'),
+    'script':       _harita_olustur(
+        '𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵',
+        '𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏'),
+    'bold_script':  _harita_olustur(
+        '𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩',
+        '𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃'),
+    'bold_fraktur': _harita_olustur(
+        '𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅',
+        '𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟'),
+    'fullwidth':    _harita_olustur(
+        'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ',
+        'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ',
+        '０１２３４５６７８９'),
+    'small_caps':   _harita_olustur(
+        'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ',
+        'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ'),
+    'superscript':  _harita_olustur(
+        'ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁᵛᵂˣʸᶻ',
+        'ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖqʳˢᵗᵘᵛʷˣʸᶻ',
+        '⁰¹²³⁴⁵⁶⁷⁸⁹'),
+    'inverted':     _harita_olustur(
+        '∀ᗺƆᗡƎℲƃHIſʞ˥WNOdQᴚS⊥∩ΛMXʎZ',
+        'ɐqɔpǝɟɓɥıɾʞlɯuodbɹsʇnʌʍxʎz'),
+}
+
 # Turkish character decomposition for font transformation
 _TR_DECOMP = {
     'ö': 'o\u0308', 'Ö': 'O\u0308',
@@ -217,6 +247,143 @@ def font_donustur(metin: str, font_id: str) -> str:
         i += 1
 
     return ''.join(result)
+
+# ─── İSİM FONTU DÖNÜŞTÜRÜCÜ ──────────────────────────────────────
+_IF_SEP = {
+    'sep_star':'★','sep_dot':'·','sep_diamond':'◆','sep_heart':'♥',
+    'sep_arrow':'→','sep_tri':'▸','sep_bullet':'•','sep_pipe':'│',
+    'sep_wave':'~','sep_star4':'✦','sep_plus':'+','sep_dash':'-',
+    'sep_space2':'  ','sep_times':'×','sep_slash':'/',
+}
+_IF_COMBO = {
+    'bold_strike':   ('bold',          '\u0336'),
+    'bold_under':    ('bold',          '\u0332'),
+    'bold_over':     ('bold',          '\u0305'),
+    'italic_strike': ('italic',        '\u0336'),
+    'mono_under':    ('monospace',     '\u0332'),
+    'script_under':  ('script',        '\u0332'),
+    'dstruck_str':   ('double_struck', '\u0336'),
+    'fraktur_under': ('fraktur',       '\u0332'),
+    'bscript_under': ('bold_script',   '\u0332'),
+    'fw_under':      ('fullwidth',     '\u0332'),
+}
+_IF_BOLD_SEP = {
+    'bold_sep_star':    ('bold',         '★'),
+    'bold_sep_dot':     ('bold',         '·'),
+    'bold_sep_diamond': ('bold',         '◆'),
+    'italic_sep_star':  ('italic',       '★'),
+    'script_sep_dot':   ('script',       '·'),
+    'mono_sep_bullet':  ('monospace',    '•'),
+    'bscript_sep_star': ('bold_script',  '★'),
+}
+_IF_COMB_MARK = {
+    'overline':    '\u0305',
+    'double_under':'\u0333',
+    'tilde':       '\u0303',
+    'dot_above':   '\u0307',
+    'ring':        '\u030a',
+    'wavy_below':  '\u0330',
+    'dot_below':   '\u0323',
+    'xthrough':    '\u0338',
+}
+
+def _isim_fontu_uygula(metin: str, stil: str) -> str:
+    """Apply a font style transformation for İsim Fontu feature."""
+    if stil in _IF_SEP:
+        return _IF_SEP[stil].join(metin)
+    if stil in _IF_BOLD_SEP:
+        base, sep = _IF_BOLD_SEP[stil]
+        return sep.join(_isim_fontu_uygula(c, base) for c in metin)
+    if stil in _IF_COMBO:
+        base, comb = _IF_COMBO[stil]
+        return ''.join(c + comb for c in _isim_fontu_uygula(metin, base))
+    if stil in _IF_COMB_MARK:
+        comb = _IF_COMB_MARK[stil]
+        return ''.join(c + comb for c in metin)
+    if stil == 'inverted':
+        h = _IF_EK_HARITALAR['inverted']
+        return ''.join(h.get(c, c) for c in reversed(metin))
+    if stil in YAZI_TIPI_HARITASI:
+        if stil == 'strikethrough':
+            return ''.join(c + '\u0336' for c in metin)
+        elif stil == 'underline':
+            return ''.join(c + '\u0332' for c in metin)
+        h = YAZI_TIPI_HARITASI[stil]
+        return ''.join(h.get(c, c) for c in metin)
+    if stil in _IF_EK_HARITALAR:
+        h = _IF_EK_HARITALAR[stil]
+        return ''.join(h.get(c, c) for c in metin)
+    return metin
+
+_ISIM_FONTU_LISTESI = [
+    # ── Bot ayarlarındaki fontlar ──
+    ('bold',            '𝐁𝐨𝐥𝐝'),
+    ('italic',          '𝐼𝑡𝑎𝑙𝑖𝑐'),
+    ('bold_italic',     '𝑩𝒐𝒍𝒅 𝑰𝒕𝒂𝒍𝒊𝒄'),
+    ('sans_bold',       '𝗦𝗮𝗻𝘀 𝗕𝗼𝗹𝗱'),
+    ('sans_italic',     '𝘚𝘢𝘯𝘴 𝘐𝘵𝘢𝘭𝘪𝘤'),
+    ('sans_bold_italic','𝙎𝘽 𝙄𝙩𝙖𝙡𝙞𝙘'),
+    ('monospace',       '𝙼𝚘𝚗𝚘𝚜𝚙𝚊𝚌𝚎'),
+    ('double_struck',   '𝔻𝕠𝕦𝕓𝕝𝕖 𝕊𝕥𝕣𝕦𝕔𝕜'),
+    ('fraktur',         '𝔉𝔯𝔞𝔨𝔱𝔲𝔯'),
+    ('bubble',          'Ⓑⓤⓑⓑⓛⓔ'),
+    ('strikethrough',   'S̶t̶r̶i̶k̶e̶t̶h̶r̶o̶u̶g̶h̶'),
+    ('underline',       'U͟n͟d͟e͟r͟l͟i͟n͟e͟'),
+    # ── Yeni Unicode Math Alphabets ──
+    ('sans_serif',      '𝖲𝖺𝗇𝗌-𝖲𝖾𝗋𝗂𝖿'),
+    ('script',          '𝒮𝒸𝓇𝒾𝓅𝓉'),
+    ('bold_script',     '𝓑𝓸𝓵𝓭 𝓢𝓬𝓻𝓲𝓹𝓽'),
+    ('bold_fraktur',    '𝕭𝖔𝖑𝖉 𝕱𝖗𝖆𝖐𝖙𝖚𝖗'),
+    # ── Özel Karakter Eşlemeleri ──
+    ('fullwidth',       'ＦＵＬＬ ＷＩＤＴＨ'),
+    ('small_caps',      'sᴍᴀʟʟ ᴄᴀᴘs'),
+    ('superscript',     'ˢᵘᵖᵉʳˢᶜʳⁱᵖᵗ'),
+    ('inverted',        'pǝʇɹǝʌuı'),
+    # ── Birleştirici Karakter Stilleri ──
+    ('overline',        'O̅v̅e̅r̅l̅i̅n̅e̅'),
+    ('double_under',    'D͇o͇u͇b͇l͇e͇ U͇n͇d͇e͇r͇'),
+    ('tilde',           'T̃ĩl̃d̃ẽ'),
+    ('dot_above',       'Ḋȯṫ Ȧḃȯṿė'),
+    ('ring',            'R̊i̊n̊g̊'),
+    ('wavy_below',      'W̰a̰v̰y̰'),
+    ('dot_below',       'Ḍọṭ Ḅẹḷọẉ'),
+    ('xthrough',        'X̸ T̸h̸r̸o̸u̸g̸h̸'),
+    # ── Kombo Stiller ──
+    ('bold_strike',     '𝐁̶𝐨̶𝐥̶𝐝̶ 𝐒̶𝐭̶𝐫̶𝐢̶𝐤̶𝐞̶'),
+    ('bold_under',      '𝐁͟𝐨͟𝐥͟𝐝͟ 𝐔͟𝐧͟𝐝͟𝐞͟𝐫͟'),
+    ('bold_over',       '𝐁̅𝐨̅𝐥̅𝐝̅ 𝐎̅𝐯̅𝐞̅𝐫̅'),
+    ('italic_strike',   '𝐼̶𝑡̶𝑎̶𝑙̶𝑖̶𝑐̶ 𝑆̶𝑡̶𝑟̶'),
+    ('mono_under',      '𝙼͟𝚘͟𝚗͟𝚘͟ 𝚄͟𝚗͟𝚍͟𝚎͟𝚛͟'),
+    ('script_under',    '𝒮͟𝒸͟𝓇͟𝒾͟𝓅͟𝓉͟'),
+    ('dstruck_str',     '𝔸̶𝔹̶ℂ̶ 𝕊̶𝕥̶𝕣̶'),
+    ('fraktur_under',   '𝔄͟𝔅͟ℭ͟ 𝔘͟𝔫͟𝔡͟'),
+    ('bscript_under',   '𝓑͟𝓸͟𝓵͟𝓭͟ 𝓢͟𝓬͟𝓻͟'),
+    ('fw_under',        'Ｆ͟Ｕ͟Ｌ͟Ｌ͟'),
+    # ── Ayırıcı Stiller ──
+    ('sep_star',        'A★B★C'),
+    ('sep_dot',         'A·B·C'),
+    ('sep_diamond',     'A◆B◆C'),
+    ('sep_heart',       'A♥B♥C'),
+    ('sep_arrow',       'A→B→C'),
+    ('sep_tri',         'A▸B▸C'),
+    ('sep_bullet',      'A•B•C'),
+    ('sep_pipe',        'A│B│C'),
+    ('sep_wave',        'A~B~C'),
+    ('sep_star4',       'A✦B✦C'),
+    ('sep_plus',        'A+B+C'),
+    ('sep_dash',        'A-B-C'),
+    ('sep_space2',      'A  B  C'),
+    ('sep_times',       'A×B×C'),
+    ('sep_slash',       'A/B/C'),
+    # ── Bold/Script + Ayırıcı Kombolar ──
+    ('bold_sep_star',    '𝐀★𝐁★𝐂'),
+    ('bold_sep_dot',     '𝐀·𝐁·𝐂'),
+    ('bold_sep_diamond', '𝐀◆𝐁◆𝐂'),
+    ('italic_sep_star',  '𝐴★𝐵★𝐶'),
+    ('script_sep_dot',   '𝒜·ℬ·𝒞'),
+    ('mono_sep_bullet',  '𝙰•𝙱•𝙲'),
+    ('bscript_sep_star', '𝓐★𝓑★𝓒'),
+]
 
 def get_font(context, user_id: int) -> str:
     """Get user's chosen font style id."""
@@ -5258,6 +5425,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🔠 Şifrele", callback_data='pro20_sifrele'),
              InlineKeyboardButton("💪 BMI", callback_data='pro20_bmi'),
              InlineKeyboardButton("💯 Yüzde", callback_data='pro20_yuzde')],
+            [InlineKeyboardButton("🔤 İsim Fontu", callback_data='pro_isim_fontu')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -5704,6 +5872,16 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ İptal", callback_data='menu_pro_araclar')]]),
             parse_mode='Markdown'
         )
+    elif query.data == 'pro_isim_fontu':
+        context.user_data['durum'] = 'isim_fontu_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
+        await query.edit_message_text(
+            "🔤 **İSİM FONTU**\n━━━━━━━━━━━━━━━━━━━━\n\n"
+            "İsmini veya istediğin metni yaz, bot sana **50+ farklı font stiliyle** göstersin!\n\n"
+            "Örnek: `MAQA` veya `Ahmet`",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+
     # ── END 2.0 ARAÇLAR ────────────────────────────────────────
     elif query.data == 'pro_sans':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
@@ -7110,6 +7288,38 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             )
         return
 
+    if context.user_data.get('durum') == 'isim_fontu_bekliyor':
+        context.user_data['durum'] = None
+        girdi = (update.message.text or '').strip()
+        if not girdi:
+            await update.message.reply_text("❌ Boş metin gönderilemez!")
+            return
+        if len(girdi) > 60:
+            await update.message.reply_text("❌ Metin en fazla 60 karakter olabilir.")
+            return
+        satirlar = [f"🔤 <b>İSİM FONTU</b> — <code>{html.escape(girdi)}</code>\n{'─'*22}"]
+        for i, (stil_id, stil_adi) in enumerate(_ISIM_FONTU_LISTESI, 1):
+            try:
+                donusmus = _isim_fontu_uygula(girdi, stil_id)
+            except Exception:
+                donusmus = girdi
+            satirlar.append(f"{i:02d}. {donusmus}  <i>— {stil_adi}</i>")
+        satirlar.append(f"\n{'─'*22}\n📋 <i>Beğendiğin fontu kopyalayabilirsin!</i>")
+        sonuc = '\n'.join(satirlar)
+        geri_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Yeni Metin', callback_data='pro_isim_fontu')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_pro_araclar')],
+        ])
+        # Mesaj çok uzunsa ikiye böl
+        if len(sonuc) > 4000:
+            yarim = len(_ISIM_FONTU_LISTESI) // 2
+            kisim1 = '\n'.join(satirlar[:yarim+1])
+            kisim2 = '\n'.join(satirlar[yarim+1:])
+            await update.message.reply_text(kisim1, parse_mode='HTML')
+            await update.message.reply_text(kisim2, reply_markup=geri_klavye, parse_mode='HTML')
+        else:
+            await update.message.reply_text(sonuc, reply_markup=geri_klavye, parse_mode='HTML')
+        return
 
 # --- 🖼️ FİLİGRAN SİSTEMİ ---
 FILIGRAN_KANALLARI = {-1003775055611, -1003930940829}
@@ -8291,7 +8501,12 @@ async def ban_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid, display = await _hedef_al(update, context)
     if not uid:
         await update.message.reply_text(
-            "ℹ️ Kullanım:\n<code>/ban @kullanici [sebep]</code>\nveya bir mesaja yanıt vererek\n<code>/ban [sebep]</code>",
+            "❌ <b>Kullanıcı bulunamadı!</b>\n\n"
+            "💡 <b>Kullanım:</b>\n"
+            "• Kişinin mesajına <b>yanıt ver</b> → <code>/ban [sebep]</code>\n"
+            "• Kullanıcı adıyla → <code>/ban @kullanici [sebep]</code>\n"
+            "• ID ile → <code>/ban 123456789</code>\n\n"
+            "⚠️ <i>@username yoksa mesaja yanıt vererek kullan!</i>",
             parse_mode='HTML'
         )
         return
@@ -8317,7 +8532,12 @@ async def unban_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     uid, display = await _hedef_al(update, context)
     if not uid:
-        await update.message.reply_text("ℹ️ Kullanım: <code>/unban @kullanici</code>", parse_mode='HTML')
+        await update.message.reply_text(
+            "❌ <b>Kullanıcı bulunamadı!</b>\n\n"
+            "💡 Mesaja yanıt ver → <code>/unban</code>\n"
+            "veya → <code>/unban @kullanici</code>",
+            parse_mode='HTML'
+        )
         return
     try:
         await context.bot.unban_chat_member(update.effective_chat.id, uid, only_if_banned=True)
@@ -8336,7 +8556,13 @@ async def kick_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     uid, display = await _hedef_al(update, context)
     if not uid:
-        await update.message.reply_text("ℹ️ Kullanım: <code>/kick @kullanici</code>", parse_mode='HTML')
+        await update.message.reply_text(
+            "❌ <b>Kullanıcı bulunamadı!</b>\n\n"
+            "💡 Mesaja yanıt ver → <code>/kick</code>\n"
+            "veya → <code>/kick @kullanici</code>\n\n"
+            "⚠️ <i>@username yoksa mesaja yanıt vererek kullan!</i>",
+            parse_mode='HTML'
+        )
         return
     try:
         await context.bot.ban_chat_member(update.effective_chat.id, uid)
@@ -8357,10 +8583,15 @@ async def mute_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid, display = await _hedef_al(update, context)
     if not uid:
         await update.message.reply_text(
-            "ℹ️ Kullanım:\n<code>/mute @kullanici 30d</code> — 30 dakika\n"
-            "<code>/mute @kullanici 2s</code> — 2 saat\n"
-            "<code>/mute @kullanici 1g</code> — 1 gün\n"
-            "<code>/mute @kullanici</code> — süresiz",
+            "❌ <b>Kullanıcı bulunamadı!</b>\n\n"
+            "💡 Mesaja yanıt ver → <code>/mute [süre]</code>\n"
+            "veya → <code>/mute @kullanici [süre]</code>\n\n"
+            "⏱ <b>Süre örnekleri:</b>\n"
+            "• <code>30d</code> = 30 dakika\n"
+            "• <code>2s</code> = 2 saat\n"
+            "• <code>1g</code> = 1 gün\n"
+            "• Süre yazmazsan = süresiz\n\n"
+            "⚠️ <i>@username yoksa mesaja yanıt vererek kullan!</i>",
             parse_mode='HTML'
         )
         return
@@ -8393,7 +8624,12 @@ async def unmute_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     uid, display = await _hedef_al(update, context)
     if not uid:
-        await update.message.reply_text("ℹ️ Kullanım: <code>/unmute @kullanici</code>", parse_mode='HTML')
+        await update.message.reply_text(
+            "❌ <b>Kullanıcı bulunamadı!</b>\n\n"
+            "💡 Mesaja yanıt ver → <code>/unmute</code>\n"
+            "veya → <code>/unmute @kullanici</code>",
+            parse_mode='HTML'
+        )
         return
     try:
         await context.bot.restrict_chat_member(
@@ -8422,7 +8658,10 @@ async def warn_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid, display = await _hedef_al(update, context)
     if not uid:
         await update.message.reply_text(
-            "ℹ️ Kullanım: <code>/warn @kullanici [sebep]</code>\nveya mesaja yanıt ver.",
+            "❌ <b>Kullanıcı bulunamadı!</b>\n\n"
+            "💡 Mesaja yanıt ver → <code>/warn [sebep]</code>\n"
+            "veya → <code>/warn @kullanici [sebep]</code>\n\n"
+            "⚠️ <i>Sebep yazmak zorunlu değil! 3 uyarıda otomatik ban.</i>",
             parse_mode='HTML'
         )
         return
