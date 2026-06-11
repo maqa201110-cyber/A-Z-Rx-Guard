@@ -1115,6 +1115,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton('📦 APK-OBB-CONFİG', callback_data='menu_apk_obb')
         ],
+        [
+            InlineKeyboardButton('🎮 MİNECRAFT 7/24 BOT', callback_data='menu_mc')
+        ],
     ]
     return InlineKeyboardMarkup(klavye)
 
@@ -6551,6 +6554,195 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ft(strings.get('sa_tarih_ask', '📅 Doğum tarihinizi girin (GG.AA.YYYY):'), context, user_id),
             reply_markup=geri, parse_mode='Markdown'
         )
+    # ─── 🎮 MİNECRAFT 7/24 BOT PANELİ ──────────────────────────
+    elif query.data == 'menu_mc':
+        botlar = mc_kullanici_botlari(user_id)
+        satirlar = []
+        for b in botlar:
+            emoji = mc_durum_emoji(user_id, b['id'])
+            satirlar.append([InlineKeyboardButton(
+                f"{emoji} {b['isim']} ({b['ip']}:{b['port']})",
+                callback_data=f"mc_v_{b['id']}"
+            )])
+        satirlar.append([InlineKeyboardButton('➕ Yeni Bot Oluştur', callback_data='mc_yeni')])
+        satirlar.append([InlineKeyboardButton('⬅️ Geri', callback_data='go_home')])
+        await query.edit_message_text(
+            "🎮 <b>MİNECRAFT 7/24 BOT</b>\n\n"
+            "Aşağıda sadece senin botların görünür.\n"
+            "Yeni bir AFK bot oluşturmak için butona bas.\n\n"
+            "🟢 = Bağlı   🔴 = Bağlantı Kesildi",
+            reply_markup=InlineKeyboardMarkup(satirlar),
+            parse_mode='HTML'
+        )
+    elif query.data == 'mc_yeni':
+        context.user_data['durum'] = 'mc_ip_bekle'
+        context.user_data['mc_yeni'] = {}
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data='menu_mc')]])
+        await query.edit_message_text(
+            "🎮 <b>Yeni Minecraft AFK Bot</b>\n\n"
+            "📡 <b>1/3 — Sunucu IP adresini gir:</b>\n"
+            "<i>Örnek: play.sunucu.com veya 192.168.1.1</i>",
+            reply_markup=geri, parse_mode='HTML'
+        )
+    elif query.data.startswith('mc_v_'):
+        bot_id = query.data[5:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        emoji = mc_durum_emoji(user_id, bot_id)
+        proc = _MC_PROSESLER.get((user_id, str(bot_id)))
+        durum_yazi = '🟢 Bağlı' if (proc and proc.returncode is None) else '🔴 Bağlantı Kesildi'
+        klavye = [
+            [
+                InlineKeyboardButton('⚔️ HAYATA KALMA', callback_data=f'mc_mod_h_{bot_id}'),
+                InlineKeyboardButton('🌟 YARATICI', callback_data=f'mc_mod_y_{bot_id}'),
+            ],
+            [InlineKeyboardButton('⚠️ BOT ÖZEL AYARLARI! ⚠️', callback_data=f'mc_ayar_{bot_id}')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_mc')],
+        ]
+        await query.edit_message_text(
+            f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n\n"
+            f"📡 Sunucu: <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n"
+            f"📶 Durum: <b>{durum_yazi}</b>\n\n"
+            f"Bir işlem seç:",
+            reply_markup=InlineKeyboardMarkup(klavye),
+            parse_mode='HTML'
+        )
+    elif query.data.startswith('mc_ayar_'):
+        bot_id = query.data[8:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        proc = _MC_PROSESLER.get((user_id, str(bot_id)))
+        durum_yazi = '🟢 Bağlı' if (proc and proc.returncode is None) else '🔴 Bağlantı Kesildi'
+        klavye = [
+            [InlineKeyboardButton('1️⃣ BOT BAĞLANTISINI KES', callback_data=f'mc_kes_{bot_id}')],
+            [InlineKeyboardButton('2️⃣ BOTU BAĞLA', callback_data=f'mc_bag_{bot_id}')],
+            [InlineKeyboardButton('3️⃣ BOTU YENİDEN BAĞLA', callback_data=f'mc_yen_{bot_id}')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_v_{bot_id}')],
+        ]
+        await query.edit_message_text(
+            f"⚠️ <b>BOT ÖZEL AYARLARI</b> ⚠️\n\n"
+            f"🤖 Bot: <b>{html.escape(bilgi['isim'])}</b>\n"
+            f"📡 Sunucu: <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n"
+            f"📶 Durum: <b>{durum_yazi}</b>\n\n"
+            f"Bir işlem seç:",
+            reply_markup=InlineKeyboardMarkup(klavye),
+            parse_mode='HTML'
+        )
+    elif query.data.startswith('mc_kes_'):
+        bot_id = query.data[7:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        await mc_bot_durdur(user_id, bot_id)
+        await query.answer('✅ Bot sunucudan çıkarıldı!', show_alert=False)
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_ayar_{bot_id}')]])
+        await query.edit_message_text(
+            f"🔌 <b>Bot Bağlantısı Kesildi</b>\n\n"
+            f"🤖 <b>{html.escape(bilgi['isim'])}</b> sunucudan çıkarıldı.\n"
+            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>",
+            reply_markup=geri_klavye, parse_mode='HTML'
+        )
+    elif query.data.startswith('mc_bag_'):
+        bot_id = query.data[7:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        proc = _MC_PROSESLER.get((user_id, str(bot_id)))
+        if proc and proc.returncode is None:
+            await query.answer('⚠️ Bot zaten bağlı!', show_alert=True)
+            return
+        await query.edit_message_text(
+            f"🔄 <b>Bot bağlanıyor...</b>\n\n"
+            f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
+            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>",
+            parse_mode='HTML'
+        )
+        basarili = await mc_bot_baslat(user_id, bot_id, context.bot)
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_ayar_{bot_id}')]])
+        if basarili:
+            await asyncio.sleep(2)
+            await query.edit_message_text(
+                f"✅ <b>Bot bağlandı!</b>\n\n"
+                f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
+                f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n\n"
+                f"🟢 Sunucuya giriş yapıldı. TPA istekleri otomatik reddedilecek.",
+                reply_markup=geri_klavye, parse_mode='HTML'
+            )
+        else:
+            await query.edit_message_text(
+                f"❌ <b>Bağlantı başlatılamadı!</b>\n\n"
+                f"Node.js ve mineflayer kurulu olduğundan emin ol.",
+                reply_markup=geri_klavye, parse_mode='HTML'
+            )
+    elif query.data.startswith('mc_yen_'):
+        bot_id = query.data[7:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        await query.edit_message_text(
+            f"🔄 <b>Bot yeniden bağlanıyor...</b>\n\n"
+            f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
+            f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>",
+            parse_mode='HTML'
+        )
+        await mc_bot_durdur(user_id, bot_id)
+        await asyncio.sleep(1)
+        basarili = await mc_bot_baslat(user_id, bot_id, context.bot)
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton('⬅️ Geri', callback_data=f'mc_ayar_{bot_id}')]])
+        if basarili:
+            await asyncio.sleep(2)
+            await query.edit_message_text(
+                f"✅ <b>Bot yeniden bağlandı!</b>\n\n"
+                f"🤖 <b>{html.escape(bilgi['isim'])}</b>\n"
+                f"📡 <code>{html.escape(bilgi['ip'])}:{bilgi['port']}</code>\n\n"
+                f"🟢 Sunucuya başarıyla giriş yapıldı.",
+                reply_markup=geri_klavye, parse_mode='HTML'
+            )
+        else:
+            await query.edit_message_text(
+                f"❌ <b>Yeniden bağlantı başlatılamadı!</b>",
+                reply_markup=geri_klavye, parse_mode='HTML'
+            )
+    elif query.data.startswith('mc_mod_h_'):
+        bot_id = query.data[9:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        proc = _MC_PROSESLER.get((user_id, str(bot_id)))
+        if proc and proc.returncode is None and proc.stdin:
+            try:
+                proc.stdin.write(b'{"cmd":"gamemode","mode":"survival"}\n')
+                await proc.stdin.drain()
+                await query.answer('⚔️ /gamemode survival komutu gönderildi!', show_alert=False)
+            except Exception:
+                await query.answer('❌ Komut gönderilemedi.', show_alert=True)
+        else:
+            await query.answer('❌ Bot şu an bağlı değil!', show_alert=True)
+    elif query.data.startswith('mc_mod_y_'):
+        bot_id = query.data[9:]
+        bilgi = mc_bot_bilgi(user_id, bot_id)
+        if not bilgi:
+            await query.answer('❌ Bot bulunamadı!', show_alert=True)
+            return
+        proc = _MC_PROSESLER.get((user_id, str(bot_id)))
+        if proc and proc.returncode is None and proc.stdin:
+            try:
+                proc.stdin.write(b'{"cmd":"gamemode","mode":"creative"}\n')
+                await proc.stdin.drain()
+                await query.answer('🌟 /gamemode creative komutu gönderildi!', show_alert=False)
+            except Exception:
+                await query.answer('❌ Komut gönderilemedi.', show_alert=True)
+        else:
+            await query.answer('❌ Bot şu an bağlı değil!', show_alert=True)
+    # ─── MC PANELİ SONU ──────────────────────────────────────────
     elif query.data == 'go_home':
         context.user_data['durum'] = None
         context.user_data['mevcut_kategori'] = None
@@ -6577,6 +6769,83 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         await log_kanali_gonder(context.bot, update)
     except Exception:
         pass
+
+    # ─── 🎮 MC BOT OLUŞTURMA ADIMLARI ───────────────────────────
+    if context.user_data.get('durum') == 'mc_ip_bekle':
+        ip_girdisi = update.message.text.strip()
+        if not re.match(r'^[a-zA-Z0-9.\-:]{2,253}$', ip_girdisi):
+            await update.message.reply_text(
+                "❌ Geçersiz IP/domain. Tekrar dene:\n<i>Örnek: play.sunucu.com veya 1.2.3.4</i>",
+                parse_mode='HTML'
+            )
+            return
+        context.user_data['mc_yeni'] = {'ip': ip_girdisi}
+        context.user_data['durum'] = 'mc_port_bekle'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data='menu_mc')]])
+        await update.message.reply_text(
+            f"✅ IP: <code>{html.escape(ip_girdisi)}</code>\n\n"
+            f"🔢 <b>2/3 — Sunucu Port numarasını gir:</b>\n"
+            f"<i>Örnek: 25565 (Minecraft varsayılanı)</i>",
+            reply_markup=geri, parse_mode='HTML'
+        )
+        return
+
+    if context.user_data.get('durum') == 'mc_port_bekle':
+        port_str = update.message.text.strip()
+        try:
+            port_val = int(port_str)
+            if not (1 <= port_val <= 65535):
+                raise ValueError
+        except ValueError:
+            await update.message.reply_text(
+                "❌ Geçersiz port (1–65535). Tekrar dene:\n<i>Örnek: 25565</i>",
+                parse_mode='HTML'
+            )
+            return
+        context.user_data.setdefault('mc_yeni', {})['port'] = port_val
+        context.user_data['durum'] = 'mc_isim_bekle'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('❌ İptal', callback_data='menu_mc')]])
+        await update.message.reply_text(
+            f"✅ Port: <code>{port_val}</code>\n\n"
+            f"🤖 <b>3/3 — Bot için bir isim gir:</b>\n"
+            f"<i>Bu isim Minecraft'ta oyuncu adı olarak görünür.\n"
+            f"3-16 karakter, harf/rakam/alt çizgi.</i>",
+            reply_markup=geri, parse_mode='HTML'
+        )
+        return
+
+    if context.user_data.get('durum') == 'mc_isim_bekle':
+        isim = update.message.text.strip()
+        if not re.match(r'^[a-zA-Z0-9_]{3,16}$', isim):
+            await update.message.reply_text(
+                "❌ Geçersiz isim! 3-16 karakter, sadece harf/rakam/alt çizgi.\n"
+                "<i>Örnek: AFK_Bot veya CraftBot1</i>",
+                parse_mode='HTML'
+            )
+            return
+        mc_data = context.user_data.get('mc_yeni', {})
+        ip_val = mc_data.get('ip', '')
+        port_val = mc_data.get('port', 25565)
+        if not ip_val:
+            context.user_data['durum'] = None
+            await update.message.reply_text("❌ Bir hata oluştu, tekrar dene.")
+            return
+        bot_id = mc_bot_ekle(user_id, isim, ip_val, port_val)
+        context.user_data['durum'] = None
+        context.user_data['mc_yeni'] = {}
+        baslat_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('▶️ Şimdi Bağlan!', callback_data=f'mc_bag_{bot_id}')],
+            [InlineKeyboardButton('⬅️ MC Menüsüne Dön', callback_data='menu_mc')],
+        ])
+        await update.message.reply_text(
+            f"✅ <b>Bot Oluşturuldu!</b>\n\n"
+            f"🤖 İsim: <b>{html.escape(isim)}</b>\n"
+            f"📡 Sunucu: <code>{html.escape(ip_val)}:{port_val}</code>\n\n"
+            f"Bota sunucuya bağlanmak için aşağıdaki butona bas:",
+            reply_markup=baslat_klavye, parse_mode='HTML'
+        )
+        return
+    # ─── MC BOT ADIMLARI SONU ────────────────────────────────────
 
     if context.user_data.get('durum') == 'admin_mesaj_bekliyor':
         user = update.effective_user
@@ -8844,6 +9113,157 @@ async def url_kisalt(url: str) -> str:
         pass
     return url
 
+# ═══════════════════════════════════════════════════════════════
+# 🎮 MİNECRAFT 7/24 BOT YÖNETİM SİSTEMİ
+# ═══════════════════════════════════════════════════════════════
+
+MC_WORKER_JS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mc_worker', 'worker.js')
+MC_VERI_DOSYASI = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mc_botlar.json')
+_MC_PROSESLER: dict = {}   # (user_id, bot_id) -> asyncio.Process
+_MC_GOREVLER: dict = {}    # (user_id, bot_id) -> asyncio.Task
+
+
+def _mc_veri_yukle() -> dict:
+    try:
+        with open(MC_VERI_DOSYASI, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {'botlar': {}, 'sonraki_id': 1}
+
+
+def _mc_veri_kaydet(veri: dict):
+    try:
+        with open(MC_VERI_DOSYASI, 'w', encoding='utf-8') as f:
+            json.dump(veri, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"MC veri kaydetme hatası: {e}")
+
+
+def mc_kullanici_botlari(user_id: int) -> list:
+    """Kullanıcının MC botlarını döndürür: [{id, isim, ip, port}, ...]"""
+    veri = _mc_veri_yukle()
+    return list(veri['botlar'].get(str(user_id), {}).values())
+
+
+def mc_bot_bilgi(user_id: int, bot_id: str) -> dict | None:
+    veri = _mc_veri_yukle()
+    return veri['botlar'].get(str(user_id), {}).get(str(bot_id))
+
+
+def mc_bot_ekle(user_id: int, isim: str, ip: str, port: int) -> str:
+    veri = _mc_veri_yukle()
+    user_key = str(user_id)
+    if user_key not in veri['botlar']:
+        veri['botlar'][user_key] = {}
+    bot_id = str(veri['sonraki_id'])
+    veri['sonraki_id'] += 1
+    veri['botlar'][user_key][bot_id] = {'id': bot_id, 'isim': isim, 'ip': ip, 'port': port}
+    _mc_veri_kaydet(veri)
+    return bot_id
+
+
+def mc_durum_emoji(user_id: int, bot_id: str) -> str:
+    key = (user_id, str(bot_id))
+    proc = _MC_PROSESLER.get(key)
+    if proc and proc.returncode is None:
+        return '🟢'
+    return '🔴'
+
+
+async def _mc_monitor(user_id: int, bot_id: str, process, tg_bot):
+    """MC bot çıktısını izler; düşünce sahibine bildirim atar."""
+    key = (user_id, str(bot_id))
+    bilgi = mc_bot_bilgi(user_id, bot_id)
+    try:
+        while True:
+            line = await process.stdout.readline()
+            if not line:
+                break
+            try:
+                data = json.loads(line.decode().strip())
+                event = data.get('event')
+                if event == 'connected':
+                    logger.info(f"MC Bot bağlandı: user={user_id} bot_id={bot_id}")
+                elif event in ('kicked', 'error', 'disconnected'):
+                    isim = bilgi.get('isim', '?') if bilgi else '?'
+                    ip = bilgi.get('ip', '?') if bilgi else '?'
+                    port_n = bilgi.get('port', '?') if bilgi else '?'
+                    reason = data.get('reason') or data.get('message') or 'Bilinmeyen sebep'
+                    try:
+                        await tg_bot.send_message(
+                            chat_id=user_id,
+                            text=(
+                                f"⚠️ <b>AFK Botun sunucudan düştü reis!</b>\n\n"
+                                f"🤖 Bot: <b>{html.escape(str(isim))}</b>\n"
+                                f"📡 Sunucu: <code>{html.escape(str(ip))}:{port_n}</code>\n"
+                                f"❌ Sebep: <i>{html.escape(str(reason)[:300])}</i>\n\n"
+                                f"🔁 Yeniden bağlamak için MC menüsüne gir."
+                            ),
+                            parse_mode='HTML'
+                        )
+                    except Exception:
+                        pass
+                    break
+            except Exception:
+                pass
+    except asyncio.CancelledError:
+        pass
+    except Exception as e:
+        logger.error(f"MC monitor hatası ({user_id}/{bot_id}): {e}")
+    finally:
+        _MC_PROSESLER.pop(key, None)
+        _MC_GOREVLER.pop(key, None)
+
+
+async def mc_bot_baslat(user_id: int, bot_id: str, tg_bot) -> bool:
+    """MC AFK botunu subprocess olarak başlatır."""
+    bilgi = mc_bot_bilgi(user_id, bot_id)
+    if not bilgi:
+        return False
+    key = (user_id, str(bot_id))
+    await mc_bot_durdur(user_id, bot_id)
+    try:
+        process = await asyncio.create_subprocess_exec(
+            'node', MC_WORKER_JS,
+            bilgi['ip'], str(bilgi['port']), bilgi['isim'],
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+            stdin=asyncio.subprocess.PIPE,
+        )
+        _MC_PROSESLER[key] = process
+        task = asyncio.create_task(_mc_monitor(user_id, bot_id, process, tg_bot))
+        _MC_GOREVLER[key] = task
+        return True
+    except Exception as e:
+        logger.error(f"MC bot başlatma hatası: {e}")
+        return False
+
+
+async def mc_bot_durdur(user_id: int, bot_id: str):
+    """MC bot bağlantısını güvenli şekilde keser."""
+    key = (user_id, str(bot_id))
+    task = _MC_GOREVLER.pop(key, None)
+    if task and not task.done():
+        task.cancel()
+    proc = _MC_PROSESLER.pop(key, None)
+    if proc and proc.returncode is None:
+        try:
+            if proc.stdin:
+                proc.stdin.write(b'{"cmd":"quit"}\n')
+                await proc.stdin.drain()
+            await asyncio.sleep(0.6)
+            proc.terminate()
+        except Exception:
+            pass
+
+
+async def tum_mc_botlari_durdur():
+    """Bot kapanırken tüm MC bağlantılarını temizler."""
+    for key in list(_MC_PROSESLER.keys()):
+        user_id, bot_id = key
+        await mc_bot_durdur(user_id, bot_id)
+
+
 # ══════════════════════════════════════════════════════
 
 def main():
@@ -8985,6 +9405,12 @@ def main():
             logger.warning(f"Grup komut listesi ayarlanamadı: {e}")
 
     application.post_init = baslangic_komut_listesi
+
+    async def mc_kapatma_hook(app):
+        """Bot kapanırken tüm MC AFK bağlantılarını temizler."""
+        await tum_mc_botlari_durdur()
+
+    application.post_shutdown = mc_kapatma_hook
     # ──────────────────────────────────────────────────────────
 
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")

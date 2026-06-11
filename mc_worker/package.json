@@ -1,0 +1,9 @@
+{
+  "name": "mc-worker",
+  "version": "1.0.0",
+  "description": "Minecraft AFK bot worker for AZRxGUARD",
+  "main": "worker.js",
+  "dependencies": {
+    "mineflayer": "^4.22.0"
+  }
+}
