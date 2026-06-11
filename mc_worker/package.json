@@ -4,6 +4,7 @@
   "description": "Minecraft AFK bot worker for AZRxGUARD",
   "main": "worker.js",
   "dependencies": {
+    "bedrock-protocol": "^3.56.1",
     "mineflayer": "^4.22.0"
   }
 }
