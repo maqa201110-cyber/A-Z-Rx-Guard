@@ -6,8 +6,15 @@
         "isim": "Mmm",
         "ip": "aliyev7080.aternos.me",
         "port": 19132
+      },
+      "2": {
+        "id": "2",
+        "isim": "AMA",
+        "ip": "aliyev7080.aternos.me",
+        "port": 25565,
+        "edition": "java"
       }
     }
   },
-  "sonraki_id": 2
+  "sonraki_id": 3
 }
