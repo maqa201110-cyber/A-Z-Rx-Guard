@@ -1,14 +1,14 @@
 {
   "botlar": {
     "5730924995": {
-      "9": {
-        "id": "9",
-        "isim": "Vaca",
-        "ip": "Nihilum.org",
-        "port": 25565,
+      "10": {
+        "id": "10",
+        "isim": "Hjk",
+        "ip": "aliyev7080.aternos.me",
+        "port": 39307,
         "edition": "java"
       }
     }
   },
-  "sonraki_id": 10
+  "sonraki_id": 11
 }
