@@ -9366,21 +9366,29 @@ async def mc_bot_baslat(user_id: int, bot_id: str, tg_bot) -> tuple[bool, str]:
             'node', worker_js,
             bilgi['ip'], str(bilgi['port']), bilgi['isim'],
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.STDOUT,  # stderr'i stdout'a yönlendir — hataları yakala
             stdin=asyncio.subprocess.PIPE,
         )
         _MC_PROSESLER[key] = process
-        # Gerçek sunucu bağlantısını bekle (20 saniye)
+        # Gerçek sunucu bağlantısını bekle (45 saniye — Aternos için yeterli)
+        raw_hatalar = []
         try:
-            async with asyncio.timeout(20):
+            async with asyncio.timeout(45):
                 while True:
                     line = await process.stdout.readline()
                     if not line:
                         _MC_PROSESLER.pop(key, None)
-                        return False, 'Sunucu bağlantı isteğini kapattı'
+                        hata_detay = '; '.join(raw_hatalar[-3:]) if raw_hatalar else 'Sunucu bağlantı isteğini kapattı'
+                        return False, hata_detay
+                    ham = line.decode('utf-8', errors='replace').strip()
+                    if not ham:
+                        continue
                     try:
-                        data = json.loads(line.decode().strip())
+                        data = json.loads(ham)
                     except Exception:
+                        # JSON değil — ham Node.js çıktısı (stderr vb.), sakla
+                        logger.debug(f"MC ham çıktı [{user_id}/{bot_id}]: {ham}")
+                        raw_hatalar.append(ham[:200])
                         continue
                     event = data.get('event')
                     if event == 'connected':
@@ -9390,15 +9398,18 @@ async def mc_bot_baslat(user_id: int, bot_id: str, tg_bot) -> tuple[bool, str]:
                         return True, ''
                     elif event in ('kicked', 'error', 'disconnected'):
                         reason = data.get('reason') or data.get('message') or 'Bilinmeyen hata'
+                        if raw_hatalar:
+                            reason = f"{reason} | Ham çıktı: {raw_hatalar[-1]}"
                         _MC_PROSESLER.pop(key, None)
-                        return False, str(reason)[:300]
+                        return False, str(reason)[:400]
         except asyncio.TimeoutError:
             try:
                 process.kill()
             except Exception:
                 pass
             _MC_PROSESLER.pop(key, None)
-            return False, '⏱ Zaman aşımı (20sn) — sunucu kapalı, IP/port yanlış veya online-mode aktif olabilir'
+            detay = f" | Son çıktı: {raw_hatalar[-1]}" if raw_hatalar else ''
+            return False, f'⏱ Zaman aşımı (45sn) — sunucu kapalı, IP/port yanlış veya online-mode aktif olabilir{detay}'
     except Exception as e:
         logger.error(f"MC bot başlatma hatası: {e}")
         _MC_PROSESLER.pop(key, None)

@@ -24,19 +24,30 @@ function emit(obj) {
 }
 
 function createBot() {
+  // Host boş veya geçersizse hemen hata ver
+  if (!host || host.trim().length < 2) {
+    emit({ event: 'error', message: 'Geçersiz sunucu adresi.' });
+    process.exit(1);
+  }
+
   try {
     bot = mineflayer.createBot({
       host,
       port,
       username,
-      version: false,
+      version: '1.20.1',   // Aternos & genel sunucular için kararlı sürüm
       auth: 'offline',
       hideErrors: false,
       checkTimeoutInterval: 30000,
       defaultChatPatterns: true,
+      connect: (client) => {
+        client.on('error', (err) => {
+          emit({ event: 'error', message: `Ağ hatası: ${err.message || err}` });
+        });
+      },
     });
   } catch (err) {
-    emit({ event: 'error', message: err.message });
+    emit({ event: 'error', message: `Bot oluşturulamadı: ${err.message}` });
     process.exit(1);
   }
 
