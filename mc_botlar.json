@@ -1,6 +1,14 @@
 {
   "botlar": {
-    "5730924995": {}
+    "5730924995": {
+      "9": {
+        "id": "9",
+        "isim": "Vaca",
+        "ip": "Nihilum.org",
+        "port": 25565,
+        "edition": "java"
+      }
+    }
   },
-  "sonraki_id": 5
+  "sonraki_id": 10
 }
