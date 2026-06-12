@@ -1,8 +1,12 @@
 /**
- * AZRxGUARD — Minecraft AFK Bot Worker
+ * AZRxGUARD — Minecraft AFK Bot Worker (Java Edition)
  * Spawned as a subprocess by bot.py.
  * Communication: JSON lines on stdout (events to Python).
  *                JSON lines on stdin  (commands from Python).
+ *
+ * Sürüm stratejisi:
+ *   1. version:false → sunucuya ping at, sürümü otomatik öğren
+ *   2. Ping başarısızsa FALLBACK_VERSIONS sırasıyla dene
  */
 
 const mineflayer = require('mineflayer');
@@ -10,74 +14,87 @@ const mineflayer = require('mineflayer');
 const [,, host, portStr, username] = process.argv;
 const port = parseInt(portStr, 10) || 25565;
 
-if (!host || !username) {
+// Deneme sırası: en yaygın/yeni sürümler önce
+const FALLBACK_VERSIONS = [
+  '1.21.1', '1.21', '1.20.4', '1.20.1', '1.20',
+  '1.19.4', '1.19.2', '1.18.2', '1.17.1', '1.16.5',
+];
+
+if (!host || host.trim().length < 2 || !username) {
   process.stdout.write(JSON.stringify({ event: 'error', message: 'Eksik argümanlar: host ve username gerekli.' }) + '\n');
   process.exit(1);
 }
 
 let bot = null;
+let connected = false;
+let attemptIndex = -1; // -1 = auto-detect, 0+ = fallback
 
 function emit(obj) {
-  try {
-    process.stdout.write(JSON.stringify(obj) + '\n');
-  } catch (_) {}
+  try { process.stdout.write(JSON.stringify(obj) + '\n'); } catch (_) {}
 }
 
-function createBot() {
-  // Host boş veya geçersizse hemen hata ver
-  if (!host || host.trim().length < 2) {
-    emit({ event: 'error', message: 'Geçersiz sunucu adresi.' });
-    process.exit(1);
-  }
+function isVersionError(msg) {
+  const s = String(msg).toLowerCase();
+  return s.includes('version') || s.includes('protocol') || s.includes('unsupported')
+      || s.includes('ping') || s.includes('handshak');
+}
 
+function currentVersion() {
+  return attemptIndex < 0 ? false : FALLBACK_VERSIONS[attemptIndex];
+}
+
+function tryConnect() {
+  const ver = currentVersion();
+  emit({ event: 'debug', message: `Bağlanıyor: ${host}:${port} sürüm=${ver === false ? 'auto' : ver}` });
+
+  let b;
   try {
-    bot = mineflayer.createBot({
+    b = mineflayer.createBot({
       host,
       port,
       username,
-      version: '1.20.1',   // Aternos & genel sunucular için kararlı sürüm
+      version: ver,
       auth: 'offline',
-      hideErrors: false,
+      hideErrors: true,
       checkTimeoutInterval: 30000,
       defaultChatPatterns: true,
-      connect: (client) => {
-        client.on('error', (err) => {
-          emit({ event: 'error', message: `Ağ hatası: ${err.message || err}` });
-        });
-      },
     });
   } catch (err) {
     emit({ event: 'error', message: `Bot oluşturulamadı: ${err.message}` });
     process.exit(1);
   }
 
-  bot.on('spawn', () => {
-    emit({ event: 'connected', host, port, username });
-  });
+  bot = b;
 
-  bot.on('chat', (senderName, message) => {
-    const lower = message.toLowerCase();
-    // TPA komutunu otomatik reddet
-    if (lower.includes('tpa') || lower.includes('/tpa')) {
-      try { bot.chat('/tpa deny'); } catch (_) {}
-      try { bot.chat('/tpdeny'); } catch (_) {}
-      emit({ event: 'tpa_rejected', from: senderName, message });
-    }
-  });
+  b.once('spawn', () => {
+    connected = true;
+    emit({ event: 'connected', host, port, username, version: b.version || ver });
 
-  bot.on('message', (jsonMsg) => {
-    try {
-      const text = jsonMsg.toString();
-      const lower = text.toLowerCase();
-      if (lower.includes('tpa') && lower.includes(username.toLowerCase())) {
-        try { bot.chat('/tpa deny'); } catch (_) {}
-        try { bot.chat('/tpdeny'); } catch (_) {}
-        emit({ event: 'tpa_rejected', text });
+    // TPA otomatik red — chat
+    b.on('chat', (senderName, message) => {
+      const lower = message.toLowerCase();
+      if (lower.includes('tpa') || lower.includes('/tpa')) {
+        try { b.chat('/tpa deny'); } catch (_) {}
+        try { b.chat('/tpdeny'); } catch (_) {}
+        emit({ event: 'tpa_rejected', from: senderName, message });
       }
-    } catch (_) {}
+    });
+
+    // TPA otomatik red — sunucu mesajları
+    b.on('message', (jsonMsg) => {
+      try {
+        const text = jsonMsg.toString();
+        const lower = text.toLowerCase();
+        if (lower.includes('tpa') && lower.includes(username.toLowerCase())) {
+          try { b.chat('/tpa deny'); } catch (_) {}
+          try { b.chat('/tpdeny'); } catch (_) {}
+          emit({ event: 'tpa_rejected', text });
+        }
+      } catch (_) {}
+    });
   });
 
-  bot.on('kicked', (reason) => {
+  b.once('kicked', (reason) => {
     let reasonStr = reason;
     try {
       const parsed = JSON.parse(reason);
@@ -87,18 +104,29 @@ function createBot() {
     process.exit(1);
   });
 
-  bot.on('error', (err) => {
-    emit({ event: 'error', message: err.message || String(err) });
+  b.once('error', (err) => {
+    const msg = err.message || String(err);
+    if (!connected && isVersionError(msg)) {
+      // Sürüm uyumsuzluğu → sonraki fallback'i dene
+      attemptIndex++;
+      if (attemptIndex < FALLBACK_VERSIONS.length) {
+        emit({ event: 'debug', message: `Sürüm hatası (${msg.slice(0,80)}), ${FALLBACK_VERSIONS[attemptIndex]} deneniyor...` });
+        setTimeout(tryConnect, 500);
+        return;
+      }
+    }
+    emit({ event: 'error', message: msg });
     process.exit(1);
   });
 
-  bot.on('end', (reason) => {
+  b.once('end', (reason) => {
+    if (!connected) return; // error handler halleder
     emit({ event: 'disconnected', reason: reason || 'Bağlantı kapandı' });
     process.exit(0);
   });
 }
 
-// Stdin'den Python'dan komut al
+// Stdin — Python'dan komut al
 let stdinBuf = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (chunk) => {
@@ -122,14 +150,8 @@ process.stdin.on('data', (chunk) => {
   }
 });
 
-process.on('SIGTERM', () => {
-  if (bot) { try { bot.quit(); } catch (_) {} }
-  process.exit(0);
-});
+process.on('SIGTERM', () => { if (bot) { try { bot.quit(); } catch (_) {} } process.exit(0); });
+process.on('SIGINT',  () => { if (bot) { try { bot.quit(); } catch (_) {} } process.exit(0); });
 
-process.on('SIGINT', () => {
-  if (bot) { try { bot.quit(); } catch (_) {} }
-  process.exit(0);
-});
-
-createBot();
+// İlk deneme: auto-detect
+tryConnect();
