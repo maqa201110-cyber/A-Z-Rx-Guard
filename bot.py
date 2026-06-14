@@ -1107,7 +1107,8 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
         ],
         [
-            InlineKeyboardButton(strings.get('btn_sohbet_araclari', '💬 SOHBET ARAÇLARI'), callback_data='menu_sohbet_araclari')
+            InlineKeyboardButton('🤖 AI Asistan', callback_data='menu_ai'),
+            InlineKeyboardButton('📥 Video İndir', callback_data='menu_video_indir')
         ],
         [
             InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')
@@ -5195,11 +5196,15 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
             [InlineKeyboardButton(strings.get('btn_oyun_tkmk', '✊ Taş-Kağıt-Makas'), callback_data='oyun_tkmk')],
             [InlineKeyboardButton(strings.get('btn_oyun_sayi', '🔢 Sayı Tahmin'), callback_data='oyun_sayi_baslat')],
+            [InlineKeyboardButton('🪙 Para At', callback_data='eglence_para_at'),
+             InlineKeyboardButton('🎯 Rus Ruleti', callback_data='eglence_rulet')],
+            [InlineKeyboardButton('🔮 Kehanet', callback_data='eglence_kehanet')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
             "🎮 **" + strings['btn_fun'] + "**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🎲 Zar · 🎱 Şans Topu · ✊ Taş-Kağıt-Makas · 🔢 Sayı Tahmin",
+            "🎲 Zar · 🎱 Şans Topu · ✊ TKM · 🔢 Sayı Tahmin\n"
+            "🪙 Para At · 🎯 Rus Ruleti · 🔮 Kehanet",
             reply_markup=InlineKeyboardMarkup(fun_klavye),
             parse_mode='Markdown'
         )
@@ -5326,9 +5331,13 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik'
         siber_klavye = [
             [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
-             InlineKeyboardButton(strings.get('btn_panel', '🔍 TG PANELİ'), callback_data='menu_panel')],
-            [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ USERNAME HUNTER'), callback_data='menu_guvenli_sorgu')],
-            [InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
+             InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
+            [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ Username Hunter'), callback_data='menu_guvenli_sorgu'),
+             InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
+            [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
+             InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
+            [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
+             InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -5407,30 +5416,43 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_pro_araclar':
         context.user_data['mevcut_kategori'] = '⚡ Pro Araçlar'
         pro_klavye = [
-            [InlineKeyboardButton(strings.get('btn_hesap_arac', '🧮 Hesap Makinesi'), callback_data='pro_hesap'),
-             InlineKeyboardButton(strings.get('btn_hash_arac', '🔐 Hash Üretici'), callback_data='pro_hash')],
-            [InlineKeyboardButton(strings.get('btn_hava_arac', '🌍 Hava Durumu'), callback_data='pro_hava'),
-             InlineKeyboardButton(strings.get('btn_doviz_arac', '💱 Döviz Kuru'), callback_data='pro_doviz')],
-            [InlineKeyboardButton(strings.get('btn_saat_arac', '🕐 Dünya Saati'), callback_data='pro_saat'),
-             InlineKeyboardButton(strings.get('btn_b64_arac', '🔒 Base64'), callback_data='pro_b64')],
-            [InlineKeyboardButton(strings.get('btn_sifre_arac', '🔑 Şifre Üretici'), callback_data='pro_sifre'),
-             InlineKeyboardButton(strings.get('btn_wiki_arac', '🌐 Wikipedia'), callback_data='pro_wiki')],
-            [InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defterim'), callback_data='pro_not'),
-             InlineKeyboardButton(strings.get('btn_gunsozu_arac', '💡 Günün Sözü'), callback_data='pro_gunsozu')],
-            [InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çevir'), callback_data='pro_birim')],
-            [InlineKeyboardButton("🏓 Ping", callback_data='pro20_ping'),
-             InlineKeyboardButton("🎨 Renk Çevir", callback_data='pro20_renk')],
-            [InlineKeyboardButton("📊 Metin Analiz", callback_data='pro20_metin'),
-             InlineKeyboardButton("🎲 Rastgele", callback_data='pro20_rastgele')],
-            [InlineKeyboardButton("🔠 Şifrele", callback_data='pro20_sifrele'),
-             InlineKeyboardButton("💪 BMI", callback_data='pro20_bmi'),
-             InlineKeyboardButton("💯 Yüzde", callback_data='pro20_yuzde')],
-            [InlineKeyboardButton("🔤 İsim Fontu", callback_data='pro_isim_fontu')],
+            [InlineKeyboardButton('🏠 Kişisel Kullanım', callback_data='menu_kisisel_kullanim')],
+            [InlineKeyboardButton('🛡️ Siber Güvenlik', callback_data='menu_siber_guvenlik'),
+             InlineKeyboardButton('🎮 Eğlence', callback_data='menu_fun')],
+            [InlineKeyboardButton('🎲 Rastgele', callback_data='pro20_rastgele'),
+             InlineKeyboardButton('🌐 Wikipedia', callback_data='pro_wiki')],
+            [InlineKeyboardButton('📱 QR Kod', callback_data='sa_qr'),
+             InlineKeyboardButton('🌐 URL Kısalt', callback_data='sa_url')],
+            [InlineKeyboardButton('🎭 Sahte Kimlik', callback_data='sa_kimlik'),
+             InlineKeyboardButton('📅 Yaş/Tarih', callback_data='sa_tarih')],
+            [InlineKeyboardButton('🏓 Ping', callback_data='pro20_ping'),
+             InlineKeyboardButton('🎨 Renk Çevir', callback_data='pro20_renk')],
+            [InlineKeyboardButton('📊 Metin Analiz', callback_data='pro20_metin'),
+             InlineKeyboardButton('🔤 İsim Fontu', callback_data='pro_isim_fontu')],
+            [InlineKeyboardButton('💡 Günün Sözü', callback_data='pro_gunsozu')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
-            strings.get('pro_araclar_welcome', '⚡ **PRO ARAÇLAR**\n\nBir araç seçin:'),
+            "⚡ **PRO ARAÇLAR MERKEZİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\nKategori veya araç seçin:",
             reply_markup=InlineKeyboardMarkup(pro_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_kisisel_kullanim':
+        context.user_data['mevcut_kategori'] = '🏠 Kişisel Kullanım'
+        kis_klavye = [
+            [InlineKeyboardButton(strings.get('btn_hesap_arac', '🧮 Hesap Makinesi'), callback_data='pro_hesap'),
+             InlineKeyboardButton(strings.get('btn_hava_arac', '🌍 Hava Durumu'), callback_data='pro_hava')],
+            [InlineKeyboardButton(strings.get('btn_saat_arac', '🕐 Dünya Saati'), callback_data='pro_saat'),
+             InlineKeyboardButton(strings.get('btn_not_arac', '📝 Not Defteri'), callback_data='pro_not')],
+            [InlineKeyboardButton(strings.get('btn_doviz_arac', '💱 Döviz Kuru'), callback_data='pro_doviz'),
+             InlineKeyboardButton('💯 Yüzde', callback_data='pro20_yuzde')],
+            [InlineKeyboardButton('💪 BMI', callback_data='pro20_bmi'),
+             InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çeviri'), callback_data='pro_birim')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+        ]
+        await query.edit_message_text(
+            "🏠 **KİŞİSEL KULLANIM**\n━━━━━━━━━━━━━━━━━━━━━━\n\nBir araç seçin:",
+            reply_markup=InlineKeyboardMarkup(kis_klavye),
             parse_mode='Markdown'
         )
     elif query.data == 'pro_hesap':
@@ -5883,6 +5905,124 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     # ── END 2.0 ARAÇLAR ────────────────────────────────────────
+    elif query.data == 'eglence_para_at':
+        sonuc = random.choice(['🟡 **YAZI!**', '🔵 **TURA!**'])
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Tekrar At', callback_data='eglence_para_at')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+        ])
+        await query.edit_message_text(
+            f"🪙 **PARA ATIŞI**\n━━━━━━━━━━━━━━━━━━━━━━\n\n💫 Sonuç: {sonuc}",
+            reply_markup=klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'eglence_rulet':
+        if random.randint(1, 6) == 1:
+            desc = "💥 **BANG!**\n_Şanssız bir ruhsun..._"
+        else:
+            desc = "😮‍💨 **KLIK!**\n_Bu sefer şansın yaver gitti!_"
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Tekrar', callback_data='eglence_rulet')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+        ])
+        await query.edit_message_text(
+            f"🎯 **RUS RULETİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n{desc}",
+            reply_markup=klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'eglence_kehanet':
+        kehanetler = [
+            "✨ Büyük bir fırsat kapında seni bekliyor!",
+            "⚠️ Bugün önemli kararlar almaktan kaçın.",
+            "💫 Eski bir arkadaşından haber alacaksın.",
+            "🌟 Başarı çok yakın, vazgeçme!",
+            "🌊 Değişim rüzgarları esiyor, hazır ol.",
+            "🍀 Şans bugün seninle — bir şans dene!",
+            "🔮 Gizem içinde bir cevap yatıyor.",
+            "💡 Aklındaki fikir düşündüğünden daha değerli.",
+            "🌙 Geceleri daha çok çalışman gerekiyor.",
+            "☀️ Sabah güzel haberler gelecek.",
+            "🦋 Küçük bir değişim büyük farklar yaratır.",
+            "🎭 Masken düşüyor, gerçek yüzün ortaya çıkıyor.",
+            "🏆 Bugün şansını denemek için iyi bir gün.",
+            "🎯 Hedefine çok yakınsın, biraz daha sabret.",
+            "💎 Değerini bil, kimse seni küçümseyemez.",
+        ]
+        klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔮 Yeni Kehanet', callback_data='eglence_kehanet')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_fun')]
+        ])
+        await query.edit_message_text(
+            f"🔮 **KEHANET**\n━━━━━━━━━━━━━━━━━━━━━━\n\n{random.choice(kehanetler)}",
+            reply_markup=klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_ai':
+        context.user_data['mevcut_kategori'] = '🤖 AI Asistan'
+        context.user_data['durum'] = 'ai_sohbet_bekliyor'
+        gecmis_sayi = len(context.user_data.get('ai_gecmis', []))
+        ai_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🗑️ Geçmişi Temizle', callback_data='ai_gecmis_sil')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            f"🤖 **AI ASİSTAN — Gemini 2.0 Flash**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"Merhaba! Sana nasıl yardımcı olabilirim? 😊\n\n"
+            f"Herhangi bir soru sorabilirsin. Mesajını yaz ve gönder!\n\n"
+            f"📊 Sohbet geçmişi: `{gecmis_sayi}` mesaj\n"
+            f"_/iptal ile durumu sıfırlayabilirsin_",
+            reply_markup=ai_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'ai_gecmis_sil':
+        context.user_data['ai_gecmis'] = []
+        context.user_data['durum'] = 'ai_sohbet_bekliyor'
+        ai_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🗑️ Geçmişi Temizle', callback_data='ai_gecmis_sil')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            "🤖 **AI ASİSTAN**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "✅ Sohbet geçmişi temizlendi!\n\n"
+            "Yeni sorunuzu yazabilirsiniz:",
+            reply_markup=ai_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_video_indir':
+        context.user_data['mevcut_kategori'] = '📥 Video İndir'
+        context.user_data['durum'] = 'vid_indir_url_bekliyor'
+        vid_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            "📥 **VİDEO İNDİRİCİ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🎬 Desteklenen platformlar:\n"
+            "▸ YouTube · TikTok · Instagram\n"
+            "▸ Twitter/X · Facebook · Dailymotion\n"
+            "▸ Reddit · Pinterest · Snapchat\n"
+            "▸ ve 1000+ platform!\n\n"
+            "📎 **Video linkini şimdi gönder:**\n"
+            "_Sonra Video veya Sadece Ses seçimi yapacaksın._\n\n"
+            "_/iptal ile çıkabilirsin_",
+            reply_markup=vid_klavye, parse_mode='Markdown'
+        )
+    elif query.data == 'vid_dl_video':
+        url = context.user_data.pop('vid_indir_url', None)
+        if not url:
+            await query.answer("❌ URL bulunamadı, tekrar deneyin.", show_alert=True)
+            return
+        bekle_msg = await query.edit_message_text(
+            "⏳ **Video indiriliyor...**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🔗 `{url[:60]}...`\n\n_Bu işlem 30-60 saniye sürebilir._",
+            parse_mode='Markdown'
+        )
+        await _vid_indir_ve_gonder(update, context, url, mod='video', bekle_msg=bekle_msg)
+    elif query.data == 'vid_dl_ses':
+        url = context.user_data.pop('vid_indir_url', None)
+        if not url:
+            await query.answer("❌ URL bulunamadı, tekrar deneyin.", show_alert=True)
+            return
+        bekle_msg = await query.edit_message_text(
+            "⏳ **Ses indiriliyor...**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🔗 `{url[:60]}...`\n\n_Bu işlem 30-60 saniye sürebilir._",
+            parse_mode='Markdown'
+        )
+        await _vid_indir_ve_gonder(update, context, url, mod='ses', bekle_msg=bekle_msg)
     elif query.data == 'pro_sans':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🎱 Şans Topu')
@@ -6525,14 +6665,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'sa_qr':
         context.user_data['durum'] = 'sa_qr_bekliyor'
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         await query.edit_message_text(
             ft(strings.get('sa_qr_ask', '📱 QR kod için metin girin:'), context, user_id),
             reply_markup=geri, parse_mode='Markdown'
         )
     elif query.data == 'sa_url':
         context.user_data['durum'] = 'sa_url_bekliyor'
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         await query.edit_message_text(
             ft(strings.get('sa_url_ask', '🌐 URL girin:'), context, user_id),
             reply_markup=geri, parse_mode='Markdown'
@@ -6541,12 +6681,12 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kimlik = sahte_kimlik_uret(lang)
         yeni_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton('🔄 Yeni Kimlik', callback_data='sa_kimlik')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')],
         ])
         await query.edit_message_text(kimlik, reply_markup=yeni_klavye, parse_mode='HTML')
     elif query.data == 'sa_tarih':
         context.user_data['durum'] = 'sa_tarih_bekliyor'
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_sohbet_araclari')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]])
         await query.edit_message_text(
             ft(strings.get('sa_tarih_ask', '📅 Doğum tarihinizi girin (GG.AA.YYYY):'), context, user_id),
             reply_markup=geri, parse_mode='Markdown'
@@ -6565,6 +6705,167 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.message.delete()
             except Exception:
                 pass
+
+# ══════════════════════════════════════════════════════════════
+# 🤖 AI ASİSTAN — GEMINI 2.0 FLASH
+# ══════════════════════════════════════════════════════════════
+
+_tg_ai_gecmis: dict = {}
+
+async def gemini_yanit_tg(user_id: int, soru: str) -> str:
+    try:
+        from google import genai
+        from google.genai import types
+        gecmis = _tg_ai_gecmis.get(user_id, [])
+        gecmis.append({"role": "user", "parts": [{"text": soru}]})
+        if len(gecmis) > 20:
+            gecmis = gecmis[-20:]
+        def call_api():
+            client = genai.Client()
+            system_prompt = (
+                "Sen AZRxGUARD botunun yapay zeka asistanısın. "
+                "Türkçe, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
+                "Samimi, yardımsever ve kısa cevaplar veriyorsun. "
+                "Markdown kullanabilirsin."
+            )
+            contents = []
+            for m in gecmis:
+                contents.append(types.Content(
+                    role=m["role"],
+                    parts=[types.Part.from_text(text=m["parts"][0]["text"])]
+                ))
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=1024,
+                    temperature=0.7,
+                )
+            )
+            return response.text
+        yanit = await asyncio.to_thread(call_api)
+        if yanit:
+            gecmis.append({"role": "model", "parts": [{"text": yanit}]})
+            _tg_ai_gecmis[user_id] = gecmis[-20:]
+        return yanit or "❌ AI yanıt üretemedi."
+    except Exception as e:
+        logger.error(f"Gemini TG hatası: {e}")
+        return f"❌ AI servisi şu an erişilemiyor.\n`{str(e)[:100]}`"
+
+
+# ══════════════════════════════════════════════════════════════
+# 📥 VİDEO İNDİRİCİ — YT-DLP (İZOLE SİSTEM)
+# ══════════════════════════════════════════════════════════════
+
+async def _vid_indir_ve_gonder(update: Update, context, url: str, mod: str, bekle_msg=None):
+    tmp_dir = None
+    try:
+        import yt_dlp
+        import os as _os
+        tmp_dir = tempfile.mkdtemp(prefix='azr_vid_')
+        cikis_path = _os.path.join(tmp_dir, '%(title)s.%(ext)s')
+
+        if mod == 'ses':
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': cikis_path,
+                'quiet': True,
+                'no_warnings': True,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'socket_timeout': 30,
+            }
+        else:
+            ydl_opts = {
+                'format': 'best[filesize<50M]/best',
+                'outtmpl': cikis_path,
+                'quiet': True,
+                'no_warnings': True,
+                'socket_timeout': 30,
+            }
+
+        def indir():
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                return info
+
+        info = await asyncio.to_thread(indir)
+
+        dosyalar = [_os.path.join(tmp_dir, f) for f in _os.listdir(tmp_dir)]
+        if not dosyalar:
+            raise Exception("Dosya indirilemedi")
+
+        dosya_yolu = max(dosyalar, key=lambda f: _os.path.getsize(f))
+        boyut_mb = _os.path.getsize(dosya_yolu) / 1024 / 1024
+        baslik = (info.get('title', 'video') if info else 'video')[:50]
+        platform = (info.get('extractor_key', '') if info else '').lower()
+
+        if boyut_mb > 49:
+            geri_kl = InlineKeyboardMarkup([[InlineKeyboardButton('🏠 Ana Menü', callback_data='go_home')]])
+            if bekle_msg:
+                await bekle_msg.edit_text(
+                    f"❌ **Dosya çok büyük!**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📦 Boyut: `{boyut_mb:.1f} MB` (Limit: 50 MB)\n\n"
+                    f"Lütfen daha kısa bir video deneyin.",
+                    reply_markup=geri_kl, parse_mode='Markdown'
+                )
+            return
+
+        caption = (
+            f"{'🎵' if mod == 'ses' else '🎬'} **{baslik}**\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📦 Boyut: `{boyut_mb:.1f} MB`\n"
+            f"_İndirildi: AZRxGUARD 📥_"
+        )
+        geri_kl = InlineKeyboardMarkup([
+            [InlineKeyboardButton('📥 Yeni İndir', callback_data='menu_video_indir'),
+             InlineKeyboardButton('🏠 Ana Menü', callback_data='go_home')]
+        ])
+
+        with open(dosya_yolu, 'rb') as f:
+            if mod == 'ses':
+                await update.effective_chat.send_audio(
+                    audio=f, caption=caption, parse_mode='Markdown', reply_markup=geri_kl
+                )
+            else:
+                await update.effective_chat.send_video(
+                    video=f, caption=caption, parse_mode='Markdown', reply_markup=geri_kl,
+                    supports_streaming=True
+                )
+
+        if bekle_msg:
+            try:
+                await bekle_msg.delete()
+            except Exception:
+                pass
+
+    except Exception as e:
+        logger.error(f"Video indirici hatası: {e}")
+        hata_mesaji = str(e)
+        if 'Unsupported URL' in hata_mesaji or 'No video formats' in hata_mesaji:
+            mesaj = "❌ Bu URL desteklenmiyor.\nYouTube, TikTok, Instagram linki gönder."
+        elif 'Private' in hata_mesaji or 'login' in hata_mesaji.lower():
+            mesaj = "❌ Bu video gizli/şifre korumalı, indirilemiyor."
+        elif 'Too large' in hata_mesaji or '50M' in hata_mesaji:
+            mesaj = "❌ Video çok büyük (50 MB üstü)."
+        else:
+            mesaj = f"❌ İndirme başarısız.\n`{hata_mesaji[:120]}`"
+        geri_kl = InlineKeyboardMarkup([[InlineKeyboardButton('🔄 Tekrar Dene', callback_data='menu_video_indir')]])
+        if bekle_msg:
+            await bekle_msg.edit_text(mesaj, reply_markup=geri_kl, parse_mode='Markdown')
+        else:
+            await update.effective_chat.send_message(mesaj, reply_markup=geri_kl, parse_mode='Markdown')
+    finally:
+        if tmp_dir:
+            try:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+            except Exception:
+                pass
+
 
 async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -7103,6 +7404,54 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         return
     # ── END 2.0 ARAÇLAR GİRİŞ HANDLER'LARI ───────────────────
 
+    # ── 🤖 AI ASİSTAN HANDLER ─────────────────────────────────
+    if context.user_data.get('durum') == 'ai_sohbet_bekliyor':
+        soru = (update.message.text or '').strip()
+        if not soru:
+            return
+        bekleme = await update.message.reply_text("🤖 _Düşünüyor..._", parse_mode='Markdown')
+        yanit = await gemini_yanit_tg(user_id, soru)
+        ai_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🗑️ Geçmişi Temizle', callback_data='ai_gecmis_sil')],
+            [InlineKeyboardButton('🏠 Ana Menü', callback_data='go_home')]
+        ])
+        try:
+            await bekleme.edit_text(
+                f"🤖 **AI ASİSTAN**\n━━━━━━━━━━━━━━━━━━━━━━\n\n{yanit}",
+                reply_markup=ai_klavye,
+                parse_mode='Markdown'
+            )
+        except Exception:
+            await bekleme.edit_text(yanit, reply_markup=ai_klavye)
+        return
+
+    # ── 📥 VİDEO İNDİRİCİ HANDLER (İZOLE) ────────────────────
+    if context.user_data.get('durum') == 'vid_indir_url_bekliyor':
+        url = (update.message.text or '').strip()
+        if not url:
+            return
+        if not (url.startswith('http://') or url.startswith('https://')):
+            await update.message.reply_text(
+                "❌ Geçersiz link! `http://` veya `https://` ile başlayan bir URL gönder.",
+                parse_mode='Markdown'
+            )
+            return
+        context.user_data['vid_indir_url'] = url
+        context.user_data['durum'] = None
+        format_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('📹 Video İndir', callback_data='vid_dl_video'),
+             InlineKeyboardButton('🎵 Sadece Ses (MP3)', callback_data='vid_dl_ses')],
+            [InlineKeyboardButton('❌ İptal', callback_data='go_home')]
+        ])
+        await update.message.reply_text(
+            f"🔗 **Link alındı!**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"`{url[:80]}{'...' if len(url) > 80 else ''}`\n\n"
+            f"**Ne indirmek istersin?**",
+            reply_markup=format_klavye,
+            parse_mode='Markdown'
+        )
+        return
+
     # ── ✂️ VİDEO EDİTÖR — METİN GİRİŞ HANDLERS ──────────────
     if context.user_data.get('durum') == 'ved_kirp_sure_bekle':
         sure_gir = (update.message.text or '').strip()
@@ -7216,7 +7565,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         bekle = await update.message.reply_text("⏳ QR kod oluşturuluyor...")
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton('🔄 Yeni QR', callback_data='sa_qr')],
-            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_sohbet_araclari')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_pro_araclar')],
         ])
         await bekle.delete()
         await qr_url_gonder(context.bot, update.effective_chat.id, metin, reply_markup=geri)
@@ -7240,7 +7589,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             kisaltilmis = url_girdisi
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton('🔄 Başka URL Kısalt', callback_data='sa_url')],
-            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_sohbet_araclari')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_pro_araclar')],
         ])
         await bekle.edit_text(
             f"🌐 <b>URL KISALTILDI!</b>\n\n"
@@ -7255,7 +7604,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         tarih_str = (update.message.text or '').strip()
         geri = InlineKeyboardMarkup([
             [InlineKeyboardButton('🔄 Tekrar Hesapla', callback_data='sa_tarih')],
-            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_sohbet_araclari')],
+            [InlineKeyboardButton('⬅️ Geri', callback_data='menu_pro_araclar')],
         ])
         try:
             parca = tarih_str.replace('/', '.').replace('-', '.').split('.')
