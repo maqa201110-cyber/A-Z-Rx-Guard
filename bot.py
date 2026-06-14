@@ -8995,6 +8995,13 @@ def main():
         """PTB'nin async API'siyle polling başlatır ve sonsuza dek çalışır."""
         try:
             async with application:
+                # Önceki oturumu / webhook'u temizle (Conflict önleme)
+                try:
+                    await application.bot.delete_webhook(drop_pending_updates=True)
+                    await application.bot.get_updates(offset=-1, timeout=0)
+                except Exception:
+                    pass
+                await asyncio.sleep(2)   # eski bağlantının Telegram tarafında kapanması için
                 await application.start()
                 await application.updater.start_polling(
                     allowed_updates=["message", "callback_query", "channel_post", "chat_member"],
