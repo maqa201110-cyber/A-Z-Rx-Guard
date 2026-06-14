@@ -8987,7 +8987,44 @@ def main():
     application.post_init = baslangic_komut_listesi
 
     logger.info("AZRxGUARD Sistemi Sorunsuz Başlatıldı...")
-    application.run_polling(allowed_updates=["message", "callback_query", "channel_post", "chat_member"], drop_pending_updates=True)
+
+    # ── Çift Başlı Asenkron Motor ─────────────────────────────────────────────
+    # Telegram ve Discord botları birbirini kilitlemeden aynı anda çalışır.
+    # Birinin çökmesi diğerini durdurmaz.
+    async def _telegram_calistir():
+        """PTB'nin async API'siyle polling başlatır ve sonsuza dek çalışır."""
+        try:
+            async with application:
+                await application.start()
+                await application.updater.start_polling(
+                    allowed_updates=["message", "callback_query", "channel_post", "chat_member"],
+                    drop_pending_updates=True
+                )
+                logger.info("Telegram polling aktif.")
+                # Sonsuz bekleme — process SIGTERM alana kadar çalışır
+                await asyncio.get_event_loop().create_future()
+        except asyncio.CancelledError:
+            logger.info("Telegram botu durduruldu.")
+        except Exception as e:
+            logger.error(f"Telegram botu beklenmedik hata: {e}", exc_info=True)
+
+    async def _discord_calistir():
+        """Discord botunu güvenli şekilde başlatır; çökerse Telegram etkilenmez."""
+        try:
+            from discord_bot import run_discord
+            await run_discord()
+        except asyncio.CancelledError:
+            logger.info("Discord botu durduruldu.")
+        except Exception as e:
+            logger.error(f"Discord task hatası: {e}", exc_info=True)
+
+    async def _cift_basli_motor():
+        tg_task = asyncio.create_task(_telegram_calistir(), name="telegram")
+        dc_task = asyncio.create_task(_discord_calistir(), name="discord")
+        await asyncio.gather(tg_task, dc_task, return_exceptions=True)
+
+    asyncio.run(_cift_basli_motor())
+
 
 if __name__ == '__main__':
     main()
