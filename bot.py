@@ -1107,10 +1107,6 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
         ],
         [
-            InlineKeyboardButton('🤖 AI Asistan', callback_data='menu_ai'),
-            InlineKeyboardButton('📥 Video İndir', callback_data='menu_video_indir')
-        ],
-        [
             InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')
         ],
         [
@@ -5199,7 +5195,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton('🪙 Para At', callback_data='eglence_para_at'),
              InlineKeyboardButton('🎯 Rus Ruleti', callback_data='eglence_rulet')],
             [InlineKeyboardButton('🔮 Kehanet', callback_data='eglence_kehanet')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ]
         await query.edit_message_text(
             "🎮 **" + strings['btn_fun'] + "**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -5338,7 +5334,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
             [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
              InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ]
         await query.edit_message_text(
             strings.get('siber_guvenlik_welcome', '🛡️ **SİBER GÜVENLİK**\n\nAraçlardan birini seçin:'),
