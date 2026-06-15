@@ -1095,9 +1095,6 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
         ],
         [
-            InlineKeyboardButton(strings.get('btn_siber_guvenlik', '🛡️ SİBER GÜVENLİK'), callback_data='menu_siber_guvenlik')
-        ],
-        [
             InlineKeyboardButton(strings['btn_azr_special'], callback_data='menu_azr_special')
         ],
         [
