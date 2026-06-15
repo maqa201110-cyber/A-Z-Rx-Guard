@@ -1091,7 +1091,6 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings['btn_channel'], url='https://t.me/azrXmaqa')
         ],
         [
-            InlineKeyboardButton(strings['btn_fun'], callback_data='menu_fun'),
             InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
         ],
         [
@@ -1102,9 +1101,6 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(strings.get('btn_video_olusturucu', '🎬 VİDEO OLUŞTURUCU'), callback_data='menu_video_olusturucu')
-        ],
-        [
-            InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')
         ],
         [
             InlineKeyboardButton('📦 APK-OBB-CONFİG', callback_data='menu_apk_obb')
@@ -5191,13 +5187,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings.get('btn_oyun_sayi', '🔢 Sayı Tahmin'), callback_data='oyun_sayi_baslat')],
             [InlineKeyboardButton('🪙 Para At', callback_data='eglence_para_at'),
              InlineKeyboardButton('🎯 Rus Ruleti', callback_data='eglence_rulet')],
-            [InlineKeyboardButton('🔮 Kehanet', callback_data='eglence_kehanet')],
+            [InlineKeyboardButton('🔮 Kehanet', callback_data='eglence_kehanet'),
+             InlineKeyboardButton('🎲 Rastgele', callback_data='pro20_rastgele')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ]
         await query.edit_message_text(
             "🎮 **" + strings['btn_fun'] + "**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "🎲 Zar · 🎱 Şans Topu · ✊ TKM · 🔢 Sayı Tahmin\n"
-            "🪙 Para At · 🎯 Rus Ruleti · 🔮 Kehanet",
+            "🪙 Para At · 🎯 Rus Ruleti · 🔮 Kehanet · 🎲 Rastgele",
             reply_markup=InlineKeyboardMarkup(fun_klavye),
             parse_mode='Markdown'
         )
@@ -5221,6 +5218,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings['btn_meid'], callback_data='show_meid')],
             [InlineKeyboardButton(strings.get('btn_hatirlat', '⏰ Hatırlatıcı'), callback_data='menu_hatirlat')],
             [InlineKeyboardButton('🤖 INFO', callback_data='azr_bot_info')],
+            [InlineKeyboardButton('🏓 Ping', callback_data='pro20_ping')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(strings['azr_welcome'], reply_markup=InlineKeyboardMarkup(azr_klavye), parse_mode='Markdown')
@@ -5412,17 +5410,13 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton('🏠 Kişisel Kullanım', callback_data='menu_kisisel_kullanim')],
             [InlineKeyboardButton('🛡️ Siber Güvenlik', callback_data='menu_siber_guvenlik'),
              InlineKeyboardButton('🎮 Eğlence', callback_data='menu_fun')],
-            [InlineKeyboardButton('🎲 Rastgele', callback_data='pro20_rastgele'),
-             InlineKeyboardButton('🌐 Wikipedia', callback_data='pro_wiki')],
-            [InlineKeyboardButton('📱 QR Kod', callback_data='sa_qr'),
-             InlineKeyboardButton('🌐 URL Kısalt', callback_data='sa_url')],
-            [InlineKeyboardButton('🎭 Sahte Kimlik', callback_data='sa_kimlik'),
-             InlineKeyboardButton('📅 Yaş/Tarih', callback_data='sa_tarih')],
-            [InlineKeyboardButton('🏓 Ping', callback_data='pro20_ping'),
-             InlineKeyboardButton('🎨 Renk Çevir', callback_data='pro20_renk')],
+            [InlineKeyboardButton('🌐 Wikipedia', callback_data='pro_wiki'),
+             InlineKeyboardButton('📱 QR Kod', callback_data='sa_qr')],
+            [InlineKeyboardButton('🌐 URL Kısalt', callback_data='sa_url'),
+             InlineKeyboardButton('🎭 Sahte Kimlik', callback_data='sa_kimlik')],
             [InlineKeyboardButton('📊 Metin Analiz', callback_data='pro20_metin'),
-             InlineKeyboardButton('🔤 İsim Fontu', callback_data='pro_isim_fontu')],
-            [InlineKeyboardButton('💡 Günün Sözü', callback_data='pro_gunsozu')],
+             InlineKeyboardButton('💡 Günün Sözü', callback_data='pro_gunsozu')],
+            [InlineKeyboardButton('📱 Telefon Fiyatları', callback_data='menu_telefon_fiyatlari')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
@@ -5441,6 +5435,9 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton('💯 Yüzde', callback_data='pro20_yuzde')],
             [InlineKeyboardButton('💪 BMI', callback_data='pro20_bmi'),
              InlineKeyboardButton(strings.get('btn_birim_arac', '📐 Birim Çeviri'), callback_data='pro_birim')],
+            [InlineKeyboardButton('📅 Yaş/Tarih', callback_data='sa_tarih'),
+             InlineKeyboardButton('🔤 İsim Fontu', callback_data='pro_isim_fontu')],
+            [InlineKeyboardButton('🎨 Renk Çevir', callback_data='pro20_renk')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ]
         await query.edit_message_text(
@@ -8759,6 +8756,50 @@ async def yuzde_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except (ValueError, IndexError, ZeroDivisionError):
         await update.message.reply_text("❌ Geçersiz format! `/yuzde` yazarak yardım al.", parse_mode='Markdown')
 
+async def sifre_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uzunluk = 16
+    if context.args:
+        try:
+            uzunluk = max(8, min(64, int(context.args[0])))
+        except ValueError:
+            pass
+    sifre = sifre_uret(uzunluk)
+    await update.message.reply_text(
+        f"🔑 **Güvenli Şifre**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"`{sifre}`\n\n"
+        f"📏 Uzunluk: **{uzunluk}** karakter\n"
+        f"✅ Büyük/küçük harf, rakam, sembol\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"💡 Farklı uzunluk: `/sifre 32`",
+        parse_mode='Markdown'
+    )
+
+async def kimlik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    kimlik = sahte_kimlik_uret()
+    await update.message.reply_text(kimlik, parse_mode='Markdown')
+
+async def kisalt_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "🔗 **URL Kısaltıcı**\n\nKullanım: `/kisalt https://ornek.com/uzun-link`",
+            parse_mode='Markdown'
+        )
+        return
+    url = context.args[0]
+    sonuc = await url_kisalt(url)
+    await update.message.reply_text(sonuc, parse_mode='Markdown')
+
+async def wiki_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text(
+            "🌐 **Wikipedia**\n\nKullanım: `/wiki Python programlama`",
+            parse_mode='Markdown'
+        )
+        return
+    sorgu = ' '.join(context.args)
+    sonuc = await wikipedia_ara(sorgu)
+    await update.message.reply_text(sonuc, parse_mode='Markdown')
+
 # ══════════════════════════════════════════════════════
 # 💬 SOHBET ARAÇLARI & 🛡️ GRUP YÖNETİMİ — AZRxGUARD v3.0
 # ══════════════════════════════════════════════════════
@@ -9215,6 +9256,10 @@ def main():
     application.add_handler(CommandHandler("sifrele", sifrele_komutu))
     application.add_handler(CommandHandler("bmi", bmi_komutu))
     application.add_handler(CommandHandler("yuzde", yuzde_komutu))
+    application.add_handler(CommandHandler("sifre", sifre_komutu))
+    application.add_handler(CommandHandler("kimlik", kimlik_komutu))
+    application.add_handler(CommandHandler("kisalt", kisalt_komutu))
+    application.add_handler(CommandHandler("wiki", wiki_komutu))
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
