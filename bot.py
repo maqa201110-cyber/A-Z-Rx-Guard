@@ -6763,7 +6763,10 @@ async def vin_bilgi_al(sasi_no: str) -> dict:
             for item in data.get('Results', []):
                 if item.get('Variable') == key:
                     v = (item.get('Value') or '').strip()
-                    return v if v and v not in ('Not Applicable', '0', 'null', 'None', '') else default
+                    if v and v not in ('Not Applicable', '0', 'null', 'None', ''):
+                        for ch in ('_', '*', '`', '[', ']', '\\'):
+                            v = v.replace(ch, ' ')
+                        return v.strip() or default
             return default
 
         marka   = g('Make');  model = g('Model');  yil = g('Model Year')
@@ -6780,9 +6783,11 @@ async def vin_bilgi_al(sasi_no: str) -> dict:
                 recalls_sayi = len(recalls)
                 for rec in recalls[:4]:
                     comp = (rec.get('Component') or '')[:55]
+                    for ch in ('_', '*', '`', '[', ']', '\\'):
+                        comp = comp.replace(ch, ' ')
                     num  = rec.get('NHTSACampaignNumber', '')
-                    if comp:
-                        recalls_satirlar.append(f"  ↳ `{num}` {comp}")
+                    if comp.strip():
+                        recalls_satirlar.append(f"  ↳ {num} {comp.strip()}")
         except Exception:
             pass
 
