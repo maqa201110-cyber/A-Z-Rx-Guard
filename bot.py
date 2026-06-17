@@ -6747,55 +6747,195 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # 🚗 ARABA MENÜSÜ — VIN / ŞASİ NO SORGULAMA
 # ══════════════════════════════════════════════════════════════
 
-async def vin_sasi_sorgula(sasi_no: str) -> str:
+async def vin_bilgi_al(sasi_no: str) -> dict:
     sasi_no = sasi_no.strip().upper()
+    GECERSIZ = {"gecerli": False, "marka": "", "model": "", "yil": "",
+                "rapor": "❌ **Geçersiz Şasi Numarası!**\n\nReis, şasi numarasını eksik veya yanlış girdin, kontrol et!\n\n📌 Şasi no tam 17 karakter olmalı ve I, O, Q harfleri içermemeli."}
     if len(sasi_no) != 17 or not re.match(r'^[A-HJ-NPR-Z0-9]{17}$', sasi_no):
-        return "❌ **Geçersiz Şasi Numarası!**\n\nReis, şasi numarasını eksik veya yanlış girdin, kontrol et!\n\n📌 Şasi no tam 17 karakter olmalı ve I, O, Q harfleri içermemeli."
+        return GECERSIZ
     try:
-        url = f"https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{sasi_no}?format=json"
         loop = asyncio.get_event_loop()
+        url = f"https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{sasi_no}?format=json"
         response = await loop.run_in_executor(None, lambda: http_requests.get(url, timeout=10))
         data = response.json()
-        results = {item['Variable']: item['Value'] for item in data.get('Results', []) if item.get('Value') and item['Value'] not in ('', 'Not Applicable', '0')}
 
-        marka       = results.get('Make', '—')
-        model       = results.get('Model', '—')
-        yil         = results.get('Model Year', '—')
-        ulke        = results.get('Plant Country', '—')
-        fabrika     = results.get('Plant City', '')
-        motor_hac   = results.get('Displacement (L)', '—')
-        silindir    = results.get('Engine Number of Cylinders', '—')
-        yakit       = results.get('Fuel Type - Primary', '—')
-        beygir      = results.get('Engine Brake (hp) From', results.get('Engine Brake (hp) To', '—'))
-        govde       = results.get('Body Class', '—')
-        sure_tipi   = results.get('Drive Type', '—')
-        vites       = results.get('Transmission Style', '—')
-        kapi_sayisi = results.get('Doors', '—')
+        def g(key, default='—'):
+            for item in data.get('Results', []):
+                if item.get('Variable') == key:
+                    v = (item.get('Value') or '').strip()
+                    return v if v and v not in ('Not Applicable', '0', 'null', 'None', '') else default
+            return default
 
-        fabrika_str = f"{fabrika}, {ulke}" if fabrika and fabrika != ulke else ulke
+        marka   = g('Make');  model = g('Model');  yil = g('Model Year')
 
-        rapor = (
-            f"🚗 **ŞASİ NO ANALİZ RAPORU**\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"🔑 **Şasi No:** `{sasi_no}`\n\n"
-            f"🏭 **Marka & Model:** {marka} {model}\n"
-            f"📅 **Üretim Yılı:** {yil}\n"
-            f"🌍 **Fabrika:** {fabrika_str}\n\n"
-            f"⚙️ **Motor Hacmi:** {motor_hac}L\n"
-            f"🔩 **Silindir Sayısı:** {silindir}\n"
-            f"⛽ **Yakıt Tipi:** {yakit}\n"
-            f"🐎 **Beygir Gücü:** {beygir} hp\n\n"
-            f"🚘 **Gövde Tipi:** {govde}\n"
-            f"🚪 **Kapı Sayısı:** {kapi_sayisi}\n"
-            f"🔄 **Çekiş:** {sure_tipi}\n"
-            f"⚙️ **Vites:** {vites}\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"📡 _Kaynak: NHTSA vPIC Veritabanı_"
-        )
-        return rapor
+        # --- Geri çağırma (Recalls) ---
+        recalls_sayi = 0
+        recalls_satirlar = []
+        try:
+            if marka != '—' and model != '—' and yil != '—':
+                rc_url = (f"https://api.nhtsa.gov/recalls/recallsByVehicle"
+                          f"?make={urllib.parse.quote(marka)}&model={urllib.parse.quote(model)}&modelYear={yil}")
+                rc = await loop.run_in_executor(None, lambda: http_requests.get(rc_url, timeout=8).json())
+                recalls = rc.get('results', [])
+                recalls_sayi = len(recalls)
+                for rec in recalls[:4]:
+                    comp = (rec.get('Component') or '')[:55]
+                    num  = rec.get('NHTSACampaignNumber', '')
+                    if comp:
+                        recalls_satirlar.append(f"  ↳ `{num}` {comp}")
+        except Exception:
+            pass
+
+        # --- Şikayet sayısı ---
+        sikayet_sayi = 0
+        try:
+            if marka != '—' and model != '—' and yil != '—':
+                cmp_url = (f"https://api.nhtsa.gov/complaints/complaintsByVehicle"
+                           f"?make={urllib.parse.quote(marka)}&model={urllib.parse.quote(model)}&modelYear={yil}")
+                cmp = await loop.run_in_executor(None, lambda: http_requests.get(cmp_url, timeout=8).json())
+                sikayet_sayi = cmp.get('count', 0) or len(cmp.get('results', []))
+        except Exception:
+            pass
+
+        # --- Alanlar ---
+        uretici       = g('Manufacturer Name')
+        fabrika_ulke  = g('Plant Country');  fabrika_sehir = g('Plant City');  fabrika_eyalet = g('Plant State')
+        mensei        = g('Country of Origin')
+        hedef         = g('Destination Market')
+        seri          = g('Series');  trim = g('Trim');  descriptor = g('Vehicle Descriptor')
+        arac_tipi     = g('Vehicle Type')
+        govde         = g('Body Class')
+        kapi          = g('Doors');  pencere = g('Windows');  koltuk = g('Seats')
+        motor_l       = g('Displacement (L)');  motor_cc = g('Displacement (cc)');  motor_ci = g('Displacement (ci)')
+        silindir      = g('Engine Number of Cylinders');  motor_konfig = g('Engine Configuration')
+        motor_model   = g('Engine Model');  motor_uretici = g('Engine Manufacturer')
+        hp_min        = g('Engine Brake (hp) From');  hp_max = g('Engine Brake (hp) To')
+        hp            = hp_min if hp_min != '—' else hp_max
+        yakit_ana     = g('Fuel Type - Primary');  yakit_ek = g('Fuel Type - Secondary')
+        elektrik      = g('Electrification Level')
+        cekis         = g('Drive Type')
+        vites_tipi    = g('Transmission Style');  vites_sayi = g('Transmission Speeds')
+        aks           = g('Axles');  aks_konfig = g('Axle Configuration')
+        lastik        = g('Tire Size')
+        fren          = g('Brake System Type')
+        gvwr          = g('Gross Vehicle Weight Rating From')
+        dingil        = g('Wheel Base (from)')
+        on_airbag     = g('Front Air Bag Locations');  yan_airbag = g('Side Air Bag Locations')
+        perde_airbag  = g('Curtain Air Bag Locations');  diz_airbag = g('Knee Air Bag Locations')
+        koltuk_airbag = g('Seat Cushion Air Bag Locations')
+        abs_s         = g('ABS');  esc_s = g('ESC');  traksiyon = g('Traction Control')
+        tpms          = g('TPMS Type');  kemer = g('Seat Belt Type')
+        not_bilgi     = g('Note')
+
+        fabrika_str = ', '.join(x for x in [fabrika_sehir, fabrika_eyalet, fabrika_ulke] if x and x != '—') or '—'
+
+        def sec(label, val):
+            return f"{label} {val}\n" if val and val != '—' else ''
+
+        rapor  = f"🚗 **ŞASİ NO ANALİZ RAPORU**\n━━━━━━━━━━━━━━━━━━━━━━\n"
+        rapor += f"🔑 **Şasi:** `{sasi_no}`\n\n"
+
+        rapor += f"🏷️ **ARAÇ KİMLİĞİ**\n"
+        rapor += sec("🏭 Marka/Model:", f"{marka} {model}")
+        rapor += sec("📅 Yıl:", yil)
+        rapor += sec("🎯 Trim/Seri:", f"{trim} / {seri}" if trim != '—' and seri != '—' else (trim if trim != '—' else seri))
+        rapor += sec("🚘 Araç Tipi:", arac_tipi)
+        rapor += sec("📋 Descriptor:", descriptor)
+        rapor += "\n"
+
+        rapor += f"🏢 **ÜRETİCİ & FABRİKA**\n"
+        rapor += sec("🏭 Üretici:", uretici)
+        rapor += sec("🌍 Menşei:", mensei)
+        rapor += sec("🏗️ Fabrika:", fabrika_str)
+        rapor += sec("🎯 Hedef Pazar:", hedef)
+        rapor += "\n"
+
+        rapor += f"⚙️ **MOTOR & YAKITI**\n"
+        motor_str = ' / '.join(x for x in [f"{motor_l}L" if motor_l != '—' else '', f"{motor_cc}cc" if motor_cc != '—' else '', f"{motor_ci}ci" if motor_ci != '—' else ''] if x)
+        rapor += sec("💧 Motor Hacmi:", motor_str)
+        rapor += sec("🔩 Konfigürasyon:", f"{motor_konfig} / {silindir} Silindir" if motor_konfig != '—' and silindir != '—' else silindir)
+        rapor += sec("🐎 Güç:", f"{hp} HP")
+        rapor += sec("⛽ Yakıt:", f"{yakit_ana}" + (f" + {yakit_ek}" if yakit_ek != '—' else ''))
+        rapor += sec("⚡ Elektrik:", elektrik)
+        rapor += sec("🔧 Motor Kodu:", motor_model)
+        rapor += sec("🏭 Motor Üreticisi:", motor_uretici)
+        rapor += "\n"
+
+        rapor += f"🔄 **AKTARMA ORGANLARı**\n"
+        rapor += sec("🔃 Çekiş:", cekis)
+        rapor += sec("⚙️ Vites:", f"{vites_tipi}" + (f" ({vites_sayi} ileri)" if vites_sayi != '—' else ''))
+        rapor += sec("🔩 Aks:", f"{aks}" + (f" — {aks_konfig}" if aks_konfig != '—' else ''))
+        rapor += "\n"
+
+        rapor += f"🚘 **GÖVDE & KASERİ**\n"
+        rapor += sec("📦 Gövde Tipi:", govde)
+        rapor += sec("🚪 Kapılar:", kapi)
+        rapor += sec("🪟 Pencereler:", pencere)
+        rapor += sec("💺 Koltuk:", koltuk)
+        rapor += "\n"
+
+        rapor += f"📐 **BOYUT & AĞIRLIK**\n"
+        rapor += sec("🏋️ GVWR:", gvwr)
+        rapor += sec("📏 Dingil Mesafesi:", f"{dingil} mm" if dingil != '—' else '—')
+        rapor += sec("🛞 Lastik:", lastik)
+        rapor += sec("🔒 Fren:", fren)
+        rapor += "\n"
+
+        rapor += f"🛡️ **GÜVENLİK SİSTEMLERİ**\n"
+        rapor += sec("💨 Ön Airbag:", on_airbag)
+        rapor += sec("💨 Yan Airbag:", yan_airbag)
+        rapor += sec("💨 Perde Airbag:", perde_airbag)
+        rapor += sec("💨 Diz Airbag:", diz_airbag)
+        rapor += sec("💨 Koltuk Airbag:", koltuk_airbag)
+        rapor += sec("🔒 ABS:", abs_s)
+        rapor += sec("⚡ ESC:", esc_s)
+        rapor += sec("🏎️ Traksiyon:", traksiyon)
+        rapor += sec("🛞 TPMS:", tpms)
+        rapor += sec("🪢 Emniyet Kemeri:", kemer)
+        rapor += "\n"
+
+        kaza_icon = "🚨" if recalls_sayi > 0 else "✅"
+        rapor += f"⚠️ **KAZA & GERİ ÇAĞIRMA GEÇMİŞİ**\n"
+        rapor += f"{kaza_icon} Geri Çağırma: **{recalls_sayi}** kayıt\n"
+        if recalls_satirlar:
+            rapor += '\n'.join(recalls_satirlar) + '\n'
+        sikayet_icon = "⚠️" if sikayet_sayi > 5 else ("🔶" if sikayet_sayi > 0 else "✅")
+        rapor += f"{sikayet_icon} NHTSA Şikayet: **{sikayet_sayi}** kayıt\n"
+        if not_bilgi and not_bilgi != '—':
+            rapor += f"📝 Not: {not_bilgi}\n"
+        rapor += f"\n━━━━━━━━━━━━━━━━━━━━━━\n📡 _NHTSA vPIC + Recalls + Complaints_"
+
+        return {"gecerli": True, "marka": marka, "model": model, "yil": yil, "rapor": rapor}
     except Exception as e:
-        logger.error(f"VIN sorgulama hatası: {e}")
-        return "❌ Sorgulama sırasında bir hata oluştu. Lütfen tekrar dene."
+        logger.error(f"VIN bilgi alma hatası: {e}")
+        return {"gecerli": False, "marka": "", "model": "", "yil": "",
+                "rapor": "❌ Sorgulama sırasında bir hata oluştu. Lütfen tekrar dene."}
+
+
+async def vin_sasi_sorgula(sasi_no: str) -> str:
+    return (await vin_bilgi_al(sasi_no))["rapor"]
+
+
+async def vin_foto_bul(marka: str, model: str, yil: str) -> str | None:
+    try:
+        loop = asyncio.get_event_loop()
+        sorgu = urllib.parse.quote(f"{yil} {marka} {model}")
+        search_url = (f"https://en.wikipedia.org/w/api.php?action=query&list=search"
+                      f"&srsearch={sorgu}&format=json&srlimit=4")
+        sr = await loop.run_in_executor(None, lambda: http_requests.get(search_url, timeout=6).json())
+        hits = sr.get('query', {}).get('search', [])
+        for hit in hits:
+            title = urllib.parse.quote(hit['title'])
+            img_url = (f"https://en.wikipedia.org/w/api.php?action=query&titles={title}"
+                       f"&prop=pageimages&format=json&pithumbsize=800")
+            ir = await loop.run_in_executor(None, lambda u=img_url: http_requests.get(u, timeout=6).json())
+            for page in ir.get('query', {}).get('pages', {}).values():
+                src = page.get('thumbnail', {}).get('source', '')
+                if src:
+                    return src
+        return None
+    except Exception:
+        return None
 
 
 async def gemini_vin_oku(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
@@ -6827,17 +6967,35 @@ async def gemini_vin_oku(image_bytes: bytes, mime_type: str = "image/jpeg") -> s
         return "HATA"
 
 
+async def _vin_gonder(mesaj, sasi_no: str, on_ek: str = ""):
+    geri = InlineKeyboardMarkup([
+        [InlineKeyboardButton('🔍 Yeni VIN Sorgula', callback_data='menu_araba_sasi')],
+        [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
+    ])
+    sonuc = await vin_bilgi_al(sasi_no)
+    rapor = (on_ek + "\n\n" + sonuc["rapor"]) if on_ek else sonuc["rapor"]
+    if sonuc["gecerli"]:
+        foto_url = await vin_foto_bul(sonuc["marka"], sonuc["model"], sonuc["yil"])
+        if foto_url:
+            try:
+                await mesaj.reply_photo(
+                    photo=foto_url,
+                    caption=f"🚗 {sonuc['yil']} {sonuc['marka']} {sonuc['model']}",
+                    parse_mode='Markdown'
+                )
+            except Exception:
+                pass
+    await mesaj.reply_text(rapor, parse_mode='Markdown', reply_markup=geri)
+
+
 async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if args:
         sasi_no = args[0].strip()
-        bekle = await update.message.reply_text("🔍 Şasi sorgulanıyor...", parse_mode='Markdown')
-        rapor = await vin_sasi_sorgula(sasi_no)
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
-        await bekle.edit_text(rapor, parse_mode='Markdown', reply_markup=geri)
+        bekle = await update.message.reply_text("🔍 _Sorgulanıyor..._", parse_mode='Markdown')
+        await bekle.delete()
+        await _vin_gonder(update.message, sasi_no)
     else:
-        lang = get_lang(context, update.effective_user.id)
-        strings = fs(context, update.effective_user.id, lang)
         context.user_data['durum'] = 'sasi_bekliyor'
         geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
         await update.message.reply_text(
@@ -7093,10 +7251,9 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     if context.user_data.get('durum') == 'sasi_bekliyor':
         context.user_data['durum'] = None
         sasi_no = update.message.text.strip()
-        bekle = await update.message.reply_text("🔍 Şasi sorgulanıyor...", parse_mode='Markdown')
-        rapor = await vin_sasi_sorgula(sasi_no)
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
-        await bekle.edit_text(rapor, parse_mode='Markdown', reply_markup=geri)
+        bekle = await update.message.reply_text("🔍 _Sorgulanıyor, fotoğraf ve bilgiler getiriliyor..._", parse_mode='Markdown')
+        await bekle.delete()
+        await _vin_gonder(update.message, sasi_no)
         return
 
     if context.user_data.get('durum') == 'username_checker_bekliyor':
@@ -8536,19 +8693,11 @@ async def diger_medya_log_yonet(update: Update, context: ContextTypes.DEFAULT_TY
                 )
             else:
                 await bekle.edit_text(
-                    f"✅ _AI okudu:_ `{vin_temiz}`\n🔍 _NHTSA veritabanı sorgulanıyor..._",
+                    f"✅ _AI okudu:_ `{vin_temiz}`\n🔍 _Fotoğraf ve bilgiler getiriliyor..._",
                     parse_mode='Markdown'
                 )
-                rapor = await vin_sasi_sorgula(vin_temiz)
-                geri = InlineKeyboardMarkup([
-                    [InlineKeyboardButton('📷 Başka Fotoğraf', callback_data='menu_araba_sasi_foto')],
-                    [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
-                ])
-                await bekle.edit_text(
-                    f"📷 _AI tarafından okundu:_ `{vin_temiz}`\n\n{rapor}",
-                    reply_markup=geri,
-                    parse_mode='Markdown'
-                )
+                await bekle.delete()
+                await _vin_gonder(mesaj, vin_temiz, on_ek=f"📷 _AI tarafından okundu:_ `{vin_temiz}`")
         except Exception as e:
             logger.error(f"Fotoğraftan VIN hatası: {e}")
             geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
