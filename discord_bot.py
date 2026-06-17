@@ -1619,6 +1619,17 @@ async def avatar_komutu(interaction: discord.Interaction, kullanici: discord.Mem
     embed.set_footer(text="AZRxGUARD")
     await interaction.response.send_message(embed=embed)
 
+# ── /sasi ─────────────────────────────────────────────────────────────────────
+@tree.command(name="sasi", description="🚗 Araç şasi no (VIN) sorgula — NHTSA veritabanı")
+@app_commands.describe(sasi_no="17 haneli şasi numarası (örn: WBA5A5C54FD520774)")
+async def sasi_komutu(interaction: discord.Interaction, sasi_no: str):
+    await interaction.response.defer()
+    from bot import vin_sasi_sorgula
+    rapor = await vin_sasi_sorgula(sasi_no.strip())
+    embed = discord.Embed(description=rapor, color=RENK_ANA)
+    embed.set_footer(text="AZRxGUARD Otomotiv OSINT • NHTSA vPIC")
+    await interaction.followup.send(embed=embed)
+
 # ══════════════════════════════════════════════════════════════════════════════
 # Ana coroutine (bot.py'dan çağrılır)
 # ══════════════════════════════════════════════════════════════════════════════

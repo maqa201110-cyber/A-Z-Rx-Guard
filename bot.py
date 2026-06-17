@@ -1105,6 +1105,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton('📦 APK-OBB-CONFİG', callback_data='menu_apk_obb')
         ],
+        [
+            InlineKeyboardButton('🚗 ARABA MENÜSÜ', callback_data='menu_araba')
+        ],
     ]
     return InlineKeyboardMarkup(klavye)
 
@@ -6681,6 +6684,32 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ft(strings.get('sa_tarih_ask', '📅 Doğum tarihinizi girin (GG.AA.YYYY):'), context, user_id),
             reply_markup=geri, parse_mode='Markdown'
         )
+    elif query.data == 'menu_araba':
+        context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
+        araba_klavye = [
+            [InlineKeyboardButton('🔍 Şasi No (VIN) Sorgula', callback_data='menu_araba_sasi')],
+            [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
+        ]
+        await query.edit_message_text(
+            "🚗 **ARABA MENÜSÜ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Otomotiv OSINT araçlarından birini seçin:\n\n"
+            "🔍 **Şasi No (VIN) Sorgula** — Araç hakkında fabrika verilerini öğren",
+            reply_markup=InlineKeyboardMarkup(araba_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_araba_sasi':
+        context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
+        context.user_data['durum'] = 'sasi_bekliyor'
+        await log_kanali_gonder(context.bot, update, kategori='🚗 Araba Menüsü', komut='🔍 Şasi No Sorgula')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_araba')]])
+        await query.edit_message_text(
+            "🔍 **ŞASİ NO (VIN) SORGULAMA**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Araç şasi numarasını (17 karakter) girin:\n\n"
+            "📌 _Örnek: `WBA5A5C54FD520774`_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+
     elif query.data == 'go_home':
         context.user_data['durum'] = None
         context.user_data['mevcut_kategori'] = None
@@ -6695,6 +6724,83 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.message.delete()
             except Exception:
                 pass
+
+# ══════════════════════════════════════════════════════════════
+# 🚗 ARABA MENÜSÜ — VIN / ŞASİ NO SORGULAMA
+# ══════════════════════════════════════════════════════════════
+
+async def vin_sasi_sorgula(sasi_no: str) -> str:
+    sasi_no = sasi_no.strip().upper()
+    if len(sasi_no) != 17 or not re.match(r'^[A-HJ-NPR-Z0-9]{17}$', sasi_no):
+        return "❌ **Geçersiz Şasi Numarası!**\n\nReis, şasi numarasını eksik veya yanlış girdin, kontrol et!\n\n📌 Şasi no tam 17 karakter olmalı ve I, O, Q harfleri içermemeli."
+    try:
+        url = f"https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{sasi_no}?format=json"
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(None, lambda: http_requests.get(url, timeout=10))
+        data = response.json()
+        results = {item['Variable']: item['Value'] for item in data.get('Results', []) if item.get('Value') and item['Value'] not in ('', 'Not Applicable', '0')}
+
+        marka       = results.get('Make', '—')
+        model       = results.get('Model', '—')
+        yil         = results.get('Model Year', '—')
+        ulke        = results.get('Plant Country', '—')
+        fabrika     = results.get('Plant City', '')
+        motor_hac   = results.get('Displacement (L)', '—')
+        silindir    = results.get('Engine Number of Cylinders', '—')
+        yakit       = results.get('Fuel Type - Primary', '—')
+        beygir      = results.get('Engine Brake (hp) From', results.get('Engine Brake (hp) To', '—'))
+        govde       = results.get('Body Class', '—')
+        sure_tipi   = results.get('Drive Type', '—')
+        vites       = results.get('Transmission Style', '—')
+        kapi_sayisi = results.get('Doors', '—')
+
+        fabrika_str = f"{fabrika}, {ulke}" if fabrika and fabrika != ulke else ulke
+
+        rapor = (
+            f"🚗 **ŞASİ NO ANALİZ RAPORU**\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔑 **Şasi No:** `{sasi_no}`\n\n"
+            f"🏭 **Marka & Model:** {marka} {model}\n"
+            f"📅 **Üretim Yılı:** {yil}\n"
+            f"🌍 **Fabrika:** {fabrika_str}\n\n"
+            f"⚙️ **Motor Hacmi:** {motor_hac}L\n"
+            f"🔩 **Silindir Sayısı:** {silindir}\n"
+            f"⛽ **Yakıt Tipi:** {yakit}\n"
+            f"🐎 **Beygir Gücü:** {beygir} hp\n\n"
+            f"🚘 **Gövde Tipi:** {govde}\n"
+            f"🚪 **Kapı Sayısı:** {kapi_sayisi}\n"
+            f"🔄 **Çekiş:** {sure_tipi}\n"
+            f"⚙️ **Vites:** {vites}\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📡 _Kaynak: NHTSA vPIC Veritabanı_"
+        )
+        return rapor
+    except Exception as e:
+        logger.error(f"VIN sorgulama hatası: {e}")
+        return "❌ Sorgulama sırasında bir hata oluştu. Lütfen tekrar dene."
+
+
+async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if args:
+        sasi_no = args[0].strip()
+        bekle = await update.message.reply_text("🔍 Şasi sorgulanıyor...", parse_mode='Markdown')
+        rapor = await vin_sasi_sorgula(sasi_no)
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
+        await bekle.edit_text(rapor, parse_mode='Markdown', reply_markup=geri)
+    else:
+        lang = get_lang(context, update.effective_user.id)
+        strings = fs(context, update.effective_user.id, lang)
+        context.user_data['durum'] = 'sasi_bekliyor'
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
+        await update.message.reply_text(
+            "🔍 **ŞASİ NO (VIN) SORGULAMA**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Araç şasi numarasını (17 karakter) girin:\n\n"
+            "📌 _Örnek: `WBA5A5C54FD520774`_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+
 
 # ══════════════════════════════════════════════════════════════
 # 🤖 AI ASİSTAN — GEMINI 2.0 FLASH
@@ -6935,6 +7041,15 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"IP analiz menü hatası: {e}")
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
+        return
+
+    if context.user_data.get('durum') == 'sasi_bekliyor':
+        context.user_data['durum'] = None
+        sasi_no = update.message.text.strip()
+        bekle = await update.message.reply_text("🔍 Şasi sorgulanıyor...", parse_mode='Markdown')
+        rapor = await vin_sasi_sorgula(sasi_no)
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
+        await bekle.edit_text(rapor, parse_mode='Markdown', reply_markup=geri)
         return
 
     if context.user_data.get('durum') == 'username_checker_bekliyor':
@@ -9238,6 +9353,7 @@ def main():
     application.add_handler(CommandHandler("meid", meid_komutu))
     application.add_handler(CommandHandler("ip", ip_basit_komutu))
     application.add_handler(CommandHandler("ip_analiz", ip_komutu))
+    application.add_handler(CommandHandler("sasi", sasi_komutu))
     application.add_handler(CommandHandler("hatirlat", hatirlat_komutu))
     # ⚡ PRO ARAÇLAR — Hızlı komutlar
     application.add_handler(CommandHandler("hesap", hesap_komutu))
