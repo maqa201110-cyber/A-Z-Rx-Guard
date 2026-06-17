@@ -6688,12 +6688,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
         araba_klavye = [
             [InlineKeyboardButton('🔍 Şasi No (VIN) Sorgula', callback_data='menu_araba_sasi')],
+            [InlineKeyboardButton('📷 Fotoğraftan VIN Oku (AI)', callback_data='menu_araba_sasi_foto')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
             "🚗 **ARABA MENÜSÜ**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "Otomotiv OSINT araçlarından birini seçin:\n\n"
-            "🔍 **Şasi No (VIN) Sorgula** — Araç hakkında fabrika verilerini öğren",
+            "🔍 **Şasi No (VIN) Sorgula** — VIN numarasını elle gir\n"
+            "📷 **Fotoğraftan VIN Oku** — Araç sticker/plaka fotoğrafını gönder, AI okusun",
             reply_markup=InlineKeyboardMarkup(araba_klavye),
             parse_mode='Markdown'
         )
@@ -6706,6 +6708,22 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🔍 **ŞASİ NO (VIN) SORGULAMA**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "Araç şasi numarasını (17 karakter) girin:\n\n"
             "📌 _Örnek: `WBA5A5C54FD520774`_",
+            reply_markup=geri,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_araba_sasi_foto':
+        context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
+        context.user_data['durum'] = 'sasi_foto_bekliyor'
+        await log_kanali_gonder(context.bot, update, kategori='🚗 Araba Menüsü', komut='📷 Fotoğraftan VIN')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_araba')]])
+        await query.edit_message_text(
+            "📷 **FOTOĞRAFTAN VIN OKUMA**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Araç şasi etiketi, torpido camı veya motorun fotoğrafını gönder.\n\n"
+            "🤖 _Gemini AI otomatik olarak VIN kodunu okuyup araç bilgilerini getirecek._\n\n"
+            "📌 **İpuçları:**\n"
+            "• Fotoğraf net ve iyi aydınlatılmış olsun\n"
+            "• VIN etiketi frame içinde tam görünsün\n"
+            "• Torpido camındaki sticker en kolay okunur",
             reply_markup=geri,
             parse_mode='Markdown'
         )
@@ -6778,6 +6796,35 @@ async def vin_sasi_sorgula(sasi_no: str) -> str:
     except Exception as e:
         logger.error(f"VIN sorgulama hatası: {e}")
         return "❌ Sorgulama sırasında bir hata oluştu. Lütfen tekrar dene."
+
+
+async def gemini_vin_oku(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
+    try:
+        from google import genai
+        from google.genai import types
+        def call_api():
+            client = genai.Client()
+            prompt = (
+                "Bu araç fotoğrafında bir VIN (Vehicle Identification Number / Şasi Numarası) kodu var mı? "
+                "Varsa sadece o 17 haneli VIN kodunu döndür, başka hiçbir şey yazma. "
+                "VIN kodu yoksa veya okunamıyorsa sadece 'BULUNAMADI' yaz."
+            )
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=[
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                    types.Part.from_text(text=prompt)
+                ],
+                config=types.GenerateContentConfig(
+                    max_output_tokens=64,
+                    temperature=0.0,
+                )
+            )
+            return (response.text or "").strip()
+        return await asyncio.to_thread(call_api)
+    except Exception as e:
+        logger.error(f"Gemini VIN okuma hatası: {e}")
+        return "HATA"
 
 
 async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -8451,6 +8498,63 @@ async def diger_medya_log_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     mesaj = update.message
     if not mesaj:
         return
+
+    # 📷 Fotoğraftan VIN okuma durumu
+    if context.user_data.get('durum') == 'sasi_foto_bekliyor' and mesaj.photo:
+        context.user_data['durum'] = None
+        bekle = await mesaj.reply_text(
+            "🤖 _Fotoğraf analiz ediliyor, VIN kodu aranıyor..._",
+            parse_mode='Markdown'
+        )
+        try:
+            foto = mesaj.photo[-1]
+            dosya = await context.bot.get_file(foto.file_id)
+            import io
+            buf = io.BytesIO()
+            await dosya.download_to_memory(buf)
+            image_bytes = buf.getvalue()
+            mime = "image/jpeg"
+
+            vin_ham = await gemini_vin_oku(image_bytes, mime)
+            vin_temiz = vin_ham.strip().upper().replace(" ", "").replace("\n", "")
+
+            if vin_temiz in ("BULUNAMADI", "HATA", "") or len(vin_temiz) < 10:
+                geri = InlineKeyboardMarkup([
+                    [InlineKeyboardButton('📷 Tekrar Dene', callback_data='menu_araba_sasi_foto')],
+                    [InlineKeyboardButton('🔍 Manuel Gir', callback_data='menu_araba_sasi')],
+                    [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
+                ])
+                await bekle.edit_text(
+                    "❌ **VIN Kodu Okunamadı**\n\n"
+                    "Fotoğrafta net bir şasi numarası bulunamadı.\n\n"
+                    "📌 **İpuçları:**\n"
+                    "• Torpido camındaki etiketi yakından çek\n"
+                    "• Aydınlık ortamda, net fotoğraf çek\n"
+                    "• VIN yazısı tam frame içinde olsun",
+                    reply_markup=geri,
+                    parse_mode='Markdown'
+                )
+            else:
+                await bekle.edit_text(
+                    f"✅ _AI okudu:_ `{vin_temiz}`\n🔍 _NHTSA veritabanı sorgulanıyor..._",
+                    parse_mode='Markdown'
+                )
+                rapor = await vin_sasi_sorgula(vin_temiz)
+                geri = InlineKeyboardMarkup([
+                    [InlineKeyboardButton('📷 Başka Fotoğraf', callback_data='menu_araba_sasi_foto')],
+                    [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
+                ])
+                await bekle.edit_text(
+                    f"📷 _AI tarafından okundu:_ `{vin_temiz}`\n\n{rapor}",
+                    reply_markup=geri,
+                    parse_mode='Markdown'
+                )
+        except Exception as e:
+            logger.error(f"Fotoğraftan VIN hatası: {e}")
+            geri = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
+            await bekle.edit_text("❌ İşlem sırasında bir hata oluştu, tekrar dene.", reply_markup=geri)
+        return
+
     tur = (
         "📸 Fotoğraf" if mesaj.photo else
         "🎙️ Ses Notu" if mesaj.voice else
