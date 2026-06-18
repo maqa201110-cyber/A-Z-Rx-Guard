@@ -7032,37 +7032,73 @@ async def texasmator_sorgula(plaka_ham: str) -> str:
     son_muayene  = None
     bitis_tarihi = None
 
-    # ── 1. RS.ge eFiling — teknik muayene endpoint'i ─────────────────────────
-    for ep in [
-        f"https://efiling.rs.ge/efiling/api/vehicle/technical-inspection?plate={urllib.parse.quote(plaka)}",
-        f"https://efiling.rs.ge/efiling/api/vehicle/inspection?plateNumber={urllib.parse.quote(pg)}",
-    ]:
+    # ── 1. pti.ge — resmi Gürcistan teknik muayene portalı (BİRİNCİL KAYNAK) ──
+    def _pti_ge_sorgula():
+        import requests as _req
+        import warnings as _w
+        _w.filterwarnings('ignore')
         try:
-            r = await loop.run_in_executor(None,
-                lambda u=ep: http_requests.get(u, headers=_TX_HEADERS, timeout=8, verify=False))
-            if r.status_code == 200:
-                j = r.json()
-                son_muayene  = (j.get('lastInspectionDate') or j.get('inspectionDate')
-                                or j.get('date') or j.get('lastDate'))
-                bitis_tarihi = (j.get('expiryDate') or j.get('validUntil')
-                                or j.get('expiry')  or j.get('endDate'))
-                logger.info(f"texasmator rs.ge efiling: {list(j.keys())}")
-                if son_muayene or bitis_tarihi:
-                    break
+            sess = _req.Session()
+            hdrs = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'ka-GE,ka;q=0.9,en;q=0.8',
+            }
+            r1 = sess.get("https://pti.ge/ka-GE/learn_deadline", headers=hdrs, timeout=10, verify=False)
+            csrf_m = re.search(r'name="_token"\s+value="([^"]+)"', r1.text)
+            if not csrf_m:
+                return None, None
+            csrf = csrf_m.group(1)
+            r2 = sess.post("https://pti.ge/ka-GE/deadline", data={
+                '_token': csrf,
+                'plate_num': plaka,
+                'car_category': 'm1',
+            }, headers={**hdrs, 'Referer': 'https://pti.ge/ka-GE/learn_deadline'}, timeout=12, verify=False)
+            if r2.status_code != 200:
+                return None, None
+            # Parse inspection deadline from response
+            date_m = re.search(
+                r'id="deadlineAnswer"[\s\S]{0,500}?(\d{4}-\d{2}-\d{2}(?:\s\d{2}:\d{2}:\d{2})?)',
+                r2.text)
+            if date_m:
+                raw_date = date_m.group(1).strip()[:10]  # YYYY-MM-DD
+                return None, raw_date
+            return None, None
         except Exception as e:
-            logger.debug(f"texasmator efiling {ep}: {e}")
+            logger.debug(f"texasmator pti.ge: {e}")
+            return None, None
 
-    # ── 2. service.gov.ge / mia.gov.ge inspection API ────────────────────────
+    son_muayene, bitis_tarihi = await loop.run_in_executor(None, _pti_ge_sorgula)
+    logger.info(f"texasmator pti.ge: son={son_muayene} bitis={bitis_tarihi}")
+
+    # ── 2. RS.ge eFiling yedek ────────────────────────────────────────────────
     if not son_muayene and not bitis_tarihi:
-        api_denemeler = [
+        for ep in [
+            f"https://efiling.rs.ge/efiling/api/vehicle/technical-inspection?plate={urllib.parse.quote(plaka)}",
+            f"https://efiling.rs.ge/efiling/api/vehicle/inspection?plateNumber={urllib.parse.quote(pg)}",
+        ]:
+            try:
+                r = await loop.run_in_executor(None,
+                    lambda u=ep: http_requests.get(u, headers=_TX_HEADERS, timeout=8, verify=False))
+                if r.status_code == 200:
+                    j = r.json()
+                    son_muayene  = (j.get('lastInspectionDate') or j.get('inspectionDate')
+                                    or j.get('date') or j.get('lastDate'))
+                    bitis_tarihi = (j.get('expiryDate') or j.get('validUntil')
+                                    or j.get('expiry')  or j.get('endDate'))
+                    logger.info(f"texasmator rs.ge efiling: {list(j.keys())}")
+                    if son_muayene or bitis_tarihi:
+                        break
+            except Exception as e:
+                logger.debug(f"texasmator efiling {ep}: {e}")
+
+    # ── 3. service.gov.ge / mia.gov.ge yedek ─────────────────────────────────
+    if not son_muayene and not bitis_tarihi:
+        for method, url, payload in [
             ('POST', 'https://service.gov.ge/api/v1/vehicle/inspection',
              {'plate': plaka, 'plateNumber': pg}),
             ('GET',  f'https://mia.gov.ge/api/vehicle/inspection?plate={urllib.parse.quote(plaka)}',
              None),
-            ('POST', 'https://rs.ge/api/vehicle/technical-inspection',
-             {'plateNumber': plaka}),
-        ]
-        for method, url, payload in api_denemeler:
+        ]:
             try:
                 if method == 'POST':
                     r = await loop.run_in_executor(None,
@@ -7084,26 +7120,6 @@ async def texasmator_sorgula(plaka_ham: str) -> str:
             except Exception as e:
                 logger.debug(f"texasmator {url}: {e}")
 
-    # ── 3. RS.ge araç kontrol sayfasından HTML scrape ────────────────────────
-    if not son_muayene and not bitis_tarihi:
-        try:
-            page_url = f"https://www.rs.ge/ka/vehicle-check?plateNumber={urllib.parse.quote(pg)}"
-            r = await loop.run_in_executor(None,
-                lambda: http_requests.get(page_url, headers=_TX_HEADERS, timeout=10))
-            if r.status_code == 200:
-                html = r.text
-                m1 = re.search(
-                    r'(?:inspection|muayene|ტექდათვალიერება)[^<]{0,120}?(\d{2}[./\-]\d{2}[./\-]\d{4})',
-                    html, re.IGNORECASE)
-                m2 = re.search(
-                    r'(?:expir|valid\s*until|ვადა|გასვლა)[^<]{0,120}?(\d{2}[./\-]\d{2}[./\-]\d{4})',
-                    html, re.IGNORECASE)
-                if m1: son_muayene  = m1.group(1)
-                if m2: bitis_tarihi = m2.group(1)
-                logger.info(f"texasmator rs.ge HTML: son={son_muayene} bitis={bitis_tarihi}")
-        except Exception as e:
-            logger.debug(f"texasmator rs.ge HTML: {e}")
-
     # ── Rapor oluştur ─────────────────────────────────────────────────────────
     rapor  = "📊 *GÜRCİSTAN ARAÇ MUAYENE (TEXASMATOR) DURUMU*\n"
     rapor += "━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -7117,9 +7133,9 @@ async def texasmator_sorgula(plaka_ham: str) -> str:
         if bitis_tarihi:
             try:
                 from datetime import datetime as _dt
-                for fmt in ('%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d'):
+                for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y'):
                     try:
-                        expired = _dt.strptime(bitis_tarihi.strip(), fmt) < _dt.now()
+                        expired = _dt.strptime(bitis_tarihi.strip()[:10], fmt) < _dt.now()
                         break
                     except ValueError:
                         continue
@@ -7138,8 +7154,8 @@ async def texasmator_sorgula(plaka_ham: str) -> str:
         rapor += "❓ *Durum:* Reis plaka sorgulanamadı, kontrol et\\!"
 
     rapor += "\n\n━━━━━━━━━━━━━━━━━━━━━━\n"
-    rapor += "🔍 [RS\\.ge Araç Kontrol](https://www.rs.ge/ka/vehicle-check) • "
-    rapor += "[service\\.gov\\.ge](https://service.gov.ge)\n"
+    rapor += "🔍 [pti\\.ge](https://pti.ge) • "
+    rapor += "[RS\\.ge Araç Kontrol](https://www.rs.ge/ka/vehicle-check)\n"
     rapor += "📡 _Gürcistan Teknik Muayene Sistemi_"
     return rapor
 
