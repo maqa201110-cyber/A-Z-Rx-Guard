@@ -6688,12 +6688,27 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
         araba_klavye = [
             [InlineKeyboardButton('🔍 Şasi No (VIN) Sorgula', callback_data='menu_araba_sasi')],
+            [InlineKeyboardButton('🇬🇪 Gürcistan Plaka Sorgula', callback_data='menu_araba_plaka')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
             "🚗 *ARABA MENÜSÜ*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🔍 *Şasi No (VIN) Sorgula* — 17 haneli VIN gir, detaylı araç raporu al",
+            "🔍 *Şasi No (VIN)* — 17 haneli VIN gir, detaylı araç raporu al\n"
+            "🇬🇪 *Gürcistan Plaka* — Araç, ceza ve tescil bilgisi",
             reply_markup=InlineKeyboardMarkup(araba_klavye),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'menu_araba_plaka':
+        context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
+        context.user_data['durum'] = 'plaka_bekliyor'
+        await log_kanali_gonder(context.bot, update, kategori='🚗 Araba Menüsü', komut='🇬🇪 Plaka Sorgula')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_araba')]])
+        await query.edit_message_text(
+            "🇬🇪 *GÜRCİSTAN PLAKA SORGULAMA*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Araç plakasını girin:\n\n"
+            "📌 _Örnek: `MA-777-GA`_\n"
+            "_2 harf · 3 rakam · 2 harf_",
+            reply_markup=geri,
             parse_mode='Markdown'
         )
     elif query.data == 'menu_araba_sasi':
@@ -6987,6 +7002,251 @@ async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+# ══════════════════════════════════════════════════════════════
+# 🇬🇪 GÜRCISTAN PLAKA SORGULAMA MOTORU
+# ══════════════════════════════════════════════════════════════
+
+_GE_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/html, */*',
+    'Accept-Language': 'ka-GE,ka;q=0.9,en-US;q=0.8',
+    'Connection': 'keep-alive',
+}
+
+
+async def _ge_arac_bilgi(plaka: str, loop) -> dict:
+    """carcheck.ge ve diğer kaynaklardan araç bilgisi çek."""
+    sonuc = {}
+    denemeler = [
+        f"https://carcheck.ge/en/result/{urllib.parse.quote(plaka)}",
+        f"https://carcheck.ge/en/search?q={urllib.parse.quote(plaka)}",
+        f"https://carcheck.ge/en/report/{urllib.parse.quote(plaka)}",
+    ]
+    for url in denemeler:
+        try:
+            resp = await loop.run_in_executor(None,
+                lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10, allow_redirects=True))
+            if resp.status_code != 200 or len(resp.text) < 300:
+                continue
+            html = resp.text
+
+            for pat in [r'"make"\s*:\s*"([^"]{2,50})"', r'"brand"\s*:\s*"([^"]{2,50})"', r'data-make="([^"]{2,50})"']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['marka'] = m.group(1).strip().title()
+                    break
+            for pat in [r'"model"\s*:\s*"([^"]{1,60})"', r'data-model="([^"]{1,60})"']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['model'] = m.group(1).strip()
+                    break
+            for pat in [r'"year"\s*:\s*"?(\d{4})"?', r'"productionYear"\s*:\s*"?(\d{4})"?', r'data-year="(\d{4})"', r'<[^>]*year[^>]*>(\d{4})<']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m and 1950 <= int(m.group(1)) <= 2030:
+                    sonuc['yil'] = m.group(1)
+                    break
+            for pat in [r'"color"\s*:\s*"([^"]{2,30})"', r'"colour"\s*:\s*"([^"]{2,30})"', r'data-color="([^"]{2,30})"']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['renk'] = m.group(1).strip().title()
+                    break
+            for pat in [r'"vin"\s*:\s*"([A-HJ-NPR-Z0-9]{17})"', r'VIN[:\s]+([A-HJ-NPR-Z0-9]{17})']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['vin'] = m.group(1).upper()
+                    break
+            for pat in [r'"engine"\s*:\s*"([^"]{2,60})"', r'"engineVolume"\s*:\s*"?([^",}{]{1,20})"?']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['motor'] = m.group(1).strip()
+                    break
+            for pat in [r'"fuel[Tt]ype"\s*:\s*"([^"]{2,30})"', r'"fuel"\s*:\s*"([^"]{2,30})"']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['yakit'] = m.group(1).strip()
+                    break
+            for pat in [r'"mileage"\s*:\s*"?(\d+)"?', r'"odometer"\s*:\s*"?(\d+)"?']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['km'] = int(m.group(1))
+                    break
+            for pat in [r'"registrationDate"\s*:\s*"([^"]{4,20})"', r'"regDate"\s*:\s*"([^"]{4,20})"']:
+                m = re.search(pat, html, re.IGNORECASE)
+                if m:
+                    sonuc['tescil'] = m.group(1)[:10]
+                    break
+            if sonuc:
+                sonuc['kaynak'] = 'carcheck.ge'
+                break
+        except Exception as e:
+            logger.debug(f"carcheck.ge {url}: {e}")
+    return sonuc
+
+
+async def _ge_ceza_bilgi(plaka: str, loop) -> dict:
+    """police.ge üzerinden trafik cezalarını sorgula."""
+    sonuc = {'sayi': 0, 'tutar': 0.0, 'liste': []}
+    denemeler = [
+        ('POST', 'https://www.police.ge/ge/fines/search',      {'plateNumber': plaka}),
+        ('POST', 'https://www.police.ge/api/fines',            {'plate': plaka, 'plateNumber': plaka}),
+        ('POST', 'https://police.ge/api/fines/search',         {'plateNumber': plaka}),
+        ('GET',  f'https://www.police.ge/ge/fines?plate={urllib.parse.quote(plaka)}', None),
+        ('POST', 'https://efines.ge/api/check',                {'plateNumber': plaka}),
+    ]
+    for method, url, payload in denemeler:
+        try:
+            if method == 'POST':
+                r = await loop.run_in_executor(None,
+                    lambda u=url, p=payload: http_requests.post(u, json=p, headers=_GE_HEADERS, timeout=8))
+            else:
+                r = await loop.run_in_executor(None,
+                    lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=8))
+            if r.status_code not in (200, 201):
+                continue
+            try:
+                j = r.json()
+                fines = (j.get('fines') or j.get('data') or j.get('result') or j.get('violations') or j.get('items') or [])
+                if isinstance(fines, list) and fines:
+                    sonuc['sayi'] = len(fines)
+                    for f in fines[:5]:
+                        amount = float(str(f.get('amount') or f.get('fineAmount') or f.get('sum') or 0).replace(',', '').replace(' ', '') or 0)
+                        date_s = str(f.get('date') or f.get('violationDate') or f.get('created_at') or '')
+                        desc   = str(f.get('description') or f.get('violationType') or f.get('type') or '')
+                        sonuc['tutar'] += amount
+                        sonuc['liste'].append({'tutar': amount, 'tarih': date_s[:10], 'aciklama': desc[:70]})
+                    return sonuc
+                elif isinstance(j, dict):
+                    cnt = j.get('count') or j.get('total') or 0
+                    if cnt:
+                        sonuc['sayi'] = int(cnt)
+                        sonuc['tutar'] = float(str(j.get('totalAmount') or j.get('sum') or 0).replace(',', '') or 0)
+                        return sonuc
+            except Exception:
+                html = r.text.lower()
+                if any(w in html for w in ['fine', 'ceza', 'violation', 'ჯარიმა']):
+                    cm = re.search(r'(\d+)\s*(?:fine|ceza|violation|ჯარიმა)', html, re.IGNORECASE)
+                    am = re.search(r'([\d\s]+(?:\.\d+)?)\s*(?:₾|gel|lari)', html, re.IGNORECASE)
+                    if cm:
+                        sonuc['sayi'] = int(cm.group(1))
+                    if am:
+                        sonuc['tutar'] = float(am.group(1).replace(' ', ''))
+                    if sonuc['sayi']:
+                        return sonuc
+        except Exception as e:
+            logger.debug(f"ceza sorgu {url}: {e}")
+    return sonuc
+
+
+async def gurcistan_plaka_sorgula(plaka_ham: str) -> str:
+    plaka = re.sub(r'[\s\-\.]', '', plaka_ham.upper().strip())
+    if not re.match(r'^[A-Z]{2}\d{3}[A-Z]{2}$', plaka):
+        return (
+            "❌ *Hatalı Plaka Formatı*\n\n"
+            "Gürcistan plaka formatı: `XX-NNN-XX`\n"
+            "_2 harf · 3 rakam · 2 harf_\n\n"
+            "✅ Doğru: `MA-777-GA`\n\n"
+            "Reis plaka sorgulanamadı, formatı kontrol et _(Örn: MA-777-GA)_"
+        )
+
+    pg = f"{plaka[:2]}-{plaka[2:5]}-{plaka[5:]}"
+    loop = asyncio.get_event_loop()
+
+    arac_sonuc, ceza_sonuc = await asyncio.gather(
+        _ge_arac_bilgi(plaka, loop),
+        _ge_ceza_bilgi(plaka, loop),
+        return_exceptions=True
+    )
+    if isinstance(arac_sonuc, Exception):
+        arac_sonuc = {}
+    if isinstance(ceza_sonuc, Exception):
+        ceza_sonuc = {'sayi': 0, 'tutar': 0.0, 'liste': []}
+
+    def sc(v):
+        for ch in ('_', '*', '`', '[', ']'):
+            v = str(v).replace(ch, ' ')
+        return v.strip()
+
+    rapor  = "📊 *GÜRCİSTAN ARAÇ VE CEZA RAPORU*\n"
+    rapor += "━━━━━━━━━━━━━━━━━━━━━━\n"
+    rapor += f"🚗 *Plaka:* `{pg}`\n\n"
+
+    marka = sc(arac_sonuc.get('marka', ''))
+    model = sc(arac_sonuc.get('model', ''))
+    yil   = sc(arac_sonuc.get('yil', ''))
+    renk  = sc(arac_sonuc.get('renk', ''))
+    vin   = sc(arac_sonuc.get('vin', ''))
+    motor = sc(arac_sonuc.get('motor', ''))
+    yakit = sc(arac_sonuc.get('yakit', ''))
+    km    = arac_sonuc.get('km', 0)
+    tescil= sc(arac_sonuc.get('tescil', ''))
+
+    if marka or model:
+        rapor += f"🚘 *Marka / Model:* {marka} {model}\n".replace('  ', ' ')
+    else:
+        rapor += "🚘 *Marka / Model:* Veritabanında bulunamadı\n"
+    if yil:
+        rapor += f"📅 *Kayıt / Alım Yılı:* {yil}\n"
+    if renk:
+        rapor += f"🎨 *Renk:* {renk}\n"
+    if motor:
+        rapor += f"⚙️ *Motor:* {motor}\n"
+    if yakit:
+        rapor += f"⛽ *Yakıt:* {yakit}\n"
+    if km:
+        rapor += f"🛣️ *Kilometre:* {km:,} km\n"
+    if tescil:
+        rapor += f"📋 *Tescil Tarihi:* {tescil}\n"
+    if vin:
+        rapor += f"🔑 *Şasi (VIN):* `{vin}`\n"
+    rapor += f"👤 *Araç Sahibi:* Gizli _(Kişisel veri yasası)_\n"
+    rapor += "\n"
+
+    if ceza_sonuc['sayi'] > 0:
+        rapor += f"⚠️ *Aktif Trafik Cezaları:* {ceza_sonuc['sayi']} adet\n"
+        if ceza_sonuc['tutar'] > 0:
+            rapor += f"💰 *Toplam Borç:* {ceza_sonuc['tutar']:.0f} ₾ _(Gürcistan Larisi)_\n"
+        for c in ceza_sonuc['liste'][:4]:
+            parts = []
+            if c['tarih']:
+                parts.append(c['tarih'])
+            if c['aciklama']:
+                parts.append(sc(c['aciklama']))
+            if c['tutar']:
+                parts.append(f"{c['tutar']:.0f} ₾")
+            if parts:
+                rapor += f"  🔸 {' — '.join(parts)}\n"
+    else:
+        rapor += "✅ *Trafik Cezası:* Temiz, ceza yok reis!\n"
+
+    rapor += "\n━━━━━━━━━━━━━━━━━━━━━━\n"
+    rapor += f"🔍 [carcheck.ge](https://carcheck.ge/en/result/{plaka}) • "
+    rapor += f"[police.ge ceza](https://www.police.ge/ge/fines)\n"
+    rapor += "📡 _carcheck.ge + police.ge_"
+    return rapor
+
+
+async def plaka_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    geri = InlineKeyboardMarkup([
+        [InlineKeyboardButton('🔍 Yeni Plaka', callback_data='menu_araba_plaka')],
+        [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
+    ])
+    if args:
+        plaka = ' '.join(args).strip()
+        bekle = await update.message.reply_text("🇬🇪 _Gürcistan plakalı araç sorgulanıyor..._", parse_mode='Markdown')
+        rapor = await gurcistan_plaka_sorgula(plaka)
+        await bekle.edit_text(rapor, parse_mode='Markdown', reply_markup=geri, disable_web_page_preview=True)
+    else:
+        context.user_data['durum'] = 'plaka_bekliyor'
+        geri2 = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
+        await update.message.reply_text(
+            "🇬🇪 *GÜRCİSTAN PLAKA SORGULAMA*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Araç plakasını girin:\n\n"
+            "📌 _Örnek: `MA-777-GA`_",
+            reply_markup=geri2,
+            parse_mode='Markdown'
+        )
+
 
 # ══════════════════════════════════════════════════════════════
 # 🤖 AI ASİSTAN — GEMINI 2.0 FLASH
@@ -7235,6 +7495,18 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         bekle = await update.message.reply_text("🔍 _Sorgulanıyor..._", parse_mode='Markdown')
         await bekle.delete()
         await _vin_gonder(update.message, sasi_no)
+        return
+
+    if context.user_data.get('durum') == 'plaka_bekliyor':
+        context.user_data['durum'] = None
+        plaka = update.message.text.strip()
+        bekle = await update.message.reply_text("🇬🇪 _Gürcistan araç kaydı ve cezaları sorgulanıyor..._", parse_mode='Markdown')
+        rapor = await gurcistan_plaka_sorgula(plaka)
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔍 Yeni Plaka', callback_data='menu_araba_plaka')],
+            [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
+        ])
+        await bekle.edit_text(rapor, parse_mode='Markdown', reply_markup=geri, disable_web_page_preview=True)
         return
 
     if context.user_data.get('durum') == 'username_checker_bekliyor':
@@ -9540,6 +9812,7 @@ def main():
     application.add_handler(CommandHandler("ip", ip_basit_komutu))
     application.add_handler(CommandHandler("ip_analiz", ip_komutu))
     application.add_handler(CommandHandler("sasi", sasi_komutu))
+    application.add_handler(CommandHandler("plaka", plaka_komutu))
     application.add_handler(CommandHandler("hatirlat", hatirlat_komutu))
     # ⚡ PRO ARAÇLAR — Hızlı komutlar
     application.add_handler(CommandHandler("hesap", hesap_komutu))
