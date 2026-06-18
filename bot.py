@@ -7014,124 +7014,153 @@ _GE_HEADERS = {
 }
 
 
-async def _ge_arac_bilgi(plaka: str, loop) -> dict:
-    """carcheck.ge ve diğer kaynaklardan araç bilgisi çek."""
-    sonuc = {}
-    denemeler = [
-        f"https://carcheck.ge/en/result/{urllib.parse.quote(plaka)}",
-        f"https://carcheck.ge/en/search?q={urllib.parse.quote(plaka)}",
-        f"https://carcheck.ge/en/report/{urllib.parse.quote(plaka)}",
-    ]
-    for url in denemeler:
-        try:
-            resp = await loop.run_in_executor(None,
-                lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10, allow_redirects=True))
-            if resp.status_code != 200 or len(resp.text) < 300:
-                continue
-            html = resp.text
+def _html_parse_arac(html: str) -> dict:
+    """HTML/JSON içinden araç alanlarını regex ile çıkar."""
+    s = {}
+    for pat in [r'"make"\s*:\s*"([^"]{2,50})"', r'"brand"\s*:\s*"([^"]{2,50})"', r'data-make="([^"]{2,50})"']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['marka'] = m.group(1).strip().title(); break
+    for pat in [r'"model"\s*:\s*"([^"]{1,60})"', r'data-model="([^"]{1,60})"']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['model'] = m.group(1).strip(); break
+    for pat in [r'"year"\s*:\s*"?(\d{4})"?', r'"productionYear"\s*:\s*"?(\d{4})"?', r'data-year="(\d{4})"']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m and 1950 <= int(m.group(1)) <= 2030:
+            s['yil'] = m.group(1); break
+    for pat in [r'"color"\s*:\s*"([^"]{2,30})"', r'"colour"\s*:\s*"([^"]{2,30})"']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['renk'] = m.group(1).strip().title(); break
+    for pat in [r'"vin"\s*:\s*"([A-HJ-NPR-Z0-9]{17})"', r'\bVIN[:\s]+([A-HJ-NPR-Z0-9]{17})']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['vin'] = m.group(1).upper(); break
+    for pat in [r'"engine[Vv]olume"\s*:\s*"?([^",}{]{1,20})"?', r'"engine"\s*:\s*"([^"]{2,60})"']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['motor'] = m.group(1).strip(); break
+    for pat in [r'"fuel[Tt]ype"\s*:\s*"([^"]{2,30})"', r'"fuel"\s*:\s*"([^"]{2,30})"']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['yakit'] = m.group(1).strip(); break
+    for pat in [r'"mileage"\s*:\s*"?(\d+)"?', r'"odometer"\s*:\s*"?(\d+)"?']:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            s['km'] = int(m.group(1)); break
+    return s
 
-            for pat in [r'"make"\s*:\s*"([^"]{2,50})"', r'"brand"\s*:\s*"([^"]{2,50})"', r'data-make="([^"]{2,50})"']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['marka'] = m.group(1).strip().title()
-                    break
-            for pat in [r'"model"\s*:\s*"([^"]{1,60})"', r'data-model="([^"]{1,60})"']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['model'] = m.group(1).strip()
-                    break
-            for pat in [r'"year"\s*:\s*"?(\d{4})"?', r'"productionYear"\s*:\s*"?(\d{4})"?', r'data-year="(\d{4})"', r'<[^>]*year[^>]*>(\d{4})<']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m and 1950 <= int(m.group(1)) <= 2030:
-                    sonuc['yil'] = m.group(1)
-                    break
-            for pat in [r'"color"\s*:\s*"([^"]{2,30})"', r'"colour"\s*:\s*"([^"]{2,30})"', r'data-color="([^"]{2,30})"']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['renk'] = m.group(1).strip().title()
-                    break
-            for pat in [r'"vin"\s*:\s*"([A-HJ-NPR-Z0-9]{17})"', r'VIN[:\s]+([A-HJ-NPR-Z0-9]{17})']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['vin'] = m.group(1).upper()
-                    break
-            for pat in [r'"engine"\s*:\s*"([^"]{2,60})"', r'"engineVolume"\s*:\s*"?([^",}{]{1,20})"?']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['motor'] = m.group(1).strip()
-                    break
-            for pat in [r'"fuel[Tt]ype"\s*:\s*"([^"]{2,30})"', r'"fuel"\s*:\s*"([^"]{2,30})"']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['yakit'] = m.group(1).strip()
-                    break
-            for pat in [r'"mileage"\s*:\s*"?(\d+)"?', r'"odometer"\s*:\s*"?(\d+)"?']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['km'] = int(m.group(1))
-                    break
-            for pat in [r'"registrationDate"\s*:\s*"([^"]{4,20})"', r'"regDate"\s*:\s*"([^"]{4,20})"']:
-                m = re.search(pat, html, re.IGNORECASE)
-                if m:
-                    sonuc['tescil'] = m.group(1)[:10]
-                    break
-            if sonuc:
-                sonuc['kaynak'] = 'carcheck.ge'
-                break
+
+async def _ge_arac_bilgi(plaka: str, pg: str, loop) -> dict:
+    """myauto.ge API → carcheck.ge sırasıyla araç bilgisi çek."""
+    sonuc = {}
+
+    # ── 1. myauto.ge resmi API (en güvenilir) ────────────────────────────────
+    for plate_fmt in [pg, plaka]:
+        try:
+            url = (f"https://api2.myauto.ge/ka/products?Plate={urllib.parse.quote(plate_fmt)}"
+                   f"&TypeID=0&forRent=0&SortOrder=1&Page=1")
+            r = await loop.run_in_executor(None,
+                lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10))
+            if r.status_code == 200:
+                j = r.json()
+                items = j.get('data', {}).get('items', [])
+                if items:
+                    it = items[0]
+                    if it.get('man_name'):
+                        sonuc['marka'] = str(it['man_name']).strip()
+                    if it.get('model_name'):
+                        sonuc['model'] = str(it['model_name']).strip()
+                    if it.get('prod_year'):
+                        sonuc['yil'] = str(it['prod_year'])
+                    if it.get('color_name'):
+                        sonuc['renk'] = str(it['color_name']).strip()
+                    if it.get('engine_volume'):
+                        sonuc['motor'] = f"{it['engine_volume']}L"
+                    if it.get('fuel_type_name'):
+                        sonuc['yakit'] = str(it['fuel_type_name']).strip()
+                    if it.get('mileage'):
+                        sonuc['km'] = int(it['mileage'])
+                    if it.get('vin'):
+                        sonuc['vin'] = str(it['vin']).upper()
+                    sonuc['kaynak'] = 'myauto.ge'
+                    return sonuc
         except Exception as e:
-            logger.debug(f"carcheck.ge {url}: {e}")
+            logger.debug(f"myauto.ge API {plate_fmt}: {e}")
+
+    # ── 2. carcheck.ge (tireli format) ───────────────────────────────────────
+    for plate_fmt in [pg, plaka]:
+        for path in [f"/en/result/{urllib.parse.quote(plate_fmt)}",
+                     f"/en/check?plate={urllib.parse.quote(plate_fmt)}",
+                     f"/en/search?q={urllib.parse.quote(plate_fmt)}"]:
+            url = f"https://carcheck.ge{path}"
+            try:
+                r = await loop.run_in_executor(None,
+                    lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10, allow_redirects=True))
+                if r.status_code == 200 and len(r.text) > 400:
+                    s = _html_parse_arac(r.text)
+                    if s:
+                        s['kaynak'] = 'carcheck.ge'
+                        return s
+            except Exception as e:
+                logger.debug(f"carcheck.ge {url}: {e}")
+
     return sonuc
 
 
-async def _ge_ceza_bilgi(plaka: str, loop) -> dict:
+async def _ge_ceza_bilgi(plaka: str, pg: str, loop) -> dict:
     """police.ge üzerinden trafik cezalarını sorgula."""
     sonuc = {'sayi': 0, 'tutar': 0.0, 'liste': []}
+
     denemeler = [
-        ('POST', 'https://www.police.ge/ge/fines/search',      {'plateNumber': plaka}),
-        ('POST', 'https://www.police.ge/api/fines',            {'plate': plaka, 'plateNumber': plaka}),
-        ('POST', 'https://police.ge/api/fines/search',         {'plateNumber': plaka}),
-        ('GET',  f'https://www.police.ge/ge/fines?plate={urllib.parse.quote(plaka)}', None),
-        ('POST', 'https://efines.ge/api/check',                {'plateNumber': plaka}),
+        ('POST', 'https://police.ge/ge/fines/search',    {'plateNumber': pg}),
+        ('POST', 'https://police.ge/ge/fines/search',    {'plateNumber': plaka}),
+        ('POST', 'https://police.ge/api/fines/search',   {'plateNumber': plaka, 'plate': plaka}),
+        ('POST', 'https://police.ge/api/fines',          {'plate': plaka}),
+        ('GET',  f'https://police.ge/ge/fines?plate={urllib.parse.quote(plaka)}', None),
     ]
     for method, url, payload in denemeler:
         try:
             if method == 'POST':
                 r = await loop.run_in_executor(None,
-                    lambda u=url, p=payload: http_requests.post(u, json=p, headers=_GE_HEADERS, timeout=8))
+                    lambda u=url, p=payload: http_requests.post(
+                        u, json=p, headers=_GE_HEADERS, timeout=8, verify=False))
             else:
                 r = await loop.run_in_executor(None,
-                    lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=8))
+                    lambda u=url: http_requests.get(
+                        u, headers=_GE_HEADERS, timeout=8, verify=False))
             if r.status_code not in (200, 201):
                 continue
             try:
                 j = r.json()
-                fines = (j.get('fines') or j.get('data') or j.get('result') or j.get('violations') or j.get('items') or [])
+                fines = (j.get('fines') or j.get('data') or j.get('result')
+                         or j.get('violations') or j.get('items') or [])
                 if isinstance(fines, list) and fines:
                     sonuc['sayi'] = len(fines)
                     for f in fines[:5]:
-                        amount = float(str(f.get('amount') or f.get('fineAmount') or f.get('sum') or 0).replace(',', '').replace(' ', '') or 0)
-                        date_s = str(f.get('date') or f.get('violationDate') or f.get('created_at') or '')
+                        amt = float(str(f.get('amount') or f.get('fineAmount') or f.get('sum') or 0)
+                                    .replace(',', '').replace(' ', '') or 0)
+                        date_s = str(f.get('date') or f.get('violationDate') or '')
                         desc   = str(f.get('description') or f.get('violationType') or f.get('type') or '')
-                        sonuc['tutar'] += amount
-                        sonuc['liste'].append({'tutar': amount, 'tarih': date_s[:10], 'aciklama': desc[:70]})
+                        sonuc['tutar'] += amt
+                        sonuc['liste'].append({'tutar': amt, 'tarih': date_s[:10], 'aciklama': desc[:70]})
                     return sonuc
-                elif isinstance(j, dict):
-                    cnt = j.get('count') or j.get('total') or 0
-                    if cnt:
-                        sonuc['sayi'] = int(cnt)
-                        sonuc['tutar'] = float(str(j.get('totalAmount') or j.get('sum') or 0).replace(',', '') or 0)
-                        return sonuc
+                cnt = j.get('count') or j.get('total') or 0
+                if cnt:
+                    sonuc['sayi'] = int(cnt)
+                    sonuc['tutar'] = float(str(j.get('totalAmount') or j.get('sum') or 0).replace(',', '') or 0)
+                    return sonuc
             except Exception:
                 html = r.text.lower()
-                if any(w in html for w in ['fine', 'ceza', 'violation', 'ჯარიმა']):
-                    cm = re.search(r'(\d+)\s*(?:fine|ceza|violation|ჯარიმა)', html, re.IGNORECASE)
-                    am = re.search(r'([\d\s]+(?:\.\d+)?)\s*(?:₾|gel|lari)', html, re.IGNORECASE)
-                    if cm:
-                        sonuc['sayi'] = int(cm.group(1))
-                    if am:
-                        sonuc['tutar'] = float(am.group(1).replace(' ', ''))
-                    if sonuc['sayi']:
-                        return sonuc
+                cm = re.search(r'(\d+)\s*(?:fine|violation|ჯარიმა)', html)
+                am = re.search(r'([\d]+(?:\.\d+)?)\s*(?:₾|gel|lari)', html, re.IGNORECASE)
+                if cm:
+                    sonuc['sayi'] = int(cm.group(1))
+                if am:
+                    sonuc['tutar'] = float(am.group(1))
+                if sonuc['sayi']:
+                    return sonuc
         except Exception as e:
             logger.debug(f"ceza sorgu {url}: {e}")
     return sonuc
@@ -7145,15 +7174,15 @@ async def gurcistan_plaka_sorgula(plaka_ham: str) -> str:
             "Gürcistan plaka formatı: `XX-NNN-XX`\n"
             "_2 harf · 3 rakam · 2 harf_\n\n"
             "✅ Doğru: `MA-777-GA`\n\n"
-            "Reis plaka sorgulanamadı, formatı kontrol et _(Örn: MA-777-GA)_"
+            "Reis plaka sorgulanamadı, formatı kontrol et _(Örn: MA\\-777\\-GA)_"
         )
 
     pg = f"{plaka[:2]}-{plaka[2:5]}-{plaka[5:]}"
     loop = asyncio.get_event_loop()
 
     arac_sonuc, ceza_sonuc = await asyncio.gather(
-        _ge_arac_bilgi(plaka, loop),
-        _ge_ceza_bilgi(plaka, loop),
+        _ge_arac_bilgi(plaka, pg, loop),
+        _ge_ceza_bilgi(plaka, pg, loop),
         return_exceptions=True
     )
     if isinstance(arac_sonuc, Exception):
