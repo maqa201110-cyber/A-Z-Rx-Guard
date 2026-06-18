@@ -7056,63 +7056,64 @@ async def _ge_arac_bilgi(plaka: str, pg: str, loop) -> dict:
     """myauto.ge API → carcheck.ge sırasıyla araç bilgisi çek."""
     sonuc = {}
 
-    # ── 1. myauto.ge resmi API (en güvenilir) ────────────────────────────────
-    _myauto_headers = {
-        **_GE_HEADERS,
-        'Referer':          'https://www.myauto.ge/',
-        'Origin':           'https://www.myauto.ge',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept':           'application/json, text/javascript, */*; q=0.01',
-    }
+    # ── 1. myauto.ge — session+cookie yaklaşımı ──────────────────────────────
+    def _myauto_fetch(plate_fmt: str) -> object:
+        s = http_requests.Session()
+        s.headers.update({
+            'User-Agent': _GE_HEADERS['User-Agent'],
+            'Accept-Language': 'ka-GE,ka;q=0.9,en-US;q=0.8,en;q=0.7',
+        })
+        try:
+            s.get('https://www.myauto.ge/ka/', timeout=5, allow_redirects=True)
+        except Exception:
+            pass
+        api_url = (f"https://api2.myauto.ge/ka/products?Plate={urllib.parse.quote(plate_fmt)}"
+                   f"&TypeID=0&forRent=0&SortOrder=1&Page=1")
+        return s.get(api_url, headers={
+            'Referer':        'https://www.myauto.ge/',
+            'Origin':         'https://www.myauto.ge',
+            'Accept':         'application/json, text/javascript, */*; q=0.01',
+            'Sec-Fetch-Site': 'same-site',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+        }, timeout=12)
+
     for plate_fmt in [pg, plaka]:
         try:
-            url = (f"https://api2.myauto.ge/ka/products?Plate={urllib.parse.quote(plate_fmt)}"
-                   f"&TypeID=0&forRent=0&SortOrder=1&Page=1")
-            r = await loop.run_in_executor(None,
-                lambda u=url: http_requests.get(u, headers=_myauto_headers, timeout=10))
+            r = await loop.run_in_executor(None, lambda pf=plate_fmt: _myauto_fetch(pf))
             logger.info(f"myauto.ge status={r.status_code} plate={plate_fmt}")
             if r.status_code == 200:
                 j = r.json()
                 items = j.get('data', {}).get('items', [])
                 if items:
                     it = items[0]
-                    if it.get('man_name'):
-                        sonuc['marka'] = str(it['man_name']).strip()
-                    if it.get('model_name'):
-                        sonuc['model'] = str(it['model_name']).strip()
-                    if it.get('prod_year'):
-                        sonuc['yil'] = str(it['prod_year'])
-                    if it.get('color_name'):
-                        sonuc['renk'] = str(it['color_name']).strip()
-                    if it.get('engine_volume'):
-                        sonuc['motor'] = f"{it['engine_volume']}L"
-                    if it.get('fuel_type_name'):
-                        sonuc['yakit'] = str(it['fuel_type_name']).strip()
-                    if it.get('mileage'):
-                        sonuc['km'] = int(it['mileage'])
-                    if it.get('vin'):
-                        sonuc['vin'] = str(it['vin']).upper()
+                    if it.get('man_name'):   sonuc['marka'] = str(it['man_name']).strip()
+                    if it.get('model_name'): sonuc['model'] = str(it['model_name']).strip()
+                    if it.get('prod_year'):  sonuc['yil']   = str(it['prod_year'])
+                    if it.get('color_name'): sonuc['renk']  = str(it['color_name']).strip()
+                    if it.get('engine_volume'): sonuc['motor'] = f"{it['engine_volume']}L"
+                    if it.get('fuel_type_name'): sonuc['yakit'] = str(it['fuel_type_name']).strip()
+                    if it.get('mileage'):    sonuc['km']  = int(it['mileage'])
+                    if it.get('vin'):        sonuc['vin'] = str(it['vin']).upper()
                     sonuc['kaynak'] = 'myauto.ge'
                     return sonuc
         except Exception as e:
-            logger.debug(f"myauto.ge API {plate_fmt}: {e}")
+            logger.debug(f"myauto.ge session {plate_fmt}: {e}")
 
-    # ── 2. carcheck.ge (tireli format) ───────────────────────────────────────
-    for plate_fmt in [pg, plaka]:
-        for path in [f"/en/result/{urllib.parse.quote(plate_fmt)}",
-                     f"/en/check?plate={urllib.parse.quote(plate_fmt)}",
-                     f"/en/search?q={urllib.parse.quote(plate_fmt)}"]:
-            url = f"https://carcheck.ge{path}"
-            try:
-                r = await loop.run_in_executor(None,
-                    lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10, allow_redirects=True))
-                if r.status_code == 200 and len(r.text) > 400:
-                    s = _html_parse_arac(r.text)
-                    if s:
-                        s['kaynak'] = 'carcheck.ge'
-                        return s
-            except Exception as e:
-                logger.debug(f"carcheck.ge {url}: {e}")
+    # ── 2. auto.ge (ikinci Gürcü otomobil pazarı) ────────────────────────────
+    for plate_fmt in [plaka, pg]:
+        try:
+            url = f"https://auto.ge/ka/cars?RegistrationNumber={urllib.parse.quote(plate_fmt)}&page=1"
+            r = await loop.run_in_executor(None,
+                lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=8))
+            logger.info(f"auto.ge status={r.status_code} plate={plate_fmt}")
+            if r.status_code == 200 and len(r.text) > 800:
+                s = _html_parse_arac(r.text)
+                if s:
+                    s['kaynak'] = 'auto.ge'
+                    return s
+        except Exception as e:
+            logger.debug(f"auto.ge {plate_fmt}: {e}")
 
     return sonuc
 
@@ -7121,26 +7122,61 @@ async def _ge_ceza_bilgi(plaka: str, pg: str, loop) -> dict:
     """police.ge üzerinden trafik cezalarını sorgula."""
     sonuc = {'sayi': 0, 'tutar': 0.0, 'liste': []}
 
-    denemeler = [
-        ('POST', 'https://police.ge/ge/fines/search',    {'plateNumber': pg}),
-        ('POST', 'https://police.ge/ge/fines/search',    {'plateNumber': plaka}),
-        ('POST', 'https://police.ge/api/fines/search',   {'plateNumber': plaka, 'plate': plaka}),
-        ('POST', 'https://police.ge/api/fines',          {'plate': plaka}),
-        ('GET',  f'https://police.ge/ge/fines?plate={urllib.parse.quote(plaka)}', None),
+    # police.ge Next.js uygulaması — __NEXT_DATA__ içinden veri çek
+    for plate_fmt in [pg, plaka]:
+        try:
+            url = f"https://police.ge/ge/fines?plateNumber={urllib.parse.quote(plate_fmt)}"
+            r = await loop.run_in_executor(None,
+                lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10, verify=False))
+            if r.status_code == 200:
+                # Next.js SSR verisi script etiketinde gömülü
+                nd = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.DOTALL)
+                if nd:
+                    import json as _json
+                    nd_data = _json.loads(nd.group(1))
+                    # Veriyi çeşitli yollarda ara
+                    page_props = (nd_data.get('props', {})
+                                         .get('pageProps', {}))
+                    fines_raw = (page_props.get('fines') or
+                                 page_props.get('data') or
+                                 page_props.get('violations') or
+                                 page_props.get('items') or [])
+                    logger.info(f"police.ge __NEXT_DATA__ plate={plate_fmt} keys={list(page_props.keys())[:8]}")
+                    if isinstance(fines_raw, list) and fines_raw:
+                        sonuc['sayi'] = len(fines_raw)
+                        for f in fines_raw[:5]:
+                            amt  = float(str(f.get('amount') or f.get('fineAmount') or f.get('sum') or 0)
+                                         .replace(',','').replace(' ','') or 0)
+                            ds   = str(f.get('date') or f.get('violationDate') or '')
+                            desc = str(f.get('description') or f.get('violationType') or f.get('type') or '')
+                            sonuc['tutar'] += amt
+                            sonuc['liste'].append({'tutar': amt, 'tarih': ds[:10], 'aciklama': desc[:70]})
+                        return sonuc
+                    cnt = page_props.get('count') or page_props.get('total') or 0
+                    if cnt:
+                        sonuc['sayi'] = int(cnt)
+                        return sonuc
+        except Exception as e:
+            logger.debug(f"police.ge __NEXT_DATA__: {e}")
+
+    # JSON API denemeleri (ek endpoint'ler)
+    json_denemeler = [
+        ('POST', 'https://police.ge/api/interactive-services/fines', {'plateNumber': plaka}),
+        ('POST', 'https://police.ge/api/services/fines',             {'plate': plaka}),
+        ('GET',  f'https://police.ge/api/fines?plateNumber={urllib.parse.quote(plaka)}', None),
     ]
-    for method, url, payload in denemeler:
+    for method, url, payload in json_denemeler:
         try:
             if method == 'POST':
                 r = await loop.run_in_executor(None,
                     lambda u=url, p=payload: http_requests.post(
-                        u, json=p, headers=_GE_HEADERS, timeout=8, verify=False))
+                        u, json=p, headers=_GE_HEADERS, timeout=7, verify=False))
             else:
                 r = await loop.run_in_executor(None,
                     lambda u=url: http_requests.get(
-                        u, headers=_GE_HEADERS, timeout=8, verify=False))
+                        u, headers=_GE_HEADERS, timeout=7, verify=False))
             if r.status_code not in (200, 201):
                 continue
-            logger.info(f"police.ge 200 url={url} body_snippet={r.text[:300]!r}")
             try:
                 j = r.json()
                 fines = (j.get('fines') or j.get('data') or j.get('result')
@@ -7148,30 +7184,23 @@ async def _ge_ceza_bilgi(plaka: str, pg: str, loop) -> dict:
                 if isinstance(fines, list) and fines:
                     sonuc['sayi'] = len(fines)
                     for f in fines[:5]:
-                        amt = float(str(f.get('amount') or f.get('fineAmount') or f.get('sum') or 0)
-                                    .replace(',', '').replace(' ', '') or 0)
-                        date_s = str(f.get('date') or f.get('violationDate') or '')
-                        desc   = str(f.get('description') or f.get('violationType') or f.get('type') or '')
+                        amt  = float(str(f.get('amount') or f.get('fineAmount') or 0)
+                                     .replace(',','').replace(' ','') or 0)
                         sonuc['tutar'] += amt
-                        sonuc['liste'].append({'tutar': amt, 'tarih': date_s[:10], 'aciklama': desc[:70]})
+                        sonuc['liste'].append({
+                            'tutar': amt,
+                            'tarih': str(f.get('date') or '')[:10],
+                            'aciklama': str(f.get('description') or f.get('type') or '')[:70]
+                        })
                     return sonuc
                 cnt = j.get('count') or j.get('total') or 0
                 if cnt:
                     sonuc['sayi'] = int(cnt)
-                    sonuc['tutar'] = float(str(j.get('totalAmount') or j.get('sum') or 0).replace(',', '') or 0)
                     return sonuc
             except Exception:
-                html = r.text.lower()
-                cm = re.search(r'(\d+)\s*(?:fine|violation|ჯარიმა)', html)
-                am = re.search(r'([\d]+(?:\.\d+)?)\s*(?:₾|gel|lari)', html, re.IGNORECASE)
-                if cm:
-                    sonuc['sayi'] = int(cm.group(1))
-                if am:
-                    sonuc['tutar'] = float(am.group(1))
-                if sonuc['sayi']:
-                    return sonuc
+                pass
         except Exception as e:
-            logger.debug(f"ceza sorgu {url}: {e}")
+            logger.debug(f"ceza JSON API {url}: {e}")
     return sonuc
 
 
