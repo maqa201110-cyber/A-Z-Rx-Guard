@@ -5232,14 +5232,16 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_ip_sorgu':
         context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › IP Sorgu'
         ip_klavye = [
-            [
-                InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
-                InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
-            ],
+            [InlineKeyboardButton('📊 OSINT Raporu  (/ip)', callback_data='menu_ip')],
+            [InlineKeyboardButton('🛡️ Derin IP Analizi  (/ip_analiz)', callback_data='menu_ip_analiz')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
         ]
         await query.edit_message_text(
-            strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
+            "🌐 **IP İSTİHBARAT MERKEZİ**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "📊 **OSINT Raporu** — Ülke, şehir, ISP, koordinat, VPN/Proxy tespiti\n\n"
+            "🛡️ **Derin IP Analizi** — Tam güvenlik analizi, tehdit skoru, ağ detayları\n\n"
+            "Sorgulama türünü seç:",
             reply_markup=InlineKeyboardMarkup(ip_klavye), parse_mode='Markdown'
         )
     elif query.data == 'menu_azr_special':
@@ -5308,11 +5310,15 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_ip':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
-        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🌐 IP Sorgulama')
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='📊 OSINT IP Raporu')
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
         context.user_data['durum'] = 'ip_bekliyor'
         await query.edit_message_text(
-            strings.get('ip_ask', '🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`'),
+            "📊 **OSINT IP RAPORU**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "Sorgulamak istediğin IP adresini yaz:\n\n"
+            "📌 _Örnek: `8.8.8.8`_\n\n"
+            "_Ülke, şehir, ISP, koordinat, VPN/Proxy tespiti yapılır._",
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'menu_ip_analiz':
