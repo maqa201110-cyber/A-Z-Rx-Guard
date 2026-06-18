@@ -7056,12 +7056,15 @@ async def texasmator_sorgula(plaka_ham: str) -> str:
             if r2.status_code != 200:
                 return None, None
             # Parse inspection deadline from response
+            # Page has only one date — the inspection deadline
             date_m = re.search(
-                r'id="deadlineAnswer"[\s\S]{0,500}?(\d{4}-\d{2}-\d{2}(?:\s\d{2}:\d{2}:\d{2})?)',
+                r'deadlineAnswer"[\s\S]{0,1500}?(\d{4}-\d{2}-\d{2})(?:\s\d{2}:\d{2}:\d{2})?',
                 r2.text)
+            if not date_m:
+                # fallback: grab first date anywhere on the page
+                date_m = re.search(r'(\d{4}-\d{2}-\d{2})', r2.text)
             if date_m:
-                raw_date = date_m.group(1).strip()[:10]  # YYYY-MM-DD
-                return None, raw_date
+                return None, date_m.group(1)
             return None, None
         except Exception as e:
             logger.debug(f"texasmator pti.ge: {e}")
