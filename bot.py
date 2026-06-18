@@ -4358,35 +4358,63 @@ def _ipapi_basit_getir(ip: str) -> dict:
 def ip_basit_rapor(veri: dict, aranan_ip: str) -> str:
     if veri.get("status") != "success":
         hata = veri.get("message", "Bilinmeyen hata")
-        return f"❌ **IP sorgulanamadı:** `{hata}`\n\nGirilen değer: `{aranan_ip}`"
+        return (
+            "❌ **Reis, IP adresini hatalı girdin veya sistem yanıt vermiyor, kontrol et!**\n\n"
+            f"Girilen değer: `{aranan_ip}`\n"
+            f"Hata: `{hata}`"
+        )
 
-    lat = veri.get('lat', '')
-    lon = veri.get('lon', '')
+    lat  = veri.get('lat', '')
+    lon  = veri.get('lon', '')
     harita = f"https://maps.google.com/?q={lat},{lon}" if lat and lon else None
 
-    rozetler = []
-    if veri.get('proxy'):   rozetler.append("🔴 Proxy/VPN")
-    if veri.get('hosting'): rozetler.append("🟠 Hosting/Sunucu")
-    if veri.get('mobile'):  rozetler.append("📱 Mobil Hat")
-    rozet_str = " · ".join(rozetler) if rozetler else "✅ Temiz (Normal Kullanıcı)"
+    gercek_ip = veri.get('query', aranan_ip)
+    ulke      = veri.get('country', '—')
+    ulke_kod  = veri.get('countryCode', '—')
+    sehir     = veri.get('city', '—')
+    bolge     = veri.get('regionName', '—')
+    posta     = veri.get('zip', '—')
+    saat_dil  = veri.get('timezone', '—')
+    isp       = veri.get('isp', '—')
+    org       = veri.get('org', '—')
+    asn       = veri.get('as', '—')
+    mobil     = veri.get('mobile', False)
+    proxy     = veri.get('proxy', False)
+    hosting   = veri.get('hosting', False)
 
-    return (
-        f"🌐 **IP Sorgulama — AZRxGUARD**\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🔍 **Sorgulan IP:** `{veri.get('query', aranan_ip)}`\n\n"
-        f"🏳️ **Ülke:** {veri.get('country', '—')} ({veri.get('countryCode', '—')})\n"
-        f"🏙️ **Bölge:** {veri.get('regionName', '—')} / {veri.get('city', '—')}\n"
-        f"📮 **Posta Kodu:** {veri.get('zip', '—')}\n"
-        f"🕐 **Saat Dilimi:** `{veri.get('timezone', '—')}`\n\n"
-        f"📍 **Koordinat:** {lat}, {lon}\n"
-        + (f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n\n" if harita else "\n")
-        + f"🏢 **ISP:** {veri.get('isp', '—')}\n"
-        f"🏛️ **Organizasyon:** {veri.get('org', '—')}\n"
-        f"📡 **AS:** {veri.get('as', '—')}\n"
-        f"🔤 **AS Adı:** {veri.get('asname', '—')}\n\n"
-        f"🛡️ **IP Türü:** {rozet_str}\n\n"
-        f"🤖 _AZRxGUARD tarafından sorgulandı_"
+    if proxy:    ip_turu = "🔴 Proxy / VPN"
+    elif hosting: ip_turu = "🟠 Hosting / Veri Merkezi"
+    elif mobil:   ip_turu = "📱 Mobil Hat"
+    else:         ip_turu = "✅ Normal Kullanıcı"
+
+    konum_str = f"{ulke} / {sehir}"
+
+    rapor = (
+        f"📊 **IP LOGGED — SİBER İSTİHBARAT RAPORU** 📊\n"
+        f"━━━━━━━━━━━━━━━━━━\n\n"
+        f"🌐 **IP Adresi:** `{gercek_ip}`\n"
+        f"📍 **Ülke / Şehir:** {konum_str}\n"
+        f"🗺️ **Bölge:** {bolge} ({ulke_kod})\n"
+        f"📮 **Posta Kodu:** {posta}\n"
+        f"🕐 **Saat Dilimi:** `{saat_dil}`\n"
     )
+    if lat and lon:
+        rapor += f"📡 **Koordinatlar:** `{lat}, {lon}`\n"
+        if harita:
+            rapor += f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n"
+    rapor += (
+        f"\n"
+        f"📶 **İnternet Sağlayıcısı (ISP):** {isp}\n"
+        f"🏛️ **Organizasyon:** {org}\n"
+        f"📡 **AS Numarası:** `{asn}`\n"
+        f"📱 **Mobil Hat:** {'✅ Evet' if mobil else '❌ Hayır'}\n"
+        f"\n"
+        f"🛡️ **IP Türü:** {ip_turu}\n"
+        f"\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"🤖 _AZRxGUARD Siber İstihbarat Sistemi_"
+    )
+    return rapor
 
 async def ip_basit_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
@@ -6688,27 +6716,12 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
         araba_klavye = [
             [InlineKeyboardButton('🔍 Şasi No (VIN) Sorgula', callback_data='menu_araba_sasi')],
-            [InlineKeyboardButton('🔧 Texasmator (Muayene) Sorgula', callback_data='menu_araba_texasmator')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='go_home')]
         ]
         await query.edit_message_text(
             "🚗 *ARABA MENÜSÜ*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🔍 *Şasi No (VIN)* — 17 haneli VIN gir, detaylı araç raporu al\n"
-            "🔧 *Texasmator* — Gürcistan araç muayene durumu sorgula",
+            "🔍 *Şasi No (VIN)* — 17 haneli VIN gir, detaylı araç raporu al",
             reply_markup=InlineKeyboardMarkup(araba_klavye),
-            parse_mode='Markdown'
-        )
-    elif query.data == 'menu_araba_texasmator':
-        context.user_data['mevcut_kategori'] = '🚗 Araba Menüsü'
-        context.user_data['durum'] = 'texasmator_bekliyor'
-        await log_kanali_gonder(context.bot, update, kategori='🚗 Araba Menüsü', komut='🔧 Texasmator Sorgula')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_araba')]])
-        await query.edit_message_text(
-            "🔧 *TEXASMATOR — ARAÇ MUAYENE SORGUSU*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Gürcistan plakalı aracın plakasını girin:\n\n"
-            "📌 _Örnek: `MA-777-GA`_\n"
-            "_2 harf · 3 rakam · 2 harf_",
-            reply_markup=geri,
             parse_mode='Markdown'
         )
     elif query.data == 'menu_araba_sasi':
@@ -7003,191 +7016,6 @@ async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ══════════════════════════════════════════════════════════════
-# 🔧 TEXASMATOR — GÜRCİSTAN ARAÇ MUAYENE KONTROLÜ
-# ══════════════════════════════════════════════════════════════
-
-_TX_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'application/json, text/html, */*',
-    'Accept-Language': 'ka-GE,ka;q=0.9,en-US;q=0.8',
-    'Connection': 'keep-alive',
-}
-
-
-async def texasmator_sorgula(plaka_ham: str) -> str:
-    """Gürcistan araç muayene (texasmator) durumunu sorgula."""
-    plaka = re.sub(r'[\s\-\.]', '', plaka_ham.upper().strip())
-    if not re.match(r'^[A-Z]{2}\d{3}[A-Z]{2}$', plaka):
-        return (
-            "❌ *Hatalı Plaka Formatı*\n\n"
-            "Gürcistan plaka formatı: `XX\-NNN\-XX`\n"
-            "_2 harf · 3 rakam · 2 harf_\n\n"
-            "📌 Örnek: `MA\-777\-GA`\n\n"
-            "Reis plaka sorgulanamadı, kontrol et\!"
-        )
-
-    pg   = f"{plaka[:2]}-{plaka[2:5]}-{plaka[5:]}"
-    loop = asyncio.get_event_loop()
-
-    son_muayene  = None
-    bitis_tarihi = None
-
-    # ── 1. pti.ge — resmi Gürcistan teknik muayene portalı (BİRİNCİL KAYNAK) ──
-    def _pti_ge_sorgula():
-        import requests as _req
-        import warnings as _w
-        _w.filterwarnings('ignore')
-        try:
-            sess = _req.Session()
-            hdrs = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': 'ka-GE,ka;q=0.9,en;q=0.8',
-            }
-            r1 = sess.get("https://pti.ge/ka-GE/learn_deadline", headers=hdrs, timeout=10, verify=False)
-            csrf_m = re.search(r'name="_token"\s+value="([^"]+)"', r1.text)
-            if not csrf_m:
-                return None, None
-            csrf = csrf_m.group(1)
-            r2 = sess.post("https://pti.ge/ka-GE/deadline", data={
-                '_token': csrf,
-                'plate_num': plaka,
-                'car_category': 'm1',
-            }, headers={**hdrs, 'Referer': 'https://pti.ge/ka-GE/learn_deadline'}, timeout=12, verify=False)
-            if r2.status_code != 200:
-                return None, None
-            # Parse inspection deadline from response
-            # Page has only one date — the inspection deadline
-            date_m = re.search(
-                r'deadlineAnswer"[\s\S]{0,1500}?(\d{4}-\d{2}-\d{2})(?:\s\d{2}:\d{2}:\d{2})?',
-                r2.text)
-            if not date_m:
-                # fallback: grab first date anywhere on the page
-                date_m = re.search(r'(\d{4}-\d{2}-\d{2})', r2.text)
-            if date_m:
-                return None, date_m.group(1)
-            return None, None
-        except Exception as e:
-            logger.debug(f"texasmator pti.ge: {e}")
-            return None, None
-
-    son_muayene, bitis_tarihi = await loop.run_in_executor(None, _pti_ge_sorgula)
-    logger.info(f"texasmator pti.ge: son={son_muayene} bitis={bitis_tarihi}")
-
-    # ── 2. RS.ge eFiling yedek ────────────────────────────────────────────────
-    if not son_muayene and not bitis_tarihi:
-        for ep in [
-            f"https://efiling.rs.ge/efiling/api/vehicle/technical-inspection?plate={urllib.parse.quote(plaka)}",
-            f"https://efiling.rs.ge/efiling/api/vehicle/inspection?plateNumber={urllib.parse.quote(pg)}",
-        ]:
-            try:
-                r = await loop.run_in_executor(None,
-                    lambda u=ep: http_requests.get(u, headers=_TX_HEADERS, timeout=8, verify=False))
-                if r.status_code == 200:
-                    j = r.json()
-                    son_muayene  = (j.get('lastInspectionDate') or j.get('inspectionDate')
-                                    or j.get('date') or j.get('lastDate'))
-                    bitis_tarihi = (j.get('expiryDate') or j.get('validUntil')
-                                    or j.get('expiry')  or j.get('endDate'))
-                    logger.info(f"texasmator rs.ge efiling: {list(j.keys())}")
-                    if son_muayene or bitis_tarihi:
-                        break
-            except Exception as e:
-                logger.debug(f"texasmator efiling {ep}: {e}")
-
-    # ── 3. service.gov.ge / mia.gov.ge yedek ─────────────────────────────────
-    if not son_muayene and not bitis_tarihi:
-        for method, url, payload in [
-            ('POST', 'https://service.gov.ge/api/v1/vehicle/inspection',
-             {'plate': plaka, 'plateNumber': pg}),
-            ('GET',  f'https://mia.gov.ge/api/vehicle/inspection?plate={urllib.parse.quote(plaka)}',
-             None),
-        ]:
-            try:
-                if method == 'POST':
-                    r = await loop.run_in_executor(None,
-                        lambda u=url, p=payload: http_requests.post(
-                            u, json=p, headers=_TX_HEADERS, timeout=8, verify=False))
-                else:
-                    r = await loop.run_in_executor(None,
-                        lambda u=url: http_requests.get(
-                            u, headers=_TX_HEADERS, timeout=8, verify=False))
-                if r.status_code == 200:
-                    j = r.json()
-                    son_muayene  = (j.get('lastInspectionDate') or j.get('lastDate')
-                                    or j.get('inspectionDate'))
-                    bitis_tarihi = (j.get('expiryDate') or j.get('validUntil')
-                                    or j.get('expiry'))
-                    logger.info(f"texasmator {url}: {list(j.keys())}")
-                    if son_muayene or bitis_tarihi:
-                        break
-            except Exception as e:
-                logger.debug(f"texasmator {url}: {e}")
-
-    # ── Rapor oluştur ─────────────────────────────────────────────────────────
-    rapor  = "📊 *GÜRCİSTAN ARAÇ MUAYENE (TEXASMATOR) DURUMU*\n"
-    rapor += "━━━━━━━━━━━━━━━━━━━━━━\n"
-    rapor += f"🚗 *Plaka:* `{pg}`\n\n"
-
-    if son_muayene or bitis_tarihi:
-        rapor += f"📆 *Son Muayene Tarihi:* {son_muayene or '—'}\n"
-        rapor += f"⏳ *Muayene Bitiş Tarihi:* {bitis_tarihi or '—'}\n\n"
-
-        expired = False
-        if bitis_tarihi:
-            try:
-                from datetime import datetime as _dt
-                for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y'):
-                    try:
-                        expired = _dt.strptime(bitis_tarihi.strip()[:10], fmt) < _dt.now()
-                        break
-                    except ValueError:
-                        continue
-            except Exception:
-                pass
-
-        if bitis_tarihi and expired:
-            rapor += "🚨 *Durum:* TEXASMATOR BİTMİŞ\\! Ceza yiyebilirsin reis\\!"
-        elif bitis_tarihi:
-            rapor += "✅ *Durum:* Texasmator aktif, sıkıntı yok reis\\!"
-        else:
-            rapor += "⚠️ *Durum:* Bitiş tarihi alınamadı"
-    else:
-        rapor += "📆 *Son Muayene Tarihi:* —\n"
-        rapor += "⏳ *Muayene Bitiş Tarihi:* —\n\n"
-        rapor += "❓ *Durum:* Reis plaka sorgulanamadı, kontrol et\\!"
-
-    rapor += "\n\n━━━━━━━━━━━━━━━━━━━━━━\n"
-    rapor += "🔍 [pti\\.ge](https://pti.ge) • "
-    rapor += "[RS\\.ge Araç Kontrol](https://www.rs.ge/ka/vehicle-check)\n"
-    rapor += "📡 _Gürcistan Teknik Muayene Sistemi_"
-    return rapor
-
-
-async def texasmator_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    geri = InlineKeyboardMarkup([
-        [InlineKeyboardButton('🔧 Yeni Sorgu', callback_data='menu_araba_texasmator')],
-        [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
-    ])
-    if args:
-        plaka = ' '.join(args).strip()
-        bekle = await update.message.reply_text("🔧 _Muayene durumu sorgulanıyor..._", parse_mode='Markdown')
-        rapor = await texasmator_sorgula(plaka)
-        await bekle.edit_text(rapor, parse_mode='MarkdownV2', reply_markup=geri,
-                              disable_web_page_preview=True)
-    else:
-        context.user_data['durum'] = 'texasmator_bekliyor'
-        geri2 = InlineKeyboardMarkup([[InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]])
-        await update.message.reply_text(
-            "🔧 *TEXASMATOR — ARAÇ MUAYENE SORGUSU*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Gürcistan plakalı aracın plakasını girin:\n\n"
-            "📌 _Örnek: `MA-777-GA`_",
-            reply_markup=geri2,
-            parse_mode='Markdown'
-        )
-
-
-# ══════════════════════════════════════════════════════════════
 # 🤖 AI ASİSTAN — GEMINI 2.0 FLASH
 # ══════════════════════════════════════════════════════════════
 
@@ -7434,18 +7262,6 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         bekle = await update.message.reply_text("🔍 _Sorgulanıyor..._", parse_mode='Markdown')
         await bekle.delete()
         await _vin_gonder(update.message, sasi_no)
-        return
-
-    if context.user_data.get('durum') == 'texasmator_bekliyor':
-        context.user_data['durum'] = None
-        plaka = update.message.text.strip()
-        bekle = await update.message.reply_text("🔧 _Muayene durumu sorgulanıyor\.\.\._", parse_mode='MarkdownV2')
-        rapor = await texasmator_sorgula(plaka)
-        geri = InlineKeyboardMarkup([
-            [InlineKeyboardButton('🔧 Yeni Sorgu', callback_data='menu_araba_texasmator')],
-            [InlineKeyboardButton('🚗 Araba Menüsü', callback_data='menu_araba')]
-        ])
-        await bekle.edit_text(rapor, parse_mode='MarkdownV2', reply_markup=geri, disable_web_page_preview=True)
         return
 
     if context.user_data.get('durum') == 'username_checker_bekliyor':
@@ -9751,7 +9567,6 @@ def main():
     application.add_handler(CommandHandler("ip", ip_basit_komutu))
     application.add_handler(CommandHandler("ip_analiz", ip_komutu))
     application.add_handler(CommandHandler("sasi", sasi_komutu))
-    application.add_handler(CommandHandler("texasmator", texasmator_komutu))
     application.add_handler(CommandHandler("hatirlat", hatirlat_komutu))
     # ⚡ PRO ARAÇLAR — Hızlı komutlar
     application.add_handler(CommandHandler("hesap", hesap_komutu))
