@@ -7057,12 +7057,20 @@ async def _ge_arac_bilgi(plaka: str, pg: str, loop) -> dict:
     sonuc = {}
 
     # ── 1. myauto.ge resmi API (en güvenilir) ────────────────────────────────
+    _myauto_headers = {
+        **_GE_HEADERS,
+        'Referer':          'https://www.myauto.ge/',
+        'Origin':           'https://www.myauto.ge',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept':           'application/json, text/javascript, */*; q=0.01',
+    }
     for plate_fmt in [pg, plaka]:
         try:
             url = (f"https://api2.myauto.ge/ka/products?Plate={urllib.parse.quote(plate_fmt)}"
                    f"&TypeID=0&forRent=0&SortOrder=1&Page=1")
             r = await loop.run_in_executor(None,
-                lambda u=url: http_requests.get(u, headers=_GE_HEADERS, timeout=10))
+                lambda u=url: http_requests.get(u, headers=_myauto_headers, timeout=10))
+            logger.info(f"myauto.ge status={r.status_code} plate={plate_fmt}")
             if r.status_code == 200:
                 j = r.json()
                 items = j.get('data', {}).get('items', [])
@@ -7132,6 +7140,7 @@ async def _ge_ceza_bilgi(plaka: str, pg: str, loop) -> dict:
                         u, headers=_GE_HEADERS, timeout=8, verify=False))
             if r.status_code not in (200, 201):
                 continue
+            logger.info(f"police.ge 200 url={url} body_snippet={r.text[:300]!r}")
             try:
                 j = r.json()
                 fines = (j.get('fines') or j.get('data') or j.get('result')
