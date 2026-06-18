@@ -1633,16 +1633,16 @@ async def sasi_komutu(interaction: discord.Interaction, sasi_no: str):
     embed.set_footer(text="AZRxGUARD Otomotiv OSINT • NHTSA vPIC + Safety Ratings")
     await interaction.followup.send(embed=embed)
 
-# ── /plaka ────────────────────────────────────────────────────────────────────
-@tree.command(name="plaka", description="🇬🇪 Gürcistan plaka sorgula — araç ve ceza bilgisi")
+# ── /texasmator ───────────────────────────────────────────────────────────────
+@tree.command(name="texasmator", description="🔧 Gürcistan araç muayene durumu sorgula")
 @app_commands.describe(plaka="Gürcistan plaka numarası (örn: MA-777-GA)")
-async def plaka_discord_komutu(interaction: discord.Interaction, plaka: str):
+async def texasmator_discord_komutu(interaction: discord.Interaction, plaka: str):
     await interaction.response.defer()
-    from bot import gurcistan_plaka_sorgula
-    rapor = await gurcistan_plaka_sorgula(plaka.strip())
-    embed = discord.Embed(description=rapor[:4090], color=0x1a9e5f)
-    embed.set_author(name=f"🇬🇪 Gürcistan Plaka: {plaka.upper().replace(' ', '-')}")
-    embed.set_footer(text="AZRxGUARD • carcheck.ge + police.ge")
+    from bot import texasmator_sorgula
+    rapor = await texasmator_sorgula(plaka.strip())
+    embed = discord.Embed(description=rapor[:4090], color=0xe67e22)
+    embed.set_author(name=f"🔧 Texasmator: {plaka.upper()}")
+    embed.set_footer(text="AZRxGUARD • Gürcistan Araç Muayene Sistemi")
     await interaction.followup.send(embed=embed)
 
 # ══════════════════════════════════════════════════════════════════════════════
