@@ -1624,16 +1624,13 @@ async def avatar_komutu(interaction: discord.Interaction, kullanici: discord.Mem
 @app_commands.describe(sasi_no="17 haneli şasi numarası (örn: WBA5A5C54FD520774)")
 async def sasi_komutu(interaction: discord.Interaction, sasi_no: str):
     await interaction.response.defer()
-    from bot import vin_bilgi_al, vin_foto_bul
+    from bot import vin_bilgi_al
     sonuc = await vin_bilgi_al(sasi_no.strip())
     rapor = sonuc["rapor"]
     embed = discord.Embed(description=rapor[:4090], color=RENK_ANA)
     if sonuc.get("gecerli"):
-        foto_url = await vin_foto_bul(sonuc["marka"], sonuc["model"], sonuc["yil"])
-        if foto_url:
-            embed.set_image(url=foto_url)
         embed.set_author(name=f"🚗 {sonuc['yil']} {sonuc['marka']} {sonuc['model']}")
-    embed.set_footer(text="AZRxGUARD Otomotiv OSINT • NHTSA vPIC + Recalls + Complaints")
+    embed.set_footer(text="AZRxGUARD Otomotiv OSINT • NHTSA vPIC + Safety Ratings")
     await interaction.followup.send(embed=embed)
 
 # ══════════════════════════════════════════════════════════════════════════════
