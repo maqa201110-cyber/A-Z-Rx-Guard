@@ -3080,7 +3080,7 @@ GUNUN_SOZLERI = [
     "💡 _\"Zamanın değerini bil — her saniye geri gelmez.\"_\n— Anonim",
     "💡 _\"Azmin önünde her engel eğilir.\"_\n— Anonim",
     "💡 _\"Bilgi güçtür.\"_\n— Francis Bacon",
-    "💡 _\"İyilik yap, suya at — balık bilmese de Allah bilir.\"_\n— Türk Atasözü",
+    "💡 _\"Tumca da tumca — gürcü kalbinde yer tutar.\"_\n— Gürcü Atasözü",
     "💡 _\"Qüvvət bilikdədir.\"_\n— Anonim",
     "💡 _\"Hər gecənin bir sabahı var.\"_\n— Azərbaycan atalar sözü",
     "💡 _\"Səbrli olan, muradına çatar.\"_\n— Azərbaycan atalar sözü",
@@ -3092,7 +3092,7 @@ GUNUN_SOZLERI = [
     "💡 _\"Hardship often prepares an ordinary person for an extraordinary destiny.\"_\n— C.S. Lewis",
     "💡 _\"Do not watch the clock. Do what it does — keep going.\"_\n— Sam Levenson",
     "💡 _\"Eğer hayaller görmüyorsan, uykun değil, gözlerin kapalıdır.\"_\n— Anonim",
-    "💡 _\"Kısmet bekleyene değil, çalışana güler.\"_\n— Türk Atasözü",
+    "💡 _\"Işığa giden yol, önce karanlıktan geçer.\"_\n— Gürcü Atasözü",
 ]
 
 def gunun_sozu_getir() -> str:
@@ -5357,10 +5357,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
             [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ Username Hunter'), callback_data='menu_guvenli_sorgu'),
              InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton('📧 Email Sızıntı', callback_data='menu_email_sizinti'),
-             InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned')],
-            [InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator'),
-             InlineKeyboardButton('📸 URL Screenshot', callback_data='menu_screenshot')],
+            [InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned'),
+             InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
             [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
              InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
             [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
@@ -5383,18 +5381,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "_(Şifren sadece sana görünür, hiçbir yerde saklanmaz)_",
             reply_markup=geri, parse_mode='Markdown'
         )
-    elif query.data == 'menu_email_sizinti':
-        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📧 Email Sızıntı')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
-        context.user_data['durum'] = 'email_sizinti_bekliyor'
-        await query.edit_message_text(
-            "📧 **EMAIL SIZINTI KONTROLÜ**\n"
-            "━━━━━━━━━━━━━━━━━━\n\n"
-            "Kontrol etmek istediğin email adresini yaz:\n\n"
-            "📌 _Örnek: `ornek@gmail.com`_\n\n"
-            "_Email adresin dark web veri ihlali listelerinde aranır._",
-            reply_markup=geri, parse_mode='Markdown'
-        )
     elif query.data == 'menu_sifre_pwned':
         await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='🔍 Şifre Sızıntı')
         geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
@@ -5414,21 +5400,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             "📱 **OPERATÖR SORGULAMA**\n"
             "━━━━━━━━━━━━━━━━━━\n\n"
-            "Türk telefon numarasını yaz:\n\n"
+            "Gürcistan telefon numarasını yaz:\n\n"
             "📌 _Örnekler:_\n"
-            "`05321234567`\n"
-            "`+905321234567`",
-            reply_markup=geri, parse_mode='Markdown'
-        )
-    elif query.data == 'menu_screenshot':
-        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📸 URL Screenshot')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
-        context.user_data['durum'] = 'screenshot_bekliyor'
-        await query.edit_message_text(
-            "📸 **URL SCREENSHOT**\n"
-            "━━━━━━━━━━━━━━━━━━\n\n"
-            "Ekran görüntüsünü almak istediğin sitenin linkini yaz:\n\n"
-            "📌 _Örnek: `https://google.com`_",
+            "`0591234567`\n"
+            "`+995591234567`",
             reply_markup=geri, parse_mode='Markdown'
         )
     elif query.data == 'oyun_tkmk':
@@ -7074,46 +7049,37 @@ async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 import hashlib as _hashlib
 
-# Türk operatör prefix tablosu
+# Gürcistan operatör prefix tablosu (+995)
 _OPERATOR_TABLO = {
-    '501': 'Vodafone', '502': 'Vodafone', '503': 'Vodafone', '504': 'Vodafone',
-    '505': 'Turkcell', '506': 'Turkcell', '507': 'Turkcell',
-    '508': 'Türk Telekom', '509': 'Türk Telekom',
-    '510': 'Türk Telekom', '511': 'Türk Telekom', '512': 'Türk Telekom',
-    '513': 'Türk Telekom', '514': 'Türk Telekom', '515': 'Türk Telekom',
-    '516': 'Türk Telekom', '517': 'Türk Telekom', '518': 'Türk Telekom',
-    '519': 'Türk Telekom', '520': 'Türk Telekom', '521': 'Türk Telekom',
-    '522': 'Türk Telekom', '523': 'Türk Telekom', '524': 'Türk Telekom',
-    '525': 'Türk Telekom', '526': 'Türk Telekom', '527': 'Türk Telekom',
-    '528': 'Türk Telekom', '529': 'Türk Telekom',
-    '530': 'Turkcell', '531': 'Turkcell', '532': 'Turkcell', '533': 'Turkcell',
-    '534': 'Turkcell', '535': 'Turkcell', '536': 'Turkcell', '537': 'Turkcell',
-    '538': 'Turkcell', '539': 'Turkcell',
-    '540': 'Vodafone', '541': 'Vodafone', '542': 'Vodafone', '543': 'Vodafone',
-    '544': 'Vodafone', '545': 'Vodafone', '546': 'Vodafone', '547': 'Vodafone',
-    '548': 'Vodafone', '549': 'Vodafone',
-    '550': 'Turkcell', '551': 'Turkcell', '552': 'Turkcell', '553': 'Turkcell',
-    '554': 'Turkcell', '555': 'Turkcell', '556': 'Turkcell', '557': 'Turkcell',
-    '558': 'Turkcell', '559': 'Turkcell',
-    '560': 'Türk Telekom', '561': 'Türk Telekom', '562': 'Türk Telekom',
-    '563': 'Türk Telekom', '564': 'Türk Telekom', '565': 'Türk Telekom',
-    '566': 'Türk Telekom', '567': 'Türk Telekom', '568': 'Türk Telekom',
-    '569': 'Türk Telekom',
-    '570': 'Sabit Hat / VoIP', '850': 'Sabit Hat / VoIP',
+    # Geocell / Silknet
+    '511': 'Geocell / Silknet', '514': 'Geocell / Silknet', '515': 'Geocell / Silknet',
+    '551': 'Geocell / Silknet', '555': 'Geocell / Silknet', '557': 'Geocell / Silknet', '558': 'Geocell / Silknet',
+    '571': 'Geocell / Silknet', '574': 'Geocell / Silknet', '577': 'Geocell / Silknet',
+    '591': 'Geocell / Silknet', '592': 'Geocell / Silknet', '593': 'Geocell / Silknet', '596': 'Geocell / Silknet',
+    # Magti
+    '568': 'Magti', '569': 'Magti', '598': 'Magti',
+    '790': 'Magti', '791': 'Magti', '793': 'Magti', '774': 'Magti',
+    # Beeline Georgia
+    '595': 'Beeline Georgia', '597': 'Beeline Georgia', '599': 'Beeline Georgia',
+    # MagtiCom / Veon
+    '561': 'MagtiCom', '562': 'MagtiCom', '563': 'MagtiCom', '564': 'MagtiCom',
 }
 
-_OPERATOR_EMOJI = {'Turkcell': '📶', 'Vodafone': '🔴', 'Türk Telekom': '🔵', 'Sabit Hat / VoIP': '☎️'}
+_OPERATOR_EMOJI = {
+    'Geocell / Silknet': '🟠', 'Magti': '🔵',
+    'Beeline Georgia': '🟡', 'MagtiCom': '🟣',
+}
 
 
 def operator_sorgula_func(numara_ham: str) -> str:
     numara = re.sub(r'\D', '', numara_ham).lstrip('0')
-    if numara.startswith('90'):
-        numara = numara[2:]
-    if len(numara) != 10 or not numara.startswith('5'):
+    if numara.startswith('995'):
+        numara = numara[3:]
+    if len(numara) != 9 or numara[0] not in ('5', '7'):
         return (
             "❌ **Geçersiz Numara**\n\n"
-            "Türkiye formatında gir:\n"
-            "`05xx xxx xx xx` veya `+905xx...`"
+            "Gürcistan formatında gir:\n"
+            "`0591234567` veya `+995591234567`"
         )
     prefix = numara[:3]
     operator = _OPERATOR_TABLO.get(prefix, 'Bilinmiyor')
@@ -7121,9 +7087,9 @@ def operator_sorgula_func(numara_ham: str) -> str:
     return (
         f"📱 **OPERATÖR SORGULAMA**\n"
         f"━━━━━━━━━━━━━━━━━━\n\n"
-        f"📞 **Numara:** `+90 {numara[:3]} {numara[3:6]} {numara[6:8]} {numara[8:]}`\n"
+        f"📞 **Numara:** `+995 {numara[:3]} {numara[3:6]} {numara[6:]}`\n"
         f"{emoji} **Operatör:** {operator}\n"
-        f"🇹🇷 **Ülke:** Türkiye\n\n"
+        f"🇬🇪 **Ülke:** Gürcistan\n\n"
         f"_Sonuç prefix tablosuna göredir._"
     )
 
@@ -7152,46 +7118,7 @@ async def sifre_pwned_kontrol(sifre: str) -> tuple:
 
 
 async def email_sizinti_kontrol(email: str) -> str:
-    api_key = os.environ.get('HIBP_API_KEY', '')
-    if not api_key:
-        return (
-            "⚠️ **HIBP API Anahtarı Gerekli**\n\n"
-            "Email sızıntı kontrolü için `HIBP_API_KEY` secret'ı gerekiyor.\n"
-            "haveibeenpwned.com adresinden ücretsiz anahtar alabilirsin.\n\n"
-            "_Şifre sızıntı kontrolü API anahtarı gerektirmez._"
-        )
-    try:
-        loop = asyncio.get_event_loop()
-        r = await loop.run_in_executor(
-            None,
-            lambda: http_requests.get(
-                f'https://haveibeenpwned.com/api/v3/breachedaccount/{urllib.parse.quote(email)}',
-                headers={'hibp-api-key': api_key, 'User-Agent': 'AZRxGUARD-Bot'},
-                timeout=10
-            )
-        )
-        if r.status_code == 404:
-            return (
-                f"✅ **Temiz! Email Sızdırılmamış**\n\n"
-                f"📧 `{email}`\n\n"
-                f"Bu email hiçbir veri ihlalinde görülmedi."
-            )
-        if r.status_code == 200:
-            ihlaller = r.json()
-            satirlar = '\n'.join(
-                f"• **{b['Name']}** ({b.get('BreachDate','?')}) — {b.get('PwnCount',0):,} hesap"
-                for b in ihlaller[:10]
-            )
-            return (
-                f"🚨 **{len(ihlaller)} VERİ İHLALİNDE BULUNDU!**\n\n"
-                f"📧 `{email}`\n\n"
-                f"{satirlar}\n\n"
-                f"{'_...ve daha fazlası_' if len(ihlaller)>10 else ''}\n"
-                f"🔐 _Şifreni hemen değiştirmeni öneririz!_"
-            )
-        return f"❌ Sorgu başarısız (HTTP {r.status_code})"
-    except Exception as e:
-        return f"❌ Hata: `{e}`"
+    return "⚠️ Bu özellik kaldırıldı."
 
 
 async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -7221,6 +7148,39 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def gunluk_istatistik_job(context: ContextTypes.DEFAULT_TYPE):
+    """Her gün 00:00'da tüm gruplara günün en çok mesaj atanını duyurur."""
+    import tracking_store as _ts
+    import datetime as _dt
+    dun = (_dt.date.today() - _dt.timedelta(days=1)).isoformat()
+    gruplar = _ts.stats_tum_gruplar()
+    for group_id in gruplar:
+        try:
+            gunluk = _ts.daily_stats_getir(group_id, tarih=dun, limit=10)
+            if not gunluk:
+                continue
+            madalyalar = ['🥇', '🥈', '🥉']
+            liste = ""
+            for i, (uid, username, full_name, count) in enumerate(gunluk):
+                rozet = madalyalar[i] if i < 3 else f"{i+1}."
+                isim = f"@{username}" if username else (full_name or str(uid))
+                liste += f"{rozet} {isim} — **{count:,}** mesaj\n"
+            kazanan_isim = f"@{gunluk[0][1]}" if gunluk[0][1] else (gunluk[0][2] or str(gunluk[0][0]))
+            await context.bot.send_message(
+                chat_id=group_id,
+                text=(
+                    f"🏆 **GÜNÜN ŞAMPIYONU — {dun}**\n"
+                    f"━━━━━━━━━━━━━━━━━━\n\n"
+                    f"🎉 Bugün en çok mesaj atan: {kazanan_isim} 👑\n\n"
+                    f"{liste}\n"
+                    f"📅 _Sonuç {dun} tarihine aittir._"
+                ),
+                parse_mode='Markdown'
+            )
+        except Exception as e:
+            logger.debug(f"Günlük istatistik gönderme hatası (grup {group_id}): {e}")
+
+
 # ══════════════════════════════════════════════════════════════
 # 🤖 AI ASİSTAN — GEMINI 2.0 FLASH
 # ══════════════════════════════════════════════════════════════
@@ -7239,7 +7199,8 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
             client = genai.Client()
             system_prompt = (
                 "Sen AZRxGUARD botunun yapay zeka asistanısın. "
-                "Türkçe, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
+                "Gürcüce, Türkçe, Rusça, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
+                "Gürcistan odaklı sorularda öncelikle Gürcüce veya Türkçe yanıt veriyorsun. "
                 "Samimi, yardımsever ve kısa cevaplar veriyorsun. "
                 "Markdown kullanabilirsin."
             )
@@ -7495,17 +7456,6 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         )
         return
 
-    if context.user_data.get('durum') == 'email_sizinti_bekliyor':
-        context.user_data['durum'] = None
-        email = update.message.text.strip()
-        bekle = await update.message.reply_text("🔍 _Kontrol ediliyor..._", parse_mode='Markdown')
-        try:
-            sonuc = await email_sizinti_kontrol(email)
-        except Exception as e:
-            sonuc = f"❌ Hata: {e}"
-        await bekle.edit_text(sonuc, parse_mode='Markdown', disable_web_page_preview=True)
-        return
-
     if context.user_data.get('durum') == 'sifre_pwned_bekliyor':
         context.user_data['durum'] = None
         sifre = update.message.text.strip()
@@ -7526,27 +7476,6 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             sonuc = f"❌ Hata: {e}"
         await bekle.edit_text(sonuc, parse_mode='Markdown')
-        return
-
-    if context.user_data.get('durum') == 'screenshot_bekliyor':
-        context.user_data['durum'] = None
-        raw_url = update.message.text.strip()
-        if not raw_url.startswith('http'):
-            await update.message.reply_text("❌ Geçersiz URL. `https://` ile başlayan bir link gönder.", parse_mode='Markdown')
-            return
-        bekle = await update.message.reply_text("📸 _Ekran görüntüsü alınıyor..._", parse_mode='Markdown')
-        try:
-            from urllib.parse import quote_plus
-            ss_url = f"https://image.thum.io/get/width/1280/crop/800/{raw_url}"
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=ss_url,
-                caption=f"📸 **Screenshot**\n🔗 {raw_url[:80]}{'...' if len(raw_url)>80 else ''}",
-                parse_mode='Markdown'
-            )
-            await bekle.delete()
-        except Exception as e:
-            await bekle.edit_text(f"❌ Screenshot alınamadı: {e}")
         return
 
     if context.user_data.get('durum') == 'sasi_bekliyor':
@@ -8503,10 +8432,10 @@ async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "⚠️ *Gece Modu Uyarısı*\n\n"
                 "🌒 Birazdan *Gece Modu* başlıyor\\!\n\n"
-                "🇹🇷 Türkiye: saat *22:00*'de grup kapanacak\n"
+                "🇬🇪 Gürcistan: saat *22:00*'de grup kapanacak\n"
                 "🇦🇿 Azərbaycan: saat *23:00*\\-da qrup bağlanacaq\n\n"
                 "Tekrar açılış / Yenidən açılış:\n"
-                "🇹🇷 *08:00* \\| 🇦🇿 *09:00* 💤"
+                "🇬🇪 *08:00* \\| 🇦🇿 *09:00* 💤"
             ),
             parse_mode='MarkdownV2'
         )
@@ -9777,18 +9706,18 @@ async def temizle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ─────────────────────────────────────────────────────────────
 
 _SOHBET_TR_ISIMLER = [
-    ("Ahmet","Yılmaz"),("Mehmet","Kaya"),("Mustafa","Demir"),("Ali","Şahin"),
-    ("Hüseyin","Çelik"),("İbrahim","Arslan"),("Hasan","Doğan"),("Ömer","Kılıç"),
-    ("Yusuf","Aslan"),("Burak","Çetin"),("Emre","Koç"),("Serkan","Kurt"),
-    ("Fatma","Öztürk"),("Emine","Aydın"),("Zeynep","Özdemir"),("Hatice","Şimşek"),
-    ("Ayşe","Erdoğan"),("Elif","Yıldız"),("Merve","Güneş"),("Selin","Polat"),
+    ("Giorgi","Beridze"),("Davit","Kvaratskhelia"),("Luka","Chikvanaia"),("Sandro","Mgeladze"),
+    ("Irakli","Tabatadze"),("Levan","Kobiashvili"),("Tornike","Shengelia"),("Beka","Vekua"),
+    ("Nika","Tsiklauri"),("Mikheil","Salukvadze"),("Zura","Daraselia"),("Shota","Arveladze"),
+    ("Nino","Burjanadze"),("Mariam","Tsimakuridze"),("Ana","Dolidze"),("Ketevan","Maisuradze"),
+    ("Tamar","Chikovanı"),("Natia","Gelashvili"),("Salome","Zurabishvili"),("Elene","Khoshtaria"),
 ]
 _SOHBET_AZ_ISIMLER = [
     ("Əli","Həsənov"),("Rəşad","Məmmədov"),("Nicat","Əliyev"),("Tural","İsmayılov"),
     ("Kamran","Hüseynov"),("Elçin","Quliyev"),("Anar","Babayev"),("Müşfiq","Rəhimov"),
     ("Günay","Xəlilova"),("Sevinc","Məmmədzadə"),("Lalə","Əsgərova"),("Aytən","Nəsirov"),
 ]
-_SOHBET_SEHIRLER_TR = ["İstanbul","Ankara","İzmir","Bursa","Antalya","Adana","Konya","Trabzon","Kayseri","Mersin"]
+_SOHBET_SEHIRLER_TR = ["Tiflis","Batum","Kutaisi","Rustavi","Zugdidi","Gori","Poti","Telavi","Akhaltsikhe","Ozurgeti"]
 _SOHBET_SEHIRLER_AZ = ["Bakı","Gəncə","Sumqayıt","Mingəçevir","Naxçıvan","Lənkəran","Şəki","Şirvan"]
 _SOHBET_MESLEKLER = [
     "Yazılım Geliştirici","Grafik Tasarımcı","Öğretmen","Mühendis","Doktor",
@@ -9903,6 +9832,14 @@ def main():
 
     # --- ZAMANLI GÖREVLER ---
     jq = application.job_queue
+
+    # 00:00 — Günlük mesaj istatistiği (Gürcistan saati UTC+4)
+    _GE_SAAT = datetime.timezone(datetime.timedelta(hours=4))
+    jq.run_daily(
+        callback=gunluk_istatistik_job,
+        time=datetime.time(hour=0, minute=0, second=0, tzinfo=_GE_SAAT),
+        name="gunluk_istatistik"
+    )
 
     # 21:00 — Gece modu uyarısı
     jq.run_daily(
