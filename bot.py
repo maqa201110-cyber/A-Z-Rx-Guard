@@ -4970,6 +4970,16 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
         # Üye takibi — gruplarda mesaj atan herkesi kaydet
         if update.message.chat.type in ('group', 'supergroup') and update.message.from_user:
             grup_uye_ekle(update.message.chat_id, update.message.from_user)
+            # Mesaj sayacı — istatistik için
+            try:
+                import tracking_store as _ts
+                usr = update.message.from_user
+                _ts.stats_artir(
+                    update.message.chat_id, usr.id,
+                    usr.username or '', usr.full_name or ''
+                )
+            except Exception:
+                pass
 
         # Gece modu: ZAMANLI_KANAL_ID grubundaki mesajları sil (admin mesajlarına dokunma)
         if update.message.chat_id == ZAMANLI_KANAL_ID and gece_modu_aktif_mi():
@@ -5347,6 +5357,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
             [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ Username Hunter'), callback_data='menu_guvenli_sorgu'),
              InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
+            [InlineKeyboardButton('📧 Email Sızıntı', callback_data='menu_email_sizinti'),
+             InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned')],
+            [InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator'),
+             InlineKeyboardButton('📸 URL Screenshot', callback_data='menu_screenshot')],
             [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
              InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
             [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
@@ -5367,6 +5381,54 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🔐 **Şifre Güç Testi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "Test etmek istediğin şifreyi yaz:\n"
             "_(Şifren sadece sana görünür, hiçbir yerde saklanmaz)_",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_email_sizinti':
+        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📧 Email Sızıntı')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'email_sizinti_bekliyor'
+        await query.edit_message_text(
+            "📧 **EMAIL SIZINTI KONTROLÜ**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "Kontrol etmek istediğin email adresini yaz:\n\n"
+            "📌 _Örnek: `ornek@gmail.com`_\n\n"
+            "_Email adresin dark web veri ihlali listelerinde aranır._",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_sifre_pwned':
+        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='🔍 Şifre Sızıntı')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'sifre_pwned_bekliyor'
+        await query.edit_message_text(
+            "🔍 **SIZDIRILMIŞ ŞİFRE KONTROLÜ**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "Kontrol etmek istediğin şifreyi yaz:\n\n"
+            "🔒 _Şifren SHA-1 hash'lenerek kontrol edilir._\n"
+            "_Tam şifre hiçbir sunucuya gönderilmez (k-anonymity)._",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_operator':
+        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📱 Operatör Sorgula')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'operator_bekliyor'
+        await query.edit_message_text(
+            "📱 **OPERATÖR SORGULAMA**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "Türk telefon numarasını yaz:\n\n"
+            "📌 _Örnekler:_\n"
+            "`05321234567`\n"
+            "`+905321234567`",
+            reply_markup=geri, parse_mode='Markdown'
+        )
+    elif query.data == 'menu_screenshot':
+        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📸 URL Screenshot')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        context.user_data['durum'] = 'screenshot_bekliyor'
+        await query.edit_message_text(
+            "📸 **URL SCREENSHOT**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "Ekran görüntüsünü almak istediğin sitenin linkini yaz:\n\n"
+            "📌 _Örnek: `https://google.com`_",
             reply_markup=geri, parse_mode='Markdown'
         )
     elif query.data == 'oyun_tkmk':
@@ -7007,6 +7069,159 @@ async def sasi_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ══════════════════════════════════════════════════════════════
+# 📧 EMAIL SIZINTI / 🔍 ŞİFRE SIZINTI / 📱 OPERATÖR / 📸 SCREENSHOT / 👥 GRUP STAT
+# ══════════════════════════════════════════════════════════════
+
+import hashlib as _hashlib
+
+# Türk operatör prefix tablosu
+_OPERATOR_TABLO = {
+    '501': 'Vodafone', '502': 'Vodafone', '503': 'Vodafone', '504': 'Vodafone',
+    '505': 'Turkcell', '506': 'Turkcell', '507': 'Turkcell',
+    '508': 'Türk Telekom', '509': 'Türk Telekom',
+    '510': 'Türk Telekom', '511': 'Türk Telekom', '512': 'Türk Telekom',
+    '513': 'Türk Telekom', '514': 'Türk Telekom', '515': 'Türk Telekom',
+    '516': 'Türk Telekom', '517': 'Türk Telekom', '518': 'Türk Telekom',
+    '519': 'Türk Telekom', '520': 'Türk Telekom', '521': 'Türk Telekom',
+    '522': 'Türk Telekom', '523': 'Türk Telekom', '524': 'Türk Telekom',
+    '525': 'Türk Telekom', '526': 'Türk Telekom', '527': 'Türk Telekom',
+    '528': 'Türk Telekom', '529': 'Türk Telekom',
+    '530': 'Turkcell', '531': 'Turkcell', '532': 'Turkcell', '533': 'Turkcell',
+    '534': 'Turkcell', '535': 'Turkcell', '536': 'Turkcell', '537': 'Turkcell',
+    '538': 'Turkcell', '539': 'Turkcell',
+    '540': 'Vodafone', '541': 'Vodafone', '542': 'Vodafone', '543': 'Vodafone',
+    '544': 'Vodafone', '545': 'Vodafone', '546': 'Vodafone', '547': 'Vodafone',
+    '548': 'Vodafone', '549': 'Vodafone',
+    '550': 'Turkcell', '551': 'Turkcell', '552': 'Turkcell', '553': 'Turkcell',
+    '554': 'Turkcell', '555': 'Turkcell', '556': 'Turkcell', '557': 'Turkcell',
+    '558': 'Turkcell', '559': 'Turkcell',
+    '560': 'Türk Telekom', '561': 'Türk Telekom', '562': 'Türk Telekom',
+    '563': 'Türk Telekom', '564': 'Türk Telekom', '565': 'Türk Telekom',
+    '566': 'Türk Telekom', '567': 'Türk Telekom', '568': 'Türk Telekom',
+    '569': 'Türk Telekom',
+    '570': 'Sabit Hat / VoIP', '850': 'Sabit Hat / VoIP',
+}
+
+_OPERATOR_EMOJI = {'Turkcell': '📶', 'Vodafone': '🔴', 'Türk Telekom': '🔵', 'Sabit Hat / VoIP': '☎️'}
+
+
+def operator_sorgula_func(numara_ham: str) -> str:
+    numara = re.sub(r'\D', '', numara_ham).lstrip('0')
+    if numara.startswith('90'):
+        numara = numara[2:]
+    if len(numara) != 10 or not numara.startswith('5'):
+        return (
+            "❌ **Geçersiz Numara**\n\n"
+            "Türkiye formatında gir:\n"
+            "`05xx xxx xx xx` veya `+905xx...`"
+        )
+    prefix = numara[:3]
+    operator = _OPERATOR_TABLO.get(prefix, 'Bilinmiyor')
+    emoji = _OPERATOR_EMOJI.get(operator, '📱')
+    return (
+        f"📱 **OPERATÖR SORGULAMA**\n"
+        f"━━━━━━━━━━━━━━━━━━\n\n"
+        f"📞 **Numara:** `+90 {numara[:3]} {numara[3:6]} {numara[6:8]} {numara[8:]}`\n"
+        f"{emoji} **Operatör:** {operator}\n"
+        f"🇹🇷 **Ülke:** Türkiye\n\n"
+        f"_Sonuç prefix tablosuna göredir._"
+    )
+
+
+async def sifre_pwned_kontrol(sifre: str) -> tuple:
+    sha1 = _hashlib.sha1(sifre.encode('utf-8')).hexdigest().upper()
+    prefix, suffix = sha1[:5], sha1[5:]
+    try:
+        loop = asyncio.get_event_loop()
+        r = await loop.run_in_executor(
+            None,
+            lambda: http_requests.get(
+                f'https://api.pwnedpasswords.com/range/{prefix}',
+                headers={'Add-Padding': 'true'},
+                timeout=8
+            )
+        )
+        for line in r.text.splitlines():
+            parts = line.split(':')
+            if len(parts) == 2 and parts[0] == suffix:
+                return True, int(parts[1])
+        return False, 0
+    except Exception as e:
+        logger.debug(f"HIBP şifre: {e}")
+        return None, 0
+
+
+async def email_sizinti_kontrol(email: str) -> str:
+    api_key = os.environ.get('HIBP_API_KEY', '')
+    if not api_key:
+        return (
+            "⚠️ **HIBP API Anahtarı Gerekli**\n\n"
+            "Email sızıntı kontrolü için `HIBP_API_KEY` secret'ı gerekiyor.\n"
+            "haveibeenpwned.com adresinden ücretsiz anahtar alabilirsin.\n\n"
+            "_Şifre sızıntı kontrolü API anahtarı gerektirmez._"
+        )
+    try:
+        loop = asyncio.get_event_loop()
+        r = await loop.run_in_executor(
+            None,
+            lambda: http_requests.get(
+                f'https://haveibeenpwned.com/api/v3/breachedaccount/{urllib.parse.quote(email)}',
+                headers={'hibp-api-key': api_key, 'User-Agent': 'AZRxGUARD-Bot'},
+                timeout=10
+            )
+        )
+        if r.status_code == 404:
+            return (
+                f"✅ **Temiz! Email Sızdırılmamış**\n\n"
+                f"📧 `{email}`\n\n"
+                f"Bu email hiçbir veri ihlalinde görülmedi."
+            )
+        if r.status_code == 200:
+            ihlaller = r.json()
+            satirlar = '\n'.join(
+                f"• **{b['Name']}** ({b.get('BreachDate','?')}) — {b.get('PwnCount',0):,} hesap"
+                for b in ihlaller[:10]
+            )
+            return (
+                f"🚨 **{len(ihlaller)} VERİ İHLALİNDE BULUNDU!**\n\n"
+                f"📧 `{email}`\n\n"
+                f"{satirlar}\n\n"
+                f"{'_...ve daha fazlası_' if len(ihlaller)>10 else ''}\n"
+                f"🔐 _Şifreni hemen değiştirmeni öneririz!_"
+            )
+        return f"❌ Sorgu başarısız (HTTP {r.status_code})"
+    except Exception as e:
+        return f"❌ Hata: `{e}`"
+
+
+async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    import tracking_store as _ts
+    chat = update.effective_chat
+    if chat.type not in ('group', 'supergroup'):
+        await update.message.reply_text("❌ Bu komut yalnızca gruplarda çalışır.")
+        return
+    satirlar = _ts.stats_getir(chat.id, limit=10)
+    toplam = _ts.stats_toplam(chat.id)
+    if not satirlar:
+        await update.message.reply_text("📊 Henüz mesaj istatistiği yok.")
+        return
+    liste = ""
+    madalyalar = ['🥇', '🥈', '🥉']
+    for i, (uid, username, full_name, count) in enumerate(satirlar):
+        rozet = madalyalar[i] if i < 3 else f"{i+1}."
+        isim = f"@{username}" if username else (full_name or str(uid))
+        liste += f"{rozet} {isim} — **{count:,}** mesaj\n"
+    await update.message.reply_text(
+        f"📊 **GRUP MESAJ SIRALAMAСИ**\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"👥 {chat.title or 'Grup'}\n\n"
+        f"{liste}\n"
+        f"📨 Toplam: **{toplam:,}** mesaj",
+        parse_mode='Markdown'
+    )
+
+
+# ══════════════════════════════════════════════════════════════
 # 🤖 AI ASİSTAN — GEMINI 2.0 FLASH
 # ══════════════════════════════════════════════════════════════
 
@@ -7278,6 +7493,60 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             reply_markup=geri,
             parse_mode='MarkdownV2'
         )
+        return
+
+    if context.user_data.get('durum') == 'email_sizinti_bekliyor':
+        context.user_data['durum'] = None
+        email = update.message.text.strip()
+        bekle = await update.message.reply_text("🔍 _Kontrol ediliyor..._", parse_mode='Markdown')
+        try:
+            sonuc = await email_sizinti_kontrol(email)
+        except Exception as e:
+            sonuc = f"❌ Hata: {e}"
+        await bekle.edit_text(sonuc, parse_mode='Markdown', disable_web_page_preview=True)
+        return
+
+    if context.user_data.get('durum') == 'sifre_pwned_bekliyor':
+        context.user_data['durum'] = None
+        sifre = update.message.text.strip()
+        bekle = await update.message.reply_text("🔍 _Kontrol ediliyor..._", parse_mode='Markdown')
+        try:
+            sonuc = await sifre_pwned_kontrol(sifre)
+        except Exception as e:
+            sonuc = f"❌ Hata: {e}"
+        await bekle.edit_text(sonuc, parse_mode='Markdown')
+        return
+
+    if context.user_data.get('durum') == 'operator_bekliyor':
+        context.user_data['durum'] = None
+        numara = update.message.text.strip()
+        bekle = await update.message.reply_text("🔍 _Sorgulanıyor..._", parse_mode='Markdown')
+        try:
+            sonuc = operator_sorgula_func(numara)
+        except Exception as e:
+            sonuc = f"❌ Hata: {e}"
+        await bekle.edit_text(sonuc, parse_mode='Markdown')
+        return
+
+    if context.user_data.get('durum') == 'screenshot_bekliyor':
+        context.user_data['durum'] = None
+        raw_url = update.message.text.strip()
+        if not raw_url.startswith('http'):
+            await update.message.reply_text("❌ Geçersiz URL. `https://` ile başlayan bir link gönder.", parse_mode='Markdown')
+            return
+        bekle = await update.message.reply_text("📸 _Ekran görüntüsü alınıyor..._", parse_mode='Markdown')
+        try:
+            from urllib.parse import quote_plus
+            ss_url = f"https://image.thum.io/get/width/1280/crop/800/{raw_url}"
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=ss_url,
+                caption=f"📸 **Screenshot**\n🔗 {raw_url[:80]}{'...' if len(raw_url)>80 else ''}",
+                parse_mode='Markdown'
+            )
+            await bekle.delete()
+        except Exception as e:
+            await bekle.edit_text(f"❌ Screenshot alınamadı: {e}")
         return
 
     if context.user_data.get('durum') == 'sasi_bekliyor':
@@ -9614,6 +9883,7 @@ def main():
     application.add_handler(CommandHandler("kisalt", kisalt_komutu))
     application.add_handler(CommandHandler("wiki", wiki_komutu))
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("istatistik", istatistik_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     # 🛡️ GRUP YÖNETİM KOMUTLARI
