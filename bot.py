@@ -4358,63 +4358,35 @@ def _ipapi_basit_getir(ip: str) -> dict:
 def ip_basit_rapor(veri: dict, aranan_ip: str) -> str:
     if veri.get("status") != "success":
         hata = veri.get("message", "Bilinmeyen hata")
-        return (
-            "❌ **Reis, IP adresini hatalı girdin veya sistem yanıt vermiyor, kontrol et!**\n\n"
-            f"Girilen değer: `{aranan_ip}`\n"
-            f"Hata: `{hata}`"
-        )
+        return f"❌ **IP sorgulanamadı:** `{hata}`\n\nGirilen değer: `{aranan_ip}`"
 
-    lat  = veri.get('lat', '')
-    lon  = veri.get('lon', '')
+    lat = veri.get('lat', '')
+    lon = veri.get('lon', '')
     harita = f"https://maps.google.com/?q={lat},{lon}" if lat and lon else None
 
-    gercek_ip = veri.get('query', aranan_ip)
-    ulke      = veri.get('country', '—')
-    ulke_kod  = veri.get('countryCode', '—')
-    sehir     = veri.get('city', '—')
-    bolge     = veri.get('regionName', '—')
-    posta     = veri.get('zip', '—')
-    saat_dil  = veri.get('timezone', '—')
-    isp       = veri.get('isp', '—')
-    org       = veri.get('org', '—')
-    asn       = veri.get('as', '—')
-    mobil     = veri.get('mobile', False)
-    proxy     = veri.get('proxy', False)
-    hosting   = veri.get('hosting', False)
+    rozetler = []
+    if veri.get('proxy'):   rozetler.append("🔴 Proxy/VPN")
+    if veri.get('hosting'): rozetler.append("🟠 Hosting/Sunucu")
+    if veri.get('mobile'):  rozetler.append("📱 Mobil Hat")
+    rozet_str = " · ".join(rozetler) if rozetler else "✅ Temiz (Normal Kullanıcı)"
 
-    if proxy:    ip_turu = "🔴 Proxy / VPN"
-    elif hosting: ip_turu = "🟠 Hosting / Veri Merkezi"
-    elif mobil:   ip_turu = "📱 Mobil Hat"
-    else:         ip_turu = "✅ Normal Kullanıcı"
-
-    konum_str = f"{ulke} / {sehir}"
-
-    rapor = (
-        f"📊 **IP LOGGED — SİBER İSTİHBARAT RAPORU** 📊\n"
-        f"━━━━━━━━━━━━━━━━━━\n\n"
-        f"🌐 **IP Adresi:** `{gercek_ip}`\n"
-        f"📍 **Ülke / Şehir:** {konum_str}\n"
-        f"🗺️ **Bölge:** {bolge} ({ulke_kod})\n"
-        f"📮 **Posta Kodu:** {posta}\n"
-        f"🕐 **Saat Dilimi:** `{saat_dil}`\n"
+    return (
+        f"🌐 **IP Sorgulama — AZRxGUARD**\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔍 **Sorgulan IP:** `{veri.get('query', aranan_ip)}`\n\n"
+        f"🏳️ **Ülke:** {veri.get('country', '—')} ({veri.get('countryCode', '—')})\n"
+        f"🏙️ **Bölge:** {veri.get('regionName', '—')} / {veri.get('city', '—')}\n"
+        f"📮 **Posta Kodu:** {veri.get('zip', '—')}\n"
+        f"🕐 **Saat Dilimi:** `{veri.get('timezone', '—')}`\n\n"
+        f"📍 **Koordinat:** {lat}, {lon}\n"
+        + (f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n\n" if harita else "\n")
+        + f"🏢 **ISP:** {veri.get('isp', '—')}\n"
+        f"🏛️ **Organizasyon:** {veri.get('org', '—')}\n"
+        f"📡 **AS:** {veri.get('as', '—')}\n"
+        f"🔤 **AS Adı:** {veri.get('asname', '—')}\n\n"
+        f"🛡️ **IP Türü:** {rozet_str}\n\n"
+        f"🤖 _AZRxGUARD tarafından sorgulandı_"
     )
-    if lat and lon:
-        rapor += f"📡 **Koordinatlar:** `{lat}, {lon}`\n"
-        if harita:
-            rapor += f"🗺️ **Harita:** [Google Maps'te Gör]({harita})\n"
-    rapor += (
-        f"\n"
-        f"📶 **İnternet Sağlayıcısı (ISP):** {isp}\n"
-        f"🏛️ **Organizasyon:** {org}\n"
-        f"📡 **AS Numarası:** `{asn}`\n"
-        f"📱 **Mobil Hat:** {'✅ Evet' if mobil else '❌ Hayır'}\n"
-        f"\n"
-        f"🛡️ **IP Türü:** {ip_turu}\n"
-        f"\n"
-        f"━━━━━━━━━━━━━━━━━━\n"
-        f"🤖 _AZRxGUARD Siber İstihbarat Sistemi_"
-    )
-    return rapor
 
 async def ip_basit_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
@@ -5232,16 +5204,14 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_ip_sorgu':
         context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › IP Sorgu'
         ip_klavye = [
-            [InlineKeyboardButton('📊 OSINT Raporu  (/ip)', callback_data='menu_ip')],
-            [InlineKeyboardButton('🛡️ Derin IP Analizi  (/ip_analiz)', callback_data='menu_ip_analiz')],
+            [
+                InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
+                InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
+            ],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
         ]
         await query.edit_message_text(
-            "🌐 **IP İSTİHBARAT MERKEZİ**\n"
-            "━━━━━━━━━━━━━━━━━━\n\n"
-            "📊 **OSINT Raporu** — Ülke, şehir, ISP, koordinat, VPN/Proxy tespiti\n\n"
-            "🛡️ **Derin IP Analizi** — Tam güvenlik analizi, tehdit skoru, ağ detayları\n\n"
-            "Sorgulama türünü seç:",
+            strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
             reply_markup=InlineKeyboardMarkup(ip_klavye), parse_mode='Markdown'
         )
     elif query.data == 'menu_azr_special':
@@ -5310,15 +5280,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_ip':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
-        await log_kanali_gonder(context.bot, update, kategori=kat, komut='📊 OSINT IP Raporu')
+        await log_kanali_gonder(context.bot, update, kategori=kat, komut='🌐 IP Sorgulama')
         geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
         context.user_data['durum'] = 'ip_bekliyor'
         await query.edit_message_text(
-            "📊 **OSINT IP RAPORU**\n"
-            "━━━━━━━━━━━━━━━━━━\n\n"
-            "Sorgulamak istediğin IP adresini yaz:\n\n"
-            "📌 _Örnek: `8.8.8.8`_\n\n"
-            "_Ülke, şehir, ISP, koordinat, VPN/Proxy tespiti yapılır._",
+            strings.get('ip_ask', '🌐 **IP Sorgulama**\n\nSorgulamak istediğiniz IP adresini yazın:\nÖrnek: `8.8.8.8`'),
             reply_markup=geri_klavye, parse_mode='Markdown'
         )
     elif query.data == 'menu_ip_analiz':
