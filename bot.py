@@ -6046,7 +6046,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
     elif query.data == 'aki_baslat':
         await query.answer()
-        await _akinator_oyun_baslat(context.bot, query.message.chat_id, query.from_user.id, context)
+        await _aki_oyun_baslat_callback(query, context)
     elif query.data in ('aki_evet', 'aki_hayir', 'aki_bilmiyorum', 'aki_muhtemelen', 'aki_muhtemelen_degil'):
         await akinator_cevap_isle(query, context, query.data)
     elif query.data == 'aki_bitir':
@@ -9894,19 +9894,197 @@ async def url_kisalt(url: str) -> str:
     return url
 
 # ══════════════════════════════════════════════════════════════
-# 🔮 AKİNATÖR OYUN MOTORU
+# 🔮 AKİNATÖR OYUN MOTORU  (Tamamen Yerli — API bağımlılığı yok)
 # ══════════════════════════════════════════════════════════════
 
 _akinator_sessions: dict = {}
 _AKINATOR_IMG_YOL = "attached_assets/IMG_20260622_144754_1782125326168.png"
 
-_AKI_CEVAP_MAP = {
-    'aki_evet':           'yes',
-    'aki_hayir':          'no',
-    'aki_bilmiyorum':     'idk',
-    'aki_muhtemelen':     'probably',
-    'aki_muhtemelen_degil': 'probably not',
+# ── Karakter Veritabanı ────────────────────────────────────────
+# Her karakter için özellik sözlüğü (True=Evet / False=Hayır)
+_AKI_KARAKTERLER: dict = {
+    'Mustafa Kemal Atatürk': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=True, turk=True,    insan=True,
+        muzisyen=False, politikaci=True, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=False, film=False,  disney=False,
+    ),
+    'Albert Einstein': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=False, bilimci=True, tarihsel=True,  turk=False,   insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=True, film=False,   disney=False,
+    ),
+    'Napolyon Bonaparte': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=True, turk=False,   insan=True,
+        muzisyen=False, politikaci=True, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=True, film=False,   disney=False,
+    ),
+    'Michael Jackson': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=True, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=False,   disney=False,
+    ),
+    'Elon Musk': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=False, bilimci=True, tarihsel=False, turk=False,   insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=False,   disney=False,
+    ),
+    'Lionel Messi': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=True,  bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=False, film=False,  disney=False,
+    ),
+    'Cristiano Ronaldo': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=True,  bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=True, film=False,   disney=False,
+    ),
+    'Recep Tayyip Erdoğan': dict(
+        gercek=True,  erkek=True,  kurgusal=False, anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=True,   insan=True,
+        muzisyen=False, politikaci=True, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=False, film=False,  disney=False,
+    ),
+    'Batman': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=True,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=False,
+    ),
+    'Spider-Man': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=True,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=True,
+    ),
+    'Iron Man': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=True,
+        sporcu=False, bilimci=True, tarihsel=False, turk=False,   insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=True,
+    ),
+    'Superman': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=True,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=False,
+    ),
+    'Harry Potter': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=True,
+        amerikan=False, japon=False, avrupali=True, film=True,    disney=False,
+    ),
+    'Hermione Granger': dict(
+        gercek=False, erkek=False, kurgusal=True,  anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=True,
+        amerikan=False, japon=False, avrupali=True, film=True,    disney=False,
+    ),
+    'Naruto': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=True,
+        amerikan=False, japon=True, avrupali=False, film=False,   disney=False,
+    ),
+    'Goku': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=False,
+        amerikan=False, japon=True, avrupali=False, film=False,   disney=False,
+    ),
+    'Pikachu': dict(
+        gercek=False, erkek=False, kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=True, guc=True,  cocuk=False,
+        amerikan=False, japon=True, avrupali=False, film=False,   disney=False,
+    ),
+    'Mickey Mouse': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=True, guc=False, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=True,
+    ),
+    'Sherlock Holmes': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=False,
+        sporcu=False, bilimci=True, tarihsel=False, turk=False,   insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=True, film=True,    disney=False,
+    ),
+    'Dracula': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=False,   superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=False, guc=True, cocuk=False,
+        amerikan=False, japon=False, avrupali=True, film=True,    disney=False,
+    ),
+    'Elsa (Karlar Ülkesi)': dict(
+        gercek=False, erkek=False, kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=True, politikaci=False, hayvan=False, guc=True,  cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=True,
+    ),
+    'Pamuk Prenses': dict(
+        gercek=False, erkek=False, kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=True,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=True,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=True,
+    ),
+    'Shrek': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=False, guc=False, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=False,
+    ),
+    'SpongeBob': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=True, guc=False, cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=False,
+    ),
+    'Winnie the Pooh': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=False, hayvan=True, guc=False, cocuk=False,
+        amerikan=False, japon=False, avrupali=True, film=True,    disney=True,
+    ),
+    'Kral Aslan (Simba)': dict(
+        gercek=False, erkek=True,  kurgusal=True,  anime=True,    superhero=False,
+        sporcu=False, bilimci=False, tarihsel=False, turk=False,  insan=False,
+        muzisyen=False, politikaci=True, hayvan=True, guc=False,  cocuk=False,
+        amerikan=True, japon=False, avrupali=False, film=True,    disney=True,
+    ),
 }
+
+# ── Soru Havuzu ────────────────────────────────────────────────
+# (soru_metni, özellik_anahtarı)
+_AKI_SORU_HAVUZU: list = [
+    ("Bu karakter gerçek bir kişi midir?",                 'gercek'),
+    ("Bu karakter erkek midir?",                           'erkek'),
+    ("Bu karakter çizgi film veya anime karakteri midir?", 'anime'),
+    ("Bu karakter bir süper kahraman mıdır?",              'superhero'),
+    ("Bu karakterin doğaüstü / süper güçleri var mıdır?",  'guc'),
+    ("Bu karakter bir hayvan mıdır?",                      'hayvan'),
+    ("Bu karakter insan mıdır?",                           'insan'),
+    ("Bu karakter Türk müdür?",                            'turk'),
+    ("Bu karakter Japon kökenli midir?",                   'japon'),
+    ("Bu karakter Avrupalı mıdır?",                        'avrupali'),
+    ("Bu karakter Amerikan midir?",                        'amerikan'),
+    ("Bu karakter bir sporcu mudur?",                      'sporcu'),
+    ("Bu karakter müzisyen midir?",                        'muzisyen'),
+    ("Bu karakter bir film veya dizi karakteri midir?",    'film'),
+    ("Bu karakter Disney'e ait bir karakter midir?",       'disney'),
+    ("Bu karakter tarihsel bir figür müdür?",              'tarihsel'),
+    ("Bu karakter siyasetçi ya da lider midir?",           'politikaci'),
+    ("Bu karakter bilim insanı veya mucit midir?",         'bilimci'),
+    ("Bu karakter genç / çocuk mudur?",                    'cocuk'),
+    ("Bu karakter kurgusaldır (roman, çizgi roman vb.)?",  'kurgusal'),
+]
 
 
 def _aki_soru_klavye() -> InlineKeyboardMarkup:
@@ -9926,95 +10104,173 @@ def _aki_soru_klavye() -> InlineKeyboardMarkup:
 
 def _aki_ilerleme_bar(progression: float) -> str:
     dolu = int(progression / 10)
-    bos = 10 - dolu
+    bos  = 10 - dolu
     return '🟦' * dolu + '⬜' * bos
 
 
-async def _akinator_oyun_baslat(bot, chat_id: int, user_id: int, context):
-    """Akinator oyununu başlatır — /akinator komutundan ve menü butonundan çağrılır."""
-    if not AKINATOR_YUKLU:
-        await bot.send_message(
-            chat_id,
-            "❌ Akinator şu an kullanılamıyor. Yöneticiyle iletişime geçin."
-        )
-        return
+def _aki_sonraki_soru(skorlar: dict, sorulmus: set) -> tuple:
+    """Bilgi kazanımına göre en iyi soruyu seçer (50/50 bölme hedefi)."""
+    canli = [c for c, s in skorlar.items() if s > 0.01]
+    n     = len(canli)
+    if n == 0:
+        return None, None
+    en_iyi_soru = None
+    en_iyi_anahtar = None
+    en_iyi_skor = -1.0
+    for soru_metni, anahtar in _AKI_SORU_HAVUZU:
+        if anahtar in sorulmus:
+            continue
+        evet_sayisi = sum(1 for c in canli if _AKI_KARAKTERLER[c].get(anahtar, False))
+        hayir_sayisi = n - evet_sayisi
+        if n > 0:
+            bolme = min(evet_sayisi, hayir_sayisi) / n
+        else:
+            bolme = 0
+        if bolme > en_iyi_skor:
+            en_iyi_skor   = bolme
+            en_iyi_soru   = soru_metni
+            en_iyi_anahtar = anahtar
+    return en_iyi_soru, en_iyi_anahtar
 
-    _akinator_sessions.pop(user_id, None)
 
-    karsilama = (
-        "🔮 *AKİNATÖR'E HOŞ GELDİN!*\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "🧞 *Ben aklındaki karakteri tahmin edeceğim!*\n\n"
-        "💡 Gerçek, hayali ya da herkesçe tanınan\n"
-        "herhangi bir karakter düşünebilirsin.\n\n"
-        "🎯 Sorularıma dürüstçe cevap ver,\n"
-        "ben gerisini hallederim! 😏\n\n"
-        "⏳ _Akinator uyanıyor..._"
-    )
+def _aki_ilerlem_hesapla(skorlar: dict) -> float:
+    """0-100 arasında ilerleme yüzdesi döner."""
+    toplam = sum(s for s in skorlar.values() if s > 0)
+    if toplam == 0:
+        return 0.0
+    en_yuksek = max(skorlar.values())
+    return (en_yuksek / toplam) * 100
 
-    try:
-        with open(_AKINATOR_IMG_YOL, 'rb') as _f:
-            await bot.send_photo(
-                chat_id=chat_id,
-                photo=_f,
-                caption=karsilama,
-                parse_mode='Markdown'
-            )
-    except Exception:
-        await bot.send_message(chat_id, karsilama, parse_mode='Markdown')
 
-    yuk_msg = await bot.send_message(chat_id, "⏳ _Bağlantı kuruluyor..._", parse_mode='Markdown')
+def _aki_en_iyi_karakter(skorlar: dict) -> str:
+    return max(skorlar, key=lambda c: skorlar[c])
 
-    try:
-        aki = _akinator_lib.Akinator()
-        soru = await asyncio.to_thread(aki.start_game, 'tr')
 
-        _akinator_sessions[user_id] = {
-            'aki': aki,
-            'chat_id': chat_id,
-            'msg_id': yuk_msg.message_id
-        }
+def _aki_skoru_guncelle(skorlar: dict, anahtar: str, cevap: str) -> dict:
+    """Cevaba göre Bayesian ağırlık güncellemesi."""
+    ceza_agir = 0.02   # kesin yanlış cevap
+    ceza_hafif = 0.35  # muhtemelen yanlış
+    for karakter, ozellikler in _AKI_KARAKTERLER.items():
+        if karakter not in skorlar:
+            continue
+        prop = ozellikler.get(anahtar, False)
+        if cevap == 'evet':
+            if not prop:
+                skorlar[karakter] *= ceza_agir
+        elif cevap == 'hayir':
+            if prop:
+                skorlar[karakter] *= ceza_agir
+        elif cevap == 'muhtemelen':
+            if not prop:
+                skorlar[karakter] *= ceza_hafif
+        elif cevap == 'muhtemelen_degil':
+            if prop:
+                skorlar[karakter] *= ceza_hafif
+        # 'bilmiyorum' → değişiklik yok
+    return skorlar
 
-        bar = _aki_ilerleme_bar(aki.progression)
-        await bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=yuk_msg.message_id,
-            text=(
-                f"🔮 *AKİNATÖR* | Soru {aki.step + 1}\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"❓ *{soru}*\n\n"
-                f"📊 {bar} `{aki.progression:.0f}%`"
-            ),
-            reply_markup=_aki_soru_klavye(),
-            parse_mode='Markdown'
-        )
 
-    except Exception as e:
-        logger.error(f"Akinator başlatma hatası: {e}")
-        try:
-            await bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=yuk_msg.message_id,
-                text="❌ Akinator şu an bağlanamıyor. Daha sonra tekrar deneyin."
-            )
-        except Exception:
-            pass
+_AKI_CEVAP_MAP = {
+    'aki_evet':             'evet',
+    'aki_hayir':            'hayir',
+    'aki_bilmiyorum':       'bilmiyorum',
+    'aki_muhtemelen':       'muhtemelen',
+    'aki_muhtemelen_degil': 'muhtemelen_degil',
+}
+
+_AKI_KARSILAMA = (
+    "🔮 *AKİNATÖR'E HOŞ GELDİN!*\n"
+    "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    "🧞 *Ben aklındaki karakteri tahmin edeceğim!*\n\n"
+    "💡 Gerçek, hayali ya da herkesçe tanınan\n"
+    "herhangi bir karakter düşünebilirsin.\n\n"
+    "🎯 Sorularıma dürüstçe cevap ver,\n"
+    "ben gerisini hallederim! 😏\n\n"
+    "👇 Hazırsan *BAŞLA* butonuna bas!"
+)
 
 
 async def akinator_baslat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/akinator komutu — özel sohbet ve gruplarda çalışır."""
-    await _akinator_oyun_baslat(
-        context.bot,
-        update.effective_chat.id,
-        update.effective_user.id,
-        context
+    """/akinator komutu — hem özel hem grup sohbetlerde çalışır."""
+    aki_intro_klavye = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🎮 BAŞLA!", callback_data='aki_baslat')],
+    ])
+    try:
+        with open(_AKINATOR_IMG_YOL, 'rb') as _f:
+            await update.effective_message.reply_photo(
+                photo=_f,
+                caption=_AKI_KARSILAMA,
+                reply_markup=aki_intro_klavye,
+                parse_mode='Markdown'
+            )
+    except Exception:
+        await update.effective_message.reply_text(
+            _AKI_KARSILAMA,
+            reply_markup=aki_intro_klavye,
+            parse_mode='Markdown'
+        )
+
+
+async def _aki_oyun_baslat_callback(query, context):
+    """aki_baslat callback — yeni oyun oluşturur, ilk soruyu gönderir."""
+    user_id = query.from_user.id
+    chat_id = query.message.chat_id
+    _akinator_sessions.pop(user_id, None)
+
+    try:
+        await query.edit_message_caption(
+            caption="⏳ *Akinator uyanıyor...*",
+            parse_mode='Markdown'
+        )
+    except Exception:
+        pass
+
+    skorlar   = {k: 1.0 for k in _AKI_KARAKTERLER}
+    sorulmus  = set()
+    soru, anahtar = _aki_sonraki_soru(skorlar, sorulmus)
+
+    if not soru:
+        await context.bot.send_message(chat_id, "❌ Oyun başlatılamadı.")
+        return
+
+    sorulmus.add(anahtar)
+    ilerleme = _aki_ilerlem_hesapla(skorlar)
+    bar = _aki_ilerleme_bar(ilerleme)
+
+    soru_msg = await context.bot.send_message(
+        chat_id=chat_id,
+        text=(
+            f"🔮 *AKİNATÖR* | Soru 1\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"❓ *{soru}*\n\n"
+            f"📊 {bar} `{ilerleme:.0f}%`"
+        ),
+        reply_markup=_aki_soru_klavye(),
+        parse_mode='Markdown'
     )
+
+    _akinator_sessions[user_id] = {
+        'skorlar':   skorlar,
+        'sorulmus':  sorulmus,
+        'son_anahtar': anahtar,
+        'adim':      1,
+        'chat_id':   chat_id,
+        'msg_id':    soru_msg.message_id,
+    }
+
+    try:
+        await query.edit_message_caption(
+            caption="🔮 *AKİNATÖR*\n\n🧞 _Oyun başladı! Aşağıdaki sorulara cevap ver._",
+            parse_mode='Markdown'
+        )
+    except Exception:
+        pass
 
 
 async def akinator_cevap_isle(query, context: ContextTypes.DEFAULT_TYPE, cevap_key: str):
     """Evet / Hayır / Bilmiyorum / Muhtemelen / Muhtemelen Değil butonlarını işler."""
     user_id = query.from_user.id
-    oturum = _akinator_sessions.get(user_id)
+    oturum  = _akinator_sessions.get(user_id)
 
     if not oturum:
         await query.answer(
@@ -10024,113 +10280,89 @@ async def akinator_cevap_isle(query, context: ContextTypes.DEFAULT_TYPE, cevap_k
         return
 
     await query.answer()
-    aki = oturum['aki']
     chat_id = query.message.chat_id
-    msg_id = query.message.message_id
+    msg_id  = query.message.message_id
+
+    cevap    = _AKI_CEVAP_MAP[cevap_key]
+    skorlar  = oturum['skorlar']
+    sorulmus = oturum['sorulmus']
+    son_anahtar = oturum['son_anahtar']
+    adim     = oturum['adim']
+
+    _aki_skoru_guncelle(skorlar, son_anahtar, cevap)
+    ilerleme = _aki_ilerlem_hesapla(skorlar)
+
+    en_iyi = _aki_en_iyi_karakter(skorlar)
+    canli  = sum(1 for s in skorlar.values() if s > 0.01)
+
+    if ilerleme >= 80 or canli <= 1 or adim >= 20:
+        await _akinator_tahmin_goster(context.bot, chat_id, msg_id, user_id, en_iyi)
+        return
+
+    soru, anahtar = _aki_sonraki_soru(skorlar, sorulmus)
+    if not soru:
+        await _akinator_tahmin_goster(context.bot, chat_id, msg_id, user_id, en_iyi)
+        return
+
+    sorulmus.add(anahtar)
+    oturum['son_anahtar'] = anahtar
+    oturum['adim']        = adim + 1
+    bar = _aki_ilerleme_bar(ilerleme)
 
     try:
-        cevap = _AKI_CEVAP_MAP[cevap_key]
-        soru = await asyncio.to_thread(aki.answer, cevap)
-
-        if aki.progression >= 80 or aki.step >= 35:
-            await _akinator_tahmin_goster(context.bot, chat_id, msg_id, user_id, aki)
-            return
-
-        bar = _aki_ilerleme_bar(aki.progression)
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=msg_id,
             text=(
-                f"🔮 *AKİNATÖR* | Soru {aki.step + 1}\n"
+                f"🔮 *AKİNATÖR* | Soru {adim + 1}\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
                 f"❓ *{soru}*\n\n"
-                f"📊 {bar} `{aki.progression:.0f}%`"
+                f"📊 {bar} `{ilerleme:.0f}%`"
             ),
             reply_markup=_aki_soru_klavye(),
             parse_mode='Markdown'
         )
-
     except Exception as e:
-        logger.error(f"Akinator cevap hatası: {e}")
-        _akinator_sessions.pop(user_id, None)
-        try:
-            await context.bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=msg_id,
-                text="❌ Bağlantı koptu. /akinator ile yeni oyun başlatın."
-            )
-        except Exception:
-            pass
+        logger.error(f"Akinator mesaj güncelleme hatası: {e}")
 
 
-async def _akinator_tahmin_goster(bot, chat_id: int, msg_id: int, user_id: int, aki):
-    """Tahmin sonucunu şık panelle gösterir; karakter fotoğrafı varsa ekler."""
+async def _akinator_tahmin_goster(bot, chat_id: int, msg_id: int, user_id: int, karakter_adi: str):
+    """Tahmin sonucunu güzel bir panelle gösterir."""
+    _akinator_sessions.pop(user_id, None)
+
+    devam_klavye = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✅ Evet, bildin!",   callback_data='aki_dogru'),
+            InlineKeyboardButton("❌ Yanıltın!",       callback_data='aki_yanlis'),
+        ]
+    ])
+
+    metin = (
+        f"🧞 *REİS, BULDUM!*\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🎯 Aklındaki karakter bu mu?\n\n"
+        f"👤 *{karakter_adi}*\n\n"
+        f"🔮 _Doğru tahmin ettim mi?_"
+    )
+
     try:
-        await asyncio.to_thread(aki.win)
-        karakter = aki.first_guess
-
-        isim      = karakter.get('name', '???')
-        aciklama  = karakter.get('description', '')
-        foto_url  = karakter.get('absolute_picture_path', '')
-
-        _akinator_sessions.pop(user_id, None)
-
-        devam_klavye = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton("✅ Evet, bildin!",  callback_data='aki_dogru'),
-                InlineKeyboardButton("❌ Yanıltın!",      callback_data='aki_yanlis'),
-            ]
-        ])
-
-        metin = (
-            f"🧞 *REİS, BULDUM!*\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"🎯 Aklındaki karakter bu mu?\n\n"
-            f"👤 *{isim}*\n"
-        )
-        if aciklama:
-            metin += f"📝 _{aciklama[:200]}_\n"
-        metin += "\n🔮 _Doğru tahmin ettim mi?_"
-
-        try:
-            await bot.delete_message(chat_id=chat_id, message_id=msg_id)
-        except Exception:
-            pass
-
-        if foto_url:
-            try:
-                await bot.send_photo(
-                    chat_id=chat_id,
-                    photo=foto_url,
-                    caption=metin,
-                    reply_markup=devam_klavye,
-                    parse_mode='Markdown'
-                )
-                return
-            except Exception:
-                pass
-
-        await bot.send_message(
+        await bot.edit_message_text(
             chat_id=chat_id,
+            message_id=msg_id,
             text=metin,
             reply_markup=devam_klavye,
             parse_mode='Markdown'
         )
-
-    except Exception as e:
-        logger.error(f"Akinator tahmin gösterme hatası: {e}")
-        _akinator_sessions.pop(user_id, None)
+    except Exception:
         try:
-            await bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=msg_id,
-                text="🤔 Bu sefer tahmin edemedim! /akinator ile yeni oyun başlat."
-            )
-        except Exception:
             await bot.send_message(
                 chat_id=chat_id,
-                text="🤔 Bu sefer tahmin edemedim! /akinator ile yeni oyun başlat."
+                text=metin,
+                reply_markup=devam_klavye,
+                parse_mode='Markdown'
             )
+        except Exception as e:
+            logger.error(f"Akinator tahmin gösterme hatası: {e}")
 
 
 # ══════════════════════════════════════════════════════
