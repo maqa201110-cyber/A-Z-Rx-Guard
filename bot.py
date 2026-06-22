@@ -6018,20 +6018,32 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🎮 BAŞLA!", callback_data='aki_baslat')],
             [InlineKeyboardButton("⬅️ Geri", callback_data='menu_fun')]
         ])
-        await query.edit_message_text(
-            "🔮 *AKİNATÖR*\n"
+        karsilama_caption = (
+            "🔮 *AKİNATÖR'E HOŞ GELDİN!*\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🧞 Aklında bir karakter mi var?\n"
-            "Ben onu tahmin edeceğim!\n\n"
-            "💡 *Nasıl oynanır?*\n"
-            "• Aklında bir karakter düşün\n"
-            "• Sorularıma dürüstçe cevap ver\n"
-            "• Evet / Hayır / Bilmiyorum seçeneklerini kullan\n"
-            "• Ben karakterini bulacağım! 😏\n\n"
-            "👇 Hazırsan başlayalım!",
-            reply_markup=aki_intro_klavye,
-            parse_mode='Markdown'
+            "🧞 *Ben aklındaki karakteri tahmin edeceğim!*\n\n"
+            "💡 Gerçek, hayali ya da herkesçe tanınan\n"
+            "herhangi bir karakter düşünebilirsin.\n\n"
+            "🎯 Sorularıma dürüstçe cevap ver,\n"
+            "ben gerisini hallederim! 😏\n\n"
+            "👇 Hazırsan başlayalım!"
         )
+        try:
+            with open(_AKINATOR_IMG_YOL, 'rb') as _f:
+                await context.bot.send_photo(
+                    chat_id=query.message.chat_id,
+                    photo=_f,
+                    caption=karsilama_caption,
+                    reply_markup=aki_intro_klavye,
+                    parse_mode='Markdown'
+                )
+        except Exception:
+            await context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text=karsilama_caption,
+                reply_markup=aki_intro_klavye,
+                parse_mode='Markdown'
+            )
     elif query.data == 'aki_baslat':
         await query.answer()
         await _akinator_oyun_baslat(context.bot, query.message.chat_id, query.from_user.id, context)
