@@ -6014,6 +6014,26 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ── 🔮 AKİNATÖR CALLBACK'LERİ ─────────────────────────────
     elif query.data == 'eglence_akinator':
         await query.answer()
+        aki_intro_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🎮 BAŞLA!", callback_data='aki_baslat')],
+            [InlineKeyboardButton("⬅️ Geri", callback_data='menu_fun')]
+        ])
+        await query.edit_message_text(
+            "🔮 *AKİNATÖR*\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🧞 Aklında bir karakter mi var?\n"
+            "Ben onu tahmin edeceğim!\n\n"
+            "💡 *Nasıl oynanır?*\n"
+            "• Aklında bir karakter düşün\n"
+            "• Sorularıma dürüstçe cevap ver\n"
+            "• Evet / Hayır / Bilmiyorum seçeneklerini kullan\n"
+            "• Ben karakterini bulacağım! 😏\n\n"
+            "👇 Hazırsan başlayalım!",
+            reply_markup=aki_intro_klavye,
+            parse_mode='Markdown'
+        )
+    elif query.data == 'aki_baslat':
+        await query.answer()
         await _akinator_oyun_baslat(context.bot, query.message.chat_id, query.from_user.id, context)
     elif query.data in ('aki_evet', 'aki_hayir', 'aki_bilmiyorum', 'aki_muhtemelen', 'aki_muhtemelen_degil'):
         await akinator_cevap_isle(query, context, query.data)
