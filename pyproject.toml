@@ -15,4 +15,5 @@ dependencies = [
     "requests>=2.34.2",
     "discord.py>=2.3.2",
     "telegram>=0.0.1",
+    "akinator>=2.0.2",
 ]

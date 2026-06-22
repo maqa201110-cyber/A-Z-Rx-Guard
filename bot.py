@@ -18,6 +18,12 @@ import tempfile
 import shutil
 import urllib.parse
 
+try:
+    import akinator as _akinator_lib
+    AKINATOR_YUKLU = True
+except ImportError:
+    AKINATOR_YUKLU = False
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions, BotCommand, BotCommandScopeAllGroupChats, BotCommandScopeAllPrivateChats, BotCommandScopeDefault
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, JobQueue
 
@@ -5194,6 +5200,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_fun':
         context.user_data['mevcut_kategori'] = '🎮 Eğlence'
         fun_klavye = [
+            [InlineKeyboardButton('🔮 AKİNATÖR', callback_data='eglence_akinator')],
             [InlineKeyboardButton(strings['btn_roll_dice'], callback_data='roll_dice'),
              InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
             [InlineKeyboardButton(strings.get('btn_oyun_tkmk', '✊ Taş-Kağıt-Makas'), callback_data='oyun_tkmk')],
@@ -5205,9 +5212,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ]
         await query.edit_message_text(
-            "🎮 **" + strings['btn_fun'] + "**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🎲 Zar · 🎱 Şans Topu · ✊ TKM · 🔢 Sayı Tahmin\n"
-            "🪙 Para At · 🎯 Rus Ruleti · 🔮 Kehanet · 🎲 Rastgele",
+            "🎮 **EĞLENce MENüSü**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🔮 Akinatör · 🎲 Zar · 🎱 Şans Topu · ✊ TKM\n"
+            "🔢 Sayı Tahmin · 🪙 Para At · 🎯 Rus Ruleti\n"
+            "🔮 Kehanet · 🎲 Rastgele",
             reply_markup=InlineKeyboardMarkup(fun_klavye),
             parse_mode='Markdown'
         )
@@ -6003,6 +6011,46 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🔮 **KEHANET**\n━━━━━━━━━━━━━━━━━━━━━━\n\n{random.choice(kehanetler)}",
             reply_markup=klavye, parse_mode='Markdown'
         )
+    # ── 🔮 AKİNATÖR CALLBACK'LERİ ─────────────────────────────
+    elif query.data == 'eglence_akinator':
+        await query.answer()
+        await _akinator_oyun_baslat(context.bot, query.message.chat_id, query.from_user.id, context)
+    elif query.data in ('aki_evet', 'aki_hayir', 'aki_bilmiyorum', 'aki_muhtemelen', 'aki_muhtemelen_degil'):
+        await akinator_cevap_isle(query, context, query.data)
+    elif query.data == 'aki_bitir':
+        _akinator_sessions.pop(query.from_user.id, None)
+        await query.answer("🏳️ Oyun sona erdirildi.", show_alert=True)
+        try:
+            await query.edit_message_text(
+                "🏳️ *Akinator oyunu sonlandırıldı.*\n\n"
+                "Yeni oyun için /akinator yaz veya menüden başlat.",
+                parse_mode='Markdown'
+            )
+        except Exception:
+            pass
+    elif query.data == 'aki_dogru':
+        await query.answer("🎉 Yaşasın! Tekrar kazandım! 😎", show_alert=True)
+        try:
+            mevcut = query.message.caption or query.message.text or ''
+            ek = "\n\n✅ *Doğru tahmin! Akinator kazandı!* 🏆"
+            if query.message.caption is not None:
+                await query.edit_message_caption(caption=mevcut + ek, parse_mode='Markdown')
+            else:
+                await query.edit_message_text(mevcut + ek, parse_mode='Markdown')
+        except Exception:
+            pass
+    elif query.data == 'aki_yanlis':
+        await query.answer("😅 Bu sefer yanıldım!", show_alert=True)
+        try:
+            mevcut = query.message.caption or query.message.text or ''
+            ek = "\n\n❌ *Yanıldım! Sen kazandın!* 🎊\n/akinator ile yeni oyun başlat."
+            if query.message.caption is not None:
+                await query.edit_message_caption(caption=mevcut + ek, parse_mode='Markdown')
+            else:
+                await query.edit_message_text(mevcut + ek, parse_mode='Markdown')
+        except Exception:
+            pass
+    # ──────────────────────────────────────────────────────────
     elif query.data == 'menu_ai':
         context.user_data['mevcut_kategori'] = '🤖 AI Asistan'
         context.user_data['durum'] = 'ai_sohbet_bekliyor'
@@ -7149,36 +7197,72 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def gunluk_istatistik_job(context: ContextTypes.DEFAULT_TYPE):
-    """Her gün 00:00'da tüm gruplara günün en çok mesaj atanını duyurur."""
+    """Her gün 00:00'da (Gürcistan saati UTC+4) tüm gruplara şık günlük skor tablosu gönderir."""
     import tracking_store as _ts
     import datetime as _dt
-    dun = (_dt.date.today() - _dt.timedelta(days=1)).isoformat()
+
+    dun_dt = _dt.date.today() - _dt.timedelta(days=1)
+    dun = dun_dt.isoformat()
+    aylar = {
+        1: 'Ocak', 2: 'Şubat', 3: 'Mart', 4: 'Nisan',
+        5: 'Mayıs', 6: 'Haziran', 7: 'Temmuz', 8: 'Ağustos',
+        9: 'Eylül', 10: 'Ekim', 11: 'Kasım', 12: 'Aralık'
+    }
+    gunler = {
+        0: 'Pazartesi', 1: 'Salı', 2: 'Çarşamba', 3: 'Perşembe',
+        4: 'Cuma', 5: 'Cumartesi', 6: 'Pazar'
+    }
+    gun_adi = gunler[dun_dt.weekday()]
+    ay_adi = aylar[dun_dt.month]
+    dun_goster = f"{dun_dt.day} {ay_adi} {dun_dt.year}"
+
     gruplar = _ts.stats_tum_gruplar()
     for group_id in gruplar:
         try:
             gunluk = _ts.daily_stats_getir(group_id, tarih=dun, limit=10)
             if not gunluk:
                 continue
-            madalyalar = ['🥇', '🥈', '🥉']
+
+            toplam_mesaj = sum(row[3] for row in gunluk)
+            rozet_listesi = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+
             liste = ""
             for i, (uid, username, full_name, count) in enumerate(gunluk):
-                rozet = madalyalar[i] if i < 3 else f"{i+1}."
+                rozet = rozet_listesi[i] if i < len(rozet_listesi) else f"#{i+1}"
                 isim = f"@{username}" if username else (full_name or str(uid))
-                liste += f"{rozet} {isim} — **{count:,}** mesaj\n"
-            kazanan_isim = f"@{gunluk[0][1]}" if gunluk[0][1] else (gunluk[0][2] or str(gunluk[0][0]))
+                yuzde = (count / toplam_mesaj * 100) if toplam_mesaj else 0
+                dolu = int(yuzde / 10)
+                bar = '█' * dolu + '░' * (10 - dolu)
+                liste += f"{rozet} **{isim}**\n    `{bar}` **{count:,}** _{yuzde:.0f}%_\n"
+
+            kazanan = gunluk[0]
+            kazanan_isim = f"@{kazanan[1]}" if kazanan[1] else (kazanan[2] or str(kazanan[0]))
+
+            mesaj = (
+                f"╔════════════════════════╗\n"
+                f"║  🏆  GÜNLÜK SKOR TABLOSU  🏆  ║\n"
+                f"╚════════════════════════╝\n\n"
+                f"📅 **{gun_adi}, {dun_goster}**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"👑 **Günün Şampiyonu:**\n"
+                f"🌟 {kazanan_isim} — **{kazanan[3]:,}** mesaj ile zirvede!\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"📊 **TAM SIRALAMA**\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"{liste}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"📨 Toplam: **{toplam_mesaj:,}** mesaj\n"
+                f"👥 Aktif üye: **{len(gunluk)}** kişi\n\n"
+                f"⚡ _AZRxGUARD · Her gün 00:00 · 🇬🇪 Gürcistan Saati_"
+            )
+
             await context.bot.send_message(
                 chat_id=group_id,
-                text=(
-                    f"🏆 **GÜNÜN ŞAMPIYONU — {dun}**\n"
-                    f"━━━━━━━━━━━━━━━━━━\n\n"
-                    f"🎉 Bugün en çok mesaj atan: {kazanan_isim} 👑\n\n"
-                    f"{liste}\n"
-                    f"📅 _Sonuç {dun} tarihine aittir._"
-                ),
+                text=mesaj,
                 parse_mode='Markdown'
             )
         except Exception as e:
-            logger.debug(f"Günlük istatistik gönderme hatası (grup {group_id}): {e}")
+            logger.debug(f"Günlük skor tablosu gönderme hatası (grup {group_id}): {e}")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -9777,6 +9861,246 @@ async def url_kisalt(url: str) -> str:
         pass
     return url
 
+# ══════════════════════════════════════════════════════════════
+# 🔮 AKİNATÖR OYUN MOTORU
+# ══════════════════════════════════════════════════════════════
+
+_akinator_sessions: dict = {}
+_AKINATOR_IMG_YOL = "attached_assets/IMG_20260622_144754_1782125326168.png"
+
+_AKI_CEVAP_MAP = {
+    'aki_evet':           'yes',
+    'aki_hayir':          'no',
+    'aki_bilmiyorum':     'idk',
+    'aki_muhtemelen':     'probably',
+    'aki_muhtemelen_degil': 'probably not',
+}
+
+
+def _aki_soru_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✅ Evet",       callback_data='aki_evet'),
+            InlineKeyboardButton("❌ Hayır",      callback_data='aki_hayir'),
+            InlineKeyboardButton("🤷 Bilmiyorum", callback_data='aki_bilmiyorum'),
+        ],
+        [
+            InlineKeyboardButton("🟡 Muhtemelen",       callback_data='aki_muhtemelen'),
+            InlineKeyboardButton("🟠 Muhtemelen Değil", callback_data='aki_muhtemelen_degil'),
+        ],
+        [InlineKeyboardButton("🏳️ Pes Et / Oyunu Bitir", callback_data='aki_bitir')]
+    ])
+
+
+def _aki_ilerleme_bar(progression: float) -> str:
+    dolu = int(progression / 10)
+    bos = 10 - dolu
+    return '🟦' * dolu + '⬜' * bos
+
+
+async def _akinator_oyun_baslat(bot, chat_id: int, user_id: int, context):
+    """Akinator oyununu başlatır — /akinator komutundan ve menü butonundan çağrılır."""
+    if not AKINATOR_YUKLU:
+        await bot.send_message(
+            chat_id,
+            "❌ Akinator şu an kullanılamıyor. Yöneticiyle iletişime geçin."
+        )
+        return
+
+    _akinator_sessions.pop(user_id, None)
+
+    karsilama = (
+        "🔮 *AKİNATÖR'E HOŞ GELDİN!*\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "🧞 *Ben aklındaki karakteri tahmin edeceğim!*\n\n"
+        "💡 Gerçek, hayali ya da herkesçe tanınan\n"
+        "herhangi bir karakter düşünebilirsin.\n\n"
+        "🎯 Sorularıma dürüstçe cevap ver,\n"
+        "ben gerisini hallederim! 😏\n\n"
+        "⏳ _Akinator uyanıyor..._"
+    )
+
+    try:
+        with open(_AKINATOR_IMG_YOL, 'rb') as _f:
+            await bot.send_photo(
+                chat_id=chat_id,
+                photo=_f,
+                caption=karsilama,
+                parse_mode='Markdown'
+            )
+    except Exception:
+        await bot.send_message(chat_id, karsilama, parse_mode='Markdown')
+
+    yuk_msg = await bot.send_message(chat_id, "⏳ _Bağlantı kuruluyor..._", parse_mode='Markdown')
+
+    try:
+        aki = _akinator_lib.Akinator()
+        soru = await asyncio.to_thread(aki.start_game, 'tr')
+
+        _akinator_sessions[user_id] = {
+            'aki': aki,
+            'chat_id': chat_id,
+            'msg_id': yuk_msg.message_id
+        }
+
+        bar = _aki_ilerleme_bar(aki.progression)
+        await bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=yuk_msg.message_id,
+            text=(
+                f"🔮 *AKİNATÖR* | Soru {aki.step + 1}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"❓ *{soru}*\n\n"
+                f"📊 {bar} `{aki.progression:.0f}%`"
+            ),
+            reply_markup=_aki_soru_klavye(),
+            parse_mode='Markdown'
+        )
+
+    except Exception as e:
+        logger.error(f"Akinator başlatma hatası: {e}")
+        try:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=yuk_msg.message_id,
+                text="❌ Akinator şu an bağlanamıyor. Daha sonra tekrar deneyin."
+            )
+        except Exception:
+            pass
+
+
+async def akinator_baslat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/akinator komutu — özel sohbet ve gruplarda çalışır."""
+    await _akinator_oyun_baslat(
+        context.bot,
+        update.effective_chat.id,
+        update.effective_user.id,
+        context
+    )
+
+
+async def akinator_cevap_isle(query, context: ContextTypes.DEFAULT_TYPE, cevap_key: str):
+    """Evet / Hayır / Bilmiyorum / Muhtemelen / Muhtemelen Değil butonlarını işler."""
+    user_id = query.from_user.id
+    oturum = _akinator_sessions.get(user_id)
+
+    if not oturum:
+        await query.answer(
+            "❌ Aktif Akinator oyununuz yok! /akinator ile yeni oyun başlatın.",
+            show_alert=True
+        )
+        return
+
+    await query.answer()
+    aki = oturum['aki']
+    chat_id = query.message.chat_id
+    msg_id = query.message.message_id
+
+    try:
+        cevap = _AKI_CEVAP_MAP[cevap_key]
+        soru = await asyncio.to_thread(aki.answer, cevap)
+
+        if aki.progression >= 80 or aki.step >= 35:
+            await _akinator_tahmin_goster(context.bot, chat_id, msg_id, user_id, aki)
+            return
+
+        bar = _aki_ilerleme_bar(aki.progression)
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=msg_id,
+            text=(
+                f"🔮 *AKİNATÖR* | Soru {aki.step + 1}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"❓ *{soru}*\n\n"
+                f"📊 {bar} `{aki.progression:.0f}%`"
+            ),
+            reply_markup=_aki_soru_klavye(),
+            parse_mode='Markdown'
+        )
+
+    except Exception as e:
+        logger.error(f"Akinator cevap hatası: {e}")
+        _akinator_sessions.pop(user_id, None)
+        try:
+            await context.bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=msg_id,
+                text="❌ Bağlantı koptu. /akinator ile yeni oyun başlatın."
+            )
+        except Exception:
+            pass
+
+
+async def _akinator_tahmin_goster(bot, chat_id: int, msg_id: int, user_id: int, aki):
+    """Tahmin sonucunu şık panelle gösterir; karakter fotoğrafı varsa ekler."""
+    try:
+        await asyncio.to_thread(aki.win)
+        karakter = aki.first_guess
+
+        isim      = karakter.get('name', '???')
+        aciklama  = karakter.get('description', '')
+        foto_url  = karakter.get('absolute_picture_path', '')
+
+        _akinator_sessions.pop(user_id, None)
+
+        devam_klavye = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("✅ Evet, bildin!",  callback_data='aki_dogru'),
+                InlineKeyboardButton("❌ Yanıltın!",      callback_data='aki_yanlis'),
+            ]
+        ])
+
+        metin = (
+            f"🧞 *REİS, BULDUM!*\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🎯 Aklındaki karakter bu mu?\n\n"
+            f"👤 *{isim}*\n"
+        )
+        if aciklama:
+            metin += f"📝 _{aciklama[:200]}_\n"
+        metin += "\n🔮 _Doğru tahmin ettim mi?_"
+
+        try:
+            await bot.delete_message(chat_id=chat_id, message_id=msg_id)
+        except Exception:
+            pass
+
+        if foto_url:
+            try:
+                await bot.send_photo(
+                    chat_id=chat_id,
+                    photo=foto_url,
+                    caption=metin,
+                    reply_markup=devam_klavye,
+                    parse_mode='Markdown'
+                )
+                return
+            except Exception:
+                pass
+
+        await bot.send_message(
+            chat_id=chat_id,
+            text=metin,
+            reply_markup=devam_klavye,
+            parse_mode='Markdown'
+        )
+
+    except Exception as e:
+        logger.error(f"Akinator tahmin gösterme hatası: {e}")
+        _akinator_sessions.pop(user_id, None)
+        try:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=msg_id,
+                text="🤔 Bu sefer tahmin edemedim! /akinator ile yeni oyun başlat."
+            )
+        except Exception:
+            await bot.send_message(
+                chat_id=chat_id,
+                text="🤔 Bu sefer tahmin edemedim! /akinator ile yeni oyun başlat."
+            )
+
+
 # ══════════════════════════════════════════════════════
 
 def main():
@@ -9813,6 +10137,7 @@ def main():
     application.add_handler(CommandHandler("wiki", wiki_komutu))
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("istatistik", istatistik_komutu, filters=filters.ChatType.GROUPS))
+    application.add_handler(CommandHandler("akinator", akinator_baslat_cmd))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     # 🛡️ GRUP YÖNETİM KOMUTLARI
