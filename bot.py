@@ -10022,6 +10022,65 @@ async def _aki_play_baslat_callback(query, context):
             pass
 
 
+async def _aki_raw_answer(aki, answer_id: int) -> bool:
+    """Raw HTTP POST — library'nin bozuk __handler'ını bypass eder. True=kazandı."""
+    url = f"https://{aki.language}.akinator.com/answer"
+    data = {
+        "step": aki.step,
+        "progression": aki.progression,
+        "sid": 1,
+        "cm": "false",
+        "answer": answer_id,
+        "step_last_proposition": getattr(aki, "step_last_proposition", "") or "",
+        "session": aki.session_id,
+        "signature": aki.signature,
+    }
+    resp = await aki.session.post(url, data=data)
+    resp.raise_for_status()
+    j = resp.json()
+
+    if j.get("completion") in ("KO - TIMEOUT", "KO"):
+        raise RuntimeError("Session timed out")
+
+    if "id_proposition" in j:
+        aki.win = True
+        aki.id_proposition   = j.get("id_proposition", "")
+        aki.name_proposition  = j.get("name_proposition", "")
+        aki.description_proposition = j.get("description_proposition", "")
+        aki.photo            = j.get("photo", "")
+        aki.pseudo           = j.get("pseudo", "")
+        aki.progression      = float(j.get("progression", aki.progression))
+        aki.step             = int(j.get("step", aki.step))
+    else:
+        aki.win        = False
+        aki.step       = int(j.get("step", aki.step))
+        aki.progression = float(j.get("progression", aki.progression))
+        aki.question   = j.get("question", aki.question)
+    return aki.win
+
+
+async def _aki_raw_back(aki) -> None:
+    """Raw HTTP POST cancel_answer — library'nin back() metodunu bypass eder."""
+    if aki.step == 0:
+        raise Exception("Daha geri gidemezsin")
+    url = f"https://{aki.language}.akinator.com/cancel_answer"
+    data = {
+        "step": aki.step,
+        "progression": aki.progression,
+        "sid": 1,
+        "cm": "false",
+        "session": aki.session_id,
+        "signature": aki.signature,
+    }
+    resp = await aki.session.post(url, data=data)
+    resp.raise_for_status()
+    j = resp.json()
+    aki.win        = False
+    aki.step       = int(j.get("step", aki.step))
+    aki.progression = float(j.get("progression", aki.progression))
+    aki.question   = j.get("question", aki.question)
+
+
 async def _aki_cevap_callback(query, context):
     """aki_play_0/1/2/3/4/5/quit — Evet/Hayır/Geri/Bırak butonları."""
     user_id = query.from_user.id
@@ -10052,13 +10111,13 @@ async def _aki_cevap_callback(query, context):
     try:
         if a == "5":
             try:
-                await aki.back()
+                await _aki_raw_back(aki)
             except Exception:
                 await query.answer("⚠️ Daha geri gidemezsin!", show_alert=True)
                 return
         else:
-            cevap_str = _AKI_CEVAP_STR.get(a, "idk")
-            await aki.answer(cevap_str)
+            # 0=Evet 1=Hayır 2=Bilmiyorum 3=Muhtemelen 4=Muhtemelen Değil
+            await _aki_raw_answer(aki, int(a))
 
         if aki.win:
             dolu = int((aki.progression or 100) / 10)
@@ -10113,12 +10172,13 @@ async def _aki_cevap_callback(query, context):
                 f"❓ *{aki.question}*\n\n"
                 f"📊 {bar} `{aki.progression:.0f}%`"
             )
+            akitude = getattr(aki, "akitude_url", None) or f"https://{aki.language}.akinator.com/assets/img/akitudes_670x1096/defi.png"
             try:
                 await context.bot.edit_message_media(
                     chat_id=chat_id,
                     message_id=msg_id,
                     media=InputMediaPhoto(
-                        media=aki.akitude_url,
+                        media=akitude,
                         caption=soru_metni,
                         parse_mode="Markdown",
                     ),
@@ -10136,12 +10196,12 @@ async def _aki_cevap_callback(query, context):
                 except Exception:
                     pass
 
-    except RuntimeError as e:
+    except Exception as e:
         err = str(e).lower()
         logger.error(f"Akinator cevap hatası: {e}")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
-        if "timed out" in err:
+        if "timed out" in err or "timeout" in err:
             msg = "⌛ *Oturum zaman aşımına uğradı!*\n\n/akinator ile yeni oyun başlat."
         else:
             msg = "❌ *Bağlantı hatası!*\n\n/akinator ile yeni oyun başlat."
@@ -10152,8 +10212,6 @@ async def _aki_cevap_callback(query, context):
             )
         except Exception:
             pass
-    except Exception as e:
-        logger.error(f"Akinator beklenmeyen hata: {e}")
 
 
 async def _aki_win_callback(query, context, dogru: bool):
