@@ -6059,6 +6059,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _aki_win_callback(query, context, False)
     elif query.data == 'menu_muzik_ara':
         await muzik_ara_callback(query, context)
+    elif query.data.startswith('muzik_indir_'):
+        await muzik_indir_callback(query, context)
     # ──────────────────────────────────────────────────────────
     elif query.data == 'menu_ai':
         context.user_data['mevcut_kategori'] = '🤖 AI Asistan'
@@ -7327,92 +7329,195 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
 # 🎵 MÜZİK ARAMA — YouTube Music (yt-dlp ytsearch)
 # ══════════════════════════════════════════════════════════════
 
-async def muzik_ara_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/muzik [şarkı adı] — YouTube'dan şarkı arar, bilgi + link gönderir."""
-    msg = update.effective_message
-    aranan = " ".join(context.args).strip() if context.args else ""
-
-    if not aranan:
-        await msg.reply_text(
-            "🎵 *MÜZİK ARAMA*\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Kullanım: `/muzik şarkı adı`\n\n"
-            "Örnek:\n"
-            "`/muzik Tarkan Kuzu Kuzu`\n"
-            "`/muzik Duman Seni Kendime Sakladım`",
-            parse_mode="Markdown"
-        )
-        return
-
-    bekle = await msg.reply_text("🔍 *Aranıyor...* ⏳", parse_mode="Markdown")
-
+async def _muzik_ara_ve_goster(metin_mesaj, context, aranan: str):
+    """Ortak arama motoru — hem /muzik komutu hem durum tabanlı kullanır."""
+    bekle = await metin_mesaj.reply_text("🔍 *Aranıyor...* ⏳", parse_mode="Markdown")
     try:
         import yt_dlp as _ydl
 
         def _ara():
-            opts = {
-                "quiet": True,
-                "no_warnings": True,
-                "extract_flat": True,
-                "default_search": "ytsearch5",
-                "skip_download": True,
-            }
+            opts = {"quiet": True, "no_warnings": True, "extract_flat": True, "skip_download": True}
             with _ydl.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(f"ytsearch5:{aranan}", download=False)
                 return info.get("entries", [])
 
         sonuclar = await asyncio.to_thread(_ara)
-
         if not sonuclar:
-            await bekle.edit_text("❌ Sonuç bulunamadı. Farklı bir arama dene.")
+            await bekle.edit_text("❌ Sonuç bulunamadı. Farklı bir şey dene.")
             return
 
-        # İlk 5 sonucu göster
+        # Sonuçları user_data'ya kaydet (indirme için)
+        user_id = metin_mesaj.from_user.id if metin_mesaj.from_user else 0
+        context.user_data[f"muzik_s_{user_id}"] = [
+            {"id": e.get("id",""), "title": (e.get("title") or "")[:80]}
+            for e in sonuclar[:5]
+        ]
+
         metin = f"🎵 *\"{aranan}\"* için sonuçlar:\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
         butonlar = []
-
         for i, entry in enumerate(sonuclar[:5], 1):
             baslik = (entry.get("title") or "Bilinmeyen")[:55]
-            vid_id = entry.get("id") or entry.get("url", "")
             sure_sn = entry.get("duration") or 0
             sure_str = f"{int(sure_sn)//60}:{int(sure_sn)%60:02d}" if sure_sn else "?"
-            kanal = (entry.get("uploader") or entry.get("channel") or "")[:30]
-
-            metin += f"**{i}.** {baslik}\n"
+            kanal = (entry.get("uploader") or entry.get("channel") or "")[:28]
+            metin += f"*{i}.* {baslik}\n"
             if kanal:
                 metin += f"    🎤 _{kanal}_ · ⏱ `{sure_str}`\n"
             metin += "\n"
+            butonlar.append([InlineKeyboardButton(
+                f"⬇️ {i}. {baslik[:38]}", callback_data=f"muzik_indir_{i-1}"
+            )])
 
-            if vid_id and len(vid_id) <= 20:
-                url = f"https://youtu.be/{vid_id}"
-                butonlar.append([InlineKeyboardButton(f"▶️ {i}. {baslik[:35]}", url=url)])
-
-        klavye = InlineKeyboardMarkup(butonlar) if butonlar else None
-        await bekle.edit_text(metin, parse_mode="Markdown", reply_markup=klavye, disable_web_page_preview=True)
-
+        butonlar.append([InlineKeyboardButton("🔍 Yeni Arama", callback_data="menu_muzik_ara")])
+        await bekle.edit_text(
+            metin, parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(butonlar),
+            disable_web_page_preview=True
+        )
     except Exception as e:
         logger.error(f"Müzik arama hatası: {e}")
-        await bekle.edit_text(
-            "❌ *Arama başarısız.*\nBiraz sonra tekrar dene.",
+        await bekle.edit_text("❌ *Arama başarısız.* Biraz sonra tekrar dene.", parse_mode="Markdown")
+
+
+async def muzik_ara_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/muzik [şarkı adı] — YouTube'dan şarkı arar ve MP3 olarak gönderir."""
+    aranan = " ".join(context.args).strip() if context.args else ""
+    if not aranan:
+        await update.effective_message.reply_text(
+            "🎵 *MÜZİK ARAMA*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Kullanım: `/muzik şarkı adı`\n\n"
+            "Örnek: `/muzik Tarkan Kuzu Kuzu`",
             parse_mode="Markdown"
         )
+        return
+    await _muzik_ara_ve_goster(update.effective_message, context, aranan)
 
 
 async def muzik_ara_callback(query, context):
-    """menu_muzik_ara callback — inline müzik arama."""
+    """menu_muzik_ara — kullanıcıdan şarkı adı bekler (durum tabanlı)."""
     await query.answer()
+    context.user_data["durum"] = "muzik_arama"
     await query.edit_message_text(
-        "🎵 *MÜZİK ARAMA*\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "Aşağıya şarkı adını yaz:\n\n"
-        "`/muzik Tarkan Kuzu Kuzu`\n"
-        "`/muzik Duman Seni Kendime Sakladım`\n\n"
-        "📌 _/muzik [şarkı adı] komutuyla ara_",
+        "🎵 *MÜZİK ARAMA*\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "🎤 Hangi şarkıyı arıyorsun?\n\n"
+        "_Şarkı adını veya sanatçı adını yaz:_",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("⬅️ Geri", callback_data="menu_fun")]
+            [InlineKeyboardButton("❌ İptal", callback_data="menu_fun")]
         ])
     )
+
+
+async def muzik_indir_callback(query, context):
+    """muzik_indir_0..4 — seçilen şarkıyı indirir ve MP3 gönderir."""
+    await query.answer()
+    user_id = query.from_user.id
+    idx = int(query.data.split("_")[-1])
+    sonuclar = context.user_data.get(f"muzik_s_{user_id}", [])
+
+    if not sonuclar or idx >= len(sonuclar):
+        await query.answer("❌ Oturum sona erdi. Yeniden ara.", show_alert=True)
+        return
+
+    entry = sonuclar[idx]
+    vid_id = entry.get("id", "")
+    baslik = entry.get("title", "Müzik")
+    url = f"https://youtu.be/{vid_id}"
+    chat_id = query.message.chat_id
+
+    try:
+        await query.edit_message_reply_markup(reply_markup=None)
+    except Exception:
+        pass
+
+    bekle = await context.bot.send_message(
+        chat_id=chat_id,
+        text=f"⬇️ *İndiriliyor...*\n🎵 _{baslik[:60]}_\n\n⏳ _Lütfen bekle..._",
+        parse_mode="Markdown"
+    )
+
+    tmp_dir = None
+    try:
+        import yt_dlp as _ydl
+        import os as _os
+
+        tmp_dir = tempfile.mkdtemp(prefix="azr_muzik_")
+        cikis = _os.path.join(tmp_dir, "%(title)s.%(ext)s")
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": cikis,
+            "quiet": True,
+            "no_warnings": True,
+            "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
+            "socket_timeout": 60,
+        }
+
+        def _indir():
+            with _ydl.YoutubeDL(ydl_opts) as ydl:
+                return ydl.extract_info(url, download=True)
+
+        info = await asyncio.to_thread(_indir)
+        dosyalar = [_os.path.join(tmp_dir, f) for f in _os.listdir(tmp_dir)]
+        if not dosyalar:
+            raise Exception("Dosya bulunamadı")
+
+        dosya_yolu = max(dosyalar, key=lambda f: _os.path.getsize(f))
+        boyut_mb = _os.path.getsize(dosya_yolu) / 1024 / 1024
+
+        if boyut_mb > 49:
+            await bekle.edit_text(
+                f"❌ *Dosya çok büyük!*\n📦 `{boyut_mb:.1f} MB` — Telegram 50 MB limitini aşıyor.",
+                parse_mode="Markdown"
+            )
+            return
+
+        sure_sn = info.get("duration") or 0
+        gercek_baslik = (info.get("title") or baslik)[:80]
+        sanatci = (info.get("uploader") or info.get("artist") or "")[:40]
+        caption = (
+            f"🎵 *{gercek_baslik}*\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            + (f"🎤 _{sanatci}_\n" if sanatci else "")
+            + f"📦 `{boyut_mb:.1f} MB` · ⏱ `{int(sure_sn)//60}:{int(sure_sn)%60:02d}`\n"
+            f"_AZRxGUARD 🎶_"
+        )
+
+        await bekle.delete()
+        with open(dosya_yolu, "rb") as f:
+            await context.bot.send_audio(
+                chat_id=chat_id,
+                audio=f,
+                caption=caption,
+                parse_mode="Markdown",
+                title=gercek_baslik,
+                performer=sanatci or None,
+                duration=int(sure_sn) if sure_sn else None,
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("🔍 Yeni Arama", callback_data="menu_muzik_ara")]
+                ])
+            )
+
+    except Exception as e:
+        logger.error(f"Müzik indirme hatası: {e}")
+        err = str(e).lower()
+        if "private" in err or "login" in err:
+            msg = "❌ Bu içerik gizli veya bölgede erişilemiyor."
+        elif "too large" in err or "filesize" in err:
+            msg = "❌ Dosya çok büyük, indirilemedi."
+        else:
+            msg = "❌ *İndirme başarısız.*\nBiraz sonra tekrar dene."
+        try:
+            await bekle.edit_text(msg, parse_mode="Markdown",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔍 Tekrar Ara", callback_data="menu_muzik_ara")]]))
+        except Exception:
+            pass
+    finally:
+        if tmp_dir:
+            try:
+                import shutil as _sh
+                _sh.rmtree(tmp_dir, ignore_errors=True)
+            except Exception:
+                pass
 
 
 # ══════════════════════════════════════════════════════════════
@@ -7572,6 +7677,16 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception as e:
             logger.error(f"Cevap iletme hatası: {e}")
         context.user_data['durum'] = None
+        return
+
+    if context.user_data.get('durum') == 'muzik_arama':
+        context.user_data['durum'] = None
+        aranan = update.message.text.strip()
+        if aranan:
+            await _muzik_ara_ve_goster(update.message, context, aranan)
+        else:
+            await update.message.reply_text("❌ Şarkı adı boş olamaz. Tekrar yaz:")
+            context.user_data['durum'] = 'muzik_arama'
         return
 
     if context.user_data.get('durum') == 'ip_bekliyor':
