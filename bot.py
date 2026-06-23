@@ -5204,9 +5204,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mevcut_kategori'] = '🎮 Eğlence'
         fun_klavye = [
             [InlineKeyboardButton('🔮 AKİNATÖR', callback_data='eglence_akinator')],
-            [InlineKeyboardButton(strings['btn_roll_dice'], callback_data='roll_dice'),
-             InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans')],
-            [InlineKeyboardButton(strings.get('btn_oyun_tkmk', '✊ Taş-Kağıt-Makas'), callback_data='oyun_tkmk')],
+            [InlineKeyboardButton('🎵 Müzik Ara', callback_data='menu_muzik_ara'),
+             InlineKeyboardButton(strings['btn_roll_dice'], callback_data='roll_dice')],
+            [InlineKeyboardButton(strings.get('btn_sans_arac', '🎱 Şans Topu'), callback_data='pro_sans'),
+             InlineKeyboardButton(strings.get('btn_oyun_tkmk', '✊ Taş-Kağıt-Makas'), callback_data='oyun_tkmk')],
             [InlineKeyboardButton(strings.get('btn_oyun_sayi', '🔢 Sayı Tahmin'), callback_data='oyun_sayi_baslat')],
             [InlineKeyboardButton('🪙 Para At', callback_data='eglence_para_at'),
              InlineKeyboardButton('🎯 Rus Ruleti', callback_data='eglence_rulet')],
@@ -6056,6 +6057,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _aki_win_callback(query, context, True)
     elif query.data == 'aki_win_n':
         await _aki_win_callback(query, context, False)
+    elif query.data == 'menu_muzik_ara':
+        await muzik_ara_callback(query, context)
     # ──────────────────────────────────────────────────────────
     elif query.data == 'menu_ai':
         context.user_data['mevcut_kategori'] = '🤖 AI Asistan'
@@ -7318,6 +7321,98 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
     except Exception as e:
         logger.error(f"Gemini TG hatası: {e}")
         return f"❌ AI servisi şu an erişilemiyor.\n`{str(e)[:100]}`"
+
+
+# ══════════════════════════════════════════════════════════════
+# 🎵 MÜZİK ARAMA — YouTube Music (yt-dlp ytsearch)
+# ══════════════════════════════════════════════════════════════
+
+async def muzik_ara_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/muzik [şarkı adı] — YouTube'dan şarkı arar, bilgi + link gönderir."""
+    msg = update.effective_message
+    aranan = " ".join(context.args).strip() if context.args else ""
+
+    if not aranan:
+        await msg.reply_text(
+            "🎵 *MÜZİK ARAMA*\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Kullanım: `/muzik şarkı adı`\n\n"
+            "Örnek:\n"
+            "`/muzik Tarkan Kuzu Kuzu`\n"
+            "`/muzik Duman Seni Kendime Sakladım`",
+            parse_mode="Markdown"
+        )
+        return
+
+    bekle = await msg.reply_text("🔍 *Aranıyor...* ⏳", parse_mode="Markdown")
+
+    try:
+        import yt_dlp as _ydl
+
+        def _ara():
+            opts = {
+                "quiet": True,
+                "no_warnings": True,
+                "extract_flat": True,
+                "default_search": "ytsearch5",
+                "skip_download": True,
+            }
+            with _ydl.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(f"ytsearch5:{aranan}", download=False)
+                return info.get("entries", [])
+
+        sonuclar = await asyncio.to_thread(_ara)
+
+        if not sonuclar:
+            await bekle.edit_text("❌ Sonuç bulunamadı. Farklı bir arama dene.")
+            return
+
+        # İlk 5 sonucu göster
+        metin = f"🎵 *\"{aranan}\"* için sonuçlar:\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        butonlar = []
+
+        for i, entry in enumerate(sonuclar[:5], 1):
+            baslik = (entry.get("title") or "Bilinmeyen")[:55]
+            vid_id = entry.get("id") or entry.get("url", "")
+            sure_sn = entry.get("duration") or 0
+            sure_str = f"{int(sure_sn)//60}:{int(sure_sn)%60:02d}" if sure_sn else "?"
+            kanal = (entry.get("uploader") or entry.get("channel") or "")[:30]
+
+            metin += f"**{i}.** {baslik}\n"
+            if kanal:
+                metin += f"    🎤 _{kanal}_ · ⏱ `{sure_str}`\n"
+            metin += "\n"
+
+            if vid_id and len(vid_id) <= 20:
+                url = f"https://youtu.be/{vid_id}"
+                butonlar.append([InlineKeyboardButton(f"▶️ {i}. {baslik[:35]}", url=url)])
+
+        klavye = InlineKeyboardMarkup(butonlar) if butonlar else None
+        await bekle.edit_text(metin, parse_mode="Markdown", reply_markup=klavye, disable_web_page_preview=True)
+
+    except Exception as e:
+        logger.error(f"Müzik arama hatası: {e}")
+        await bekle.edit_text(
+            "❌ *Arama başarısız.*\nBiraz sonra tekrar dene.",
+            parse_mode="Markdown"
+        )
+
+
+async def muzik_ara_callback(query, context):
+    """menu_muzik_ara callback — inline müzik arama."""
+    await query.answer()
+    await query.edit_message_text(
+        "🎵 *MÜZİK ARAMA*\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "Aşağıya şarkı adını yaz:\n\n"
+        "`/muzik Tarkan Kuzu Kuzu`\n"
+        "`/muzik Duman Seni Kendime Sakladım`\n\n"
+        "📌 _/muzik [şarkı adı] komutuyla ara_",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("⬅️ Geri", callback_data="menu_fun")]
+        ])
+    )
 
 
 # ══════════════════════════════════════════════════════════════
@@ -10281,6 +10376,7 @@ def main():
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("istatistik", istatistik_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("akinator", akinator_baslat_cmd))
+    application.add_handler(CommandHandler("muzik", muzik_ara_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
     # 🛡️ GRUP YÖNETİM KOMUTLARI
