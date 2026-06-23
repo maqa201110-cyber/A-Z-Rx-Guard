@@ -10098,14 +10098,14 @@ async def _aki_cevap_callback(query, context):
     if a == "quit":
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
+        bitti = "🏳️ *Oyun sona erdirildi.*\n\nYeni oyun için /akinator yaz."
         try:
-            await query.edit_message_caption(
-                caption="🏳️ *Oyun sona erdirildi.*\n\nYeni oyun için /akinator yaz.",
-                parse_mode="Markdown",
-                reply_markup=None,
-            )
+            await query.edit_message_caption(caption=bitti, parse_mode="Markdown", reply_markup=None)
         except Exception:
-            pass
+            try:
+                await query.edit_message_text(bitti, parse_mode="Markdown", reply_markup=None)
+            except Exception:
+                pass
         return
 
     try:
@@ -10150,19 +10150,20 @@ async def _aki_cevap_callback(query, context):
                     pass
             try:
                 await context.bot.edit_message_caption(
-                    chat_id=chat_id,
-                    message_id=msg_id,
-                    caption=tahmin_metni,
-                    reply_markup=_AKI_WIN_KLAVYE,
-                    parse_mode="Markdown",
+                    chat_id=chat_id, message_id=msg_id,
+                    caption=tahmin_metni, reply_markup=_AKI_WIN_KLAVYE, parse_mode="Markdown",
                 )
             except Exception:
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text=tahmin_metni,
-                    reply_markup=_AKI_WIN_KLAVYE,
-                    parse_mode="Markdown",
-                )
+                try:
+                    await context.bot.edit_message_text(
+                        chat_id=chat_id, message_id=msg_id,
+                        text=tahmin_metni, reply_markup=_AKI_WIN_KLAVYE, parse_mode="Markdown",
+                    )
+                except Exception:
+                    await context.bot.send_message(
+                        chat_id=chat_id, text=tahmin_metni,
+                        reply_markup=_AKI_WIN_KLAVYE, parse_mode="Markdown",
+                    )
         else:
             dolu = int((aki.progression or 0) / 10)
             bar  = "🟦" * dolu + "⬜" * (10 - dolu)
@@ -10175,26 +10176,24 @@ async def _aki_cevap_callback(query, context):
             akitude = getattr(aki, "akitude_url", None) or f"https://{aki.language}.akinator.com/assets/img/akitudes_670x1096/defi.png"
             try:
                 await context.bot.edit_message_media(
-                    chat_id=chat_id,
-                    message_id=msg_id,
-                    media=InputMediaPhoto(
-                        media=akitude,
-                        caption=soru_metni,
-                        parse_mode="Markdown",
-                    ),
+                    chat_id=chat_id, message_id=msg_id,
+                    media=InputMediaPhoto(media=akitude, caption=soru_metni, parse_mode="Markdown"),
                     reply_markup=_AKI_PLAY_KLAVYE,
                 )
             except Exception:
                 try:
                     await context.bot.edit_message_caption(
-                        chat_id=chat_id,
-                        message_id=msg_id,
-                        caption=soru_metni,
-                        reply_markup=_AKI_PLAY_KLAVYE,
-                        parse_mode="Markdown",
+                        chat_id=chat_id, message_id=msg_id,
+                        caption=soru_metni, reply_markup=_AKI_PLAY_KLAVYE, parse_mode="Markdown",
                     )
                 except Exception:
-                    pass
+                    try:
+                        await context.bot.edit_message_text(
+                            chat_id=chat_id, message_id=msg_id,
+                            text=soru_metni, reply_markup=_AKI_PLAY_KLAVYE, parse_mode="Markdown",
+                        )
+                    except Exception:
+                        pass
 
     except Exception as e:
         err = str(e).lower()
