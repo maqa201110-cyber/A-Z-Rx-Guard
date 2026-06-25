@@ -70,7 +70,7 @@ YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
 _APK_KANAL_ID = -1004299694640         # APK-OBB-CONFİG yükleme kanalı
-TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
+TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))   # 🇹🇷 Türkiye (UTC+3)
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
 FILIGRAN_METNI = (
@@ -4054,6 +4054,23 @@ async def kanala_veya_gruba_yeni_uye_katildi(update: Update, context: ContextTyp
                 )
             except Exception as e:
                 logger.error(f"Rose normal grup karşılama hatası: {e}")
+
+    elif update.message and update.message.left_chat_member:
+        cikan = update.message.left_chat_member
+        if not cikan.is_bot:
+            guvenli_isim = html.escape(cikan.first_name) if cikan.first_name else "Üye"
+            gule_gule_metni = (
+                f"👋 **[{guvenli_isim}](tg://user?id={cikan.id}) grubumuzdan ayrıldı.**\n\n"
+                f"😔 Güle güle, seni tanımak güzeldi!\n"
+                f"Umarız tekrar görüşürüz. 🙏"
+            )
+            try:
+                await update.message.reply_text(
+                    text=gule_gule_metni,
+                    parse_mode='Markdown'
+                )
+            except Exception as e:
+                logger.error(f"Güle güle mesajı hatası: {e}")
 
 # --- ASENKRON MESAJ SİLME ZAMANLAYICISI ---
 async def mesajlari_5s_sonra_sil(context: ContextTypes.DEFAULT_TYPE, chat_id: int, bot_msg_id: int, user_msg_id: int):
@@ -8875,10 +8892,10 @@ async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "⚠️ *Gece Modu Uyarısı*\n\n"
                 "🌒 Birazdan *Gece Modu* başlıyor\\!\n\n"
-                "🇬🇪 Gürcistan: saat *22:00*'de grup kapanacak\n"
+                "🇹🇷 Türkiye: saat *22:00*'de grup kapanacak\n"
                 "🇦🇿 Azərbaycan: saat *23:00*\\-da qrup bağlanacaq\n\n"
                 "Tekrar açılış / Yenidən açılış:\n"
-                "🇬🇪 *08:00* \\| 🇦🇿 *09:00* 💤"
+                "🇹🇷 *08:00* \\| 🇦🇿 *09:00* 💤"
             ),
             parse_mode='MarkdownV2'
         )
@@ -8892,8 +8909,8 @@ async def gece_modu_baslat_job(context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "🌒 *Gece Modu Başladı / Gecə Rejimi Başladı*\n\n"
                 "Grup şu an mesajlara kapalı\\. Qrup hazırda mesajlara bağlıdır\\.\n\n"
-                "🇹🇷 Sabah *08:00*'e kadar kimse mesaj atamaz\n"
-                "🇦🇿 Sabah *09:00*\\-a qədər heç kim mesaj yaza bilməz\n\n"
+                "🇹🇷 Türkiye: Sabah *08:00*'e kadar kimse mesaj atamaz\n"
+                "🇦🇿 Azərbaycan: Sabah *09:00*\\-a qədər heç kim mesaj yaza bilməz\n\n"
                 "_🌙 İyi geceler\\! / Yaxşı gecələr\\!_"
             ),
             parse_mode='MarkdownV2'
@@ -10124,25 +10141,48 @@ async def temizle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     try:
         n = int(context.args[0]) if context.args else 10
-        n = max(1, min(n, 100))
+        n = max(1, min(n, 5000))
     except (ValueError, IndexError):
         n = 10
+
+    chat_id = update.effective_chat.id
     cmd_id = update.message.message_id
-    # Sadece komutun ÖNÜNDEKI n mesajı sil, komut mesajını da dahil et
-    # cmd_id+1'den YUKARI doğru HİÇ silme — kullanıcının yeni mesajlarına dokunma
-    silinecekler = list(range(cmd_id, cmd_id - n - 1, -1))
+
+    # Komut mesajını sil
+    try:
+        await context.bot.delete_message(chat_id, cmd_id)
+    except Exception:
+        pass
+
+    # Komutun öncesindeki n mesajı sil (ID'ler üzerinden geriye doğru)
+    tum_idler = list(range(cmd_id - 1, cmd_id - n - 1, -1))
+
     silindi = 0
-    for mid in silinecekler:
+    # 100'lük batch'ler halinde sil (Telegram limiti)
+    for i in range(0, len(tum_idler), 100):
+        batch = tum_idler[i:i + 100]
         try:
-            await context.bot.delete_message(update.effective_chat.id, mid)
-            silindi += 1
-            await asyncio.sleep(0.05)
+            await context.bot.delete_messages(chat_id, batch)
+            silindi += len(batch)
         except Exception:
-            pass
-    # Onay mesajı gönder — otomatik SİLME YOK, sabit kalıyor
-    await update.effective_chat.send_message(
+            # Toplu silme çalışmazsa tek tek dene
+            for mid in batch:
+                try:
+                    await context.bot.delete_message(chat_id, mid)
+                    silindi += 1
+                except Exception:
+                    pass
+        await asyncio.sleep(0.3)
+
+    onay = await update.effective_chat.send_message(
         f"🗑️ <b>{silindi} mesaj temizlendi.</b> ✅", parse_mode='HTML'
     )
+    # Onay mesajı 5 saniye sonra otomatik silinsin
+    await asyncio.sleep(5)
+    try:
+        await onay.delete()
+    except Exception:
+        pass
 
 # ─────────────────────────────────────────────────────────────
 # 💬 SOHBET ARAÇLARI — QR Kod / URL Kısalt / Sahte Kimlik / Şans
