@@ -70,6 +70,7 @@ YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
 _APK_KANAL_ID = -1004299694640         # APK-OBB-CONFİG yükleme kanalı
+TEST_KANAL_ID = -1003788921873         # 🧪 Bot test kanalı
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
@@ -8986,6 +8987,132 @@ async def oglen_yemek_job(context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         logger.error(f"Öğle yemek hatası: {e}")
+
+# ══════════════════════════════════════════════════════════════
+# 🧪 TEST KOMUTU — Sadece TEST_KANAL_ID için
+# ══════════════════════════════════════════════════════════════
+
+async def test_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/test — Bot mesajlarını test kanalında simüle eder (sadece test kanalında çalışır)."""
+    chat_id = update.effective_chat.id if update.effective_chat else None
+    if chat_id != TEST_KANAL_ID:
+        await update.effective_message.reply_text(
+            "❌ Bu komut yalnızca test kanalında çalışır."
+        )
+        return
+
+    hedef = TEST_KANAL_ID
+    bot = context.bot
+
+    await update.effective_message.reply_text(
+        "🧪 *Test başlıyor\\.\\.\\.*\n_Botun gönderdiği tüm mesajlar sırayla atılacak\\._",
+        parse_mode='MarkdownV2'
+    )
+
+    # 1. Gece modu uyarısı (21:00'de gönderilir)
+    try:
+        await bot.send_message(chat_id=hedef, text=(
+            "⚠️ *Gece Modu Uyarısı*\n\n"
+            "🌒 Birazdan *Gece Modu* başlıyor\\!\n\n"
+            "🇹🇷 Türkiye: saat *22:00*'de grup kapanacak\n"
+            "🇦🇿 Azərbaycan: saat *23:00*\\-da qrup bağlanacaq\n\n"
+            "Tekrar açılış / Yenidən açılış:\n"
+            "🇹🇷 *08:00* \\| 🇦🇿 *09:00* 💤"
+        ), parse_mode='MarkdownV2')
+    except Exception as e:
+        logger.error(f"Test - gece uyarı hatası: {e}")
+
+    # 2. Gece modu başladı (22:00'de gönderilir)
+    try:
+        await bot.send_message(chat_id=hedef, text=(
+            "🌒 *Gece Modu Başladı / Gecə Rejimi Başladı*\n\n"
+            "Grup şu an mesajlara kapalı\\. Qrup hazırda mesajlara bağlıdır\\.\n\n"
+            "🇹🇷 Sabah *08:00*'e kadar kimse mesaj atamaz\n"
+            "🇦🇿 Sabah *09:00*\\-a qədər heç kim mesaj yaza bilməz\n\n"
+            "_🌙 İyi geceler\\! / Yaxşı gecələr\\!_"
+        ), parse_mode='MarkdownV2')
+    except Exception as e:
+        logger.error(f"Test - gece başladı hatası: {e}")
+
+    # 3. Gece modu bitti (08:00'de gönderilir)
+    try:
+        await bot.send_message(chat_id=hedef, text=(
+            "🌅 *Gece Modu Sona Erdi / Gecə Rejimi Bitti*\n\n"
+            "🇹🇷 ☀️ Günaydın\\! Artık herkes sohbete mesaj yazabilir\\.\n"
+            "🇦🇿 ☀️ Sabahınız xeyir\\! Artıq hamı qrupa mesaj yaza bilər\\.\n\n"
+            "_Güzel bir gün\\! / Xoş bir gün\\! 😊_"
+        ), parse_mode='MarkdownV2')
+    except Exception as e:
+        logger.error(f"Test - gece bitti hatası: {e}")
+
+    # 4. Öğle yemeği uyarısı (12:00'de gönderilir)
+    try:
+        await bot.send_message(chat_id=hedef, text=(
+            "🍽️ *Öğle Yemeği Yaklaşıyor\\!*\n\n"
+            "🇹🇷 Saat *12:00* — birazdan yemek zamanı\\! 😋\n"
+            "🇦🇿 Saat *13:00* — az sonra nahar vaxtıdır\\! 😋\n\n"
+            "_🥗 Afiyet olsun\\! / Nuş olsun\\!_"
+        ), parse_mode='MarkdownV2')
+    except Exception as e:
+        logger.error(f"Test - öğle uyarı hatası: {e}")
+
+    # 5. Öğle yemeği saati (13:00'de gönderilir)
+    try:
+        await bot.send_message(chat_id=hedef, text=(
+            "🍴 *Yemek Saati / Nahar Vaxtı\\!*\n\n"
+            "🇹🇷 Saat *13:00* — Hadi herkes yemeye\\! 🥘\n"
+            "🇦🇿 Saat *14:00* — Hamı nahara\\! 🥘\n\n"
+            "_Afiyet olsun\\! / Nuş olsun\\! 😄_"
+        ), parse_mode='MarkdownV2')
+    except Exception as e:
+        logger.error(f"Test - öğle yemek hatası: {e}")
+
+    # 6. Günlük istatistik örneği (00:00'da gönderilir)
+    try:
+        import tracking_store as _ts
+        import datetime as _dt
+        bugun = _dt.date.today().isoformat()
+        aylar = {1:'Ocak',2:'Şubat',3:'Mart',4:'Nisan',5:'Mayıs',6:'Haziran',
+                 7:'Temmuz',8:'Ağustos',9:'Eylül',10:'Ekim',11:'Kasım',12:'Aralık'}
+        bugun_dt = _dt.date.today()
+        ay_adi = aylar[bugun_dt.month]
+        dun_goster = f"{bugun_dt.day} {ay_adi} {bugun_dt.year}"
+        gunluk = _ts.daily_stats_getir(hedef, tarih=bugun, limit=5)
+        if gunluk:
+            rozet_listesi = ['🥇','🥈','🥉','4️⃣','5️⃣']
+            toplam = sum(r[3] for r in gunluk)
+            liste = ""
+            for i, (uid, username, full_name, count) in enumerate(gunluk):
+                rozet = rozet_listesi[i] if i < len(rozet_listesi) else f"#{i+1}"
+                isim = f"@{username}" if username else (full_name or str(uid))
+                yuzde = (count / toplam * 100) if toplam else 0
+                dolu = int(yuzde / 10)
+                bar = '█' * dolu + '░' * (10 - dolu)
+                liste += f"{rozet} **{isim}**\n    `{bar}` **{count:,}** _{yuzde:.0f}%_\n"
+            istat_metin = (
+                f"📊 **Günlük Skor Tablosu**\n"
+                f"📅 _{dun_goster}_\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"{liste}\n"
+                f"💬 Toplam: **{toplam:,}** mesaj"
+            )
+        else:
+            istat_metin = (
+                f"📊 **Günlük Skor Tablosu**\n"
+                f"📅 _{dun_goster}_\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"_Bu kanal için henüz istatistik verisi yok._"
+            )
+        await bot.send_message(chat_id=hedef, text=istat_metin, parse_mode='Markdown')
+    except Exception as e:
+        logger.error(f"Test - günlük istatistik hatası: {e}")
+
+    await bot.send_message(
+        chat_id=hedef,
+        text="✅ *Test tamamlandı\\!* Yukarıdaki mesajların hepsi çalışıyor demektir\\.",
+        parse_mode='MarkdownV2'
+    )
+
 
 # --- ⚡ HIZLI KOMUTLAR ---
 
