@@ -70,7 +70,7 @@ YONETIM_KANAL_ID = -1003918825511
 ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
 _APK_KANAL_ID = -1004299694640         # APK-OBB-CONFİG yükleme kanalı
-TR_SAAT = datetime.timezone(datetime.timedelta(hours=3))   # 🇹🇷 Türkiye (UTC+3)
+TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
 FILIGRAN_METNI = (
@@ -8892,10 +8892,10 @@ async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "⚠️ *Gece Modu Uyarısı*\n\n"
                 "🌒 Birazdan *Gece Modu* başlıyor\\!\n\n"
-                "🇹🇷 Türkiye: saat *22:00*'de grup kapanacak\n"
+                "🇬🇪 Gürcistan: saat *22:00*'de grup kapanacak\n"
                 "🇦🇿 Azərbaycan: saat *23:00*\\-da qrup bağlanacaq\n\n"
                 "Tekrar açılış / Yenidən açılış:\n"
-                "🇹🇷 *08:00* \\| 🇦🇿 *09:00* 💤"
+                "🇬🇪 *08:00* \\| 🇦🇿 *09:00* 💤"
             ),
             parse_mode='MarkdownV2'
         )
@@ -8909,8 +8909,8 @@ async def gece_modu_baslat_job(context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "🌒 *Gece Modu Başladı / Gecə Rejimi Başladı*\n\n"
                 "Grup şu an mesajlara kapalı\\. Qrup hazırda mesajlara bağlıdır\\.\n\n"
-                "🇹🇷 Türkiye: Sabah *08:00*'e kadar kimse mesaj atamaz\n"
-                "🇦🇿 Azərbaycan: Sabah *09:00*\\-a qədər heç kim mesaj yaza bilməz\n\n"
+                "🇹🇷 Sabah *08:00*'e kadar kimse mesaj atamaz\n"
+                "🇦🇿 Sabah *09:00*\\-a qədər heç kim mesaj yaza bilməz\n\n"
                 "_🌙 İyi geceler\\! / Yaxşı gecələr\\!_"
             ),
             parse_mode='MarkdownV2'
