@@ -8892,10 +8892,10 @@ async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "⚠️ *Gece Modu Uyarısı*\n\n"
                 "🌒 Birazdan *Gece Modu* başlıyor\\!\n\n"
-                "🇬🇪 Gürcistan: saat *22:00*'de grup kapanacak\n"
+                "🇹🇷 Türkiye: saat *22:00*'de grup kapanacak\n"
                 "🇦🇿 Azərbaycan: saat *23:00*\\-da qrup bağlanacaq\n\n"
                 "Tekrar açılış / Yenidən açılış:\n"
-                "🇬🇪 *08:00* \\| 🇦🇿 *09:00* 💤"
+                "🇹🇷 *08:00* \\| 🇦🇿 *09:00* 💤"
             ),
             parse_mode='MarkdownV2'
         )
