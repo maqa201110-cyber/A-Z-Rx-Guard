@@ -84,13 +84,23 @@ _AYAR_VARSAYILAN = {
     "oglen_yemek":       True,
     "gunluk_istatistik": True,
 }
-_AYAR_ISIMLER = {
-    "gece_uyari":        "🌒 Gece Modu Uyarısı (21:00)",
-    "gece_baslat":       "🌙 Gece Modu Başlat (22:00)",
-    "gece_bitir":        "🌅 Gece Modu Bitti (08:00)",
-    "oglen_uyari":       "🍽️ Öğle Uyarısı (12:00)",
-    "oglen_yemek":       "🍴 Öğle Yemek (13:00)",
-    "gunluk_istatistik": "📊 Günlük İstatistik (00:00)",
+# Görüntüleme grupları — bir gruba Aç/Kapat basınca tüm anahtarlar değişir
+_AYAR_GRUPLAR = {
+    "gece_modu": {
+        "isim":      "🌙 Gece Modu",
+        "detay":     "Uyarı 21:00  ·  Başlat 22:00  ·  Bitir 08:00",
+        "anahtarlar": ["gece_uyari", "gece_baslat", "gece_bitir"],
+    },
+    "oglen_yemegi": {
+        "isim":      "🍽️ Öğle Yemeği",
+        "detay":     "Uyarı 12:00  ·  Yemek 13:00",
+        "anahtarlar": ["oglen_uyari", "oglen_yemek"],
+    },
+    "gunluk_istatistik": {
+        "isim":      "📊 Günlük İstatistik",
+        "detay":     "Her gün 00:00",
+        "anahtarlar": ["gunluk_istatistik"],
+    },
 }
 
 def ayar_oku() -> dict:
@@ -114,17 +124,25 @@ def ayar_yaz(_data: dict):
 def ayar_aktif_mi(anahtar: str) -> bool:
     return ayar_oku().get(anahtar, True)
 
+def _grup_acik_mi(grup_id: str, ayarlar: dict) -> bool:
+    """Gruptaki tüm anahtarlar True ise Açık, herhangi biri False ise Kapalı."""
+    keys = _AYAR_GRUPLAR[grup_id]["anahtarlar"]
+    return all(ayarlar.get(k, True) for k in keys)
+
 def _ayarlar_klavye_olustur(ayarlar: dict) -> "InlineKeyboardMarkup":
     satirlar = []
-    for anahtar, isim in _AYAR_ISIMLER.items():
-        durum = ayarlar.get(anahtar, True)
-        durum_emoji = "✅ Açık" if durum else "❌ Kapalı"
+    for grup_id, grup in _AYAR_GRUPLAR.items():
+        acik = _grup_acik_mi(grup_id, ayarlar)
+        durum = "✅ Açık" if acik else "❌ Kapalı"
         satirlar.append([
-            InlineKeyboardButton(f"{isim}  —  {durum_emoji}", callback_data="ayar_bilgi")
+            InlineKeyboardButton(
+                f"{grup['isim']}  —  {durum}",
+                callback_data="ayar_bilgi"
+            )
         ])
         satirlar.append([
-            InlineKeyboardButton("▶️ Aç",    callback_data=f"ayar_ac_{anahtar}"),
-            InlineKeyboardButton("⏹ Kapat", callback_data=f"ayar_kapat_{anahtar}"),
+            InlineKeyboardButton(f"▶️ Aç",    callback_data=f"ayar_ac_{grup_id}"),
+            InlineKeyboardButton(f"⏹ Kapat", callback_data=f"ayar_kapat_{grup_id}"),
         ])
     return InlineKeyboardMarkup(satirlar)
 
@@ -6152,18 +6170,19 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
         if query.data.startswith('ayar_ac_'):
-            _anahtar = query.data[len('ayar_ac_'):]
+            _grup_id = query.data[len('ayar_ac_'):]
             _yeni = True
         else:
-            _anahtar = query.data[len('ayar_kapat_'):]
+            _grup_id = query.data[len('ayar_kapat_'):]
             _yeni = False
-        if _anahtar not in _AYAR_VARSAYILAN:
+        if _grup_id not in _AYAR_GRUPLAR:
             await query.answer("❌ Geçersiz ayar.", show_alert=True)
             return
         _ayarlar = ayar_oku()
-        _ayarlar[_anahtar] = _yeni
+        for _k in _AYAR_GRUPLAR[_grup_id]["anahtarlar"]:
+            _ayarlar[_k] = _yeni
         ayar_yaz(_ayarlar)
-        _isim = _AYAR_ISIMLER.get(_anahtar, _anahtar)
+        _isim = _AYAR_GRUPLAR[_grup_id]["isim"]
         _durum_t = "açıldı ✅" if _yeni else "kapatıldı ❌"
         await query.answer(f"{_isim}\n{_durum_t}", show_alert=True)
         try:
@@ -11071,6 +11090,19 @@ def main():
             logger.info("Grup komut listesi ayarlandı.")
         except Exception as e:
             logger.warning(f"Grup komut listesi ayarlanamadı: {e}")
+        # Kanal komutları (/ayarlar)
+        try:
+            kanal_komutlari = [
+                BotCommand("ayarlar", "Bildirim ayarları — aç/kapat"),
+                BotCommand("test", "Bot mesajlarını test et"),
+            ]
+            await app.bot.set_my_commands(
+                kanal_komutlari,
+                scope=BotCommandScopeChat(chat_id=ZAMANLI_KANAL_ID)
+            )
+            logger.info("Kanal komut listesi ayarlandı.")
+        except Exception as e:
+            logger.warning(f"Kanal komut listesi ayarlanamadı: {e}")
 
     application.post_init = baslangic_komut_listesi
 
