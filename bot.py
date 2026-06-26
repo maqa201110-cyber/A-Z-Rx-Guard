@@ -10804,6 +10804,9 @@ def main():
     application.add_handler(CommandHandler("muzik", muzik_ara_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
+    # 🧪 TEST KOMUTU
+    application.add_handler(CommandHandler("test", test_komutu))
+
     # 🛡️ GRUP YÖNETİM KOMUTLARI
     application.add_handler(CommandHandler("ban", ban_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("unban", unban_komutu, filters=filters.ChatType.GROUPS))
