@@ -133,16 +133,14 @@ def _ayarlar_klavye_olustur(ayarlar: dict) -> "InlineKeyboardMarkup":
     satirlar = []
     for grup_id, grup in _AYAR_GRUPLAR.items():
         acik = _grup_acik_mi(grup_id, ayarlar)
-        durum = "✅ Açık" if acik else "❌ Kapalı"
+        durum_emoji = "✅" if acik else "❌"
         satirlar.append([
             InlineKeyboardButton(
-                f"{grup['isim']}  —  {durum}",
+                f"{grup['isim']} {durum_emoji}",
                 callback_data="ayar_bilgi"
-            )
-        ])
-        satirlar.append([
-            InlineKeyboardButton(f"▶️ Aç",    callback_data=f"ayar_ac_{grup_id}"),
-            InlineKeyboardButton(f"⏹ Kapat", callback_data=f"ayar_kapat_{grup_id}"),
+            ),
+            InlineKeyboardButton("▶️ Aç",    callback_data=f"ayar_ac_{grup_id}"),
+            InlineKeyboardButton("⏹ Kapat", callback_data=f"ayar_kapat_{grup_id}"),
         ])
     return InlineKeyboardMarkup(satirlar)
 
