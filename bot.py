@@ -71,7 +71,63 @@ ZAMANLI_KANAL_ID = -1003775055611
 LOG_KANAL_ID = -1003996192485
 _APK_KANAL_ID = -1004299694640         # APK-OBB-CONFİG yükleme kanalı
 TEST_KANAL_ID = -1003788921873         # 🧪 Bot test kanalı
-TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇬🇪 Gürcistan / Georgia (UTC+4)
+TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))
+
+# ── Bildirim ayarları (ayarlar.json) ────────────────────────
+import json as _json_ayar
+_AYAR_DOSYA = "ayarlar.json"
+_AYAR_VARSAYILAN = {
+    "gece_uyari":        True,
+    "gece_baslat":       True,
+    "gece_bitir":        True,
+    "oglen_uyari":       True,
+    "oglen_yemek":       True,
+    "gunluk_istatistik": True,
+}
+_AYAR_ISIMLER = {
+    "gece_uyari":        "🌒 Gece Modu Uyarısı (21:00)",
+    "gece_baslat":       "🌙 Gece Modu Başlat (22:00)",
+    "gece_bitir":        "🌅 Gece Modu Bitti (08:00)",
+    "oglen_uyari":       "🍽️ Öğle Uyarısı (12:00)",
+    "oglen_yemek":       "🍴 Öğle Yemek (13:00)",
+    "gunluk_istatistik": "📊 Günlük İstatistik (00:00)",
+}
+
+def ayar_oku() -> dict:
+    try:
+        with open(_AYAR_DOSYA, "r", encoding="utf-8") as _f:
+            _d = _json_ayar.load(_f)
+            for _k, _v in _AYAR_VARSAYILAN.items():
+                if _k not in _d:
+                    _d[_k] = _v
+            return _d
+    except Exception:
+        return dict(_AYAR_VARSAYILAN)
+
+def ayar_yaz(_data: dict):
+    try:
+        with open(_AYAR_DOSYA, "w", encoding="utf-8") as _f:
+            _json_ayar.dump(_data, _f, ensure_ascii=False, indent=2)
+    except Exception as _e:
+        pass
+
+def ayar_aktif_mi(anahtar: str) -> bool:
+    return ayar_oku().get(anahtar, True)
+
+def _ayarlar_klavye_olustur(ayarlar: dict) -> "InlineKeyboardMarkup":
+    satirlar = []
+    for anahtar, isim in _AYAR_ISIMLER.items():
+        durum = ayarlar.get(anahtar, True)
+        durum_emoji = "✅ Açık" if durum else "❌ Kapalı"
+        satirlar.append([
+            InlineKeyboardButton(f"{isim}  —  {durum_emoji}", callback_data="ayar_bilgi")
+        ])
+        satirlar.append([
+            InlineKeyboardButton("▶️ Aç",    callback_data=f"ayar_ac_{anahtar}"),
+            InlineKeyboardButton("⏹ Kapat", callback_data=f"ayar_kapat_{anahtar}"),
+        ])
+    return InlineKeyboardMarkup(satirlar)
+
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
 FILIGRAN_METNI = (
@@ -6083,6 +6139,38 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await muzik_indir_callback(query, context)
     elif query.data.startswith('muzik_klip_'):
         await muzik_klip_indir_callback(query, context)
+    # ── AYARLAR callbacks ──────────────────────────────────────
+    elif query.data == 'ayar_bilgi':
+        await query.answer("ℹ️ Durumu görmek için yukarıdaki metne bakın.", show_alert=False)
+        return
+    elif query.data.startswith('ayar_ac_') or query.data.startswith('ayar_kapat_'):
+        try:
+            member = await context.bot.get_chat_member(ZAMANLI_KANAL_ID, query.from_user.id)
+            if member.status not in ("administrator", "creator"):
+                await query.answer("❌ Sadece kanal adminleri değiştirebilir.", show_alert=True)
+                return
+        except Exception:
+            pass
+        if query.data.startswith('ayar_ac_'):
+            _anahtar = query.data[len('ayar_ac_'):]
+            _yeni = True
+        else:
+            _anahtar = query.data[len('ayar_kapat_'):]
+            _yeni = False
+        if _anahtar not in _AYAR_VARSAYILAN:
+            await query.answer("❌ Geçersiz ayar.", show_alert=True)
+            return
+        _ayarlar = ayar_oku()
+        _ayarlar[_anahtar] = _yeni
+        ayar_yaz(_ayarlar)
+        _isim = _AYAR_ISIMLER.get(_anahtar, _anahtar)
+        _durum_t = "açıldı ✅" if _yeni else "kapatıldı ❌"
+        await query.answer(f"{_isim}\n{_durum_t}", show_alert=True)
+        try:
+            await query.edit_message_reply_markup(reply_markup=_ayarlar_klavye_olustur(_ayarlar))
+        except Exception:
+            pass
+        return
     # ──────────────────────────────────────────────────────────
     elif query.data == 'menu_ai':
         context.user_data['mevcut_kategori'] = '🤖 AI Asistan'
@@ -7231,6 +7319,8 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def gunluk_istatistik_job(context: ContextTypes.DEFAULT_TYPE):
     """Her gün 00:00'da (Gürcistan saati UTC+4) tüm gruplara şık günlük skor tablosu gönderir."""
+    if not ayar_aktif_mi("gunluk_istatistik"):
+        return
     import tracking_store as _ts
     import datetime as _dt
 
@@ -8887,6 +8977,8 @@ def gece_modu_aktif_mi() -> bool:
     return simdi.hour >= 22 or simdi.hour < 8
 
 async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
+    if not ayar_aktif_mi("gece_uyari"):
+        return
     try:
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
@@ -8904,6 +8996,8 @@ async def gece_modu_uyari_job(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Gece modu uyarı hatası: {e}")
 
 async def gece_modu_baslat_job(context: ContextTypes.DEFAULT_TYPE):
+    if not ayar_aktif_mi("gece_baslat"):
+        return
     try:
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
@@ -8928,6 +9022,8 @@ async def gece_modu_baslat_job(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Gece modu kısıtlama hatası: {e}")
 
 async def gece_modu_bitir_job(context: ContextTypes.DEFAULT_TYPE):
+    if not ayar_aktif_mi("gece_bitir"):
+        return
     try:
         await context.bot.set_chat_permissions(
             chat_id=ZAMANLI_KANAL_ID,
@@ -8959,6 +9055,8 @@ async def gece_modu_bitir_job(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Gece modu bitirme hatası: {e}")
 
 async def oglen_uyari_job(context: ContextTypes.DEFAULT_TYPE):
+    if not ayar_aktif_mi("oglen_uyari"):
+        return
     try:
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
@@ -8974,6 +9072,8 @@ async def oglen_uyari_job(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Öğle uyarı hatası: {e}")
 
 async def oglen_yemek_job(context: ContextTypes.DEFAULT_TYPE):
+    if not ayar_aktif_mi("oglen_yemek"):
+        return
     try:
         await context.bot.send_message(
             chat_id=ZAMANLI_KANAL_ID,
@@ -8987,6 +9087,38 @@ async def oglen_yemek_job(context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         logger.error(f"Öğle yemek hatası: {e}")
+
+# ══════════════════════════════════════════════════════════════
+# ⚙️ AYARLAR KOMUTU — Bildirim Açma/Kapama (sadece admin)
+# ══════════════════════════════════════════════════════════════
+
+async def ayarlar_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/ayarlar — Bildirim açma/kapama paneli (sadece ZAMANLI_KANAL_ID adminleri)."""
+    msg = update.effective_message
+    chat = update.effective_chat
+    if not chat or chat.id != ZAMANLI_KANAL_ID:
+        if msg:
+            await msg.reply_text("❌ Bu komut yalnızca ana kanalda çalışır.")
+        return
+    user = update.effective_user
+    if user:
+        try:
+            member = await context.bot.get_chat_member(ZAMANLI_KANAL_ID, user.id)
+            if member.status not in ("administrator", "creator"):
+                await msg.reply_text("❌ Sadece kanal adminleri kullanabilir.")
+                return
+        except Exception:
+            pass
+    ayarlar = ayar_oku()
+    metin = (
+        "⚙️ *BOT BİLDİRİM AYARLARI*\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "Aşağıdaki bildirimleri açıp kapatabilirsiniz\\.\n\n"
+        "✅ Açık  \\|  ❌ Kapalı"
+    )
+    klavye = _ayarlar_klavye_olustur(ayarlar)
+    await msg.reply_text(metin, reply_markup=klavye, parse_mode='MarkdownV2')
+
 
 # ══════════════════════════════════════════════════════════════
 # 🧪 TEST KOMUTU — Sadece TEST_KANAL_ID için
@@ -10804,6 +10936,16 @@ def main():
     application.add_handler(CommandHandler("muzik", muzik_ara_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
+    # ⚙️ AYARLAR KOMUTU (kanal + grup + özel)
+    application.add_handler(
+        MessageHandler(
+            filters.UpdateType.CHANNEL_POSTS & filters.Regex(r'^/ayarlar(@\w+)?(\s|$)'),
+            ayarlar_komutu
+        ),
+        group=-1
+    )
+    application.add_handler(CommandHandler("ayarlar", ayarlar_komutu))
+
     # 🧪 TEST KOMUTU (group=-1 → catch-all'dan önce çalışır, kanal post'larını da yakalar)
     application.add_handler(
         MessageHandler(
