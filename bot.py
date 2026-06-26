@@ -130,6 +130,7 @@ def _grup_acik_mi(grup_id: str, ayarlar: dict) -> bool:
     return all(ayarlar.get(k, True) for k in keys)
 
 def _ayarlar_klavye_olustur(ayarlar: dict) -> "InlineKeyboardMarkup":
+    """Ana panel: her grup için tek buton (üstüne basınca detay açılır)."""
     satirlar = []
     for grup_id, grup in _AYAR_GRUPLAR.items():
         acik = _grup_acik_mi(grup_id, ayarlar)
@@ -137,12 +138,22 @@ def _ayarlar_klavye_olustur(ayarlar: dict) -> "InlineKeyboardMarkup":
         satirlar.append([
             InlineKeyboardButton(
                 f"{grup['isim']} {durum_emoji}",
-                callback_data="ayar_bilgi"
-            ),
-            InlineKeyboardButton("▶️ Aç",    callback_data=f"ayar_ac_{grup_id}"),
-            InlineKeyboardButton("⏹ Kapat", callback_data=f"ayar_kapat_{grup_id}"),
+                callback_data=f"ayar_detay_{grup_id}"
+            )
         ])
     return InlineKeyboardMarkup(satirlar)
+
+def _ayarlar_detay_klavye(grup_id: str) -> "InlineKeyboardMarkup":
+    """Detay paneli: Aç / Kapat + Geri butonu."""
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("▶️ Aç",    callback_data=f"ayar_ac_{grup_id}"),
+            InlineKeyboardButton("⏹ Kapat", callback_data=f"ayar_kapat_{grup_id}"),
+        ],
+        [
+            InlineKeyboardButton("◀️ Geri",  callback_data="ayar_menu"),
+        ]
+    ])
 
 AZ_SAAT = datetime.timezone(datetime.timedelta(hours=4))   # 🇦🇿 Azerbaycan (UTC+4)
 
@@ -6157,7 +6168,50 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await muzik_klip_indir_callback(query, context)
     # ── AYARLAR callbacks ──────────────────────────────────────
     elif query.data == 'ayar_bilgi':
-        await query.answer("ℹ️ Durumu görmek için yukarıdaki metne bakın.", show_alert=False)
+        await query.answer()
+        return
+    elif query.data.startswith('ayar_detay_'):
+        _grup_id = query.data[len('ayar_detay_'):]
+        if _grup_id not in _AYAR_GRUPLAR:
+            await query.answer("❌ Geçersiz.", show_alert=True)
+            return
+        await query.answer()
+        _grup = _AYAR_GRUPLAR[_grup_id]
+        _ayarlar = ayar_oku()
+        _acik = _grup_acik_mi(_grup_id, _ayarlar)
+        _durum = "✅ Açık" if _acik else "❌ Kapalı"
+        _metin = (
+            f"⚙️ *{_grup['isim']}*\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🕐 _{_grup['detay']}_\n\n"
+            f"Durum: *{_durum}*"
+        )
+        try:
+            await query.edit_message_text(
+                _metin,
+                parse_mode='Markdown',
+                reply_markup=_ayarlar_detay_klavye(_grup_id)
+            )
+        except Exception:
+            pass
+        return
+    elif query.data == 'ayar_menu':
+        await query.answer()
+        _ayarlar = ayar_oku()
+        _metin = (
+            "⚙️ *BOT BİLDİRİM AYARLARI*\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Bir bildirimin üstüne bas → aç veya kapat\\.\n\n"
+            "✅ Açık  \\|  ❌ Kapalı"
+        )
+        try:
+            await query.edit_message_text(
+                _metin,
+                parse_mode='MarkdownV2',
+                reply_markup=_ayarlar_klavye_olustur(_ayarlar)
+            )
+        except Exception:
+            pass
         return
     elif query.data.startswith('ayar_ac_') or query.data.startswith('ayar_kapat_'):
         try:
@@ -6182,9 +6236,23 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ayar_yaz(_ayarlar)
         _isim = _AYAR_GRUPLAR[_grup_id]["isim"]
         _durum_t = "açıldı ✅" if _yeni else "kapatıldı ❌"
-        await query.answer(f"{_isim}\n{_durum_t}", show_alert=True)
+        await query.answer(f"{_isim} {_durum_t}", show_alert=False)
+        # Detay ekranını güncelle (durum değişti)
+        _acik_yeni = _yeni
+        _durum = "✅ Açık" if _acik_yeni else "❌ Kapalı"
+        _grup = _AYAR_GRUPLAR[_grup_id]
+        _metin = (
+            f"⚙️ *{_grup['isim']}*\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🕐 _{_grup['detay']}_\n\n"
+            f"Durum: *{_durum}*"
+        )
         try:
-            await query.edit_message_reply_markup(reply_markup=_ayarlar_klavye_olustur(_ayarlar))
+            await query.edit_message_text(
+                _metin,
+                parse_mode='Markdown',
+                reply_markup=_ayarlar_detay_klavye(_grup_id)
+            )
         except Exception:
             pass
         return
