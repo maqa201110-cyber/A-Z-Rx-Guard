@@ -10804,8 +10804,15 @@ def main():
     application.add_handler(CommandHandler("muzik", muzik_ara_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
-    # 🧪 TEST KOMUTU
-    application.add_handler(CommandHandler("test", test_komutu))
+    # 🧪 TEST KOMUTU (group=-1 → catch-all'dan önce çalışır, kanal post'larını da yakalar)
+    application.add_handler(
+        MessageHandler(
+            filters.UpdateType.CHANNEL_POSTS & filters.Regex(r'^/test(@\w+)?(\s|$)'),
+            test_komutu
+        ),
+        group=-1
+    )
+    application.add_handler(CommandHandler("test", test_komutu, filters=filters.ChatType.GROUPS | filters.ChatType.PRIVATE))
 
     # 🛡️ GRUP YÖNETİM KOMUTLARI
     application.add_handler(CommandHandler("ban", ban_komutu, filters=filters.ChatType.GROUPS))
