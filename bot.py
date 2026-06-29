@@ -5253,8 +5253,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ─────────────────────────────────────────────────────────
 
     # Sahip kanal yönetim callback'lerini kanal takip kontrolünden muaf tut
-    _SAHIP_PREFIKSLERI = ('ksec_', 'kyc_', 'ksk_', 'ksa_', 'kha_', 'ksm_', 'ksmk_', 'kbi_', 'ygonder_', 'kgeri')
-    _sahip_callback = query.data == 'kgeri' or any(query.data.startswith(p) for p in _SAHIP_PREFIKSLERI)
+    _SAHIP_PREFIKSLERI = ('ksec_', 'kyc_', 'ksk_', 'ksa_', 'kha_', 'ksm_', 'ksmk_', 'kbi_', 'ygonder_', 'kgeri', 'yaz_iptal')
+    _sahip_callback = query.data in ('kgeri', 'yaz_iptal') or any(query.data.startswith(p) for p in _SAHIP_PREFIKSLERI)
     if not _sahip_callback and not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
@@ -7064,45 +7064,60 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             cid = int(query.data[5:])
         except ValueError:
+            await query.answer("❌ Geçersiz kanal ID.", show_alert=True)
             return
+        await query.answer()
         data = _kanal_yukle()
         info = data.get(str(cid), {})
         baslik = info.get('baslik', str(cid))
         butonlar = [
             [InlineKeyboardButton("🚪 Bot Kanaldan Çık",        callback_data=f"kyc_{cid}")],
-            [InlineKeyboardButton("🔒 Sohbeti Kapa",            callback_data=f"ksk_{cid}"),
+            [InlineKeyboardButton("🔒 Sohbeti Kapat",           callback_data=f"ksk_{cid}"),
              InlineKeyboardButton("🔓 Sohbeti Aç",              callback_data=f"ksa_{cid}")],
             [InlineKeyboardButton("👥 Herkesi At",              callback_data=f"kha_{cid}")],
-            [InlineKeyboardButton("🔇 Slow Mode Aç (30s)",      callback_data=f"ksm_{cid}"),
+            [InlineKeyboardButton("🐢 Slow Mode Aç (30s)",      callback_data=f"ksm_{cid}"),
              InlineKeyboardButton("🔔 Slow Mode Kapat",         callback_data=f"ksmk_{cid}")],
             [InlineKeyboardButton("📊 Kanal Bilgisi",           callback_data=f"kbi_{cid}")],
             [InlineKeyboardButton("↩️ Geri",                   callback_data="kgeri")],
         ]
-        await query.edit_message_text(
-            f"⚙️ <b>{html.escape(baslik)}</b>\n\nBir işlem seç:",
-            reply_markup=InlineKeyboardMarkup(butonlar),
-            parse_mode='HTML'
-        )
+        try:
+            await query.edit_message_text(
+                f"⚙️ <b>{html.escape(baslik)}</b>\n\nBir işlem seç:",
+                reply_markup=InlineKeyboardMarkup(butonlar),
+                parse_mode='HTML'
+            )
+        except Exception:
+            pass
 
     elif query.data.startswith('kyc_'):
         # Bot kanaldan çık
         try:
             cid = int(query.data[4:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
         try:
             await context.bot.leave_chat(cid)
             _kanal_sil(cid)
-            await query.edit_message_text("✅ Bot kanaldan başarıyla ayrıldı.")
+            try:
+                await query.edit_message_text("✅ Bot kanaldan/gruptan başarıyla ayrıldı.")
+            except Exception:
+                pass
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            try:
+                await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=f"❌ Çıkış hatası: {html.escape(str(e))}")
 
     elif query.data.startswith('ksk_'):
-        # Sohbeti kapat (mesaj gönderimi kısıtla)
+        # Sohbeti kapat
         try:
             cid = int(query.data[4:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
         try:
             await context.bot.set_chat_permissions(
                 chat_id=cid,
@@ -7119,16 +7134,25 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     can_add_web_page_previews=False,
                 )
             )
-            await query.edit_message_text("🔒 Sohbet kapatıldı. Kimse mesaj gönderemiyor.")
+            try:
+                await query.edit_message_text("🔒 Sohbet kapatıldı. Kimse mesaj gönderemiyor.")
+            except Exception:
+                pass
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Sohbet kapatılamadı:\n{html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
 
     elif query.data.startswith('ksa_'):
         # Sohbeti aç
         try:
             cid = int(query.data[4:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
         try:
             await context.bot.set_chat_permissions(
                 chat_id=cid,
@@ -7146,16 +7170,29 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     can_invite_users=True,
                 )
             )
-            await query.edit_message_text("🔓 Sohbet açıldı. Herkes mesaj gönderebilir.")
+            try:
+                await query.edit_message_text("🔓 Sohbet açıldı. Herkes mesaj gönderebilir.")
+            except Exception:
+                pass
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Sohbet açılamadı:\n{html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
 
     elif query.data.startswith('kha_'):
-        # Herkesi at (kayıtlı üyeleri ban+unban)
+        # Herkesi at
         try:
             cid = int(query.data[4:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
+        try:
+            await query.edit_message_text("⏳ Üyeler atılıyor, lütfen bekle...")
+        except Exception:
+            pass
         try:
             veriler = grup_uyeleri_yukle()
             uyeler = veriler.get(str(cid), {})
@@ -7171,45 +7208,72 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         atilan += 1
                 except Exception:
                     hata += 1
-            await query.edit_message_text(
+            sonuc = (
                 f"👥 <b>İşlem Tamamlandı</b>\n\n"
                 f"✅ Atılan: {atilan}\n"
-                f"❌ Hata / Atlanamayan: {hata}",
-                parse_mode='HTML'
+                f"❌ Hata/Atlanan: {hata}"
             )
+            try:
+                await query.edit_message_text(sonuc, parse_mode='HTML')
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=sonuc, parse_mode='HTML')
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Hata: {html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
 
     elif query.data.startswith('ksm_'):
         # Slow mode aç (30 saniye)
         try:
             cid = int(query.data[4:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
         try:
             await context.bot.set_chat_slow_mode_delay(cid, 30)
-            await query.edit_message_text("🔇 Slow mode açıldı (30 saniye bekleme süresi).")
+            try:
+                await query.edit_message_text("🐢 Slow mode açıldı (30 saniye bekleme süresi).")
+            except Exception:
+                pass
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Slow mode açılamadı:\n{html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
 
     elif query.data.startswith('ksmk_'):
         # Slow mode kapat
         try:
             cid = int(query.data[5:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
         try:
             await context.bot.set_chat_slow_mode_delay(cid, 0)
-            await query.edit_message_text("🔔 Slow mode kapatıldı.")
+            try:
+                await query.edit_message_text("🔔 Slow mode kapatıldı.")
+            except Exception:
+                pass
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Slow mode kapatılamadı:\n{html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
 
     elif query.data.startswith('kbi_'):
         # Kanal bilgisi göster
         try:
             cid = int(query.data[4:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
+        await query.answer()
         try:
             uye_s = await context.bot.get_chat_member_count(cid)
             chat_b = await context.bot.get_chat(cid)
@@ -7221,7 +7285,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 admin_s = bot_s = "?"
             aciklama = html.escape(chat_b.description or '—')
             tur_emoji = "📢" if chat_b.type == "channel" else "👥"
-            msg = (
+            msg_text = (
                 f"ℹ️ <b>Kanal Bilgisi</b>\n\n"
                 f"{tur_emoji} <b>Ad:</b> {html.escape(chat_b.title or '—')}\n"
                 f"🆔 <b>ID:</b> <code>{cid}</code>\n"
@@ -7231,52 +7295,89 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"📝 <b>Açıklama:</b>\n{aciklama}"
             )
             geri_btn = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
-            await query.edit_message_text(
-                msg, reply_markup=InlineKeyboardMarkup(geri_btn), parse_mode='HTML'
-            )
+            try:
+                await query.edit_message_text(
+                    msg_text, reply_markup=InlineKeyboardMarkup(geri_btn), parse_mode='HTML'
+                )
+            except Exception:
+                await context.bot.send_message(
+                    chat_id=SAHIP_KANAL_ID, text=msg_text,
+                    reply_markup=InlineKeyboardMarkup(geri_btn), parse_mode='HTML'
+                )
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Bilgi alınamadı:\n{html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
 
     elif query.data == 'kgeri':
         # Kanal listesine geri dön
+        await query.answer()
         data = _kanal_yukle()
         if not data:
-            await query.edit_message_text("📭 Bot hiçbir kanalda/grupta değil.")
+            try:
+                await query.edit_message_text("📭 Bot hiçbir kanalda/grupta değil.")
+            except Exception:
+                pass
             return
         butonlar = []
         for cid_s, info in data.items():
-            baslik = (info.get('baslik') or cid_s)[:38]
+            baslik = (info.get('baslik') or cid_s)[:35]
             tur_emoji = "📢" if info.get('tur') == 'channel' else "👥"
             butonlar.append([
-                InlineKeyboardButton(f"{tur_emoji} {baslik} — !TIKLA", callback_data=f"ksec_{cid_s}")
+                InlineKeyboardButton(f"{tur_emoji} {baslik}", callback_data=f"ksec_{cid_s}")
             ])
-        await query.edit_message_text(
-            "📋 <b>Botun Bulunduğu Kanallar / Gruplar</b>\n\nBir kanala tıkla:",
-            reply_markup=InlineKeyboardMarkup(butonlar),
-            parse_mode='HTML'
-        )
+        try:
+            await query.edit_message_text(
+                "📋 <b>Botun Bulunduğu Kanallar / Gruplar</b>\n\nBir kanala tıkla:",
+                reply_markup=InlineKeyboardMarkup(butonlar),
+                parse_mode='HTML'
+            )
+        except Exception:
+            pass
 
     elif query.data.startswith('ygonder_'):
         # /yaz komutu — seçilen kanala mesaj gönder
         try:
             cid = int(query.data[8:])
         except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
-        mesaj = context.chat_data.get('yaz_mesaj')
+        await query.answer()
+        mesaj = context.bot_data.get('yaz_mesaj_gecici')
         if not mesaj:
-            await query.edit_message_text("❌ Mesaj bulunamadı. Tekrar /yaz komutunu kullan.")
+            try:
+                await query.edit_message_text("❌ Mesaj bulunamadı. Tekrar /yaz <mesaj> kullan.")
+            except Exception:
+                pass
             return
         try:
             await context.bot.send_message(chat_id=cid, text=mesaj)
             data = _kanal_yukle()
             baslik = data.get(str(cid), {}).get('baslik', str(cid))
-            context.chat_data.pop('yaz_mesaj', None)
-            await query.edit_message_text(
-                f"✅ Mesaj <b>{html.escape(baslik)}</b> kanalına gönderildi!",
-                parse_mode='HTML'
-            )
+            context.bot_data.pop('yaz_mesaj_gecici', None)
+            try:
+                await query.edit_message_text(
+                    f"✅ Mesaj <b>{html.escape(baslik)}</b>'a gönderildi!",
+                    parse_mode='HTML'
+                )
+            except Exception:
+                pass
         except Exception as e:
-            await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+            errmsg = f"❌ Gönderilemedi:\n{html.escape(str(e))}"
+            try:
+                await query.edit_message_text(errmsg)
+            except Exception:
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+
+    elif query.data == 'yaz_iptal':
+        await query.answer()
+        context.bot_data.pop('yaz_mesaj_gecici', None)
+        try:
+            await query.edit_message_text("❌ İptal edildi.")
+        except Exception:
+            pass
 
 # ══════════════════════════════════════════════════════════════
 # 🚗 ARABA MENÜSÜ — VIN / ŞASİ NO SORGULAMA
@@ -11416,60 +11517,67 @@ async def kanal_listesi_komutu(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def yaz_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Kanallara mesaj gönderir. Sadece SAHIP_KANAL_ID'de çalışır."""
+    """/yaz <mesaj> — mesajı seçilen kanala gönderir. Sadece SAHIP_KANAL_ID'de çalışır."""
     eff_chat = update.effective_chat
     if not eff_chat or eff_chat.id != SAHIP_KANAL_ID:
         return
-    context.chat_data['yaz_bekliyor'] = True
-    context.chat_data.pop('yaz_mesaj', None)
-    await context.bot.send_message(
-        chat_id=SAHIP_KANAL_ID,
-        text=(
-            "✍️ <b>Göndermek istediğin mesajı yaz:</b>\n\n"
-            "(Yazı sınırı yok — istediğin kadar uzun yazabilirsin)"
-        ),
-        parse_mode='HTML'
-    )
 
-
-async def sahip_kanal_yaz_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/yaz durumunda SAHIP_KANAL_ID'den gelen mesajı yakalar, kanal seçim ekranı gösterir."""
+    # Mesajı doğrudan komuttan al: /yaz Merhaba herkes!
     msg = update.channel_post or update.message
-    if not msg:
-        return
-    if msg.chat.id != SAHIP_KANAL_ID:
-        return
-    metin = msg.text or msg.caption or ""
-    if not metin or metin.startswith('/'):
-        return
-    if not context.chat_data.get('yaz_bekliyor'):
-        return
+    metin = ""
+    if msg and msg.text:
+        # "/yaz " sonrasını al
+        parcalar = msg.text.split(None, 1)
+        if len(parcalar) >= 2:
+            metin = parcalar[1].strip()
 
-    context.chat_data['yaz_bekliyor'] = False
-    context.chat_data['yaz_mesaj'] = metin
+    if not metin:
+        await context.bot.send_message(
+            chat_id=SAHIP_KANAL_ID,
+            text=(
+                "✍️ <b>Kullanım:</b> <code>/yaz Göndermek istediğin mesaj</code>\n\n"
+                "<b>Örnek:</b> <code>/yaz Merhaba herkese duyurum var!</code>"
+            ),
+            parse_mode='HTML'
+        )
+        return
 
     data = _kanal_yukle()
     if not data:
         await context.bot.send_message(
             chat_id=SAHIP_KANAL_ID,
-            text="📭 Bot hiçbir kanalda/grupta değil."
+            text="📭 Bot şu an hiçbir kanalda/grupta değil."
         )
         return
 
+    # Mesajı bot_data'ya kaydet (chat_data yerine — daha güvenilir)
+    context.bot_data['yaz_mesaj_gecici'] = metin
+
     butonlar = []
     for cid_s, info in data.items():
-        baslik = (info.get('baslik') or cid_s)[:38]
+        baslik = (info.get('baslik') or cid_s)[:35]
         tur_emoji = "📢" if info.get('tur') == 'channel' else "👥"
         butonlar.append([
-            InlineKeyboardButton(f"{tur_emoji} {baslik} — Gönder", callback_data=f"ygonder_{cid_s}")
+            InlineKeyboardButton(f"{tur_emoji} {baslik}", callback_data=f"ygonder_{cid_s}")
         ])
+    butonlar.append([InlineKeyboardButton("❌ İptal", callback_data="yaz_iptal")])
 
+    ozet = metin[:80] + ("…" if len(metin) > 80 else "")
     await context.bot.send_message(
         chat_id=SAHIP_KANAL_ID,
-        text="📨 <b>Mesajın hazır!</b>\n\nHangi kanala göndermek istiyorsun?",
+        text=(
+            f"📨 <b>Mesajın hazır!</b>\n\n"
+            f"📝 <i>{html.escape(ozet)}</i>\n\n"
+            f"Hangi kanala/gruba gönderilsin?"
+        ),
         reply_markup=InlineKeyboardMarkup(butonlar),
         parse_mode='HTML'
     )
+
+
+async def sahip_kanal_yaz_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Artık kullanılmıyor — /yaz komutu inline çalışıyor."""
+    pass
 
 
 # ══════════════════════════════════════════════════════
