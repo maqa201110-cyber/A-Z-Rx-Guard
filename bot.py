@@ -4097,6 +4097,14 @@ def rose_welcome_klavye() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(klavye)
 
 async def kanala_veya_gruba_yeni_uye_katildi(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Pasif kanal takibi — herhangi bir üye hareketi olan grubu kaydet
+    _eff = update.effective_chat
+    if _eff and _eff.id != SAHIP_KANAL_ID and _eff.title:
+        _mevcut = _kanal_yukle()
+        _cid_str = str(_eff.id)
+        if _cid_str not in _mevcut or _mevcut[_cid_str].get('baslik') != _eff.title:
+            _kanal_ekle(_eff.id, _eff.title, _eff.type)
+
     if update.chat_member:
         chat_member_update = update.chat_member
         if chat_member_update.new_chat_member.status == "member":
@@ -5048,6 +5056,16 @@ async def atag_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # ── Pasif kanal/grup takibi: her yeni sohbet otomatik kaydedilir ──
+    eff = update.effective_chat
+    if eff and eff.id != SAHIP_KANAL_ID and eff.title:
+        mevcut = _kanal_yukle()
+        cid_str = str(eff.id)
+        if cid_str not in mevcut:
+            _kanal_ekle(eff.id, eff.title, eff.type)
+        elif mevcut[cid_str].get('baslik') != eff.title:
+            _kanal_ekle(eff.id, eff.title, eff.type)  # başlık güncellemesi
+
     if update.channel_post:
         channel_post = update.channel_post
         # ── APK-OBB-CONFİG yükleme kanalı — her zaman önce işle ──
@@ -5234,7 +5252,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
     # ─────────────────────────────────────────────────────────
 
-    if not await kanal_takip_kontrol(update, context, user_id, lang):
+    # Sahip kanal yönetim callback'lerini kanal takip kontrolünden muaf tut
+    _SAHIP_PREFIKSLERI = ('ksec_', 'kyc_', 'ksk_', 'ksa_', 'kha_', 'ksm_', 'ksmk_', 'kbi_', 'ygonder_', 'kgeri')
+    _sahip_callback = query.data == 'kgeri' or any(query.data.startswith(p) for p in _SAHIP_PREFIKSLERI)
+    if not _sahip_callback and not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
     if query.data == 'menu_bot_ayarlari':
@@ -11240,6 +11261,84 @@ def _kanal_sil(chat_id: int):
     _kanal_kaydet(data)
 
 
+async def _kanal_tara_yap(bot) -> int:
+    """Tüm bilinen kaynaklardan kanal/grup ID'lerini toplar, Telegram API ile doğrular ve kaydeder."""
+    mevcut = _kanal_yukle()
+    bilinen_idler = set()
+
+    # 1. grup_uyeler.json
+    try:
+        for cid_str in grup_uyeleri_yukle().keys():
+            try:
+                bilinen_idler.add(int(cid_str))
+            except (ValueError, TypeError):
+                pass
+    except Exception:
+        pass
+
+    # 2. grup_uyarilari.json
+    try:
+        with open("grup_uyarilari.json", "r", encoding="utf-8") as _f:
+            for cid_str in json.load(_f).keys():
+                try:
+                    bilinen_idler.add(int(cid_str))
+                except (ValueError, TypeError):
+                    pass
+    except Exception:
+        pass
+
+    # 3. Sabit kanal/grup ID'leri
+    for sabit_id in [KANAL_ID, YONETIM_KANAL_ID, ZAMANLI_KANAL_ID,
+                     LOG_KANAL_ID, _APK_KANAL_ID, TEST_KANAL_ID]:
+        if sabit_id:
+            bilinen_idler.add(sabit_id)
+
+    # 4. Zaten kayıtlı olanları güncelle
+    for cid_str in list(mevcut.keys()):
+        try:
+            bilinen_idler.add(int(cid_str))
+        except (ValueError, TypeError):
+            pass
+
+    bilinen_idler.discard(SAHIP_KANAL_ID)
+
+    ekle_sayisi = 0
+    for cid in bilinen_idler:
+        try:
+            chat = await bot.get_chat(cid)
+            _kanal_ekle(cid, chat.title or f"Chat {cid}", chat.type)
+            ekle_sayisi += 1
+        except Exception as e:
+            # API hatası varsa mevcut kaydı KORUYORUZ — sadece my_chat_member eventi siler
+            logger.debug(f"Kanal tarama: {cid} doğrulanamadı (kayıt korundu) — {e}")
+
+    return ekle_sayisi
+
+
+async def tarama_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Botun tüm bilinen kanallarını yeniden tarar. Sadece SAHIP_KANAL_ID'de."""
+    eff_chat = update.effective_chat
+    if not eff_chat or eff_chat.id != SAHIP_KANAL_ID:
+        return
+    bilgi = await context.bot.send_message(
+        chat_id=SAHIP_KANAL_ID,
+        text="🔍 Kanallar taranıyor, lütfen bekle..."
+    )
+    ekle_sayisi = await _kanal_tara_yap(context.bot)
+    data = _kanal_yukle()
+    await context.bot.edit_message_text(
+        chat_id=SAHIP_KANAL_ID,
+        message_id=bilgi.message_id,
+        text=(
+            f"✅ <b>Tarama Tamamlandı!</b>\n\n"
+            f"📋 Toplam kayıtlı kanal/grup: <b>{len(data)}</b>\n"
+            f"🆕 Bu taramada eklenen/güncellenen: <b>{ekle_sayisi}</b>\n\n"
+            f"<i>/kanal komutuyla listeyi görebilirsin.</i>"
+        ),
+        parse_mode='HTML'
+    )
+
+
 async def bot_chat_member_degisti(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Bot bir kanala/gruba eklendiğinde veya ayrıldığında tetiklenir."""
     mcu = update.my_chat_member
@@ -11469,6 +11568,13 @@ def main():
     )
     # Bot bir kanala/gruba eklendiğinde veya ayrıldığında tetiklenir
     application.add_handler(ChatMemberHandler(bot_chat_member_degisti, ChatMemberHandler.MY_CHAT_MEMBER))
+    # /tarama komutu (sadece SAHIP_KANAL_ID'de)
+    application.add_handler(
+        MessageHandler(
+            filters.UpdateType.CHANNEL_POSTS & filters.Regex(r'^/tarama(@\w+)?(\s|$)'),
+            tarama_komutu
+        )
+    )
 
     application.add_handler(MessageHandler((filters.ChatType.GROUPS | filters.ChatType.CHANNEL) & filters.ALL, grup_ve_kanal_mesaj_yonet))
     application.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, filigran_ekle), group=-1)
@@ -11554,8 +11660,14 @@ def main():
         else:
             logger.info("Başlangıç: Gece modu aktif — grup kilitli kalıyor.")
 
+    async def baslangic_kanal_tara(app):
+        """Bot başlangıcında tüm bilinen kanalları/grupları bot_kanallar.json'a ekler/günceller."""
+        ekle_sayisi = await _kanal_tara_yap(app.bot)
+        logger.info(f"Kanal taraması tamamlandı: {ekle_sayisi} kanal/grup eklendi/güncellendi.")
+
     async def baslangic_komut_listesi(app):
         await baslangic_gece_modu_kontrol(app)
+        await baslangic_kanal_tara(app)
         # Grup komutları görünür yap
         try:
             grup_komutlari = [
