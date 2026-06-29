@@ -7097,18 +7097,28 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri_liste = [[InlineKeyboardButton("↩️ Listeye Dön", callback_data="kgeri")]]
         try:
             await context.bot.leave_chat(cid)
             _kanal_sil(cid)
             try:
-                await query.edit_message_text("✅ Bot kanaldan/gruptan başarıyla ayrıldı.")
+                await query.edit_message_text(
+                    "✅ Bot kanaldan/gruptan başarıyla ayrıldı.",
+                    reply_markup=InlineKeyboardMarkup(_geri_liste)
+                )
             except Exception:
-                pass
+                await context.bot.send_message(
+                    chat_id=SAHIP_KANAL_ID,
+                    text="✅ Bot kanaldan/gruptan başarıyla ayrıldı.",
+                    reply_markup=InlineKeyboardMarkup(_geri_liste)
+                )
         except Exception as e:
+            errmsg = f"❌ Çıkış hatası:\n{html.escape(str(e))}"
             try:
-                await query.edit_message_text(f"❌ Hata: {html.escape(str(e))}")
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri_liste))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=f"❌ Çıkış hatası: {html.escape(str(e))}")
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri_liste))
 
     elif query.data.startswith('ksk_'):
         # Sohbeti kapat
@@ -7118,6 +7128,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
         try:
             await context.bot.set_chat_permissions(
                 chat_id=cid,
@@ -7135,15 +7146,20 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             )
             try:
-                await query.edit_message_text("🔒 Sohbet kapatıldı. Kimse mesaj gönderemiyor.")
+                await query.edit_message_text(
+                    "🔒 Sohbet kapatıldı. Kimse mesaj gönderemiyor.",
+                    reply_markup=InlineKeyboardMarkup(_geri)
+                )
             except Exception:
-                pass
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID,
+                    text="🔒 Sohbet kapatıldı.", reply_markup=InlineKeyboardMarkup(_geri))
         except Exception as e:
             errmsg = f"❌ Sohbet kapatılamadı:\n{html.escape(str(e))}"
             try:
-                await query.edit_message_text(errmsg)
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri))
 
     elif query.data.startswith('ksa_'):
         # Sohbeti aç
@@ -7153,6 +7169,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
         try:
             await context.bot.set_chat_permissions(
                 chat_id=cid,
@@ -7171,15 +7188,20 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             )
             try:
-                await query.edit_message_text("🔓 Sohbet açıldı. Herkes mesaj gönderebilir.")
+                await query.edit_message_text(
+                    "🔓 Sohbet açıldı. Herkes mesaj gönderebilir.",
+                    reply_markup=InlineKeyboardMarkup(_geri)
+                )
             except Exception:
-                pass
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID,
+                    text="🔓 Sohbet açıldı.", reply_markup=InlineKeyboardMarkup(_geri))
         except Exception as e:
             errmsg = f"❌ Sohbet açılamadı:\n{html.escape(str(e))}"
             try:
-                await query.edit_message_text(errmsg)
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri))
 
     elif query.data.startswith('kha_'):
         # Herkesi at
@@ -7189,40 +7211,72 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
         try:
             await query.edit_message_text("⏳ Üyeler atılıyor, lütfen bekle...")
         except Exception:
             pass
         try:
+            # Admin listesini al — onları atlayacağız
+            try:
+                adminler = await context.bot.get_chat_administrators(cid)
+                admin_idleri = {a.user.id for a in adminler}
+            except Exception:
+                admin_idleri = set()
+
+            # Kayıtlı üyelerden admin olmayanları at
             veriler = grup_uyeleri_yukle()
             uyeler = veriler.get(str(cid), {})
             atilan = 0
+            atlanan = 0  # admin/creator
             hata = 0
+
+            if not uyeler:
+                sonuc = (
+                    f"⚠️ <b>Bu grup için kayıtlı üye bulunamadı.</b>\n\n"
+                    f"Bot yalnızca kendi gözetiminde mesaj atan üyeleri takip edebilir.\n"
+                    f"Gruba birkaç mesaj attıktan sonra tekrar dene."
+                )
+                try:
+                    await query.edit_message_text(sonuc, parse_mode='HTML',
+                                                   reply_markup=InlineKeyboardMarkup(_geri))
+                except Exception:
+                    await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=sonuc,
+                        parse_mode='HTML', reply_markup=InlineKeyboardMarkup(_geri))
+                return
+
             for uid_str in list(uyeler.keys()):
                 try:
                     uid = int(uid_str)
-                    member = await context.bot.get_chat_member(cid, uid)
-                    if member.status not in ('administrator', 'creator'):
-                        await context.bot.ban_chat_member(cid, uid)
-                        await context.bot.unban_chat_member(cid, uid, only_if_banned=True)
-                        atilan += 1
+                    if uid in admin_idleri:
+                        atlanan += 1
+                        continue
+                    await context.bot.ban_chat_member(cid, uid)
+                    await asyncio.sleep(0.05)
+                    await context.bot.unban_chat_member(cid, uid, only_if_banned=True)
+                    atilan += 1
                 except Exception:
                     hata += 1
+
             sonuc = (
-                f"👥 <b>İşlem Tamamlandı</b>\n\n"
-                f"✅ Atılan: {atilan}\n"
-                f"❌ Hata/Atlanan: {hata}"
+                f"👥 <b>Herkesi At — Tamamlandı</b>\n\n"
+                f"✅ Atılan: <b>{atilan}</b>\n"
+                f"👑 Admin/atlanan: <b>{atlanan}</b>\n"
+                f"❌ Hata: <b>{hata}</b>"
             )
             try:
-                await query.edit_message_text(sonuc, parse_mode='HTML')
+                await query.edit_message_text(sonuc, parse_mode='HTML',
+                                               reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=sonuc, parse_mode='HTML')
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=sonuc,
+                    parse_mode='HTML', reply_markup=InlineKeyboardMarkup(_geri))
         except Exception as e:
             errmsg = f"❌ Hata: {html.escape(str(e))}"
             try:
-                await query.edit_message_text(errmsg)
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri))
 
     elif query.data.startswith('ksm_'):
         # Slow mode aç (30 saniye)
@@ -7232,18 +7286,24 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
         try:
             await context.bot.set_chat_slow_mode_delay(cid, 30)
             try:
-                await query.edit_message_text("🐢 Slow mode açıldı (30 saniye bekleme süresi).")
+                await query.edit_message_text(
+                    "🐢 Slow mode açıldı (30 saniye bekleme süresi).",
+                    reply_markup=InlineKeyboardMarkup(_geri)
+                )
             except Exception:
-                pass
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID,
+                    text="🐢 Slow mode açıldı (30 sn).", reply_markup=InlineKeyboardMarkup(_geri))
         except Exception as e:
             errmsg = f"❌ Slow mode açılamadı:\n{html.escape(str(e))}"
             try:
-                await query.edit_message_text(errmsg)
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri))
 
     elif query.data.startswith('ksmk_'):
         # Slow mode kapat
@@ -7253,18 +7313,24 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
         try:
             await context.bot.set_chat_slow_mode_delay(cid, 0)
             try:
-                await query.edit_message_text("🔔 Slow mode kapatıldı.")
+                await query.edit_message_text(
+                    "🔔 Slow mode kapatıldı.",
+                    reply_markup=InlineKeyboardMarkup(_geri)
+                )
             except Exception:
-                pass
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID,
+                    text="🔔 Slow mode kapatıldı.", reply_markup=InlineKeyboardMarkup(_geri))
         except Exception as e:
             errmsg = f"❌ Slow mode kapatılamadı:\n{html.escape(str(e))}"
             try:
-                await query.edit_message_text(errmsg)
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri))
 
     elif query.data.startswith('kbi_'):
         # Kanal bilgisi göster
@@ -7274,6 +7340,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("❌ Geçersiz ID.", show_alert=True)
             return
         await query.answer()
+        _geri = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
         try:
             uye_s = await context.bot.get_chat_member_count(cid)
             chat_b = await context.bot.get_chat(cid)
@@ -7294,22 +7361,22 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"🤖 <b>Bot Sayısı:</b> {bot_s}\n\n"
                 f"📝 <b>Açıklama:</b>\n{aciklama}"
             )
-            geri_btn = [[InlineKeyboardButton("↩️ Geri", callback_data=f"ksec_{cid}")]]
             try:
                 await query.edit_message_text(
-                    msg_text, reply_markup=InlineKeyboardMarkup(geri_btn), parse_mode='HTML'
+                    msg_text, reply_markup=InlineKeyboardMarkup(_geri), parse_mode='HTML'
                 )
             except Exception:
                 await context.bot.send_message(
                     chat_id=SAHIP_KANAL_ID, text=msg_text,
-                    reply_markup=InlineKeyboardMarkup(geri_btn), parse_mode='HTML'
+                    reply_markup=InlineKeyboardMarkup(_geri), parse_mode='HTML'
                 )
         except Exception as e:
             errmsg = f"❌ Bilgi alınamadı:\n{html.escape(str(e))}"
             try:
-                await query.edit_message_text(errmsg)
+                await query.edit_message_text(errmsg, reply_markup=InlineKeyboardMarkup(_geri))
             except Exception:
-                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg)
+                await context.bot.send_message(chat_id=SAHIP_KANAL_ID, text=errmsg,
+                                               reply_markup=InlineKeyboardMarkup(_geri))
 
     elif query.data == 'kgeri':
         # Kanal listesine geri dön
