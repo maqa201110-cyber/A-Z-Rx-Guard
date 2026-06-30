@@ -5253,8 +5253,13 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ─────────────────────────────────────────────────────────
 
     # Sahip kanal yönetim callback'lerini kanal takip kontrolünden muaf tut
-    _SAHIP_PREFIKSLERI = ('ksec_', 'kyc_', 'ksk_', 'ksa_', 'kha_', 'ksm_', 'ksmk_', 'kbi_', 'ygonder_', 'kgeri', 'yaz_iptal')
-    _sahip_callback = query.data in ('kgeri', 'yaz_iptal') or any(query.data.startswith(p) for p in _SAHIP_PREFIKSLERI)
+    _SAHIP_PREFIKSLERI = (
+        'ksec_', 'kyc_', 'ksk_', 'ksa_', 'kha_', 'ksm_', 'ksmk_', 'kbi_',
+        'ygonder_', 'kgeri', 'yaz_iptal', 'ksilmod', 'ksil_', 'ksilonay_', 'ksiliptal',
+    )
+    _sahip_callback = query.data in ('kgeri', 'yaz_iptal', 'ksilmod', 'ksiliptal') or any(
+        query.data.startswith(p) for p in _SAHIP_PREFIKSLERI
+    )
     if not _sahip_callback and not await kanal_takip_kontrol(update, context, user_id, lang):
         return
 
@@ -7224,18 +7229,48 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 admin_idleri = set()
 
-            # Kayıtlı üyelerden admin olmayanları at
+            # Tüm kaynaklardan üye ID'lerini topla
+            tum_uid_ler: set[int] = set()
+
+            # 1. grup_uyeler.json — mesaj atanlar + katılanlar
             veriler = grup_uyeleri_yukle()
-            uyeler = veriler.get(str(cid), {})
+            for uid_str in veriler.get(str(cid), {}).keys():
+                try:
+                    tum_uid_ler.add(int(uid_str))
+                except (ValueError, TypeError):
+                    pass
+
+            # 2. grup_uyarilari.json — uyarı alanlar
+            try:
+                with open("grup_uyarilari.json", "r", encoding="utf-8") as _f:
+                    _uy_data = json.load(_f)
+                for uid_str in _uy_data.get(str(cid), {}).keys():
+                    try:
+                        tum_uid_ler.add(int(uid_str))
+                    except (ValueError, TypeError):
+                        pass
+            except Exception:
+                pass
+
+            # Admin ve botu çıkar
+            tum_uid_ler -= admin_idleri
+            try:
+                bot_uid = (await context.bot.get_me()).id
+                tum_uid_ler.discard(bot_uid)
+            except Exception:
+                pass
+
             atilan = 0
-            atlanan = 0  # admin/creator
+            atlanan = 0
             hata = 0
 
-            if not uyeler:
+            if not tum_uid_ler:
                 sonuc = (
-                    f"⚠️ <b>Bu grup için kayıtlı üye bulunamadı.</b>\n\n"
-                    f"Bot yalnızca kendi gözetiminde mesaj atan üyeleri takip edebilir.\n"
-                    f"Gruba birkaç mesaj attıktan sonra tekrar dene."
+                    f"⚠️ <b>Bu grup için takip edilmiş üye bulunamadı.</b>\n\n"
+                    f"Bot yalnızca kendi gözetiminde gruba katılan veya mesaj atan\n"
+                    f"üyeleri takip edebilir. Telegram API tüm üyeleri listelemeye\n"
+                    f"izin vermiyor.\n\n"
+                    f"Gruba birkaç mesaj atıldıktan sonra tekrar dene."
                 )
                 try:
                     await query.edit_message_text(sonuc, parse_mode='HTML',
@@ -7245,24 +7280,25 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         parse_mode='HTML', reply_markup=InlineKeyboardMarkup(_geri))
                 return
 
-            for uid_str in list(uyeler.keys()):
+            for uid in list(tum_uid_ler):
                 try:
-                    uid = int(uid_str)
-                    if uid in admin_idleri:
-                        atlanan += 1
-                        continue
                     await context.bot.ban_chat_member(cid, uid)
                     await asyncio.sleep(0.05)
                     await context.bot.unban_chat_member(cid, uid, only_if_banned=True)
                     atilan += 1
-                except Exception:
-                    hata += 1
+                except Exception as _ke:
+                    _es = str(_ke).lower()
+                    if 'admin' in _es or 'creator' in _es or 'rights' in _es:
+                        atlanan += 1
+                    else:
+                        hata += 1
 
             sonuc = (
                 f"👥 <b>Herkesi At — Tamamlandı</b>\n\n"
                 f"✅ Atılan: <b>{atilan}</b>\n"
                 f"👑 Admin/atlanan: <b>{atlanan}</b>\n"
-                f"❌ Hata: <b>{hata}</b>"
+                f"❌ Hata: <b>{hata}</b>\n\n"
+                f"<i>Toplam takip edilen: {len(tum_uid_ler)} kişi</i>"
             )
             try:
                 await query.edit_message_text(sonuc, parse_mode='HTML',
@@ -7381,6 +7417,15 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'kgeri':
         # Kanal listesine geri dön
         await query.answer()
+        metin, klavye = _kanal_listesi_olustur()
+        try:
+            await query.edit_message_text(metin, reply_markup=klavye, parse_mode='HTML')
+        except Exception:
+            pass
+
+    elif query.data == 'ksilmod':
+        # Sil moduna geç — her kanalın yanında Sil butonu
+        await query.answer()
         data = _kanal_yukle()
         if not data:
             try:
@@ -7390,17 +7435,80 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         butonlar = []
         for cid_s, info in data.items():
-            baslik = (info.get('baslik') or cid_s)[:35]
+            baslik = (info.get('baslik') or cid_s)[:30]
             tur_emoji = "📢" if info.get('tur') == 'channel' else "👥"
             butonlar.append([
-                InlineKeyboardButton(f"{tur_emoji} {baslik}", callback_data=f"ksec_{cid_s}")
+                InlineKeyboardButton(f"{tur_emoji} {baslik}", callback_data=f"ksil_{cid_s}")
             ])
+        butonlar.append([InlineKeyboardButton("❌ İptal", callback_data="ksiliptal")])
         try:
             await query.edit_message_text(
-                "📋 <b>Botun Bulunduğu Kanallar / Gruplar</b>\n\nBir kanala tıkla:",
+                "🗑 <b>Listeden Sil</b>\n\nHangi kanalı/grubu listeden kaldırmak istiyorsun?\n"
+                "<i>(Bot kanaldan ayrılmaz, sadece listeden çıkar)</i>",
                 reply_markup=InlineKeyboardMarkup(butonlar),
                 parse_mode='HTML'
             )
+        except Exception:
+            pass
+
+    elif query.data.startswith('ksil_'):
+        # Silme onayı iste
+        try:
+            cid = int(query.data[5:])
+        except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
+            return
+        await query.answer()
+        data = _kanal_yukle()
+        info = data.get(str(cid), {})
+        baslik = info.get('baslik', str(cid))
+        tur_emoji = "📢" if info.get('tur') == 'channel' else "👥"
+        onay_klavye = [
+            [
+                InlineKeyboardButton("✅ Evet, Sil", callback_data=f"ksilonay_{cid}"),
+                InlineKeyboardButton("❌ İptal", callback_data="ksiliptal"),
+            ]
+        ]
+        try:
+            await query.edit_message_text(
+                f"⚠️ <b>Emin misin?</b>\n\n"
+                f"{tur_emoji} <b>{html.escape(baslik)}</b>\n\n"
+                f"Bu kanal/grup listeden kaldırılacak.\n"
+                f"<i>Bot kanaldan ayrılmaz — sadece listeden silinir.</i>",
+                reply_markup=InlineKeyboardMarkup(onay_klavye),
+                parse_mode='HTML'
+            )
+        except Exception:
+            pass
+
+    elif query.data.startswith('ksilonay_'):
+        # Silme onaylandı
+        try:
+            cid = int(query.data[9:])
+        except ValueError:
+            await query.answer("❌ Geçersiz ID.", show_alert=True)
+            return
+        await query.answer()
+        data = _kanal_yukle()
+        baslik = data.get(str(cid), {}).get('baslik', str(cid))
+        _kanal_sil(cid)
+        # Güncel listeyi göster
+        metin, klavye = _kanal_listesi_olustur()
+        try:
+            await query.edit_message_text(
+                f"✅ <b>{html.escape(baslik)}</b> listeden kaldırıldı.\n\n" + metin,
+                reply_markup=klavye,
+                parse_mode='HTML'
+            )
+        except Exception:
+            pass
+
+    elif query.data == 'ksiliptal':
+        # Sil modunu iptal et — normal listeye dön
+        await query.answer()
+        metin, klavye = _kanal_listesi_olustur()
+        try:
+            await query.edit_message_text(metin, reply_markup=klavye, parse_mode='HTML')
         except Exception:
             pass
 
@@ -11429,6 +11537,23 @@ def _kanal_sil(chat_id: int):
     _kanal_kaydet(data)
 
 
+def _kanal_listesi_olustur() -> tuple:
+    """Normal kanal listesi mesajı ve klavyesini döndürür (metin, InlineKeyboardMarkup)."""
+    data = _kanal_yukle()
+    if not data:
+        return "📭 Bot şu an hiçbir kanal veya grupta değil.", None
+    butonlar = []
+    for cid_s, info in data.items():
+        baslik = (info.get('baslik') or cid_s)[:35]
+        tur_emoji = "📢" if info.get('tur') == 'channel' else "👥"
+        butonlar.append([InlineKeyboardButton(f"{tur_emoji} {baslik}", callback_data=f"ksec_{cid_s}")])
+    butonlar.append([InlineKeyboardButton("🗑 Listeden Sil", callback_data="ksilmod")])
+    return (
+        "📋 <b>Botun Bulunduğu Kanallar / Gruplar</b>\n\nBir kanala tıkla:",
+        InlineKeyboardMarkup(butonlar)
+    )
+
+
 async def _kanal_tara_yap(bot) -> int:
     """Tüm bilinen kaynaklardan kanal/grup ID'lerini toplar, Telegram API ile doğrular ve kaydeder."""
     mevcut = _kanal_yukle()
@@ -11561,24 +11686,11 @@ async def kanal_listesi_komutu(update: Update, context: ContextTypes.DEFAULT_TYP
     eff_chat = update.effective_chat
     if not eff_chat or eff_chat.id != SAHIP_KANAL_ID:
         return
-    data = _kanal_yukle()
-    if not data:
-        await context.bot.send_message(
-            chat_id=SAHIP_KANAL_ID,
-            text="📭 Bot şu an hiçbir kanal veya grupta değil."
-        )
-        return
-    butonlar = []
-    for cid_s, info in data.items():
-        baslik = (info.get('baslik') or cid_s)[:38]
-        tur_emoji = "📢" if info.get('tur') == 'channel' else "👥"
-        butonlar.append([
-            InlineKeyboardButton(f"{tur_emoji} {baslik} — !TIKLA", callback_data=f"ksec_{cid_s}")
-        ])
+    metin, klavye = _kanal_listesi_olustur()
     await context.bot.send_message(
         chat_id=SAHIP_KANAL_ID,
-        text="📋 <b>Botun Bulunduğu Kanallar / Gruplar</b>\n\nBir kanala tıkla:",
-        reply_markup=InlineKeyboardMarkup(butonlar),
+        text=metin,
+        reply_markup=klavye,
         parse_mode='HTML'
     )
 
