@@ -11632,6 +11632,60 @@ async def tarama_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def uye_degisimi_takip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Supergroup/group üye değişikliklerini izler (CHAT_MEMBER).
+    - Yeni katılanları grup_uyeler.json'a ekler → 'herkesi at' bunları kullanır
+    - Ayrılanlar için güle güle mesajı gönderir (basic group'ta zaten message handler'dan geliyor,
+      supergroup'ta sadece buradan gelir)
+    """
+    cmu = update.chat_member
+    if not cmu:
+        return
+    chat = cmu.chat
+    if chat.id == SAHIP_KANAL_ID:
+        return
+
+    kullanici = cmu.new_chat_member.user
+    eski_durum = cmu.old_chat_member.status   # left / kicked / member / restricted / administrator / creator
+    yeni_durum = cmu.new_chat_member.status
+
+    # Kanal/grubu pasif olarak kaydet
+    if chat.title:
+        _mevcut = _kanal_yukle()
+        if str(chat.id) not in _mevcut or _mevcut[str(chat.id)].get('baslik') != chat.title:
+            _kanal_ekle(chat.id, chat.title, chat.type)
+
+    # ── Üye katıldı ──────────────────────────────────────────
+    yeni_katildi = (
+        eski_durum in ('left', 'kicked') and
+        yeni_durum in ('member', 'administrator', 'restricted', 'creator')
+    )
+    if yeni_katildi and not kullanici.is_bot:
+        grup_uye_ekle(chat.id, kullanici)
+
+    # ── Üye ayrıldı veya atıldı ──────────────────────────────
+    ayrilan = (
+        eski_durum in ('member', 'administrator', 'restricted', 'creator') and
+        yeni_durum in ('left', 'kicked')
+    )
+    if ayrilan and not kullanici.is_bot:
+        guvenli_isim = html.escape(kullanici.first_name or "Üye")
+        gule_gule = (
+            f"👋 **[{guvenli_isim}](tg://user?id={kullanici.id}) grubumuzdan ayrıldı.**\n\n"
+            f"😔 Güle güle, seni tanımak güzeldi!\n"
+            f"Umarız tekrar görüşürüz. 🙏"
+        )
+        try:
+            await context.bot.send_message(
+                chat_id=chat.id,
+                text=gule_gule,
+                parse_mode='Markdown'
+            )
+        except Exception as e:
+            logger.debug(f"Güle güle mesajı gönderilemedi ({chat.id}): {e}")
+
+
 async def bot_chat_member_degisti(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Bot bir kanala/gruba eklendiğinde veya ayrıldığında tetiklenir."""
     mcu = update.my_chat_member
@@ -11855,6 +11909,8 @@ def main():
     )
     # Bot bir kanala/gruba eklendiğinde veya ayrıldığında tetiklenir
     application.add_handler(ChatMemberHandler(bot_chat_member_degisti, ChatMemberHandler.MY_CHAT_MEMBER))
+    # Grup üye değişikliklerini izle (katılma/ayrılma) — güle güle + üye takibi
+    application.add_handler(ChatMemberHandler(uye_degisimi_takip, ChatMemberHandler.CHAT_MEMBER))
     # /tarama komutu (sadece SAHIP_KANAL_ID'de)
     application.add_handler(
         MessageHandler(
