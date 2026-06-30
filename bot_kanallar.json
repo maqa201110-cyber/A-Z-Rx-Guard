@@ -9,14 +9,29 @@
     "baslik": "AZRxMAQA CHAT",
     "tur": "supergroup"
   },
+  "-1003764862797": {
+    "id": -1003764862797,
+    "baslik": "S",
+    "tur": "supergroup"
+  },
   "-1003761203008": {
     "id": -1003761203008,
     "baslik": "AZRxMAQA",
     "tur": "channel"
   },
-  "-1003764862797": {
-    "id": -1003764862797,
-    "baslik": "S",
-    "tur": "supergroup"
+  "-1003788921873": {
+    "id": -1003788921873,
+    "baslik": "BOT test",
+    "tur": "channel"
+  },
+  "-1004299694640": {
+    "id": -1004299694640,
+    "baslik": "BOT APK YÜKLEME",
+    "tur": "channel"
+  },
+  "-1003918825511": {
+    "id": -1003918825511,
+    "baslik": "azrXmaqa BOT YÖNETİM",
+    "tur": "channel"
   }
 }
