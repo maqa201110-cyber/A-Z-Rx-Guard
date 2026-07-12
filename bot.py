@@ -8067,7 +8067,8 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
         if len(gecmis) > 20:
             gecmis = gecmis[-20:]
         def call_api():
-            client = genai.Client()
+            import os
+            client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
             system_prompt = (
                 "Sen AZRxGUARD botunun yapay zeka asistanısın. "
                 "Gürcüce, Türkçe, Rusça, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
