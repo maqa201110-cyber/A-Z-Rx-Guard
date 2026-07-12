@@ -8059,39 +8059,47 @@ async def gunluk_istatistik_job(context: ContextTypes.DEFAULT_TYPE):
 _tg_ai_gecmis: dict = {}
 
 async def gemini_yanit_tg(user_id: int, soru: str) -> str:
+    """
+    Gemini 2.0 Flash — direkt REST API ile çağrı yapar.
+    SDK yerine HTTP kullanır; AIza ve AQ. formatındaki keylerin ikisini de destekler.
+    """
+    import os, requests as _req
+    api_key = os.environ.get("GOOGLE_API_KEY", "")
+    if not api_key:
+        return "❌ GOOGLE_API_KEY ayarlanmamış."
+
+    gecmis = _tg_ai_gecmis.get(user_id, [])
+    gecmis.append({"role": "user", "parts": [{"text": soru}]})
+    if len(gecmis) > 20:
+        gecmis = gecmis[-20:]
+
+    system_prompt = (
+        "Sen AZRxGUARD botunun yapay zeka asistanısın. "
+        "Gürcüce, Türkçe, Rusça, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
+        "Gürcistan odaklı sorularda öncelikle Gürcüce veya Türkçe yanıt veriyorsun. "
+        "Samimi, yardımsever ve kısa cevaplar veriyorsun."
+    )
+
+    payload = {
+        "system_instruction": {"parts": [{"text": system_prompt}]},
+        "contents": gecmis,
+        "generationConfig": {
+            "maxOutputTokens": 1024,
+            "temperature": 0.7
+        }
+    }
+
+    def call_api():
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta"
+            f"/models/gemini-2.0-flash:generateContent?key={api_key}"
+        )
+        r = _req.post(url, json=payload, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
     try:
-        from google import genai
-        from google.genai import types
-        gecmis = _tg_ai_gecmis.get(user_id, [])
-        gecmis.append({"role": "user", "parts": [{"text": soru}]})
-        if len(gecmis) > 20:
-            gecmis = gecmis[-20:]
-        def call_api():
-            import os
-            client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
-            system_prompt = (
-                "Sen AZRxGUARD botunun yapay zeka asistanısın. "
-                "Gürcüce, Türkçe, Rusça, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
-                "Gürcistan odaklı sorularda öncelikle Gürcüce veya Türkçe yanıt veriyorsun. "
-                "Samimi, yardımsever ve kısa cevaplar veriyorsun. "
-                "Markdown kullanabilirsin."
-            )
-            contents = []
-            for m in gecmis:
-                contents.append(types.Content(
-                    role=m["role"],
-                    parts=[types.Part.from_text(text=m["parts"][0]["text"])]
-                ))
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_prompt,
-                    max_output_tokens=1024,
-                    temperature=0.7,
-                )
-            )
-            return response.text
         yanit = await asyncio.to_thread(call_api)
         if yanit:
             gecmis.append({"role": "model", "parts": [{"text": yanit}]})
@@ -8099,7 +8107,12 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
         return yanit or "❌ AI yanıt üretemedi."
     except Exception as e:
         logger.error(f"Gemini TG hatası: {e}")
-        return f"❌ AI servisi şu an erişilemiyor.\n`{str(e)[:100]}`"
+        hata = str(e)[:120]
+        if "429" in hata:
+            return "❌ Günlük AI kullanım limiti doldu. Yarın sıfırlanır."
+        if "400" in hata or "API_KEY" in hata.upper():
+            return "❌ Geçersiz API key. Lütfen sahibe bildirin."
+        return f"❌ AI servisi şu an erişilemiyor.\n`{hata}`"
 
 
 # ══════════════════════════════════════════════════════════════
