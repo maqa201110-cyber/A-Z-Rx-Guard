@@ -10709,27 +10709,42 @@ def _spam_mute_kaydet(veri: dict) -> None:
     except Exception as e:
         logger.warning(f"Spam mute kaydedilemedi: {e}")
 
-def _spam_mute_sayisi_al(chat_id: int, user_id: int) -> int:
+def _spam_durum_al(chat_id: int, user_id: int) -> dict:
+    """{'uyari': 0-5, 'mute': 0-5} döndürür."""
     veri = _spam_mute_yukle()
-    return veri.get(str(chat_id), {}).get(str(user_id), 0)
+    kayit = veri.get(str(chat_id), {}).get(str(user_id), {})
+    if isinstance(kayit, int):
+        # Eski format (sadece sayı) → yeni formata çevir
+        kayit = {"uyari": 0, "mute": kayit}
+    return {"uyari": kayit.get("uyari", 0), "mute": kayit.get("mute", 0)}
 
-def _spam_mute_sayisi_artir(chat_id: int, user_id: int) -> int:
+def _spam_durum_kaydet(chat_id: int, user_id: int, uyari: int, mute: int) -> None:
     veri = _spam_mute_yukle()
     ck = str(chat_id)
     uk = str(user_id)
     if ck not in veri:
         veri[ck] = {}
-    veri[ck][uk] = veri[ck].get(uk, 0) + 1
+    veri[ck][uk] = {"uyari": uyari, "mute": mute}
     _spam_mute_kaydet(veri)
-    return veri[ck][uk]
 
 async def anti_spam_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """
-    Spam kontrolü. Spam tespit edilirse mute/ban uygular.
-    True döndürürse mesaj spam'dı ve işlem yapıldı.
-    Kural: 10 saniye içinde 3 aynı/çok benzer mesaj → spam.
-    Mute süresi: 30dk × mute_sayısı (1.=30dk, 2.=60dk ...)
-    5 mute sonrası → ban.
+    Spam kontrolü.
+    Kural: 10 saniye içinde aynı mesajı 3 kez gönder → spam.
+
+    Aşama 1 — Uyarılar (mute YOK):
+      1. spam → "Ali spam yapma! 1/5"
+      2. spam → "Ali spam yapma! 2/5"
+      ...
+      5. spam → "Ali spam yapma bu son uyarı!! 5/5"
+
+    Aşama 2 — Muteler (uyarılar doldu):
+      6. spam  → 30 dk mute
+      7. spam  → 60 dk mute
+      8. spam  → 90 dk mute
+      9. spam  → 120 dk mute
+      10. spam → 150 dk mute
+      11. spam → Kalıcı ban
     """
     msg = update.message
     if not msg or not msg.from_user or msg.from_user.is_bot:
@@ -10745,64 +10760,98 @@ async def anti_spam_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return False
 
     simdi = datetime.datetime.now().timestamp()
-    pencere = 10.0   # saniye
-    esik = 3         # kaç tekrar
+    pencere = 10.0
+    esik = 3
 
     # Hafızayı güncelle
-    ck = chat_id
-    uk = user_id
-    if ck not in _spam_hafiza:
-        _spam_hafiza[ck] = {}
-    if uk not in _spam_hafiza[ck]:
-        _spam_hafiza[ck][uk] = []
+    if chat_id not in _spam_hafiza:
+        _spam_hafiza[chat_id] = {}
+    if user_id not in _spam_hafiza[chat_id]:
+        _spam_hafiza[chat_id][user_id] = []
 
-    # Eski kayıtları temizle
-    _spam_hafiza[ck][uk] = [
-        (t, ts) for (t, ts) in _spam_hafiza[ck][uk]
+    _spam_hafiza[chat_id][user_id] = [
+        (t, ts) for (t, ts) in _spam_hafiza[chat_id][user_id]
         if simdi - ts < pencere
     ]
+    _spam_hafiza[chat_id][user_id].append((metin, simdi))
 
-    # Şimdiki mesajı ekle
-    _spam_hafiza[ck][uk].append((metin, simdi))
-
-    # Penceredeki aynı metinleri say
-    ayni_sayisi = sum(1 for (t, _) in _spam_hafiza[ck][uk] if t == metin)
+    ayni_sayisi = sum(1 for (t, _) in _spam_hafiza[chat_id][user_id] if t == metin)
     if ayni_sayisi < esik:
         return False
 
-    # Spam tespit! Hafızayı temizle (bir daha tetiklenmesin)
-    _spam_hafiza[ck][uk] = []
+    # Spam tespit edildi — hafızayı temizle
+    _spam_hafiza[chat_id][user_id] = []
 
-    # Mute sayısını artır
-    mute_sayisi = _spam_mute_sayisi_artir(chat_id, user_id)
     guvenli_isim = html.escape(user.first_name or str(user_id))
     mention = f"<a href='tg://user?id={user_id}'>{guvenli_isim}</a>"
+    isim_kisa = html.escape(user.first_name or "Kullanıcı")
 
-    # 5 mute → ban
-    if mute_sayisi > 5:
+    durum = _spam_durum_al(chat_id, user_id)
+    uyari = durum["uyari"]
+    mute  = durum["mute"]
+
+    # Spam mesajını sil
+    try:
+        await msg.delete()
+    except Exception:
+        pass
+
+    # ── AŞAMA 1: Uyarı (ilk 5 spam) ─────────────────────────────────────
+    if uyari < 5:
+        uyari += 1
+        _spam_durum_kaydet(chat_id, user_id, uyari, mute)
+
+        if uyari == 5:
+            bildirim = (
+                f"⚠️ {mention} <b>spam yapma bu son uyarı!! {uyari}/5</b>\n"
+                f"Bir daha yaparsan susturulursun! 🔇"
+            )
+        else:
+            bildirim = f"⚠️ {mention} <b>spam yapma! {uyari}/5</b>"
+
         try:
-            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
-        except Exception as e:
-            logger.warning(f"Spam ban hatası ({user_id}@{chat_id}): {e}")
-        uyari_metni = (
-            f"🚫 <b>SPAM — Kalıcı Ban</b>\n\n"
-            f"👤 {mention} daha önce 5 kez spam mute yedi ve yine spam yaptı.\n"
-            f"⛔ Kullanıcı gruptan kalıcı olarak <b>banlandı</b>."
-        )
-        try:
-            await context.bot.send_message(chat_id=chat_id, text=uyari_metni, parse_mode='HTML')
-        except Exception:
-            pass
-        try:
-            await msg.delete()
+            await context.bot.send_message(chat_id=chat_id, text=bildirim, parse_mode='HTML')
         except Exception:
             pass
         return True
 
-    # Mute süresi: 30dk × mute_sayısı
-    sure_dakika = 30 * mute_sayisi
+    # ── AŞAMA 2: Mute / Ban (uyarılar doldu) ─────────────────────────────
+    mute += 1
+    _spam_durum_kaydet(chat_id, user_id, uyari, mute)
+
+    # 5 mute geçtiyse → ban
+    if mute > 5:
+        try:
+            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
+            ban_metni = (
+                f"⛔ {mention} <b>gruptan kalıcı olarak banlandı.</b>\n"
+                f"5 kez susturulmasına rağmen spam yapmaya devam etti."
+            )
+        except Exception as e:
+            logger.warning(f"Spam ban hatası ({user_id}@{chat_id}): {e}")
+            ban_metni = (
+                f"⛔ {mention} ban uygulanamadı (yönetici/kurucu ayrıcalığı).\n"
+                f"Ama kayıt tutuldu."
+            )
+        try:
+            await context.bot.send_message(chat_id=chat_id, text=ban_metni, parse_mode='HTML')
+        except Exception:
+            pass
+        return True
+
+    # Mute uygula
+    sure_dakika = 30 * mute
     sure_saniye = sure_dakika * 60
     bitis = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=sure_saniye)
+
+    if sure_dakika >= 60:
+        sure_str = (
+            f"{sure_dakika // 60} saat {sure_dakika % 60} dakika"
+            if sure_dakika % 60 else
+            f"{sure_dakika // 60} saat"
+        )
+    else:
+        sure_str = f"{sure_dakika} dakika"
 
     mute_basarili = True
     try:
@@ -10814,31 +10863,23 @@ async def anti_spam_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         )
     except Exception as e:
         logger.warning(f"Spam mute uygulanamadı ({user_id}@{chat_id}): {e}")
-        mute_basarili = False  # Kurucu/admin gibi kısıtlanamayan kişiler — yine de uyar
-
-    if sure_dakika >= 60:
-        sure_str = f"{sure_dakika // 60} saat {sure_dakika % 60:02d} dakika" if sure_dakika % 60 else f"{sure_dakika // 60} saat"
-    else:
-        sure_str = f"{sure_dakika} dakika"
+        mute_basarili = False
 
     if mute_basarili:
-        eylem_str = f"🔇 <b>{sure_str}</b> boyunca susturuldu."
+        bildirim = (
+            f"🔇 {mention} <b>{sure_str} susturuldu.</b>\n"
+            f"Sebep: uyarılara rağmen spam yapmaya devam etti.\n"
+            f"📊 Susturulma: <b>{mute}/5</b>"
+            f"{' — bir sonrakinde ban!' if mute >= 5 else ''}"
+        )
     else:
-        eylem_str = f"⚠️ <b>Susturulamadı</b> (yönetici/kurucu ayrıcalığı) — ama spam kaydedildi."
+        bildirim = (
+            f"⚠️ {mention} susturulamadı (yönetici/kurucu ayrıcalığı).\n"
+            f"Ama spam kaydedildi. 📊 Susturulma: <b>{mute}/5</b>"
+        )
 
-    uyari_metni = (
-        f"🚨 <b>SPAM TESPİT EDİLDİ</b>\n\n"
-        f"👤 {mention} kısa sürede aynı mesajı birden fazla kez gönderdi.\n"
-        f"{eylem_str}\n"
-        f"⚠️ Toplam spam ihlali: <b>{mute_sayisi}/5</b>"
-        f"{' — bir sonraki ihlalde BAN!' if mute_sayisi >= 5 else ''}"
-    )
     try:
-        await context.bot.send_message(chat_id=chat_id, text=uyari_metni, parse_mode='HTML')
-    except Exception:
-        pass
-    try:
-        await msg.delete()
+        await context.bot.send_message(chat_id=chat_id, text=bildirim, parse_mode='HTML')
     except Exception:
         pass
     return True
