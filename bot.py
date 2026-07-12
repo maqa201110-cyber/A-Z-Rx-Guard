@@ -1185,6 +1185,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
             InlineKeyboardButton(strings['btn_channel'], url='https://t.me/azrXmaqa')
         ],
         [
+            InlineKeyboardButton('🤖 AZR — AI', callback_data='menu_ai')
+        ],
+        [
             InlineKeyboardButton(strings['btn_admin'], callback_data='menu_admin')
         ],
         [
