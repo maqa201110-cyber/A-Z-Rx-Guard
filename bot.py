@@ -8060,16 +8060,12 @@ _tg_ai_gecmis: dict = {}
 
 async def gemini_yanit_tg(user_id: int, soru: str) -> str:
     """
-    Gemini 2.0 Flash — direkt REST API ile çağrı yapar.
-    SDK yerine HTTP kullanır; AIza ve AQ. formatındaki keylerin ikisini de destekler.
+    AI cevap üretici — önce Groq (Llama), yoksa Gemini REST dener.
     """
     import os, requests as _req
-    api_key = os.environ.get("GOOGLE_API_KEY", "")
-    if not api_key:
-        return "❌ GOOGLE_API_KEY ayarlanmamış."
 
     gecmis = _tg_ai_gecmis.get(user_id, [])
-    gecmis.append({"role": "user", "parts": [{"text": soru}]})
+    gecmis.append({"role": "user", "content": soru})
     if len(gecmis) > 20:
         gecmis = gecmis[-20:]
 
@@ -8080,39 +8076,61 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
         "Samimi, yardımsever ve kısa cevaplar veriyorsun."
     )
 
-    payload = {
-        "system_instruction": {"parts": [{"text": system_prompt}]},
-        "contents": gecmis,
-        "generationConfig": {
-            "maxOutputTokens": 1024,
-            "temperature": 0.7
-        }
-    }
+    # ── 1. Groq (Llama 3.3 70B) — ücretsiz, hızlı ───────────────────────
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if groq_key:
+        def call_groq():
+            mesajlar = [{"role": "system", "content": system_prompt}] + gecmis
+            r = _req.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                json={"model": "llama-3.3-70b-versatile", "messages": mesajlar, "max_tokens": 1024, "temperature": 0.7},
+                timeout=30
+            )
+            r.raise_for_status()
+            return r.json()["choices"][0]["message"]["content"]
+        try:
+            yanit = await asyncio.to_thread(call_groq)
+            if yanit:
+                gecmis.append({"role": "assistant", "content": yanit})
+                _tg_ai_gecmis[user_id] = gecmis[-20:]
+            return yanit or "❌ AI yanıt üretemedi."
+        except Exception as e:
+            logger.warning(f"Groq hatası: {e}")
 
-    def call_api():
-        url = (
-            "https://generativelanguage.googleapis.com/v1beta"
-            f"/models/gemini-2.0-flash:generateContent?key={api_key}"
-        )
-        r = _req.post(url, json=payload, timeout=30)
-        r.raise_for_status()
-        data = r.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+    # ── 2. Gemini REST (yedek) ────────────────────────────────────────────
+    gemini_key = os.environ.get("GOOGLE_API_KEY", "")
+    if gemini_key:
+        gemini_gecmis = [
+            {"role": m["role"] if m["role"] != "assistant" else "model",
+             "parts": [{"text": m.get("content", m.get("parts", [{}])[0].get("text", ""))}]}
+            for m in gecmis if m["role"] in ("user", "assistant")
+        ]
+        def call_gemini():
+            r = _req.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_key}",
+                json={
+                    "system_instruction": {"parts": [{"text": system_prompt}]},
+                    "contents": gemini_gecmis,
+                    "generationConfig": {"maxOutputTokens": 1024, "temperature": 0.7}
+                },
+                timeout=30
+            )
+            r.raise_for_status()
+            return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        try:
+            yanit = await asyncio.to_thread(call_gemini)
+            if yanit:
+                gecmis.append({"role": "assistant", "content": yanit})
+                _tg_ai_gecmis[user_id] = gecmis[-20:]
+            return yanit or "❌ AI yanıt üretemedi."
+        except Exception as e:
+            hata = str(e)
+            if "429" in hata:
+                return "❌ AI günlük limiti doldu. Yarın tekrar dene."
+            logger.error(f"Gemini hatası: {e}")
 
-    try:
-        yanit = await asyncio.to_thread(call_api)
-        if yanit:
-            gecmis.append({"role": "model", "parts": [{"text": yanit}]})
-            _tg_ai_gecmis[user_id] = gecmis[-20:]
-        return yanit or "❌ AI yanıt üretemedi."
-    except Exception as e:
-        logger.error(f"Gemini TG hatası: {e}")
-        hata = str(e)[:120]
-        if "429" in hata:
-            return "❌ Günlük AI kullanım limiti doldu. Yarın sıfırlanır."
-        if "400" in hata or "API_KEY" in hata.upper():
-            return "❌ Geçersiz API key. Lütfen sahibe bildirin."
-        return f"❌ AI servisi şu an erişilemiyor.\n`{hata}`"
+    return "❌ AI servisi için API key ayarlanmamış. Sahip /start yazarak ayarlayabilir."
 
 
 # ══════════════════════════════════════════════════════════════
