@@ -5133,6 +5133,61 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
                     pass
             return
 
+        # ── Grup AI Sohbet — @bot mention veya bota reply ────────────────────
+        if update.message.chat.type in ('group', 'supergroup'):
+            msg = update.message
+            bot_username = (context.bot.username or "").lower()
+            soru = None
+
+            # 1) Bota doğrudan reply
+            if (msg.reply_to_message and
+                    msg.reply_to_message.from_user and
+                    msg.reply_to_message.from_user.id == context.bot.id):
+                soru = (msg.text or msg.caption or "").strip()
+
+            # 2) @mention ile
+            elif msg.text or msg.caption:
+                metin_ham = msg.text or msg.caption or ""
+                entities = msg.entities or msg.caption_entities or []
+                for ent in entities:
+                    if ent.type == "mention":
+                        mention_text = metin_ham[ent.offset: ent.offset + ent.length]
+                        if mention_text.lstrip("@").lower() == bot_username:
+                            # @bot'u metinden çıkar, geri kalanı soru olarak al
+                            soru = (metin_ham[:ent.offset] + metin_ham[ent.offset + ent.length:]).strip()
+                            break
+
+            if soru:
+                user_id = msg.from_user.id if msg.from_user else 0
+                if not soru:
+                    soru = "Merhaba!"
+                try:
+                    bekle = await msg.reply_text("🤖 _Düşünüyorum..._", parse_mode="Markdown")
+                except Exception:
+                    bekle = None
+                yanit = await gemini_yanit_tg(user_id, soru)
+                if bekle:
+                    try:
+                        await bekle.edit_text(yanit, parse_mode="Markdown")
+                    except Exception:
+                        try:
+                            await bekle.edit_text(yanit)
+                        except Exception:
+                            try:
+                                await msg.reply_text(yanit)
+                            except Exception:
+                                pass
+                else:
+                    try:
+                        await msg.reply_text(yanit, parse_mode="Markdown")
+                    except Exception:
+                        try:
+                            await msg.reply_text(yanit)
+                        except Exception:
+                            pass
+                return
+        # ─────────────────────────────────────────────────────────────────────
+
         if update.message.text and update.message.text.startswith('/'):
             komut_parcalari = update.message.text.split()[0].split('@')
             if komut_parcalari[0] == '/start':
