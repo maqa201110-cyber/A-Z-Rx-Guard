@@ -10817,7 +10817,7 @@ async def anti_spam_kontrol(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     # ── AŞAMA 2: Mute / Ban (uyarılar doldu) ─────────────────────────────
     mute += 1
-    _spam_durum_kaydet(chat_id, user_id, uyari, mute)
+    _spam_durum_kaydet(chat_id, user_id, 0, mute)  # uyarı sıfırlanır, yeni döngü başlar
 
     # 5 mute geçtiyse → ban
     if mute > 5:
