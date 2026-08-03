@@ -5677,8 +5677,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mevcut_kategori'] = '⚡ Pro Araçlar'
         pro_klavye = [
             [InlineKeyboardButton('🏠 Kişisel Kullanım', callback_data='menu_kisisel_kullanim')],
-            [InlineKeyboardButton('🛡️ Siber Güvenlik', callback_data='menu_siber_guvenlik'),
-             InlineKeyboardButton('🎮 Eğlence', callback_data='menu_fun')],
+            [InlineKeyboardButton('🎮 Eğlence', callback_data='menu_fun')],
             [InlineKeyboardButton('🌐 Wikipedia', callback_data='pro_wiki'),
              InlineKeyboardButton('📱 QR Kod', callback_data='sa_qr')],
             [InlineKeyboardButton('🌐 URL Kısalt', callback_data='sa_url'),
