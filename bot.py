@@ -6379,27 +6379,46 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     elif query.data == 'siber_mod_gir':
-        # Yükleme animasyonu
-        await query.edit_message_text(
-            "⚡ **Siber mod⚡ Yükleniyor...**\n\n"
-            "┌────────────────────┐\n"
-            "│  ▰▰▰▰▰▰▱▱▱▱▱▱  │\n"
-            "└────────────────────┘",
-            parse_mode='Markdown'
-        )
-        await asyncio.sleep(1.8)
+        # ── Animasyonlu yükleme çubuğu (10 → 100) ──────────────────────────
+        def siber_cubuk(yuzde: int) -> str:
+            dolu = yuzde // 10
+            bos  = 10 - dolu
+            cubuk = '▰' * dolu + '▱' * bos
+            return (
+                f"⚡ *Siber mod⚡ Yükleniyor...*\n\n"
+                f"┌────────────────────┐\n"
+                f"│  {cubuk}  │\n"
+                f"└────────────────────┘\n\n"
+                f"`{yuzde}%`"
+            )
+        await query.edit_message_text(siber_cubuk(0), parse_mode='Markdown')
+        for yuzde in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+            await asyncio.sleep(0.35)
+            try:
+                await query.edit_message_text(siber_cubuk(yuzde), parse_mode='Markdown')
+            except Exception:
+                pass
+        await asyncio.sleep(0.4)
+        # ── Eski mesajı sil → tamamen yeni mesaj gönder ─────────────────────
+        try:
+            await query.message.delete()
+        except Exception:
+            pass
         siber_mod_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton('🔄 Standart Moda Dön', callback_data='go_home')]
         ])
-        await query.edit_message_text(
-            "⚡ **SİBER GÜVENLİK MODU**\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "```\n"
-            "▰▰▰▰▰▰▰▰▰▰▰▰  %100\n"
-            "SİSTEM HAZIR ✅\n"
-            "```\n\n"
-            "🛡️ _Siber Güvenlik Modu aktif._\n"
-            "⚠️ _Yeni özellikler yakında eklenecek..._",
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text=(
+                "⚡ *SİBER GÜVENLİK MODU*\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "```\n"
+                "▰▰▰▰▰▰▰▰▰▰  %100\n"
+                "SİSTEM HAZIR ✅\n"
+                "```\n\n"
+                "🛡️ _Siber Güvenlik Modu aktif._\n"
+                "⚠️ _Yeni özellikler yakında eklenecek..._"
+            ),
             reply_markup=siber_mod_klavye,
             parse_mode='Markdown'
         )
