@@ -8102,7 +8102,7 @@ async def gemini_yanit_tg(user_id: int, soru: str) -> str:
             logger.warning(f"Groq hatası: {e}")
 
     # ── 2. Gemini REST (yedek) ────────────────────────────────────────────
-    gemini_key = os.environ.get("GOOGLE_API_KEY", "")
+    gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
     if gemini_key:
         gemini_gecmis = [
             {"role": m["role"] if m["role"] != "assistant" else "model",
