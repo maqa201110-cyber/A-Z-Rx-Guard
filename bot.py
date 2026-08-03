@@ -1205,6 +1205,9 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton('🚗 ARABA MENÜSÜ', callback_data='menu_araba')
         ],
+        [
+            InlineKeyboardButton('⚡ SİBER GÜVENLİK MODU', callback_data='siber_mod_gir')
+        ],
     ]
     return InlineKeyboardMarkup(klavye)
 
@@ -6374,6 +6377,33 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Yeni sorunuzu yazabilirsiniz:",
             reply_markup=ai_klavye, parse_mode='Markdown'
         )
+
+    elif query.data == 'siber_mod_gir':
+        # Yükleme animasyonu
+        await query.edit_message_text(
+            "⚡ **Siber mod⚡ Yükleniyor...**\n\n"
+            "┌────────────────────┐\n"
+            "│  ▰▰▰▰▰▰▱▱▱▱▱▱  │\n"
+            "└────────────────────┘",
+            parse_mode='Markdown'
+        )
+        await asyncio.sleep(1.8)
+        siber_mod_klavye = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🔄 Standart Moda Dön', callback_data='go_home')]
+        ])
+        await query.edit_message_text(
+            "⚡ **SİBER GÜVENLİK MODU**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "```\n"
+            "▰▰▰▰▰▰▰▰▰▰▰▰  %100\n"
+            "SİSTEM HAZIR ✅\n"
+            "```\n\n"
+            "🛡️ _Siber Güvenlik Modu aktif._\n"
+            "⚠️ _Yeni özellikler yakında eklenecek..._",
+            reply_markup=siber_mod_klavye,
+            parse_mode='Markdown'
+        )
+
     elif query.data == 'menu_video_indir':
         context.user_data['mevcut_kategori'] = '📥 Video İndir'
         context.user_data['durum'] = 'vid_indir_url_bekliyor'
@@ -8064,19 +8094,64 @@ _tg_ai_gecmis: dict = {}
 async def gemini_yanit_tg(user_id: int, soru: str) -> str:
     """
     AI cevap üretici — önce Groq (Llama), yoksa Gemini REST dener.
+    Botun gerçek zamanlı verilerine (saat, hava durumu) erişimi vardır.
     """
-    import os, requests as _req
+    import os, requests as _req, datetime as _dt_ai
 
     gecmis = _tg_ai_gecmis.get(user_id, [])
     gecmis.append({"role": "user", "content": soru})
     if len(gecmis) > 20:
         gecmis = gecmis[-20:]
 
+    # ── Gerçek zamanlı saat/tarih ───────────────────────────────────────────
+    now_az = _dt_ai.datetime.now(_dt_ai.timezone(_dt_ai.timedelta(hours=4)))
+    tarih_saat_str = now_az.strftime('%d.%m.%Y %H:%M')
+
+    # ── Hava durumu sorusu tespiti → gerçek veri çek ───────────────────────
+    soru_lower = soru.lower()
+    hava_ek = ""
+    hava_keywords = ['hava', 'weather', 'derece', 'sıcaklık', 'kaç derece',
+                     'hava durumu', 'yağmur', 'kar yağ', 'güneşli']
+    if any(k in soru_lower for k in hava_keywords):
+        sehir_eslestirme = {
+            'istanbul': 'Istanbul', 'ankara': 'Ankara', 'izmir': 'Izmir',
+            'bursa': 'Bursa', 'trabzon': 'Trabzon', 'antalya': 'Antalya',
+            'baku': 'Baku', 'bakü': 'Baku',
+            'tiflis': 'Tbilisi', 'tbilisi': 'Tbilisi',
+            'batumi': 'Batumi', 'kutaisi': 'Kutaisi',
+            'moskova': 'Moscow', 'moscow': 'Moscow',
+            'berlin': 'Berlin', 'londra': 'London', 'london': 'London',
+            'paris': 'Paris', 'dubai': 'Dubai', 'amsterdam': 'Amsterdam',
+            'milano': 'Milan', 'milan': 'Milan', 'roma': 'Rome',
+            'new york': 'New York', 'tokyo': 'Tokyo',
+        }
+        sehir_api = None
+        for anahtar, deger in sehir_eslestirme.items():
+            if anahtar in soru_lower:
+                sehir_api = deger
+                break
+        if sehir_api:
+            try:
+                hava_verisi = await hava_durumu_getir(sehir_api, 'tr')
+                hava_ek = (
+                    f"\n\n[BOT'TAN GERÇEK HAVA DURUMU VERİSİ — {sehir_api}]:\n"
+                    f"{hava_verisi}\n[/HAVA DURUMU]\n"
+                    "Bu veriyi kullanarak kullanıcıya doğrudan cevap ver."
+                )
+            except Exception:
+                pass
+
     system_prompt = (
-        "Sen AZRxGUARD botunun yapay zeka asistanısın. "
+        "Sen AZRxGUARD botunun yapay zeka asistanısın ve botun tüm sistemlerine erişimin var. "
         "Gürcüce, Türkçe, Rusça, Azerbaycan Türkçesi ve diğer dillerde yardımcı olabilirsin. "
         "Gürcistan odaklı sorularda öncelikle Gürcüce veya Türkçe yanıt veriyorsun. "
-        "Samimi, yardımsever ve kısa cevaplar veriyorsun."
+        "Samimi, yardımsever ve kısa cevaplar veriyorsun. "
+        f"ŞU ANKİ TARİH VE SAAT (UTC+4 — Azerbaycan/Gürcistan saati): {tarih_saat_str}. "
+        "Kullanıcı 'saat kaç', 'bugün tarih nedir', 'şu an saat kaç' gibi sorduğunda "
+        "bu gerçek değeri kullan, asla 'bilemem' veya 'internete bak' deme. "
+        "AZRxGUARD botu özellikleri: IP sorgulama, hava durumu, şifre güvenliği, "
+        "video indirme, çeviri, admin araçları, APK/OBB/Config ve daha fazlası."
+        + hava_ek
     )
 
     # ── 1. Groq (Llama 3.3 70B) — ücretsiz, hızlı ───────────────────────
