@@ -5423,7 +5423,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
             ],
             [InlineKeyboardButton('📡 IP Al (Link İzleyici)', callback_data='menu_iplogger')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]
         ]
         await query.edit_message_text(
             strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
@@ -5537,7 +5537,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_panel':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔍 TG Paneli')
-        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
         context.user_data['durum'] = 'panel_sorgu_bekliyor'
         await query.edit_message_text(
             strings.get('panel_welcome', '🔍 **PANEL**\n\n@kullaniciadi veya ID yaz:'),
@@ -5547,15 +5547,18 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_guvenli_sorgu':
         gs_klavye = [
             [InlineKeyboardButton(strings.get('btn_username_checker', '🔎 Platform Kontrolü'), callback_data='menu_username_checker')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]
         ]
         await query.edit_message_text(
             strings.get('guvenli_sorgu_welcome', '🕵️ **USERNAME HUNTER**\n\nKullanıcı adını 14 platformda tara:'),
             reply_markup=InlineKeyboardMarkup(gs_klavye),
             parse_mode='Markdown'
         )
-    elif query.data == 'menu_siber_guvenlik':
+    elif query.data in ('menu_siber_guvenlik', 'siber_mod_ana'):
         context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik'
+        # siber_mod_ana = araçlar + Standart Moda Dön; menu_siber_guvenlik = Pro Araçlar'dan gelen
+        geri_cb = 'go_home' if query.data == 'siber_mod_ana' else 'menu_pro_araclar'
+        geri_label = '🔄 Standart Moda Dön' if query.data == 'siber_mod_ana' else strings['btn_back']
         siber_klavye = [
             [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
              InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
@@ -5567,17 +5570,20 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
             [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
              InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
+            [InlineKeyboardButton(geri_label, callback_data=geri_cb)]
         ]
+        baslik = ('⚡ **SİBER GÜVENLİK MODU**\n━━━━━━━━━━━━━━━━━━━━━━\n\n🛡️ Araçlardan birini seçin:'
+                  if query.data == 'siber_mod_ana'
+                  else strings.get('siber_guvenlik_welcome', '🛡️ **SİBER GÜVENLİK**\n\nAraçlardan birini seçin:'))
         await query.edit_message_text(
-            strings.get('siber_guvenlik_welcome', '🛡️ **SİBER GÜVENLİK**\n\nAraçlardan birini seçin:'),
+            baslik,
             reply_markup=InlineKeyboardMarkup(siber_klavye),
             parse_mode='Markdown'
         )
     elif query.data == 'siber_sifre_guc':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔐 Şifre Güç Testi')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
         context.user_data['durum'] = 'sifre_guc_bekliyor'
         await query.edit_message_text(
             "🔐 **Şifre Güç Testi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -5587,7 +5593,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_sifre_pwned':
         await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='🔍 Şifre Sızıntı')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
         context.user_data['durum'] = 'sifre_pwned_bekliyor'
         await query.edit_message_text(
             "🔍 **SIZDIRILMIŞ ŞİFRE KONTROLÜ**\n"
@@ -5599,7 +5605,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_operator':
         await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📱 Operatör Sorgula')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
         context.user_data['durum'] = 'operator_bekliyor'
         await query.edit_message_text(
             "📱 **OPERATÖR SORGULAMA**\n"
@@ -6404,7 +6410,17 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.delete()
         except Exception:
             pass
-        siber_mod_klavye = InlineKeyboardMarkup([
+        siber_mod_araclari = InlineKeyboardMarkup([
+            [InlineKeyboardButton('🌐 IP Sorgu', callback_data='menu_ip_sorgu'),
+             InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
+            [InlineKeyboardButton('🕵️ Username Hunter', callback_data='menu_guvenli_sorgu'),
+             InlineKeyboardButton('🔐 Şifre Güç Testi', callback_data='siber_sifre_guc')],
+            [InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned'),
+             InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
+            [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
+             InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
+            [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
+             InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
             [InlineKeyboardButton('🔄 Standart Moda Dön', callback_data='go_home')]
         ])
         await context.bot.send_message(
@@ -6412,14 +6428,9 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=(
                 "⚡ *SİBER GÜVENLİK MODU*\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "```\n"
-                "▰▰▰▰▰▰▰▰▰▰  %100\n"
-                "SİSTEM HAZIR ✅\n"
-                "```\n\n"
-                "🛡️ _Siber Güvenlik Modu aktif._\n"
-                "⚠️ _Yeni özellikler yakında eklenecek..._"
+                "🛡️ Araçlardan birini seçin:"
             ),
-            reply_markup=siber_mod_klavye,
+            reply_markup=siber_mod_araclari,
             parse_mode='Markdown'
         )
 
@@ -9024,7 +9035,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             rapor += "\n✅ Harika şifre!"
         klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Tekrar Test", callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='menu_siber_guvenlik')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]
         ])
         await update.message.reply_text(rapor, parse_mode='Markdown', reply_markup=klavye)
         return
