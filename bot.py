@@ -5067,19 +5067,11 @@ async def _yanit_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
     metin = (cp.text or '').strip()
     komut = metin.split()[0].lower().split('@')[0] if metin else ''
 
-    async def _bot_mesaj_sil_sonra(msg_id: int):
-        """Sadece botun gönderdiği mesajı 5s sonra sil, admin mesajına dokunma."""
-        await asyncio.sleep(5.0)
-        try:
-            await context.bot.delete_message(chat_id=KANAL_ID, message_id=msg_id)
-        except Exception:
-            pass
-
     # ── /yanıt komutu ────────────────────────────────────────────────────
     if komut in ('/yanıt', '/yanit'):
         _yanit_oturum[KANAL_ID] = {'adim': 'id_bekliyor'}
         try:
-            bot_msg = await context.bot.send_message(
+            await context.bot.send_message(
                 chat_id=KANAL_ID,
                 text=(
                     "💬 **KULLANICI YANITLA**\n"
@@ -5089,7 +5081,6 @@ async def _yanit_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
                 ),
                 parse_mode='Markdown'
             )
-            asyncio.create_task(_bot_mesaj_sil_sonra(bot_msg.message_id))
         except Exception as e:
             await context.bot.send_message(KANAL_ID, f"❌ Hata: {e}")
         return
@@ -5098,8 +5089,7 @@ async def _yanit_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
     if komut == '/iptal' and KANAL_ID in _yanit_oturum:
         _yanit_oturum.pop(KANAL_ID)
         try:
-            bot_msg = await context.bot.send_message(KANAL_ID, "❌ Yanıt işlemi iptal edildi.")
-            asyncio.create_task(_bot_mesaj_sil_sonra(bot_msg.message_id))
+            await context.bot.send_message(KANAL_ID, "❌ Yanıt işlemi iptal edildi.")
         except Exception:
             pass
         return
@@ -5114,24 +5104,22 @@ async def _yanit_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
             hedef_id = int(metin)
         except ValueError:
             try:
-                bot_msg = await context.bot.send_message(
+                await context.bot.send_message(
                     KANAL_ID,
                     "❌ Geçersiz ID! Sadece sayı girin.\nÖrnek: `123456789`",
                     parse_mode='Markdown'
                 )
-                asyncio.create_task(_bot_mesaj_sil_sonra(bot_msg.message_id))
             except Exception:
                 pass
             return
         oturum['hedef_id'] = hedef_id
         oturum['adim'] = 'mesaj_bekliyor'
         try:
-            bot_msg = await context.bot.send_message(
+            await context.bot.send_message(
                 KANAL_ID,
                 f"✅ **ID alındı:** `{hedef_id}`\n\nŞimdi göndermek istediğin **mesajı** yaz:",
                 parse_mode='Markdown'
             )
-            asyncio.create_task(_bot_mesaj_sil_sonra(bot_msg.message_id))
         except Exception:
             pass
         return
@@ -5146,16 +5134,14 @@ async def _yanit_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
                 text=f"Admin mesajı:💬\n\n{metin}",
                 parse_mode='Markdown'
             )
-            bot_msg = await context.bot.send_message(
+            await context.bot.send_message(
                 KANAL_ID,
                 f"✅ **Mesaj gönderildi!**\n👤 Kullanıcı: `{hedef_id}`",
                 parse_mode='Markdown'
             )
-            asyncio.create_task(_bot_mesaj_sil_sonra(bot_msg.message_id))
         except Exception as e:
             try:
-                bot_msg = await context.bot.send_message(KANAL_ID, f"❌ Gönderilemedi: `{e}`", parse_mode='Markdown')
-                asyncio.create_task(_bot_mesaj_sil_sonra(bot_msg.message_id))
+                await context.bot.send_message(KANAL_ID, f"❌ Gönderilemedi: `{e}`", parse_mode='Markdown')
             except Exception:
                 pass
 
