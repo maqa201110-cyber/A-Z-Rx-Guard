@@ -4734,6 +4734,7 @@ async def _toplu_gonderim_yap(bot, channel_post, rapor_chat_id):
 # ═══════════════════════════════════════════════════════════════
 _APK_DOSYALAR_YOL = 'apk_dosyalar.json'
 _apk_yukleme_oturum: dict = {}          # {chat_id: {'adim': ..., 'isim': ..., 'aciklama': ...}}
+_yanit_oturum: dict = {}               # {chat_id: {'adim': 'id_bekliyor'|'mesaj_bekliyor', 'hedef_id': int}}
 
 
 def apk_dosyalari_yukle() -> dict:
@@ -5061,6 +5062,96 @@ async def atag_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _gonder_parca(parca, ilk_parca)
 
 
+async def _yanit_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
+    """KANAL_ID'de /yanıt komutunu ve yanıt akışını yönetir."""
+    metin = (cp.text or '').strip()
+    komut = metin.split()[0].lower().split('@')[0] if metin else ''
+
+    # ── /yanıt komutu ────────────────────────────────────────────────────
+    if komut in ('/yanıt', '/yanit'):
+        _yanit_oturum[KANAL_ID] = {'adim': 'id_bekliyor'}
+        try:
+            bot_msg = await context.bot.send_message(
+                chat_id=KANAL_ID,
+                text=(
+                    "💬 **KULLANICI YANITLA**\n"
+                    "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    "Lütfen kullanıcının **ID**'sini yazın:\n\n"
+                    "_İptal için /iptal yazın_"
+                ),
+                parse_mode='Markdown'
+            )
+            asyncio.create_task(mesajlari_5s_sonra_sil(context, KANAL_ID, bot_msg.message_id, cp.message_id))
+        except Exception as e:
+            await context.bot.send_message(KANAL_ID, f"❌ Hata: {e}")
+        return
+
+    # ── /iptal ───────────────────────────────────────────────────────────
+    if komut == '/iptal' and KANAL_ID in _yanit_oturum:
+        _yanit_oturum.pop(KANAL_ID)
+        try:
+            bot_msg = await context.bot.send_message(KANAL_ID, "❌ Yanıt işlemi iptal edildi.")
+            asyncio.create_task(mesajlari_5s_sonra_sil(context, KANAL_ID, bot_msg.message_id, cp.message_id))
+        except Exception:
+            pass
+        return
+
+    oturum = _yanit_oturum.get(KANAL_ID)
+    if not oturum:
+        return
+
+    # ── Adım 1: ID bekleniyor ────────────────────────────────────────────
+    if oturum['adim'] == 'id_bekliyor':
+        try:
+            hedef_id = int(metin)
+        except ValueError:
+            try:
+                bot_msg = await context.bot.send_message(
+                    KANAL_ID,
+                    "❌ Geçersiz ID! Sadece sayı girin.\nÖrnek: `123456789`",
+                    parse_mode='Markdown'
+                )
+                asyncio.create_task(mesajlari_5s_sonra_sil(context, KANAL_ID, bot_msg.message_id, cp.message_id))
+            except Exception:
+                pass
+            return
+        oturum['hedef_id'] = hedef_id
+        oturum['adim'] = 'mesaj_bekliyor'
+        try:
+            bot_msg = await context.bot.send_message(
+                KANAL_ID,
+                f"✅ **ID alındı:** `{hedef_id}`\n\nŞimdi göndermek istediğin **mesajı** yaz:",
+                parse_mode='Markdown'
+            )
+            asyncio.create_task(mesajlari_5s_sonra_sil(context, KANAL_ID, bot_msg.message_id, cp.message_id))
+        except Exception:
+            pass
+        return
+
+    # ── Adım 2: Mesaj bekleniyor ─────────────────────────────────────────
+    if oturum['adim'] == 'mesaj_bekliyor':
+        hedef_id = oturum['hedef_id']
+        _yanit_oturum.pop(KANAL_ID, None)
+        try:
+            await context.bot.send_message(
+                chat_id=hedef_id,
+                text=f"Admin mesajı:💬\n\n{metin}",
+                parse_mode='Markdown'
+            )
+            bot_msg = await context.bot.send_message(
+                KANAL_ID,
+                f"✅ **Mesaj gönderildi!**\n👤 Kullanıcı: `{hedef_id}`",
+                parse_mode='Markdown'
+            )
+            asyncio.create_task(mesajlari_5s_sonra_sil(context, KANAL_ID, bot_msg.message_id, cp.message_id))
+        except Exception as e:
+            try:
+                bot_msg = await context.bot.send_message(KANAL_ID, f"❌ Gönderilemedi: `{e}`", parse_mode='Markdown')
+                asyncio.create_task(mesajlari_5s_sonra_sil(context, KANAL_ID, bot_msg.message_id, cp.message_id))
+            except Exception:
+                pass
+
+
 async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ── Pasif kanal/grup takibi: her yeni sohbet otomatik kaydedilir ──
     eff = update.effective_chat
@@ -5077,6 +5168,12 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
         # ── APK-OBB-CONFİG yükleme kanalı — her zaman önce işle ──
         if channel_post.chat_id == _APK_KANAL_ID:
             await _apk_kanal_isle(context, channel_post)
+            return
+        # ──────────────────────────────────────────────────────────
+
+        # ── Yanıt kanalı — admin kullanıcılara yanıt ──────────────
+        if channel_post.chat_id == KANAL_ID:
+            await _yanit_kanal_isle(context, channel_post)
             return
         # ──────────────────────────────────────────────────────────
 
