@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AZRxGUARD"
+description = "Imported AZRxGUARD moderation bot project with a Flask keep-alive and link-tracking web service, plus Telegram and Discord bot components."
+version = "1.0.0"
+id = "artifacts/az-rx-guard"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23849
+
+[services.development]
+run = "python3 -m gunicorn --chdir /home/runner/workspace --bind 0.0.0.0:$PORT --reuse-port main:app"
+
+[services.production]
+build = [ "true" ]
+serve = "static"
+publicDir = "."
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/"
+
+[services.env]
+PORT = "23849"
+BASE_PATH = "/"

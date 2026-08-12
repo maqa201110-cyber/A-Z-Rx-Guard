@@ -1,0 +1,8 @@
+{
+  "gece_uyari": true,
+  "gece_baslat": true,
+  "gece_bitir": true,
+  "oglen_uyari": true,
+  "oglen_yemek": true,
+  "gunluk_istatistik": true
+}
