@@ -11,10 +11,10 @@ dependencies = [
     "google-generativeai>=0.8.6",
     "gunicorn>=26.0.0",
     "psycopg2-binary>=2.9.12",
-    "python-telegram-bot[job-queue]>=22.7",
     "requests>=2.34.2",
     "discord-py>=2.3.2",
     "akinator>=2.0.2",
     "yt-dlp>=2026.6.9",
+    "python-telegram-bot[job-queue]>=22.7",
     "telegram>=0.0.1",
 ]
