@@ -17,7 +17,6 @@ import json
 import tempfile
 import shutil
 import urllib.parse
-import time
 
 try:
     from akinator.async_client import AsyncAkinator as _AsyncAkinator
@@ -5379,7 +5378,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     lang = get_lang(context, user_id)
     strings = fs(context, user_id, lang)
-    await query.answer()
+    # Akinator callback'leri kendi sonuçlarına göre cevap verir; diğerleri
+    # burada tek seferde onaylanır.
+    if not query.data.startswith(('aki_baslat', 'aki_play_', 'aki_win_')):
+        await query.answer()
 
     # ── Her buton basışını logla ──────────────────────────────
     _SESSIZ_CALLBACKLER = {'noop', 'go_home', 'bot_yazi_tipi', 'menu_lang', 'menu_bot_ayarlari'}
@@ -6306,13 +6308,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     # ── 🔮 AKİNATÖR CALLBACK'LERİ ─────────────────────────────
     elif query.data == 'eglence_akinator':
-        await query.answer()
         aki_intro_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🎮 BAŞLA!", callback_data='aki_baslat')],
-            [
-                InlineKeyboardButton("📊 İstatistikler", callback_data="aki_stats"),
-                InlineKeyboardButton("🏆 Sıralama", callback_data="aki_leaderboard"),
-            ],
             [InlineKeyboardButton("⬅️ Geri", callback_data='menu_fun')]
         ])
         karsilama_caption = (
@@ -6342,20 +6339,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode='Markdown'
             )
     elif query.data == 'aki_baslat':
-        await query.answer()
         await _aki_play_baslat_callback(query, context)
-    elif query.data == 'aki_stats':
-        await _aki_panel_goster(
-            query,
-            context,
-            _aki_stats_metni(query.from_user.id, _aki_kullanici_adi(query.from_user)),
-        )
-    elif query.data == 'aki_leaderboard':
-        await _aki_panel_goster(
-            query,
-            context,
-            _aki_siralama_metni(),
-        )
     elif query.data.startswith('aki_play_'):
         await _aki_cevap_callback(query, context)
     elif query.data == 'aki_win_y':
@@ -11677,162 +11661,10 @@ _AKI_KARSILAMA = (
 )
 
 
-def _aki_kullanici_adi(user) -> str:
-    """Telegram kullanıcı adı yoksa görünen adı kullan."""
-    return (getattr(user, "username", None) or
-            getattr(user, "full_name", None) or
-            str(getattr(user, "id", "Oyuncu")))
-
-
-def _aki_sure_formatla(saniye: float) -> str:
-    toplam = max(0, int(round(saniye or 0)))
-    saat, kalan = divmod(toplam, 3600)
-    dakika, saniye = divmod(kalan, 60)
-    if saat:
-        return f"{saat} saat {dakika} dk"
-    if dakika:
-        return f"{dakika} dk {saniye} sn"
-    return f"{saniye} sn"
-
-
-def _aki_oyun_kayit_baslat(user, context):
-    user_id = int(user.id)
-    context.user_data[f"aki_started_at_{user_id}"] = time.time()
-    context.user_data[f"aki_question_count_{user_id}"] = 0
-    try:
-        import tracking_store as _aki_store
-        _aki_store.akinator_oyun_baslat(
-            user_id,
-            getattr(user, "username", "") or "",
-            getattr(user, "full_name", "") or _aki_kullanici_adi(user),
-        )
-    except Exception as exc:
-        logger.warning(f"Akinator başlangıç istatistiği kaydedilemedi: {exc}")
-        context.user_data.pop(f"aki_started_at_{user_id}", None)
-        context.user_data.pop(f"aki_question_count_{user_id}", None)
-
-
-def _aki_oyun_kayit_bitir(user_id: int, context, sonuc: str):
-    baslangic = context.user_data.pop(f"aki_started_at_{user_id}", None)
-    soru_sayisi = context.user_data.pop(f"aki_question_count_{user_id}", 0)
-    if baslangic is None:
-        return
-    try:
-        import tracking_store as _aki_store
-        _aki_store.akinator_oyun_bitir(
-            user_id,
-            sonuc,
-            soru_sayisi=soru_sayisi,
-            sure_saniye=time.time() - baslangic,
-        )
-    except Exception as exc:
-        logger.warning(f"Akinator sonuç istatistiği kaydedilemedi: {exc}")
-
-
-def _aki_stats_metni(user_id: int, fallback_name: str = "Oyuncu") -> str:
-    import tracking_store as _aki_store
-    row = _aki_store.akinator_istatistik_getir(user_id)
-    if not row:
-        return (
-            f"🔮 AKİNATÖR PROFİLİ — {fallback_name}\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Henüz tamamlanmış veya devam eden bir oyunun yok.\n"
-            "🎮 /akinator ile ilk oyununu başlat!"
-        )
-    (
-        _uid, username, full_name, started, completed, aki_wins,
-        player_wins, abandoned, questions, seconds
-    ) = row
-    name = username or full_name or fallback_name
-    sonuc_sayisi = completed + abandoned
-    basari = (aki_wins / completed * 100) if completed else 0
-    return (
-        f"🔮 AKİNATÖR PROFİLİ — {name}\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🎮 Toplam oyun: {started}\n"
-        f"✅ Akinator'ın doğru tahmini: {aki_wins}\n"
-        f"❌ Akinator'ın yanlış tahmini: {player_wins}\n"
-        f"🏳️ Yarım kalan oyun: {abandoned}\n"
-        f"❓ Cevaplanan soru: {questions}\n"
-        f"⏱️ Toplam oynama süresi: {_aki_sure_formatla(seconds)}\n"
-        f"📈 Akinator başarı oranı: %{basari:.0f}\n"
-        f"📊 Sonuçlanan oyun: {sonuc_sayisi}"
-    )
-
-
-def _aki_siralama_metni() -> str:
-    import tracking_store as _aki_store
-    rows = _aki_store.akinator_siralama_getir(10)
-    if not rows:
-        return (
-            "🏆 AKİNATÖR SIRALAMASI\n"
-            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Henüz sıralamaya girecek bir oyun kaydı yok.\n"
-            "🎮 /akinator ile ilk oyunu sen başlat!"
-        )
-    satirlar = [
-        "🏆 AKİNATÖR SIRALAMASI",
-        "━━━━━━━━━━━━━━━━━━━━━━",
-        "",
-        "Sıralama toplam oyun sayısına göre hazırlanır:",
-    ]
-    for sira, row in enumerate(rows, 1):
-        (
-            _uid, username, full_name, started, completed, aki_wins,
-            player_wins, abandoned, _questions, seconds
-        ) = row
-        name = username or full_name or "Oyuncu"
-        satirlar.append(
-            f"{sira}. {name} — 🎮 {started} oyun | "
-            f"✅ {aki_wins} / ❌ {player_wins} | ⏱️ {_aki_sure_formatla(seconds)}"
-        )
-    return "\n".join(satirlar)
-
-
-async def aki_istatistik_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    await update.effective_message.reply_text(
-        _aki_stats_metni(user.id, _aki_kullanici_adi(user))
-    )
-
-
-async def aki_siralama_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.effective_message.reply_text(_aki_siralama_metni())
-
-
-async def _aki_panel_goster(query, context, metin: str):
-    """İstatistik panelini fotoğraf veya metin olan giriş mesajında göster."""
-    klavye = InlineKeyboardMarkup([
-        [InlineKeyboardButton("⬅️ Geri", callback_data="menu_fun")]
-    ])
-    try:
-        if query.message.caption is not None:
-            await query.edit_message_caption(
-                caption=metin, reply_markup=klavye
-            )
-        else:
-            await query.edit_message_text(
-                text=metin, reply_markup=klavye
-            )
-    except Exception:
-        try:
-            await context.bot.send_message(
-                chat_id=query.message.chat_id,
-                text=metin,
-                reply_markup=klavye,
-            )
-        except Exception:
-            pass
-
-
 async def akinator_baslat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/akinator komutu — özel ve grup sohbetlerde çalışır."""
     aki_intro_klavye = InlineKeyboardMarkup([
         [InlineKeyboardButton("🎮 BAŞLA!", callback_data="aki_baslat")],
-        [
-            InlineKeyboardButton("📊 İstatistikler", callback_data="aki_stats"),
-            InlineKeyboardButton("🏆 Sıralama", callback_data="aki_leaderboard"),
-        ],
     ])
     try:
         with open(_AKINATOR_IMG_YOL, "rb") as _f:
@@ -11855,15 +11687,13 @@ async def _aki_play_baslat_callback(query, context):
     user_id = query.from_user.id
     chat_id = query.message.chat_id
 
-    # Aynı kullanıcı yeni oyun açarsa önceki oturumu yarım kalmış say.
-    if context.user_data.get(f"aki_{user_id}"):
-        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
     context.user_data.pop(f"aki_{user_id}", None)
     context.user_data.pop(f"aki_msg_{user_id}", None)
 
     if not AKINATOR_YUKLU:
         await query.answer("❌ Akinator şu an kullanılamıyor!", show_alert=True)
         return
+    await query.answer()
 
     try:
         await query.edit_message_caption(
@@ -11882,7 +11712,6 @@ async def _aki_play_baslat_callback(query, context):
             await aki.start_game(language="en", child_mode=False)
 
         context.user_data[f"aki_{user_id}"] = aki
-        _aki_oyun_kayit_baslat(query.from_user, context)
 
         dolu = int((aki.progression or 0) / 10)
         bar  = "🟦" * dolu + "⬜" * (10 - dolu)
@@ -11921,7 +11750,6 @@ async def _aki_play_baslat_callback(query, context):
 
     except Exception as e:
         logger.error(f"Akinator başlatma hatası: {e}")
-        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
         try:
@@ -11982,12 +11810,13 @@ async def _aki_raw_back(aki) -> None:
     """Raw HTTP POST cancel_answer — library'nin back() metodunu bypass eder."""
     if aki.step == 0:
         raise Exception("Daha geri gidemezsin")
+    tema_id = {"c": 1, "a": 14, "o": 2}.get(getattr(aki, "theme", "c"), 1)
     url = f"https://{aki.language}.akinator.com/cancel_answer"
     data = {
         "step": aki.step,
         "progression": aki.progression,
-        "sid": 1,
-        "cm": "false",
+        "sid": tema_id,
+        "cm": str(getattr(aki, "child_mode", False)).lower(),
         "session": aki.session_id,
         "signature": aki.signature,
     }
@@ -12009,13 +11838,17 @@ async def _aki_cevap_callback(query, context):
         await query.answer("❌ Aktif oyun yok! /akinator ile başlat.", show_alert=True)
         return
 
-    await query.answer()
     a        = query.data.split("_")[-1]   # 0/1/2/3/4/5/quit
     chat_id  = query.message.chat_id
     msg_id   = query.message.message_id
 
+    if a == "5" and aki.step == 0:
+        await query.answer("⚠️ İlk sorudasın, daha geriye gidemezsin!", show_alert=True)
+        return
+
+    await query.answer()
+
     if a == "quit":
-        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
         bitti = "🏳️ *Oyun sona erdirildi.*\n\nYeni oyun için /akinator yaz."
@@ -12032,15 +11865,19 @@ async def _aki_cevap_callback(query, context):
         if a == "5":
             try:
                 await _aki_raw_back(aki)
-            except Exception:
-                await query.answer("⚠️ Daha geri gidemezsin!", show_alert=True)
+            except Exception as exc:
+                logger.warning(f"Akinator geri alma hatası: {exc}")
+                try:
+                    await context.bot.send_message(
+                        chat_id=chat_id,
+                        text="⚠️ Önceki soruya dönülemedi. Lütfen tekrar dene.",
+                    )
+                except Exception:
+                    pass
                 return
         else:
             # 0=Evet 1=Hayır 2=Bilmiyorum 3=Muhtemelen 4=Muhtemelen Değil
             await _aki_raw_answer(aki, int(a))
-            context.user_data[f"aki_question_count_{user_id}"] = (
-                context.user_data.get(f"aki_question_count_{user_id}", 0) + 1
-            )
 
         if aki.win:
             dolu = int((aki.progression or 100) / 10)
@@ -12121,7 +11958,6 @@ async def _aki_cevap_callback(query, context):
     except Exception as e:
         err = str(e).lower()
         logger.error(f"Akinator cevap hatası: {e}")
-        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
         if "timed out" in err or "timeout" in err:
@@ -12140,7 +11976,6 @@ async def _aki_cevap_callback(query, context):
 async def _aki_win_callback(query, context, dogru: bool):
     """aki_win_y / aki_win_n — Doğru/Yanlış tahmin sonucu."""
     user_id = query.from_user.id
-    _aki_oyun_kayit_bitir(user_id, context, "akinator" if dogru else "oyuncu")
     context.user_data.pop(f"aki_{user_id}", None)
     context.user_data.pop(f"aki_msg_{user_id}", None)
 
@@ -12517,8 +12352,6 @@ def main():
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("istatistik", istatistik_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("akinator", akinator_baslat_cmd))
-    application.add_handler(CommandHandler("akiistatistik", aki_istatistik_cmd))
-    application.add_handler(CommandHandler("akisiralamasi", aki_siralama_cmd))
     application.add_handler(CommandHandler("muzik", muzik_ara_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
