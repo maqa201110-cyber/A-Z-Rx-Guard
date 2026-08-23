@@ -17,6 +17,7 @@ import json
 import tempfile
 import shutil
 import urllib.parse
+import time
 
 try:
     from akinator.async_client import AsyncAkinator as _AsyncAkinator
@@ -11661,10 +11662,108 @@ _AKI_KARSILAMA = (
 )
 
 
+def _aki_sure_formatla(saniye: float) -> str:
+    toplam = max(0, int(round(saniye or 0)))
+    saat, kalan = divmod(toplam, 3600)
+    dakika, saniye = divmod(kalan, 60)
+    if saat:
+        return f"{saat}s {dakika}dk"
+    if dakika:
+        return f"{dakika}dk {saniye}sn"
+    return f"{saniye}sn"
+
+
+def _aki_oyun_kayit_baslat(user, context):
+    user_id = int(user.id)
+    context.user_data[f"aki_started_at_{user_id}"] = time.time()
+    context.user_data[f"aki_question_count_{user_id}"] = 0
+    try:
+        import tracking_store as _aki_store
+        _aki_store.akinator_oyun_baslat(
+            user_id,
+            getattr(user, "username", "") or "",
+            getattr(user, "full_name", "") or "",
+        )
+    except Exception as exc:
+        logger.warning(f"Akinator sıralama başlangıç kaydı yapılamadı: {exc}")
+
+
+def _aki_oyun_kayit_bitir(user_id: int, context, sonuc: str):
+    baslangic = context.user_data.pop(f"aki_started_at_{user_id}", None)
+    soru_sayisi = context.user_data.pop(f"aki_question_count_{user_id}", 0)
+    if baslangic is None:
+        return
+    try:
+        import tracking_store as _aki_store
+        _aki_store.akinator_oyun_bitir(
+            user_id,
+            sonuc,
+            soru_sayisi=soru_sayisi,
+            sure_saniye=time.time() - baslangic,
+        )
+    except Exception as exc:
+        logger.warning(f"Akinator sıralama sonuç kaydı yapılamadı: {exc}")
+
+
+def _aki_siralama_metni() -> str:
+    import tracking_store as _aki_store
+    rows = _aki_store.akinator_siralama_getir(10)
+    if not rows:
+        return (
+            "🏆 AKİNATÖR SIRALAMASI\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Henüz sıralamada kayıt yok.\n"
+            "🎮 /akinator ile ilk oyunu başlat!"
+        )
+    satirlar = [
+        "🏆 AKİNATÖR SIRALAMASI",
+        "━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+        "Toplam oyun sayısına göre:",
+    ]
+    for sira, row in enumerate(rows, 1):
+        (
+            _uid, username, full_name, started, _completed,
+            aki_wins, player_wins, _abandoned, _questions, seconds
+        ) = row
+        name = username or full_name or "Oyuncu"
+        satirlar.append(
+            f"{sira}. {name} — 🎮 {started} | "
+            f"✅ {aki_wins} / ❌ {player_wins} | ⏱️ {_aki_sure_formatla(seconds)}"
+        )
+    return "\n".join(satirlar)
+
+
+async def aki_siralama_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(_aki_siralama_metni())
+
+
+async def _aki_siralama_panel_goster(query, context):
+    metin = _aki_siralama_metni()
+    klavye = InlineKeyboardMarkup([
+        [InlineKeyboardButton("⬅️ Geri", callback_data="menu_fun")]
+    ])
+    try:
+        if query.message.caption is not None:
+            await query.edit_message_caption(caption=metin, reply_markup=klavye)
+        else:
+            await query.edit_message_text(text=metin, reply_markup=klavye)
+    except Exception:
+        try:
+            await context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text=metin,
+                reply_markup=klavye,
+            )
+        except Exception:
+            pass
+
+
 async def akinator_baslat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/akinator komutu — özel ve grup sohbetlerde çalışır."""
     aki_intro_klavye = InlineKeyboardMarkup([
         [InlineKeyboardButton("🎮 BAŞLA!", callback_data="aki_baslat")],
+        [InlineKeyboardButton("🏆 Sıralama", callback_data="aki_leaderboard")],
     ])
     try:
         with open(_AKINATOR_IMG_YOL, "rb") as _f:
