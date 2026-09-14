@@ -4812,6 +4812,32 @@ async def _medya_arsiv_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         await _medya_arsiv_baslat(context)
         return True
 
+    if komut == '/sil':
+        parcalar = metin.split(maxsplit=1)
+        if len(parcalar) == 1:
+            _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID] = {
+                'adim': 'sil_kod_bekliyor',
+            }
+            await context.bot.send_message(
+                MEDYA_ARSIV_KANAL_ID,
+                "🗑️ Silmek istediğiniz kodu yazın.\n"
+                "İptal etmek için /iptal yazabilirsiniz.",
+            )
+            return True
+        silinecek_kod = _medya_kod_normalize(parcalar[1])
+        arsiv = _medya_arsiv_yukle()
+        if silinecek_kod in arsiv:
+            arsiv.pop(silinecek_kod, None)
+            _medya_arsiv_kaydet(arsiv)
+            cevap = f"✅ `{parcalar[1]}` kodu ve medya eşleşmesi silindi."
+        else:
+            cevap = f"ℹ️ `{parcalar[1]}` koduna ait kayıt bulunamadı."
+        _medya_arsiv_oturum.pop(MEDYA_ARSIV_KANAL_ID, None)
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID, cevap, parse_mode='Markdown'
+        )
+        return True
+
     oturum = _medya_arsiv_oturum.get(MEDYA_ARSIV_KANAL_ID)
     if not oturum and (cp.photo or cp.video):
         await _medya_arsiv_baslat(
@@ -4829,6 +4855,21 @@ async def _medya_arsiv_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         return False
 
     adim = oturum.get('adim')
+    if adim == 'sil_kod_bekliyor':
+        silinecek_kod = _medya_kod_normalize(metin)
+        arsiv = _medya_arsiv_yukle()
+        if silinecek_kod in arsiv:
+            arsiv.pop(silinecek_kod, None)
+            _medya_arsiv_kaydet(arsiv)
+            cevap = f"✅ `{metin}` kodu ve medya eşleşmesi silindi."
+        else:
+            cevap = f"ℹ️ `{metin}` koduna ait kayıt bulunamadı."
+        _medya_arsiv_oturum.pop(MEDYA_ARSIV_KANAL_ID, None)
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID, cevap, parse_mode='Markdown'
+        )
+        return True
+
     if adim == 'kod_bekliyor':
         if not metin or metin.startswith('/'):
             await context.bot.send_message(
