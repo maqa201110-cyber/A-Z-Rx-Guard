@@ -5822,14 +5822,25 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton('🎲 Rastgele', callback_data='pro20_rastgele')],
             [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')]
         ]
-        await query.edit_message_text(
-            "🎮 **EĞLENce MENüSü**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        fun_metni = (
+            "🎮 **EĞLENCE MENÜSÜ**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "🔮 Akinatör · 🎲 Zar · 🎱 Şans Topu · ✊ TKM\n"
             "🔢 Sayı Tahmin · 🪙 Para At · 🎯 Rus Ruleti\n"
-            "🔮 Kehanet · 🎲 Rastgele",
-            reply_markup=InlineKeyboardMarkup(fun_klavye),
-            parse_mode='Markdown'
+            "🔮 Kehanet · 🎲 Rastgele"
         )
+        fun_markup = InlineKeyboardMarkup(fun_klavye)
+        if query.message.caption is not None:
+            await query.edit_message_caption(
+                caption=fun_metni,
+                reply_markup=fun_markup,
+                parse_mode='Markdown',
+            )
+        else:
+            await query.edit_message_text(
+                fun_metni,
+                reply_markup=fun_markup,
+                parse_mode='Markdown',
+            )
     elif query.data == 'menu_ip_sorgu':
         context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › IP Sorgu'
         ip_klavye = [
