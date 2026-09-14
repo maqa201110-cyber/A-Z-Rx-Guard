@@ -4738,6 +4738,7 @@ _APK_DOSYALAR_YOL = 'apk_dosyalar.json'
 _apk_yukleme_oturum: dict = {}          # {chat_id: {'adim': ..., 'isim': ..., 'aciklama': ...}}
 _yanit_oturum: dict = {}               # {chat_id: {'adim': 'id_bekliyor'|'mesaj_bekliyor', 'hedef_id': int}}
 _MEDYA_ARSIV_DOSYA = 'medya_arsiv.json'
+_MEDYA_ARSIV_MAKS = 70
 _medya_arsiv_oturum: dict = {}
 
 
@@ -4870,14 +4871,38 @@ async def _medya_arsiv_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         )
         return True
 
-    if adim == 'kod_bekliyor':
-        if not metin or metin.startswith('/'):
+    if adim == 'secim_bekliyor':
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID,
+            "⬆️ Önce Fotoğraf, Video veya Fotoğraf&video seçeneğine "
+            "basın; sonra medyaları gönderebilirsiniz.",
+            reply_markup=_medya_arsiv_secim_klavye(),
+        )
+        return True
+
+    if adim in ('medya_bekliyor', 'kod_bekliyor') and metin and not (cp.photo or cp.video):
+        if metin.startswith('/'):
             await context.bot.send_message(
                 MEDYA_ARSIV_KANAL_ID,
                 "❌ Geçerli bir kod yazın. Örnek: `fotoğraflar`",
                 parse_mode='Markdown',
             )
             return True
+        if not oturum.get('mesajlar'):
+            await context.bot.send_message(
+                MEDYA_ARSIV_KANAL_ID,
+                "❌ Önce en az bir fotoğraf veya video gönderin.",
+            )
+            return True
+        if oturum.get('tur') == 'both':
+            turler = {item['tur'] for item in oturum['mesajlar']}
+            if not {'photo', 'video'}.issubset(turler):
+                await context.bot.send_message(
+                    MEDYA_ARSIV_KANAL_ID,
+                    "❌ Fotoğraf&video seçimi için en az bir fotoğraf ve "
+                    "bir video gönderin.",
+                )
+                return True
         kod = _medya_kod_normalize(metin)
         arsiv = _medya_arsiv_yukle()
         eski = kod in arsiv
@@ -4911,12 +4936,11 @@ async def _medya_arsiv_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
             f"❌ Bu işlem için {beklenen} göndermelisiniz.",
         )
         return True
-    if secim == 'both' and medya_turu in {
-        item['tur'] for item in oturum.get('mesajlar', [])
-    }:
+    if len(oturum.get('mesajlar', [])) >= _MEDYA_ARSIV_MAKS:
         await context.bot.send_message(
             MEDYA_ARSIV_KANAL_ID,
-            "⚠️ Bu tür medya zaten alındı. Diğer türü gönderin.",
+            f"⚠️ Tek kod için en fazla {_MEDYA_ARSIV_MAKS} medya "
+            "ekleyebilirsiniz.",
         )
         return True
 
@@ -4924,24 +4948,20 @@ async def _medya_arsiv_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
         'message_id': cp.message_id,
         'tur': medya_turu,
     })
-
-    if secim == 'both' and len(oturum['mesajlar']) < 2:
-        kalan = "videoyu" if medya_turu == "photo" else "fotoğrafı"
+    oturum['adim'] = 'medya_bekliyor'
+    medya_sayisi = len(oturum['mesajlar'])
+    if medya_sayisi == 1:
         await context.bot.send_message(
             MEDYA_ARSIV_KANAL_ID,
-            f"✅ {medya_turu == 'photo' and 'Fotoğraf' or 'Video'} alındı.\n"
-            f"Şimdi {kalan} gönderin.",
+            f"✅ Medya alındı. İsterseniz {_MEDYA_ARSIV_MAKS} adede kadar "
+            "medya gönderebilirsiniz.\n"
+            "Tüm medyaları gönderdikten sonra kodu yazın.",
         )
-        return True
-
-    oturum['adim'] = 'kod_bekliyor'
-    await context.bot.send_message(
-        MEDYA_ARSIV_KANAL_ID,
-        "✅ Medya alındı.\n\n"
-        "Lütfen kod belirleyin.\n"
-        "Örnek: `fotoğraflar`",
-        parse_mode='Markdown',
-    )
+    elif medya_sayisi == _MEDYA_ARSIV_MAKS:
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID,
+            f"✅ {_MEDYA_ARSIV_MAKS} medya alındı. Şimdi kodu yazın.",
+        )
     return True
 
 
@@ -5008,15 +5028,22 @@ async def _medya_arsiv_callback(query, context: ContextTypes.DEFAULT_TYPE):
         bekleyen = []
     if bekleyen:
         _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID]['mesajlar'] = bekleyen
-    if tur == 'both' and bekleyen:
-        talimat = "Şimdi diğer medya türünü gönderin."
+    if bekleyen:
+        talimat = (
+            f"{len(bekleyen)} medya alındı. İsterseniz toplam "
+            f"{_MEDYA_ARSIV_MAKS} medyaya kadar devam edebilirsiniz. "
+            "Bittiğinde kodu yazın."
+        )
     elif tur == 'both':
-        talimat = "Önce fotoğrafı veya videoyu, ardından diğer medya türünü gönderin."
-    elif bekleyen:
-        _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID]['adim'] = 'kod_bekliyor'
-        talimat = "Medya alındı. Şimdi bu içerik için bir kod belirleyin."
+        talimat = (
+            "Fotoğraf ve videoları gönderin. En fazla "
+            f"{_MEDYA_ARSIV_MAKS} medya kabul edilir; bittiğinde kodu yazın."
+        )
     else:
-        talimat = f"Lütfen {etiket.lower()} gönderin."
+        talimat = (
+            f"Lütfen {etiket.lower()} gönderin. En fazla "
+            f"{_MEDYA_ARSIV_MAKS} medya kabul edilir; bittiğinde kodu yazın."
+        )
     await query.edit_message_text(
         f"✅ {etiket} seçildi.\n\n{talimat}\n\n"
         "İptal etmek için /iptal yazabilirsiniz.",
