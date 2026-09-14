@@ -1,1 +1,41 @@
-{}
+{
+  "!!2026-əhdi-ifşa¿": {
+    "kod": "!!2026-əhdi-ifşa¿",
+    "tur": "both",
+    "mesajlar": [
+      {
+        "message_id": 76,
+        "tur": "photo"
+      },
+      {
+        "message_id": 77,
+        "tur": "photo"
+      },
+      {
+        "message_id": 78,
+        "tur": "video"
+      },
+      {
+        "message_id": 79,
+        "tur": "photo"
+      },
+      {
+        "message_id": 80,
+        "tur": "photo"
+      },
+      {
+        "message_id": 81,
+        "tur": "photo"
+      },
+      {
+        "message_id": 82,
+        "tur": "photo"
+      },
+      {
+        "message_id": 83,
+        "tur": "video"
+      }
+    ],
+    "tarih": "2026-09-14T21:12:02.912234+04:00"
+  }
+}
