@@ -73,6 +73,7 @@ LOG_KANAL_ID = -1003996192485
 _APK_KANAL_ID = -1004299694640         # APK-OBB-CONFİG yükleme kanalı
 TEST_KANAL_ID = -1003788921873         # 🧪 Bot test kanalı
 SAHIP_KANAL_ID = -1004463468496        # 👑 Sahip kontrol kanalı
+MEDYA_ARSIV_KANAL_ID = -1004479240363  # 🗂️ Fotoğraf/video arşiv kanalı
 TR_SAAT = datetime.timezone(datetime.timedelta(hours=4))
 
 # ── Bildirim ayarları (ayarlar.json) ────────────────────────
@@ -4736,6 +4737,247 @@ async def _toplu_gonderim_yap(bot, channel_post, rapor_chat_id):
 _APK_DOSYALAR_YOL = 'apk_dosyalar.json'
 _apk_yukleme_oturum: dict = {}          # {chat_id: {'adim': ..., 'isim': ..., 'aciklama': ...}}
 _yanit_oturum: dict = {}               # {chat_id: {'adim': 'id_bekliyor'|'mesaj_bekliyor', 'hedef_id': int}}
+_MEDYA_ARSIV_DOSYA = 'medya_arsiv.json'
+_medya_arsiv_oturum: dict = {}
+
+
+def _medya_arsiv_yukle() -> dict:
+    try:
+        with open(_MEDYA_ARSIV_DOSYA, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _medya_arsiv_kaydet(data: dict):
+    try:
+        with open(_MEDYA_ARSIV_DOSYA, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        logger.error(f"Medya arşivi kaydedilemedi: {exc}")
+
+
+def _medya_kod_normalize(kod: str) -> str:
+    return re.sub(r'\s+', ' ', (kod or '').strip()).casefold()
+
+
+def _medya_turu_belirle(cp) -> str | None:
+    if cp.photo:
+        return 'photo'
+    if cp.video:
+        return 'video'
+    return None
+
+
+def _medya_arsiv_secim_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📷 Fotoğraf", callback_data="mar_photo"),
+            InlineKeyboardButton("🎥 Video", callback_data="mar_video"),
+        ],
+        [
+            InlineKeyboardButton("📷🎥 Fotoğraf&video", callback_data="mar_both"),
+        ],
+    ])
+
+
+async def _medya_arsiv_baslat(context: ContextTypes.DEFAULT_TYPE, bekleyen=None):
+    _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID] = {
+        'adim': 'secim_bekliyor',
+        'bekleyen': bekleyen or [],
+    }
+    await context.bot.send_message(
+        chat_id=MEDYA_ARSIV_KANAL_ID,
+        text=(
+            "Merhaba, hangisini seçeceksiniz?\n\n"
+            "📷 Fotoğraf\n"
+            "🎥 Video\n"
+            "📷🎥 Fotoğraf&video\n\n"
+            "Lütfen yukarıdaki işlemlerden birini seçin."
+        ),
+        reply_markup=_medya_arsiv_secim_klavye(),
+    )
+
+
+async def _medya_arsiv_kanal_isle(context: ContextTypes.DEFAULT_TYPE, cp):
+    """Arşiv kanalındaki seçim, medya ve kod adımlarını yönetir."""
+    if cp.chat_id != MEDYA_ARSIV_KANAL_ID:
+        return False
+
+    metin = (cp.text or cp.caption or '').strip()
+    komut = metin.split()[0].lower().split('@')[0] if metin else ''
+
+    if komut in ('/arsiv', '/medyaarsiv'):
+        await _medya_arsiv_baslat(context)
+        return True
+
+    oturum = _medya_arsiv_oturum.get(MEDYA_ARSIV_KANAL_ID)
+    if not oturum and (cp.photo or cp.video):
+        await _medya_arsiv_baslat(
+            context,
+            [{'message_id': cp.message_id, 'tur': _medya_turu_belirle(cp)}],
+        )
+        return True
+    if komut == '/iptal' and oturum:
+        _medya_arsiv_oturum.pop(MEDYA_ARSIV_KANAL_ID, None)
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID, "✅ Medya arşiv işlemi iptal edildi."
+        )
+        return True
+    if not oturum:
+        return False
+
+    adim = oturum.get('adim')
+    if adim == 'kod_bekliyor':
+        if not metin or metin.startswith('/'):
+            await context.bot.send_message(
+                MEDYA_ARSIV_KANAL_ID,
+                "❌ Geçerli bir kod yazın. Örnek: `fotoğraflar`",
+                parse_mode='Markdown',
+            )
+            return True
+        kod = _medya_kod_normalize(metin)
+        arsiv = _medya_arsiv_yukle()
+        eski = kod in arsiv
+        arsiv[kod] = {
+            'kod': metin[:100],
+            'tur': oturum['tur'],
+            'mesajlar': oturum['mesajlar'],
+            'tarih': datetime.datetime.now(TR_SAAT).isoformat(),
+        }
+        _medya_arsiv_kaydet(arsiv)
+        _medya_arsiv_oturum.pop(MEDYA_ARSIV_KANAL_ID, None)
+        durum = "güncellendi" if eski else "kaydedildi"
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID,
+            f"✅ Medya arşive {durum}.\n\n"
+            f"🔑 Kod: `{metin[:100]}`\n"
+            "Bu kodu DM'de bota yazan kullanıcıya içerik gönderilecek.",
+            parse_mode='Markdown',
+        )
+        return True
+
+    if not cp.photo and not cp.video:
+        return False
+
+    medya_turu = _medya_turu_belirle(cp)
+    secim = oturum.get('tur')
+    if secim in ('photo', 'video') and medya_turu != secim:
+        beklenen = "fotoğraf" if secim == "photo" else "video"
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID,
+            f"❌ Bu işlem için {beklenen} göndermelisiniz.",
+        )
+        return True
+    if secim == 'both' and medya_turu in {
+        item['tur'] for item in oturum.get('mesajlar', [])
+    }:
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID,
+            "⚠️ Bu tür medya zaten alındı. Diğer türü gönderin.",
+        )
+        return True
+
+    oturum.setdefault('mesajlar', []).append({
+        'message_id': cp.message_id,
+        'tur': medya_turu,
+    })
+
+    if secim == 'both' and len(oturum['mesajlar']) < 2:
+        kalan = "videoyu" if medya_turu == "photo" else "fotoğrafı"
+        await context.bot.send_message(
+            MEDYA_ARSIV_KANAL_ID,
+            f"✅ {medya_turu == 'photo' and 'Fotoğraf' or 'Video'} alındı.\n"
+            f"Şimdi {kalan} gönderin.",
+        )
+        return True
+
+    oturum['adim'] = 'kod_bekliyor'
+    await context.bot.send_message(
+        MEDYA_ARSIV_KANAL_ID,
+        "✅ Medya alındı.\n\n"
+        "Lütfen kod belirleyin.\n"
+        "Örnek: `fotoğraflar`",
+        parse_mode='Markdown',
+    )
+    return True
+
+
+async def _medya_arsiv_dm_sorgula(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    """DM'de yazılan arşiv kodu varsa kaynak kanaldaki medyayı kopyalar."""
+    if not update.message or update.effective_chat.type != 'private':
+        return False
+    metin = (update.message.text or '').strip()
+    if not metin or metin.startswith('/'):
+        return False
+    kayit = _medya_arsiv_yukle().get(_medya_kod_normalize(metin))
+    if not kayit:
+        return False
+    gonderilen = 0
+    for medya in kayit.get('mesajlar', []):
+        try:
+            await context.bot.copy_message(
+                chat_id=update.effective_chat.id,
+                from_chat_id=MEDYA_ARSIV_KANAL_ID,
+                message_id=medya['message_id'],
+            )
+            gonderilen += 1
+        except Exception as exc:
+            logger.warning(f"Arşiv medyası DM'e gönderilemedi: {exc}")
+    if not gonderilen:
+        await update.message.reply_text(
+            "❌ Bu kod için medya gönderilemedi. Kanal erişimini kontrol edin."
+        )
+    return True
+
+
+async def _medya_arsiv_callback(query, context: ContextTypes.DEFAULT_TYPE):
+    if query.from_user.id != MY_ID:
+        await query.answer("⛔ Bu işlem sadece bot sahibine açık.", show_alert=True)
+        return
+
+    await query.answer()
+    if query.data == "mar_cancel":
+        _medya_arsiv_oturum.pop(MEDYA_ARSIV_KANAL_ID, None)
+        await query.edit_message_text("✅ Medya arşiv işlemi iptal edildi.")
+        return
+
+    secim = {
+        "mar_photo": ("photo", "📷 Fotoğraf"),
+        "mar_video": ("video", "🎥 Video"),
+        "mar_both": ("both", "📷🎥 Fotoğraf&video"),
+    }.get(query.data)
+    if not secim:
+        return
+
+    tur, etiket = secim
+    bekleyen = _medya_arsiv_oturum.get(MEDYA_ARSIV_KANAL_ID, {}).get('bekleyen', [])
+    _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID] = {
+        'adim': 'medya_bekliyor',
+        'tur': tur,
+        'mesajlar': [],
+    }
+    if bekleyen and tur in ('photo', 'video') and bekleyen[0]['tur'] != tur:
+        bekleyen = []
+    if bekleyen:
+        _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID]['mesajlar'] = bekleyen
+    if tur == 'both' and bekleyen:
+        talimat = "Şimdi diğer medya türünü gönderin."
+    elif tur == 'both':
+        talimat = "Önce fotoğrafı veya videoyu, ardından diğer medya türünü gönderin."
+    elif bekleyen:
+        _medya_arsiv_oturum[MEDYA_ARSIV_KANAL_ID]['adim'] = 'kod_bekliyor'
+        talimat = "Medya alındı. Şimdi bu içerik için bir kod belirleyin."
+    else:
+        talimat = f"Lütfen {etiket.lower()} gönderin."
+    await query.edit_message_text(
+        f"✅ {etiket} seçildi.\n\n{talimat}\n\n"
+        "İptal etmek için /iptal yazabilirsiniz.",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("❌ İptal", callback_data="mar_cancel")]
+        ]),
+    )
 
 
 def apk_dosyalari_yukle() -> dict:
@@ -5160,6 +5402,11 @@ async def grup_ve_kanal_mesaj_yonet(update: Update, context: ContextTypes.DEFAUL
 
     if update.channel_post:
         channel_post = update.channel_post
+        # ── Fotoğraf/video arşiv kanalı ─────────────────────────
+        if channel_post.chat_id == MEDYA_ARSIV_KANAL_ID:
+            if await _medya_arsiv_kanal_isle(context, channel_post):
+                return
+        # ───────────────────────────────────────────────────────
         # ── APK-OBB-CONFİG yükleme kanalı — her zaman önce işle ──
         if channel_post.chat_id == _APK_KANAL_ID:
             await _apk_kanal_isle(context, channel_post)
@@ -5381,7 +5628,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     strings = fs(context, user_id, lang)
     # Akinator callback'leri kendi sonuçlarına göre cevap verir; diğerleri
     # burada tek seferde onaylanır.
-    if not query.data.startswith(('aki_baslat', 'aki_play_', 'aki_win_')):
+    if not query.data.startswith(('aki_baslat', 'aki_play_', 'aki_win_', 'mar_')):
         await query.answer()
 
     # ── Her buton basışını logla ──────────────────────────────
@@ -6311,6 +6558,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'eglence_akinator':
         aki_intro_klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🎮 BAŞLA!", callback_data='aki_baslat')],
+            [InlineKeyboardButton("🏆 Sıralama", callback_data="aki_leaderboard")],
             [InlineKeyboardButton("⬅️ Geri", callback_data='menu_fun')]
         ])
         karsilama_caption = (
@@ -6341,6 +6589,10 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
     elif query.data == 'aki_baslat':
         await _aki_play_baslat_callback(query, context)
+    elif query.data == 'aki_leaderboard':
+        await _aki_siralama_panel_goster(query, context)
+    elif query.data.startswith('mar_'):
+        await _medya_arsiv_callback(query, context)
     elif query.data.startswith('aki_play_'):
         await _aki_cevap_callback(query, context)
     elif query.data == 'aki_win_y':
@@ -8785,6 +9037,8 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     lang = get_lang(context, user_id)
     strings = fs(context, user_id, lang)
     if not await kanal_takip_kontrol(update, context, user_id, lang):
+        return
+    if await _medya_arsiv_dm_sorgula(update, context):
         return
 
     try:
@@ -11811,6 +12065,7 @@ async def _aki_play_baslat_callback(query, context):
             await aki.start_game(language="en", child_mode=False)
 
         context.user_data[f"aki_{user_id}"] = aki
+        _aki_oyun_kayit_baslat(query.from_user, context)
 
         dolu = int((aki.progression or 0) / 10)
         bar  = "🟦" * dolu + "⬜" * (10 - dolu)
@@ -11849,6 +12104,7 @@ async def _aki_play_baslat_callback(query, context):
 
     except Exception as e:
         logger.error(f"Akinator başlatma hatası: {e}")
+        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
         try:
@@ -11948,6 +12204,7 @@ async def _aki_cevap_callback(query, context):
     await query.answer()
 
     if a == "quit":
+        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
         bitti = "🏳️ *Oyun sona erdirildi.*\n\nYeni oyun için /akinator yaz."
@@ -11977,6 +12234,9 @@ async def _aki_cevap_callback(query, context):
         else:
             # 0=Evet 1=Hayır 2=Bilmiyorum 3=Muhtemelen 4=Muhtemelen Değil
             await _aki_raw_answer(aki, int(a))
+            context.user_data[f"aki_question_count_{user_id}"] = (
+                context.user_data.get(f"aki_question_count_{user_id}", 0) + 1
+            )
 
         if aki.win:
             dolu = int((aki.progression or 100) / 10)
@@ -12057,6 +12317,7 @@ async def _aki_cevap_callback(query, context):
     except Exception as e:
         err = str(e).lower()
         logger.error(f"Akinator cevap hatası: {e}")
+        _aki_oyun_kayit_bitir(user_id, context, "abandoned")
         context.user_data.pop(f"aki_{user_id}", None)
         context.user_data.pop(f"aki_msg_{user_id}", None)
         if "timed out" in err or "timeout" in err:
@@ -12075,6 +12336,7 @@ async def _aki_cevap_callback(query, context):
 async def _aki_win_callback(query, context, dogru: bool):
     """aki_win_y / aki_win_n — Doğru/Yanlış tahmin sonucu."""
     user_id = query.from_user.id
+    _aki_oyun_kayit_bitir(user_id, context, "akinator" if dogru else "oyuncu")
     context.user_data.pop(f"aki_{user_id}", None)
     context.user_data.pop(f"aki_msg_{user_id}", None)
 
@@ -12183,7 +12445,8 @@ async def _kanal_tara_yap(bot) -> int:
 
     # 3. Sabit kanal/grup ID'leri
     for sabit_id in [KANAL_ID, YONETIM_KANAL_ID, ZAMANLI_KANAL_ID,
-                     LOG_KANAL_ID, _APK_KANAL_ID, TEST_KANAL_ID]:
+                     LOG_KANAL_ID, _APK_KANAL_ID, TEST_KANAL_ID,
+                     MEDYA_ARSIV_KANAL_ID]:
         if sabit_id:
             bilinen_idler.add(sabit_id)
 
@@ -12451,6 +12714,7 @@ def main():
     application.add_handler(CommandHandler("atag", atag_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("istatistik", istatistik_komutu, filters=filters.ChatType.GROUPS))
     application.add_handler(CommandHandler("akinator", akinator_baslat_cmd))
+    application.add_handler(CommandHandler("akisiralamasi", aki_siralama_cmd))
     application.add_handler(CommandHandler("muzik", muzik_ara_komutu))
     application.add_handler(CallbackQueryHandler(handle_callbacks))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, gelen_mesajlari_yonet))
