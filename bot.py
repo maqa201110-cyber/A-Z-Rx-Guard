@@ -4933,8 +4933,13 @@ async def _medya_arsiv_dm_sorgula(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def _medya_arsiv_callback(query, context: ContextTypes.DEFAULT_TYPE):
-    if query.from_user.id != MY_ID:
-        await query.answer("⛔ Bu işlem sadece bot sahibine açık.", show_alert=True)
+    # Arşiv akışı yalnızca hedef kanaldaki butonlarda çalışır.
+    # Bu kanalda bulunan herkes seçim yapabilir.
+    if not query.message or query.message.chat_id != MEDYA_ARSIV_KANAL_ID:
+        await query.answer(
+            "⛔ Bu işlem yalnızca medya arşiv kanalında kullanılabilir.",
+            show_alert=True,
+        )
         return
 
     await query.answer()
