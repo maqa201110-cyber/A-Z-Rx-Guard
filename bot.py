@@ -11979,6 +11979,10 @@ _AKI_WIN_KLAVYE = InlineKeyboardMarkup([
     ]
 ])
 
+# context.user_data yeniden oluşturulsa bile aynı süreçteki aktif Akinator
+# oturumunu kaybetmemek için ikinci bir referans tutulur.
+_AKI_AKTIF_OTURUMLAR: dict = {}
+
 # 0=Evet 1=Hayır 2=Bilmiyorum 3=Muhtemelen 4=Muhtemelen Değil
 _AKI_CEVAP_STR = {
     "0": "yes",
@@ -12027,6 +12031,7 @@ def _aki_oyun_kayit_baslat(user, context):
 
 
 def _aki_oyun_kayit_bitir(user_id: int, context, sonuc: str):
+    _AKI_AKTIF_OTURUMLAR.pop(user_id, None)
     baslangic = context.user_data.pop(f"aki_started_at_{user_id}", None)
     soru_sayisi = context.user_data.pop(f"aki_question_count_{user_id}", 0)
     if baslangic is None:
@@ -12126,6 +12131,7 @@ async def _aki_play_baslat_callback(query, context):
 
     context.user_data.pop(f"aki_{user_id}", None)
     context.user_data.pop(f"aki_msg_{user_id}", None)
+    _AKI_AKTIF_OTURUMLAR.pop(user_id, None)
 
     if not AKINATOR_YUKLU:
         await query.answer("❌ Akinator şu an kullanılamıyor!", show_alert=True)
@@ -12149,6 +12155,7 @@ async def _aki_play_baslat_callback(query, context):
             await aki.start_game(language="en", child_mode=False)
 
         context.user_data[f"aki_{user_id}"] = aki
+        _AKI_AKTIF_OTURUMLAR[user_id] = aki
         _aki_oyun_kayit_baslat(query.from_user, context)
 
         dolu = int((aki.progression or 0) / 10)
@@ -12271,11 +12278,17 @@ async def _aki_raw_back(aki) -> None:
 async def _aki_cevap_callback(query, context):
     """aki_play_0/1/2/3/4/5/quit — Evet/Hayır/Geri/Bırak butonları."""
     user_id = query.from_user.id
-    aki: _AsyncAkinator = context.user_data.get(f"aki_{user_id}")
+    aki: _AsyncAkinator = (
+        context.user_data.get(f"aki_{user_id}")
+        or _AKI_AKTIF_OTURUMLAR.get(user_id)
+    )
 
     if not aki:
-        await query.answer("❌ Aktif oyun yok! /akinator ile başlat.", show_alert=True)
+        # Eski bir düğme veya yeniden oluşan user_data ile gelmişse,
+        # kullanıcıyı hatada bırakmak yerine yeni oyun başlat.
+        await _aki_play_baslat_callback(query, context)
         return
+    context.user_data[f"aki_{user_id}"] = aki
 
     a        = query.data.split("_")[-1]   # 0/1/2/3/4/5/quit
     chat_id  = query.message.chat_id
