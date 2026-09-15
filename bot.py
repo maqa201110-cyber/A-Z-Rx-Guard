@@ -5694,6 +5694,74 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await _bot_baslat_animasyon(update, context, user_id, lang)
 
+
+# ─────────────────────────────────────────────────────────────
+# 🛡️ SİBER GÜVENLİK 101 — yeni başlayanlar için kısa dersler
+# ─────────────────────────────────────────────────────────────
+SIBER_101_DERSLER = {
+    'link': (
+        "🔗 **ŞÜPHELİ LİNK NEDİR?**\n\n"
+        "Tanımadığın birinin gönderdiği veya seni acele ettiren linklere hemen basma.\n\n"
+        "✅ Linki açmadan önce gönderen kişiyi kontrol et.\n"
+        "✅ Ödül, para veya hesap kapanacak mesajlarına dikkat et.\n"
+        "❌ Şifreni isteyen sayfalara güvenme."
+    ),
+    'sifre': (
+        "🔑 **GÜVENLİ ŞİFRE NASIL OLUR?**\n\n"
+        "Şifreni kimseyle paylaşma ve her hesapta farklı şifre kullan.\n\n"
+        "✅ Uzun bir şifre veya parola cümlesi kullan.\n"
+        "✅ Ad, doğum tarihi ve 123456 kullanma.\n"
+        "✅ Mümkünse iki adımlı doğrulamayı aç."
+    ),
+    'iki_adim': (
+        "📱 **İKİ ADIMLI DOĞRULAMA NEDİR?**\n\n"
+        "Şifren bilinse bile hesabına girmek için gereken ikinci kontroldür.\n\n"
+        "Örneğin telefonuna gelen kod veya doğrulama uygulaması.\n\n"
+        "✅ Hesabını korumanın en kolay yollarından biridir."
+    ),
+    'oltalama': (
+        "🎣 **OLTALAMA (PHISHING) NEDİR?**\n\n"
+        "Birinin sahte mesaj veya sahte siteyle şifreni almaya çalışmasıdır.\n\n"
+        "Şu sözler şüphelidir:\n"
+        "• “Hemen tıkla!”\n"
+        "• “Hesabın kapanacak!”\n"
+        "• “Ödülünü almak için giriş yap!”\n\n"
+        "Şüphelenirsen linke basma ve mesajı sil."
+    ),
+    'telefon': (
+        "📲 **TELEFONUNU NASIL KORURSUN?**\n\n"
+        "✅ Telefonuna ekran kilidi koy.\n"
+        "✅ Uygulamaları sadece resmi mağazadan indir.\n"
+        "✅ Güncellemeleri geciktirme.\n"
+        "✅ Tanımadığın dosyaları açma.\n"
+        "✅ Telefonunu başkasına verirken hesaplarını açık bırakma."
+    ),
+}
+
+
+def siber_101_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔗 Şüpheli link", callback_data='siber101_link')],
+        [InlineKeyboardButton("🔑 Güvenli şifre", callback_data='siber101_sifre')],
+        [InlineKeyboardButton("📱 İki adımlı doğrulama", callback_data='siber101_iki_adim')],
+        [InlineKeyboardButton("🎣 Oltalama nedir?", callback_data='siber101_oltalama')],
+        [InlineKeyboardButton("📲 Telefon güvenliği", callback_data='siber101_telefon')],
+        [InlineKeyboardButton("🧠 Mini test", callback_data='siber101_quiz')],
+        [InlineKeyboardButton("⬅️ Siber menü", callback_data='siber101_geri')],
+    ])
+
+
+async def siber_101_goster(query, konu: str) -> None:
+    await query.edit_message_text(
+        SIBER_101_DERSLER[konu],
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("📚 Başka konu seç", callback_data='siber101')],
+            [InlineKeyboardButton("⬅️ Siber menü", callback_data='siber101_geri')],
+        ]),
+        parse_mode='Markdown',
+    )
+
+
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -6839,6 +6907,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
         siber_mod_araclari = InlineKeyboardMarkup([
+            [InlineKeyboardButton('📘 Siber Güvenlik 101', callback_data='siber101')],
             [InlineKeyboardButton('🌐 IP Sorgu', callback_data='menu_ip_sorgu'),
              InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
             [InlineKeyboardButton('🕵️ Username Hunter', callback_data='menu_guvenli_sorgu'),
@@ -6860,6 +6929,70 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ),
             reply_markup=siber_mod_araclari,
             parse_mode='Markdown'
+        )
+
+    elif query.data == 'siber101':
+        await query.edit_message_text(
+            "📘 **SİBER GÜVENLİK 101**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Yeni başlayanlar için kısa ve kolay bilgiler.\n"
+            "Bir konu seç, 30 saniyede öğren:",
+            reply_markup=siber_101_klavye(),
+            parse_mode='Markdown',
+        )
+    elif query.data == 'siber101_geri':
+        siber_mod_araclari = InlineKeyboardMarkup([
+            [InlineKeyboardButton('📘 Siber Güvenlik 101', callback_data='siber101')],
+            [InlineKeyboardButton('🌐 IP Sorgu', callback_data='menu_ip_sorgu'),
+             InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
+            [InlineKeyboardButton('🕵️ Username Hunter', callback_data='menu_guvenli_sorgu'),
+             InlineKeyboardButton('🔐 Şifre Güç Testi', callback_data='siber_sifre_guc')],
+            [InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned'),
+             InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
+            [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
+             InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
+            [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
+             InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
+            [InlineKeyboardButton('🔄 Standart Moda Dön', callback_data='go_home')],
+        ])
+        await query.edit_message_text(
+            "⚡ *SİBER GÜVENLİK MODU*\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "🛡️ Araçlardan birini seçin:",
+            reply_markup=siber_mod_araclari,
+            parse_mode='Markdown',
+        )
+    elif query.data.startswith('siber101_') and query.data[9:] in SIBER_101_DERSLER:
+        await siber_101_goster(query, query.data[9:])
+    elif query.data == 'siber101_quiz':
+        await query.edit_message_text(
+            "🧠 **MİNİ TEST**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Sana “Hesabın kapanacak, hemen bu linke tıkla!” diye mesaj geldi.\n\n"
+            "Ne yaparsın?",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔗 Hemen tıklarım", callback_data='siber101_quiz_yanlis')],
+                [InlineKeyboardButton("✅ Tıklamam, resmi uygulamadan kontrol ederim", callback_data='siber101_quiz_dogru')],
+                [InlineKeyboardButton("📤 Herkese gönderirim", callback_data='siber101_quiz_yanlis')],
+            ]),
+            parse_mode='Markdown',
+        )
+    elif query.data in ('siber101_quiz_dogru', 'siber101_quiz_yanlis'):
+        dogru = query.data.endswith('dogru')
+        sonuc = (
+            "✅ **Doğru cevap!**\n\n"
+            "Şüpheli linke basmak yerine hesabını resmi uygulamadan kontrol et."
+            if dogru else
+            "🟡 **Bu cevap güvenli değil.**\n\n"
+            "Acele ettiren mesajlara ve linklere hemen basma. Resmi uygulamayı kendin açıp kontrol et."
+        )
+        await query.edit_message_text(
+            f"{sonuc}\n\n🎉 Bir sonraki konuda görüşürüz!",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("📘 Başka konu öğren", callback_data='siber101')],
+                [InlineKeyboardButton("⬅️ Siber menü", callback_data='siber101_geri')],
+            ]),
+            parse_mode='Markdown',
         )
 
     elif query.data == 'menu_video_indir':
