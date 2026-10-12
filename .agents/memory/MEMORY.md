@@ -1,1 +1,1 @@
-- [Siber security navigation](siber-security-navigation.md) — keep security tools as a category inside PRO Araçlar, not as a separate mode.
+- [Siber security navigation](siber-security-navigation.md) — keep security tools in PRO Araçlar; OSINT stays passive and focused on public assets.

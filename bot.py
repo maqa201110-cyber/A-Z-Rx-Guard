@@ -18,6 +18,7 @@ import tempfile
 import shutil
 import urllib.parse
 import time
+import osint_tools as _osint_tools
 
 try:
     from akinator.async_client import AsyncAkinator as _AsyncAkinator
@@ -58,6 +59,12 @@ for _noisy in ('httpx', 'httpcore', 'telegram.ext', 'apscheduler'):
     logging.getLogger(_noisy).setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
+
+OSINT_PENDING_STATES = {
+    "osint_domain_bekliyor",
+    "osint_ip_bekliyor",
+    "osint_url_bekliyor",
+}
 
 # --- AYARLAR ---
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
@@ -5640,6 +5647,8 @@ async def _bot_baslat_animasyon(update, context, user_id, lang):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    if context.user_data.get('durum') in OSINT_PENDING_STATES:
+        context.user_data['durum'] = None
     lang = get_lang(context, user_id)
     tum_uyeler = uyeleri_getir()
     if user_id not in tum_uyeler:
@@ -5751,6 +5760,7 @@ def siber_101_klavye() -> InlineKeyboardMarkup:
 def pro_siber_guvenlik_klavye(strings) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("📘 Siber Güvenlik 101", callback_data='siber101')],
+        [InlineKeyboardButton("🔎 OSINT Merkezi", callback_data='osint_menu')],
         [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
          InlineKeyboardButton('📋 TG Kanalı Bilgisi', callback_data='menu_panel')],
         [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ Username Hunter'), callback_data='menu_guvenli_sorgu'),
@@ -5762,6 +5772,27 @@ def pro_siber_guvenlik_klavye(strings) -> InlineKeyboardMarkup:
         [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
          InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
         [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')],
+    ])
+
+
+def osint_merkez_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🏢 Domain Araştır", callback_data="osint_domain")],
+        [InlineKeyboardButton("🌐 IP Araştır", callback_data="osint_ip")],
+        [InlineKeyboardButton("🔗 Link Araştır", callback_data="osint_url")],
+        [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data="pro_siber_guvenlik")],
+    ])
+
+
+def osint_sonuc_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🔁 Yeni Domain", callback_data="osint_domain"),
+            InlineKeyboardButton("🌐 Yeni IP", callback_data="osint_ip"),
+        ],
+        [InlineKeyboardButton("🔗 Yeni Link", callback_data="osint_url")],
+        [InlineKeyboardButton("🔎 OSINT Merkezi", callback_data="osint_menu")],
+        [InlineKeyboardButton("⬅️ Siber Güvenlik", callback_data="pro_siber_guvenlik")],
     ])
 
 
@@ -5781,6 +5812,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     lang = get_lang(context, user_id)
     strings = fs(context, user_id, lang)
+    if query.data.startswith("osint_") and (
+        query.message is None or query.message.chat.type != "private"
+    ):
+        await query.answer("OSINT araçları yalnızca botla özel mesajda kullanılabilir.", show_alert=True)
+        return
     # Akinator callback'leri kendi sonuçlarına göre cevap verir; diğerleri
     # burada tek seferde onaylanır.
     if not query.data.startswith(('aki_baslat', 'aki_play_', 'aki_win_', 'mar_')):
@@ -5796,6 +5832,8 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'menu_azr_special': '⭐ AZR Özel', 'menu_pro_araclar': '⚡ Pro Araçlar',
                 'menu_video_olusturucu': '🎬 Video Editör', 'menu_telefon_fiyatlari': '📱 Telefon Fiyatları',
                 'menu_ip_sorgu': '🌐 IP Sorgu', 'menu_hatirlat': '⏰ Hatırlatıcı',
+                'osint_menu': '🔎 OSINT Merkezi', 'osint_domain': '🏢 OSINT Domain Araştır',
+                'osint_ip': '🌐 OSINT IP Araştır', 'osint_url': '🔗 OSINT Link Araştır',
                 'pro_hesap': '🧮 Hesap Makinesi', 'pro_hash': '🔐 Hash Üretici',
                 'pro_hava': '🌍 Hava Durumu', 'pro_doviz': '💱 Döviz Kuru',
                 'pro_saat': '🕐 Dünya Saati', 'pro_b64': '🔒 Base64',
@@ -5823,6 +5861,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     if not _sahip_callback and not await kanal_takip_kontrol(update, context, user_id, lang):
         return
+
+    if context.user_data.get("durum") in OSINT_PENDING_STATES and query.data not in {
+        "osint_domain", "osint_ip", "osint_url"
+    }:
+        context.user_data["durum"] = None
 
     if query.data == 'menu_bot_ayarlari':
         ayarlar_klavye = [
@@ -6069,6 +6112,50 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "Güvenlik araçlarını buradan seçebilirsin:",
             reply_markup=pro_siber_guvenlik_klavye(strings),
+            parse_mode='Markdown'
+        )
+    elif query.data == 'osint_menu':
+        context.user_data['durum'] = None
+        context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › OSINT Merkezi'
+        await query.edit_message_text(
+            "🔎 **OSINT MERKEZİ**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Herkese açık kaynaklardan domain, IP veya link hakkında kaynaklı rapor al.\n\n"
+            "• Pasif sorgu; hedef siteye/cihaza bağlanmaz.\n"
+            "• Yalnızca sahibi olduğun veya inceleme yetkin olan herkese açık varlıkları sorgula.\n"
+            "• Özel IP, kullanıcı bilgisi içeren link ve parola kabul edilmez.",
+            reply_markup=osint_merkez_klavye(),
+            parse_mode='Markdown'
+        )
+    elif query.data in ('osint_domain', 'osint_ip', 'osint_url'):
+        prompt_by_callback = {
+            'osint_domain': (
+                'osint_domain_bekliyor',
+                "🏢 **DOMAIN ARAŞTIR**\n\n"
+                "Herkese açık domaini yaz:\n`example.com`\n\n"
+                "Kendi domainin veya inceleme yetkin olan bir domain olmalı."
+            ),
+            'osint_ip': (
+                'osint_ip_bekliyor',
+                "🌐 **IP ARAŞTIR**\n\n"
+                "Herkese açık IP adresini yaz:\n`8.8.8.8`\n\n"
+                "Özel ağ adresleri kabul edilmez."
+            ),
+            'osint_url': (
+                'osint_url_bekliyor',
+                "🔗 **LINK ARAŞTIR**\n\n"
+                "Herkese açık bir link gönder:\n`https://example.com`\n\n"
+                "Bot sayfayı açmaz; yalnızca domaini kamu kaynaklarında arar. Linkin yolu ve parametreleri taranmaz veya paylaşılmaz."
+            ),
+        }
+        state, prompt = prompt_by_callback[query.data]
+        context.user_data['durum'] = state
+        context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik › OSINT Merkezi'
+        await query.edit_message_text(
+            prompt,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("❌ İptal / OSINT menüsü", callback_data="osint_menu")]
+            ]),
             parse_mode='Markdown'
         )
     elif query.data == 'siber_sifre_guc':
@@ -9188,13 +9275,60 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
     strings = fs(context, user_id, lang)
     if not await kanal_takip_kontrol(update, context, user_id, lang):
         return
-    if await _medya_arsiv_dm_sorgula(update, context):
+    if (
+        context.user_data.get('durum') not in OSINT_PENDING_STATES
+        and await _medya_arsiv_dm_sorgula(update, context)
+    ):
         return
 
-    try:
-        await log_kanali_gonder(context.bot, update)
-    except Exception:
-        pass
+    if context.user_data.get('durum') not in OSINT_PENDING_STATES:
+        try:
+            await log_kanali_gonder(context.bot, update)
+        except Exception:
+            pass
+
+    osint_state = context.user_data.get('durum')
+    if osint_state in OSINT_PENDING_STATES:
+        context.user_data['durum'] = None
+        sorgu = (update.message.text or '').strip()
+        son_sorgu = float(context.user_data.get('osint_son_sorgu', 0))
+        simdi = time.monotonic()
+        if simdi - son_sorgu < 10:
+            await update.message.reply_text(
+                "⏳ Kaynakları korumak için sorgular arasında 10 saniye bekle.",
+                reply_markup=osint_sonuc_klavye()
+            )
+            return
+        context.user_data['osint_son_sorgu'] = simdi
+        bekle = await update.message.reply_text(
+            "🔎 Kamuya açık kaynaklar kontrol ediliyor...\n"
+            "Hedef siteye bağlantı veya aktif tarama yapılmıyor."
+        )
+        sorgu_fonksiyonlari = {
+            "osint_domain_bekliyor": _osint_tools.inspect_domain,
+            "osint_ip_bekliyor": _osint_tools.inspect_ip,
+            "osint_url_bekliyor": _osint_tools.inspect_url,
+        }
+        try:
+            rapor = await asyncio.to_thread(sorgu_fonksiyonlari[osint_state], sorgu)
+        except _osint_tools.OsintInputError as exc:
+            await bekle.edit_text(
+                f"❌ {exc}",
+                reply_markup=osint_merkez_klavye()
+            )
+        except Exception as exc:
+            logger.error("OSINT raporu oluşturulamadı: %s", type(exc).__name__)
+            await bekle.edit_text(
+                "❌ OSINT raporu hazırlanamadı. Girdiyi kontrol edip yeniden dene.",
+                reply_markup=osint_merkez_klavye()
+            )
+        else:
+            await bekle.edit_text(
+                rapor,
+                disable_web_page_preview=True,
+                reply_markup=osint_sonuc_klavye()
+            )
+        return
 
     if context.user_data.get('durum') == 'admin_mesaj_bekliyor':
         user = update.effective_user
