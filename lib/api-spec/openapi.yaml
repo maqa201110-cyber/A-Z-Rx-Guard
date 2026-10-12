@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: MAQA SHOP authentication
+  - name: listings
+    description: Marketplace listings
 paths:
   /healthz:
     get:
@@ -24,6 +28,220 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /shop/auth/register:
+    post:
+      operationId: registerShopUser
+      tags: [auth]
+      summary: Register a MAQA SHOP account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopCredentialsInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid account details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /shop/auth/login:
+    post:
+      operationId: loginShopUser
+      tags: [auth]
+      summary: Sign in to MAQA SHOP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopCredentialsInput"
+      responses:
+        "200":
+          description: Signed in user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credentials rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /shop/auth/logout:
+    post:
+      operationId: logoutShopUser
+      tags: [auth]
+      summary: Sign out of MAQA SHOP
+      responses:
+        "204":
+          description: Signed out
+  /shop/me:
+    get:
+      operationId: getShopMe
+      tags: [auth]
+      summary: Get the current MAQA SHOP session
+      responses:
+        "200":
+          description: Current session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopMeResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /shop/listings:
+    get:
+      operationId: listShopListings
+      tags: [listings]
+      summary: List marketplace listings
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [newest, price-low, price-high]
+            default: newest
+      responses:
+        "200":
+          description: Matching listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShopListing"
+    post:
+      operationId: createShopListing
+      tags: [listings]
+      summary: Create a marketplace listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopListingInput"
+      responses:
+        "201":
+          description: Listing created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopListing"
+        "400":
+          description: Invalid listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Sign-in required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /shop/listings/stats:
+    get:
+      operationId: getShopListingStats
+      tags: [listings]
+      summary: Get marketplace summary counts
+      responses:
+        "200":
+          description: Listing summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopListingStats"
+  /shop/listings/{id}:
+    get:
+      operationId: getShopListing
+      tags: [listings]
+      summary: Get one marketplace listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopListing"
+        "404":
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteShopListing
+      tags: [listings]
+      summary: Delete a listing owned by the current user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Listing deleted
+        "401":
+          description: Sign-in required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Listing is not owned by the current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +251,119 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    ShopCredentialsInput:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+          pattern: "^[a-zA-Z0-9_.-]+$"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+      required: [username, password]
+    ShopUser:
+      type: object
+      properties:
+        id:
+          type: number
+        username:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, username, createdAt]
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/ShopUser"
+      required: [user]
+    ShopMeResponse:
+      type: object
+      properties:
+        user:
+          anyOf:
+            - $ref: "#/components/schemas/ShopUser"
+            - type: "null"
+      required: [user]
+    ShopListingInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 100
+        model:
+          type: string
+          minLength: 1
+          maxLength: 80
+        hp:
+          type: string
+          maxLength: 40
+        type:
+          type: string
+          minLength: 1
+          maxLength: 40
+        price:
+          type: string
+          minLength: 1
+          maxLength: 40
+        cpmId:
+          type: string
+          minLength: 1
+          maxLength: 80
+        contact:
+          type: string
+          minLength: 2
+          maxLength: 80
+        tags:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            maxLength: 24
+        description:
+          type: string
+          maxLength: 1000
+        images:
+          type: array
+          maxItems: 15
+          items:
+            type: string
+            pattern: "^https?://"
+      required: [title, model, type, price, cpmId, contact]
+    ShopListing:
+      allOf:
+        - $ref: "#/components/schemas/ShopListingInput"
+        - type: object
+          properties:
+            id:
+              type: number
+            seller:
+              type: string
+            isMine:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+          required: [id, seller, isMine, createdAt]
+    ShopListingStats:
+      type: object
+      properties:
+        total:
+          type: number
+        sellers:
+          type: number
+        newestTitle:
+          type: ["string", "null"]
+      required: [total, sellers, newestTitle]
 

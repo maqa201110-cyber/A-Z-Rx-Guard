@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/maqa-shop/"
+title = "MAQA SHOP"
+description = "A modern and secure marketplace for MAQA SHOP, focused on game vehicle listings, photo galleries, seller profiles, and Telegram contact flows."
+version = "1.0.0"
+id = "artifacts/maqa-shop"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/maqa-shop/" ]
+localPort = 24666
+
+[services.development]
+run = "pnpm --filter @workspace/maqa-shop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/maqa-shop", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/maqa-shop/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24666"
+BASE_PATH = "/maqa-shop/"

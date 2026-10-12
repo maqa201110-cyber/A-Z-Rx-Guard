@@ -1207,9 +1207,6 @@ def ana_menu_klavye(lang: str, font_id: str = 'normal') -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton('🚗 ARABA MENÜSÜ', callback_data='menu_araba')
         ],
-        [
-            InlineKeyboardButton('⚡ SİBER GÜVENLİK MODU', callback_data='siber_mod_gir')
-        ],
     ]
     return InlineKeyboardMarkup(klavye)
 
@@ -5747,7 +5744,24 @@ def siber_101_klavye() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("🎣 Oltalama nedir?", callback_data='siber101_oltalama')],
         [InlineKeyboardButton("📲 Telefon güvenliği", callback_data='siber101_telefon')],
         [InlineKeyboardButton("🧠 Mini test", callback_data='siber101_quiz')],
-        [InlineKeyboardButton("⬅️ Siber menü", callback_data='siber101_geri')],
+        [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data='pro_siber_guvenlik')],
+    ])
+
+
+def pro_siber_guvenlik_klavye(strings) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("📘 Siber Güvenlik 101", callback_data='siber101')],
+        [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
+         InlineKeyboardButton('📋 TG Kanalı Bilgisi', callback_data='menu_panel')],
+        [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ Username Hunter'), callback_data='menu_guvenli_sorgu'),
+         InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
+        [InlineKeyboardButton('🔍 Şifre Sızıntı Kontrolü', callback_data='menu_sifre_pwned'),
+         InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
+        [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
+         InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
+        [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
+         InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
+        [InlineKeyboardButton(strings['btn_back'], callback_data='menu_pro_araclar')],
     ])
 
 
@@ -5756,7 +5770,7 @@ async def siber_101_goster(query, konu: str) -> None:
         SIBER_101_DERSLER[konu],
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("📚 Başka konu seç", callback_data='siber101')],
-            [InlineKeyboardButton("⬅️ Siber menü", callback_data='siber101_geri')],
+            [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data='pro_siber_guvenlik')],
         ]),
         parse_mode='Markdown',
     )
@@ -5917,7 +5931,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton('🛡️ IP Analiz', callback_data='menu_ip_analiz')
             ],
             [InlineKeyboardButton('📡 IP Al (Link İzleyici)', callback_data='menu_iplogger')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]
         ]
         await query.edit_message_text(
             strings.get('ip_sorgu_welcome', '🌐 **IP Sorgu Menüsü**\n\nAşağıdan sorgu türünü seçin:'),
@@ -6031,7 +6045,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_panel':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔍 TG Paneli')
-        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
+        geri_klavye = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]])
         context.user_data['durum'] = 'panel_sorgu_bekliyor'
         await query.edit_message_text(
             strings.get('panel_welcome', '🔍 **PANEL**\n\n@kullaniciadi veya ID yaz:'),
@@ -6041,43 +6055,26 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'menu_guvenli_sorgu':
         gs_klavye = [
             [InlineKeyboardButton(strings.get('btn_username_checker', '🔎 Platform Kontrolü'), callback_data='menu_username_checker')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]
         ]
         await query.edit_message_text(
             strings.get('guvenli_sorgu_welcome', '🕵️ **USERNAME HUNTER**\n\nKullanıcı adını 14 platformda tara:'),
             reply_markup=InlineKeyboardMarkup(gs_klavye),
             parse_mode='Markdown'
         )
-    elif query.data in ('menu_siber_guvenlik', 'siber_mod_ana'):
+    elif query.data in ('pro_siber_guvenlik', 'menu_siber_guvenlik', 'siber_mod_ana', 'siber_mod_gir'):
         context.user_data['mevcut_kategori'] = '🛡️ Siber Güvenlik'
-        # siber_mod_ana = araçlar + Standart Moda Dön; menu_siber_guvenlik = Pro Araçlar'dan gelen
-        geri_cb = 'go_home' if query.data == 'siber_mod_ana' else 'menu_pro_araclar'
-        geri_label = '🔄 Standart Moda Dön' if query.data == 'siber_mod_ana' else strings['btn_back']
-        siber_klavye = [
-            [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
-             InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
-            [InlineKeyboardButton(strings.get('btn_guvenli_sorgu', '🕵️ Username Hunter'), callback_data='menu_guvenli_sorgu'),
-             InlineKeyboardButton(strings.get('btn_sifre_guc', '🔐 Şifre Güç Testi'), callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned'),
-             InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
-            [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
-             InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
-            [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
-             InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
-            [InlineKeyboardButton(geri_label, callback_data=geri_cb)]
-        ]
-        baslik = ('⚡ **SİBER GÜVENLİK MODU**\n━━━━━━━━━━━━━━━━━━━━━━\n\n🛡️ Araçlardan birini seçin:'
-                  if query.data == 'siber_mod_ana'
-                  else strings.get('siber_guvenlik_welcome', '🛡️ **SİBER GÜVENLİK**\n\nAraçlardan birini seçin:'))
         await query.edit_message_text(
-            baslik,
-            reply_markup=InlineKeyboardMarkup(siber_klavye),
+            "🛡️ **SİBER GÜVENLİK ARAÇLARI**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Güvenlik araçlarını buradan seçebilirsin:",
+            reply_markup=pro_siber_guvenlik_klavye(strings),
             parse_mode='Markdown'
         )
     elif query.data == 'siber_sifre_guc':
         kat = context.user_data.pop('mevcut_kategori', '') or ''
         await log_kanali_gonder(context.bot, update, kategori=kat, komut='🔐 Şifre Güç Testi')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]])
         context.user_data['durum'] = 'sifre_guc_bekliyor'
         await query.edit_message_text(
             "🔐 **Şifre Güç Testi**\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -6087,7 +6084,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_sifre_pwned':
         await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='🔍 Şifre Sızıntı')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]])
         context.user_data['durum'] = 'sifre_pwned_bekliyor'
         await query.edit_message_text(
             "🔍 **SIZDIRILMIŞ ŞİFRE KONTROLÜ**\n"
@@ -6099,7 +6096,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     elif query.data == 'menu_operator':
         await log_kanali_gonder(context.bot, update, kategori='🛡️ Siber Güvenlik', komut='📱 Operatör Sorgula')
-        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]])
+        geri = InlineKeyboardMarkup([[InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]])
         context.user_data['durum'] = 'operator_bekliyor'
         await query.edit_message_text(
             "📱 **OPERATÖR SORGULAMA**\n"
@@ -6172,6 +6169,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pro_klavye = [
             [InlineKeyboardButton('🏠 Kişisel Kullanım', callback_data='menu_kisisel_kullanim')],
             [InlineKeyboardButton('🎮 Eğlence', callback_data='menu_fun')],
+            [InlineKeyboardButton('🛡️ Siber Güvenlik Araçları', callback_data='pro_siber_guvenlik')],
             [InlineKeyboardButton('🌐 Wikipedia', callback_data='pro_wiki'),
              InlineKeyboardButton('📱 QR Kod', callback_data='sa_qr')],
             [InlineKeyboardButton('🌐 URL Kısalt', callback_data='sa_url'),
@@ -6880,57 +6878,6 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ai_klavye, parse_mode='Markdown'
         )
 
-    elif query.data == 'siber_mod_gir':
-        # ── Animasyonlu yükleme çubuğu (10 → 100) ──────────────────────────
-        def siber_cubuk(yuzde: int) -> str:
-            dolu = yuzde // 10
-            bos  = 10 - dolu
-            cubuk = '▰' * dolu + '▱' * bos
-            return (
-                f"⚡ *Siber mod⚡ Yükleniyor...*\n\n"
-                f"┌────────────────────┐\n"
-                f"│  {cubuk}  │\n"
-                f"└────────────────────┘\n\n"
-                f"`{yuzde}%`"
-            )
-        await query.edit_message_text(siber_cubuk(0), parse_mode='Markdown')
-        for yuzde in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-            await asyncio.sleep(0.35)
-            try:
-                await query.edit_message_text(siber_cubuk(yuzde), parse_mode='Markdown')
-            except Exception:
-                pass
-        await asyncio.sleep(0.4)
-        # ── Eski mesajı sil → tamamen yeni mesaj gönder ─────────────────────
-        try:
-            await query.message.delete()
-        except Exception:
-            pass
-        siber_mod_araclari = InlineKeyboardMarkup([
-            [InlineKeyboardButton('📘 Siber Güvenlik 101', callback_data='siber101')],
-            [InlineKeyboardButton('🌐 IP Sorgu', callback_data='menu_ip_sorgu'),
-             InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
-            [InlineKeyboardButton('🕵️ Username Hunter', callback_data='menu_guvenli_sorgu'),
-             InlineKeyboardButton('🔐 Şifre Güç Testi', callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned'),
-             InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
-            [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
-             InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
-            [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
-             InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
-            [InlineKeyboardButton('🔄 Standart Moda Dön', callback_data='go_home')]
-        ])
-        await context.bot.send_message(
-            chat_id=query.message.chat_id,
-            text=(
-                "⚡ *SİBER GÜVENLİK MODU*\n"
-                "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "🛡️ Araçlardan birini seçin:"
-            ),
-            reply_markup=siber_mod_araclari,
-            parse_mode='Markdown'
-        )
-
     elif query.data == 'siber101':
         await query.edit_message_text(
             "📘 **SİBER GÜVENLİK 101**\n"
@@ -6941,25 +6888,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown',
         )
     elif query.data == 'siber101_geri':
-        siber_mod_araclari = InlineKeyboardMarkup([
-            [InlineKeyboardButton('📘 Siber Güvenlik 101', callback_data='siber101')],
-            [InlineKeyboardButton('🌐 IP Sorgu', callback_data='menu_ip_sorgu'),
-             InlineKeyboardButton('📋 Tg Kanalı Info', callback_data='menu_panel')],
-            [InlineKeyboardButton('🕵️ Username Hunter', callback_data='menu_guvenli_sorgu'),
-             InlineKeyboardButton('🔐 Şifre Güç Testi', callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton('🔍 Şifre Sızıntı', callback_data='menu_sifre_pwned'),
-             InlineKeyboardButton('📱 Operatör Sorgula', callback_data='menu_operator')],
-            [InlineKeyboardButton('🔒 Base64', callback_data='pro_b64'),
-             InlineKeyboardButton('🔠 Şifrele', callback_data='pro20_sifrele')],
-            [InlineKeyboardButton('🔑 Şifre Üretici', callback_data='pro_sifre'),
-             InlineKeyboardButton('🔐 Hash Üretici', callback_data='pro_hash')],
-            [InlineKeyboardButton('🔄 Standart Moda Dön', callback_data='go_home')],
-        ])
         await query.edit_message_text(
-            "⚡ *SİBER GÜVENLİK MODU*\n"
+            "🛡️ *SİBER GÜVENLİK ARAÇLARI*\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🛡️ Araçlardan birini seçin:",
-            reply_markup=siber_mod_araclari,
+            "Güvenlik araçlarını buradan seçebilirsin:",
+            reply_markup=pro_siber_guvenlik_klavye(strings),
             parse_mode='Markdown',
         )
     elif query.data.startswith('siber101_') and query.data[9:] in SIBER_101_DERSLER:
@@ -6990,7 +6923,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{sonuc}\n\n🎉 Bir sonraki konuda görüşürüz!",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("📘 Başka konu öğren", callback_data='siber101')],
-                [InlineKeyboardButton("⬅️ Siber menü", callback_data='siber101_geri')],
+                [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data='pro_siber_guvenlik')],
             ]),
             parse_mode='Markdown',
         )
@@ -9598,7 +9531,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             rapor += "\n✅ Harika şifre!"
         klavye = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 Tekrar Test", callback_data='siber_sifre_guc')],
-            [InlineKeyboardButton(strings['btn_back'], callback_data='siber_mod_ana')]
+            [InlineKeyboardButton(strings['btn_back'], callback_data='pro_siber_guvenlik')]
         ])
         await update.message.reply_text(rapor, parse_mode='Markdown', reply_markup=klavye)
         return

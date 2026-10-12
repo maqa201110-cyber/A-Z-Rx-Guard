@@ -1,0 +1,1 @@
+- [Siber security navigation](siber-security-navigation.md) — keep security tools as a category inside PRO Araçlar, not as a separate mode.
