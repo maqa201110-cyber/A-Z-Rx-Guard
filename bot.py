@@ -65,6 +65,8 @@ OSINT_PENDING_STATES = {
     "osint_ip_bekliyor",
     "osint_url_bekliyor",
     "osint_subdomains_bekliyor",
+    "osint_gmail_bekliyor",
+    "osint_name_bekliyor",
 }
 
 # --- AYARLAR ---
@@ -5782,6 +5784,8 @@ def osint_merkez_klavye() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("🌐 IP Araştır", callback_data="osint_ip")],
         [InlineKeyboardButton("🔗 Link Araştır", callback_data="osint_url")],
         [InlineKeyboardButton("🌐 Alt Siteleri Bul", callback_data="osint_subdomains")],
+        [InlineKeyboardButton("📧 Gmail Kontrolü", callback_data="osint_gmail")],
+        [InlineKeyboardButton("📚 İsim / Marka Araştır", callback_data="osint_name")],
         [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data="pro_siber_guvenlik")],
     ])
 
@@ -5794,6 +5798,10 @@ def osint_sonuc_klavye() -> InlineKeyboardMarkup:
         ],
         [InlineKeyboardButton("🔗 Yeni Link", callback_data="osint_url")],
         [InlineKeyboardButton("🌐 Alt Siteleri Bul", callback_data="osint_subdomains")],
+        [
+            InlineKeyboardButton("📧 Gmail", callback_data="osint_gmail"),
+            InlineKeyboardButton("📚 İsim / Marka", callback_data="osint_name"),
+        ],
         [InlineKeyboardButton("🔎 OSINT Merkezi", callback_data="osint_menu")],
         [InlineKeyboardButton("⬅️ Siber Güvenlik", callback_data="pro_siber_guvenlik")],
     ])
@@ -5838,6 +5846,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'osint_menu': '🔎 OSINT Merkezi', 'osint_domain': '🏢 OSINT Domain Araştır',
                 'osint_ip': '🌐 OSINT IP Araştır', 'osint_url': '🔗 OSINT Link Araştır',
                 'osint_subdomains': '🌐 OSINT Alt Siteleri Bul',
+                'osint_gmail': '📧 OSINT Gmail Kontrolü', 'osint_name': '📚 OSINT İsim Araştırması',
                 'pro_hesap': '🧮 Hesap Makinesi', 'pro_hash': '🔐 Hash Üretici',
                 'pro_hava': '🌍 Hava Durumu', 'pro_doviz': '💱 Döviz Kuru',
                 'pro_saat': '🕐 Dünya Saati', 'pro_b64': '🔒 Base64',
@@ -5867,7 +5876,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if context.user_data.get("durum") in OSINT_PENDING_STATES and query.data not in {
-        "osint_domain", "osint_ip", "osint_url", "osint_subdomains"
+        "osint_domain", "osint_ip", "osint_url", "osint_subdomains", "osint_gmail", "osint_name"
     }:
         context.user_data["durum"] = None
 
@@ -6124,14 +6133,17 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             "🔎 **OSINT MERKEZİ**\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Herkese açık kaynaklardan domain, IP veya link hakkında kaynaklı rapor al.\n\n"
+            "Herkese açık kaynaklardan domain, IP, link, Gmail veya isim/marka hakkında bilgi al.\n\n"
             "• Pasif sorgu; hedef siteye/cihaza bağlanmaz.\n"
             "• Yalnızca sahibi olduğun veya inceleme yetkin olan herkese açık varlıkları sorgula.\n"
-            "• Özel IP, kullanıcı bilgisi içeren link ve parola kabul edilmez.",
+            "• Özel IP, kullanıcı bilgisi içeren link ve parola kabul edilmez.\n"
+            "• Gmail kontrolü hesap sahibini/varlığını doğrulamaz; isim sorgusu yalnızca Wikipedia başlıklarını arar.",
             reply_markup=osint_merkez_klavye(),
             parse_mode='Markdown'
         )
-    elif query.data in ('osint_domain', 'osint_ip', 'osint_url', 'osint_subdomains'):
+    elif query.data in (
+        'osint_domain', 'osint_ip', 'osint_url', 'osint_subdomains', 'osint_gmail', 'osint_name'
+    ):
         prompt_by_callback = {
             'osint_domain': (
                 'osint_domain_bekliyor',
@@ -6156,6 +6168,18 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "🌐 **BAĞLI ALT SİTELERİ BUL**\n\n"
                 "Sahibi olduğun veya inceleme yetkin olan ana domaini yaz:\n`example.com`\n\n"
                 "Yalnızca herkese açık sertifika kayıtlarına bakılır; alt sitelere bağlanılmaz veya tarama yapılmaz."
+            ),
+            'osint_gmail': (
+                'osint_gmail_bekliyor',
+                "📧 **GMAIL ADRES KONTROLÜ**\n\n"
+                "Gmail adresini yaz:\n`adın@gmail.com`\n\n"
+                "Yalnızca biçim ve Gmail'in genel MX kayıtları kontrol edilir. Hesabın varlığı veya sahibi sorgulanmaz; tam adres dış kaynağa gönderilmez."
+            ),
+            'osint_name': (
+                'osint_name_bekliyor',
+                "📚 **İSİM / MARKA ARAŞTIRMASI**\n\n"
+                "Kişi, marka veya şirket adını yaz.\n\n"
+                "Arama ifadesi Türkçe ve İngilizce Wikipedia aramasına gönderilir. Yalnızca makale başlıkları gösterilir; özel adres/telefon aranmaz ve sonuç kişi kimliğini doğrulamaz."
             ),
         }
         state, prompt = prompt_by_callback[query.data]
@@ -9319,6 +9343,8 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             "osint_ip_bekliyor": _osint_tools.inspect_ip,
             "osint_url_bekliyor": _osint_tools.inspect_url,
             "osint_subdomains_bekliyor": _osint_tools.inspect_subdomains,
+            "osint_gmail_bekliyor": _osint_tools.inspect_gmail,
+            "osint_name_bekliyor": _osint_tools.inspect_name,
         }
         try:
             rapor = await asyncio.to_thread(sorgu_fonksiyonlari[osint_state], sorgu)

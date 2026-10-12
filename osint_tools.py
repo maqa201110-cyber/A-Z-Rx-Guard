@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import html
 import re
 import threading
 import time
@@ -23,6 +24,9 @@ _CACHE_LOCK = threading.Lock()
 _URLSCAN_LOCK = threading.Lock()
 _URLSCAN_LAST_REQUEST = 0.0
 _URLSCAN_MIN_INTERVAL = 3.0
+_WIKIPEDIA_LOCK = threading.Lock()
+_WIKIPEDIA_LAST_REQUEST = 0.0
+_WIKIPEDIA_MIN_INTERVAL = 1.0
 _LOCAL_SUFFIXES = (".localhost", ".local", ".test", ".invalid", ".example", ".internal", ".onion")
 
 
@@ -134,6 +138,41 @@ def normalize_public_ip(raw: str) -> str:
     return str(address)
 
 
+def normalize_gmail(raw: str) -> str:
+    value = (raw or "").strip()
+    if not value or len(value) > 254 or any(char.isspace() or ord(char) < 32 for char in value):
+        raise OsintInputError("Gmail adresini boşluksuz biçimde yaz.")
+    if value.count("@") != 1:
+        raise OsintInputError("E-posta biçimi geçersiz. Örnek: adın@gmail.com")
+    local, domain = value.rsplit("@", 1)
+    domain = domain.lower().rstrip(".")
+    if domain not in {"gmail.com", "googlemail.com"}:
+        raise OsintInputError("Yalnızca @gmail.com veya @googlemail.com adresleri kabul edilir.")
+    if (
+        not local
+        or len(local) > 64
+        or not re.fullmatch(r"[A-Za-z0-9.+]+", local)
+        or local.startswith(".")
+        or local.endswith(".")
+        or ".." in local
+    ):
+        raise OsintInputError("Gmail adresinin kullanıcı adı bölümü geçersiz görünüyor.")
+    return domain
+
+
+def normalize_name_query(raw: str) -> str:
+    value = " ".join((raw or "").strip().split())
+    if (
+        len(value) < 2
+        or len(value) > 80
+        or any(ord(char) < 32 for char in value)
+        or not any(char.isalpha() for char in value)
+        or any(not (char.isalnum() or char in " .,'’&()-") for char in value)
+    ):
+        raise OsintInputError("2–80 karakterlik bir kişi, marka veya şirket adı yaz.")
+    return value
+
+
 def _safe_source(fn, *args, **kwargs) -> dict:
     try:
         return {"ok": True, "data": fn(*args, **kwargs)}
@@ -221,6 +260,26 @@ def _ripestat_asn(asn: str):
 def _dns_ptr(address: str):
     reverse_name = ipaddress.ip_address(address).reverse_pointer
     return _dns_lookup(reverse_name, "PTR")
+
+
+def _wikipedia_search(language: str, name: str):
+    global _WIKIPEDIA_LAST_REQUEST
+    with _WIKIPEDIA_LOCK:
+        wait = _WIKIPEDIA_MIN_INTERVAL - (time.monotonic() - _WIKIPEDIA_LAST_REQUEST)
+        if wait > 0:
+            time.sleep(wait)
+        _WIKIPEDIA_LAST_REQUEST = time.monotonic()
+    return _json_get(
+        f"https://{language}.wikipedia.org/w/api.php",
+        params={
+            "action": "query",
+            "list": "search",
+            "srsearch": name,
+            "srlimit": 5,
+            "format": "json",
+            "utf8": 1,
+        },
+    )
 
 
 def _cache_get_or_create(key: str, builder) -> str:
@@ -539,6 +598,81 @@ def inspect_subdomains(raw: str) -> str:
         f"subdomains:{domain}",
         lambda: _subdomains_report_uncached(domain),
     )
+
+
+def inspect_gmail(raw: str) -> str:
+    domain = normalize_gmail(raw)
+
+    def build_report():
+        result = _safe_source(_dns_lookup, domain, "MX")
+        checked = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        lines = [
+            "📧 GMAIL ADRES KONTROLÜ",
+            f"Kontrol: {checked}",
+            "• Yazdığın adresin biçimi temel Gmail kurallarına uyuyor.",
+            f"• Posta sunucusu kontrolü: {domain} MX kayıtları",
+        ]
+        if result["ok"]:
+            values = _answer_values(result["data"])
+            lines.append(f"  └ {', '.join(values) if values else 'MX kaydı bulunamadı.'}")
+        else:
+            lines.append(f"  └ DNS kaynağına ulaşılamadı ({result['error']}).")
+        lines.extend([
+            "",
+            "Bu kontrol hesabın gerçekten var olduğunu, kime ait olduğunu veya sızıntıda bulunup bulunmadığını göstermez.",
+            "Gizlilik: Tam e-posta adresi dış kaynağa gönderilmez; yalnızca Gmail domaininin MX kaydı sorgulanır.",
+            "Kaynak: https://dns.google/query?name=" + quote(domain) + "&type=MX",
+        ])
+        return "\n".join(lines)
+
+    return _cache_get_or_create(f"gmail-mx:{domain}", build_report)
+
+
+def inspect_name(raw: str) -> str:
+    name = normalize_name_query(raw)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        searches = {
+            language: pool.submit(_safe_source, _wikipedia_search, language, name)
+            for language in ("tr", "en")
+        }
+        results = {language: future.result() for language, future in searches.items()}
+
+    checked = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    lines = [
+        "📚 İSİM / MARKA ARAŞTIRMASI",
+        f"Aranan ifade: {name}",
+        f"Kontrol: {checked}",
+        "Kaynak kapsamı: Türkçe ve İngilizce Wikipedia'nın herkese açık makale başlıkları.",
+        "Bu arama kimlik doğrulamaz ve özel kişi bilgisi/iletişim bilgisi toplamaz.",
+        "",
+    ]
+    any_result = False
+    for language, label in (("tr", "Türkçe"), ("en", "İngilizce")):
+        result = results[language]
+        lines.append(f"🔎 {label} Wikipedia")
+        if not result["ok"]:
+            lines.append(f"• Kaynağa ulaşılamadı ({result['error']}).")
+            continue
+        payload = result["data"]
+        search_data = payload.get("query", {}) if isinstance(payload, dict) else {}
+        matches = search_data.get("search", []) if isinstance(search_data, dict) else []
+        if not isinstance(matches, list) or not matches:
+            lines.append("• Eşleşen kamuya açık makale bulunamadı.")
+            continue
+        for match in matches[:5]:
+            if not isinstance(match, dict) or not match.get("title"):
+                continue
+            title = html.unescape(re.sub(r"<[^>]*>", "", str(match["title"])))[:180]
+            page_path = quote(str(match["title"]).replace(" ", "_"), safe="()_-")
+            lines.append(f"• {title}: https://{language}.wikipedia.org/wiki/{page_path}")
+            any_result = True
+    if not any_result:
+        lines.extend(["", "Bu iki aramada sonuç çıkmaması, kişi veya markanın internette bulunmadığını kanıtlamaz."])
+    lines.extend([
+        "",
+        "Gizlilik: Aranan ifade Wikipedia'nın arama servisine gönderilir. Eşleşmeler yalnızca olası kamuya açık makalelerdir; aynı isimli kişiler karıştırılabilir.",
+    ])
+    return "\n".join(lines)[:3500]
 
 
 def inspect_url(raw: str) -> str:
