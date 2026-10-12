@@ -162,7 +162,7 @@ def _dns_lookup(name: str, record_type: str):
     )
 
 
-def _certificates(domain: str):
+def _certificates(domain: str, limit: int = 10):
     return _json_get(
         "https://api.certspotter.com/v1/issuances",
         params={
@@ -170,7 +170,7 @@ def _certificates(domain: str):
             "include_subdomains": "true",
             "match_wildcards": "true",
             "expand": "dns_names",
-            "limit": 10,
+            "limit": min(max(int(limit), 1), 100),
         },
     )
 
@@ -488,9 +488,57 @@ def _domain_report_uncached(domain: str) -> str:
     return "\n".join(lines)[:3800]
 
 
+def _subdomains_report_uncached(domain: str) -> str:
+    result = _safe_source(_certificates, domain, limit=100)
+    checked = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    lines = [
+        "🔎 OSINT — ALT SİTE RAPORU",
+        f"Ana domain: {domain}",
+        f"Kontrol: {checked}",
+        "Yöntem: Herkese açık sertifika kayıtları; DNS brute force veya aktif tarama yapılmadı.",
+        "",
+        "🔐 SERTİFİKA ŞEFFAFLIĞI (Cert Spotter)",
+    ]
+    if not result["ok"]:
+        lines.append(f"⚠️ Sertifika kaynağına ulaşılamadı ({result['error']}).")
+    else:
+        certificate_count, names = _cert_domains(result["data"], domain)
+        concrete_names = [
+            name for name in names
+            if not name.startswith("*.") and name != domain
+        ]
+        wildcard_names = [name for name in names if name.startswith("*.")]
+        lines.append(f"• {certificate_count} kamuya açık sertifika kaydı incelendi.")
+        if concrete_names:
+            lines.append(f"• {len(concrete_names)} farklı alt domain adı bulundu:")
+            lines.extend(f"  └ {name}" for name in concrete_names[:30])
+            if len(concrete_names) > 30:
+                lines.append(f"  └ ... ve {len(concrete_names) - 30} başka ad")
+        else:
+            lines.append("• Bu kayıtlarda belirli bir alt domain adı bulunamadı.")
+        if wildcard_names:
+            lines.append(f"• Genel wildcard kaydı: {', '.join(wildcard_names[:5])}")
+        lines.append("• Sertifika geçmişi eksik/eski olabilir; bir adresin şu an açık olduğunu göstermez.")
+
+    lines.extend([
+        "",
+        f"Kaynak: https://api.certspotter.com/v1/issuances?domain={quote(domain)}",
+        "Not: Yalnızca sahibi olduğun veya inceleme yetkin olan domainlerde kullan.",
+    ])
+    return "\n".join(lines)[:3500]
+
+
 def inspect_domain(raw: str) -> str:
     domain = normalize_domain(raw)
     return _cache_get_or_create(f"domain:{domain}", lambda: _domain_report_uncached(domain))
+
+
+def inspect_subdomains(raw: str) -> str:
+    domain = normalize_domain(raw)
+    return _cache_get_or_create(
+        f"subdomains:{domain}",
+        lambda: _subdomains_report_uncached(domain),
+    )
 
 
 def inspect_url(raw: str) -> str:

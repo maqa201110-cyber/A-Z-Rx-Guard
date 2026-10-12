@@ -3,7 +3,7 @@ name: Siber security navigation
 description: The user's chosen location for AZRxGUARD's cybersecurity tools.
 ---
 
-In AZRxGUARD, cybersecurity tools belong in a category inside the existing PRO Araçlar menu, not in a separate mode. OSINT should stay inside that security category and focus on passive public-source research for domains, public IPs, and links.
+In AZRxGUARD, cybersecurity tools belong in a category inside the existing PRO Araçlar menu, not in a separate mode. OSINT should stay inside that security category and focus on passive public-source research for domains, public IPs, links, and certificate records for authorized subdomains.
 
 **Why:** the user asked to remove the standalone mode and add OSINT inside the existing security tools category. Public reports should identify their sources and avoid presenting missing data as proof of safety.
 

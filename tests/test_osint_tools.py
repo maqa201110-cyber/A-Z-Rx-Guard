@@ -86,6 +86,28 @@ class OsintInputTests(unittest.TestCase):
             osint_tools._urlscan_ip_search("2001:4860:4860::8888")
         query.assert_called_once_with('page.ip:"2001:4860:4860::8888"')
 
+    def test_subdomain_report_lists_only_names_under_the_requested_domain(self):
+        certificates = [
+            {
+                "dns_names": [
+                    "example.com",
+                    "api.example.com",
+                    "*.example.com",
+                    "www.example.com",
+                    "example.net",
+                ]
+            }
+        ]
+        with patch("osint_tools._certificates", return_value=certificates) as lookup:
+            report = osint_tools._subdomains_report_uncached("example.com")
+
+        lookup.assert_called_once_with("example.com", limit=100)
+        self.assertIn("api.example.com", report)
+        self.assertIn("www.example.com", report)
+        self.assertIn("*.example.com", report)
+        self.assertNotIn("example.net", report)
+        self.assertIn("şu an açık olduğunu göstermez", report)
+
 
 if __name__ == "__main__":
     unittest.main()

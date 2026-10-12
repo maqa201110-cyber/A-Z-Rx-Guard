@@ -64,6 +64,7 @@ OSINT_PENDING_STATES = {
     "osint_domain_bekliyor",
     "osint_ip_bekliyor",
     "osint_url_bekliyor",
+    "osint_subdomains_bekliyor",
 }
 
 # --- AYARLAR ---
@@ -5780,6 +5781,7 @@ def osint_merkez_klavye() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("🏢 Domain Araştır", callback_data="osint_domain")],
         [InlineKeyboardButton("🌐 IP Araştır", callback_data="osint_ip")],
         [InlineKeyboardButton("🔗 Link Araştır", callback_data="osint_url")],
+        [InlineKeyboardButton("🌐 Alt Siteleri Bul", callback_data="osint_subdomains")],
         [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data="pro_siber_guvenlik")],
     ])
 
@@ -5791,6 +5793,7 @@ def osint_sonuc_klavye() -> InlineKeyboardMarkup:
             InlineKeyboardButton("🌐 Yeni IP", callback_data="osint_ip"),
         ],
         [InlineKeyboardButton("🔗 Yeni Link", callback_data="osint_url")],
+        [InlineKeyboardButton("🌐 Alt Siteleri Bul", callback_data="osint_subdomains")],
         [InlineKeyboardButton("🔎 OSINT Merkezi", callback_data="osint_menu")],
         [InlineKeyboardButton("⬅️ Siber Güvenlik", callback_data="pro_siber_guvenlik")],
     ])
@@ -5834,6 +5837,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'menu_ip_sorgu': '🌐 IP Sorgu', 'menu_hatirlat': '⏰ Hatırlatıcı',
                 'osint_menu': '🔎 OSINT Merkezi', 'osint_domain': '🏢 OSINT Domain Araştır',
                 'osint_ip': '🌐 OSINT IP Araştır', 'osint_url': '🔗 OSINT Link Araştır',
+                'osint_subdomains': '🌐 OSINT Alt Siteleri Bul',
                 'pro_hesap': '🧮 Hesap Makinesi', 'pro_hash': '🔐 Hash Üretici',
                 'pro_hava': '🌍 Hava Durumu', 'pro_doviz': '💱 Döviz Kuru',
                 'pro_saat': '🕐 Dünya Saati', 'pro_b64': '🔒 Base64',
@@ -5863,7 +5867,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if context.user_data.get("durum") in OSINT_PENDING_STATES and query.data not in {
-        "osint_domain", "osint_ip", "osint_url"
+        "osint_domain", "osint_ip", "osint_url", "osint_subdomains"
     }:
         context.user_data["durum"] = None
 
@@ -6127,7 +6131,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=osint_merkez_klavye(),
             parse_mode='Markdown'
         )
-    elif query.data in ('osint_domain', 'osint_ip', 'osint_url'):
+    elif query.data in ('osint_domain', 'osint_ip', 'osint_url', 'osint_subdomains'):
         prompt_by_callback = {
             'osint_domain': (
                 'osint_domain_bekliyor',
@@ -6146,6 +6150,12 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "🔗 **LINK ARAŞTIR**\n\n"
                 "Herkese açık bir link gönder:\n`https://example.com`\n\n"
                 "Bot sayfayı açmaz; yalnızca domaini kamu kaynaklarında arar. Linkin yolu ve parametreleri taranmaz veya paylaşılmaz."
+            ),
+            'osint_subdomains': (
+                'osint_subdomains_bekliyor',
+                "🌐 **BAĞLI ALT SİTELERİ BUL**\n\n"
+                "Sahibi olduğun veya inceleme yetkin olan ana domaini yaz:\n`example.com`\n\n"
+                "Yalnızca herkese açık sertifika kayıtlarına bakılır; alt sitelere bağlanılmaz veya tarama yapılmaz."
             ),
         }
         state, prompt = prompt_by_callback[query.data]
@@ -9308,6 +9318,7 @@ async def gelen_mesajlari_yonet(update: Update, context: ContextTypes.DEFAULT_TY
             "osint_domain_bekliyor": _osint_tools.inspect_domain,
             "osint_ip_bekliyor": _osint_tools.inspect_ip,
             "osint_url_bekliyor": _osint_tools.inspect_url,
+            "osint_subdomains_bekliyor": _osint_tools.inspect_subdomains,
         }
         try:
             rapor = await asyncio.to_thread(sorgu_fonksiyonlari[osint_state], sorgu)
