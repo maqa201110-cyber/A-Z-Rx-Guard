@@ -8,6 +8,7 @@ import html
 import re
 import threading
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from urllib.parse import quote, urlsplit
@@ -145,7 +146,7 @@ def normalize_gmail(raw: str) -> str:
     if value.count("@") != 1:
         raise OsintInputError("E-posta biçimi geçersiz. Örnek: adın@gmail.com")
     local, domain = value.rsplit("@", 1)
-    domain = domain.lower().rstrip(".")
+    domain = domain.lower()
     if domain not in {"gmail.com", "googlemail.com"}:
         raise OsintInputError("Yalnızca @gmail.com veya @googlemail.com adresleri kabul edilir.")
     if (
@@ -274,12 +275,22 @@ def _wikipedia_search(language: str, name: str):
         params={
             "action": "query",
             "list": "search",
-            "srsearch": name,
-            "srlimit": 5,
+            "srsearch": f'"{name}"',
+            "srlimit": 10,
             "format": "json",
             "utf8": 1,
         },
     )
+
+
+def _name_title_matches(name: str, title: str) -> bool:
+    def terms(value: str) -> set[str]:
+        decomposed = unicodedata.normalize("NFKD", value.casefold())
+        unaccented = "".join(char for char in decomposed if not unicodedata.combining(char))
+        return set(re.findall(r"[^\W_]+", unaccented, flags=re.UNICODE))
+
+    name_terms = terms(name)
+    return len(name_terms) <= 1 or name_terms.issubset(terms(title))
 
 
 def _cache_get_or_create(key: str, builder) -> str:
@@ -659,13 +670,21 @@ def inspect_name(raw: str) -> str:
         if not isinstance(matches, list) or not matches:
             lines.append("• Eşleşen kamuya açık makale bulunamadı.")
             continue
-        for match in matches[:5]:
+        shown = 0
+        for match in matches:
             if not isinstance(match, dict) or not match.get("title"):
                 continue
             title = html.unescape(re.sub(r"<[^>]*>", "", str(match["title"])))[:180]
+            if not _name_title_matches(name, title):
+                continue
             page_path = quote(str(match["title"]).replace(" ", "_"), safe="()_-")
             lines.append(f"• {title}: https://{language}.wikipedia.org/wiki/{page_path}")
             any_result = True
+            shown += 1
+            if shown >= 5:
+                break
+        if shown == 0:
+            lines.append("• İsimle eşleşen makale başlığı bulunamadı.")
     if not any_result:
         lines.extend(["", "Bu iki aramada sonuç çıkmaması, kişi veya markanın internette bulunmadığını kanıtlamaz."])
     lines.extend([
