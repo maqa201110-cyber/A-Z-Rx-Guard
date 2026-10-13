@@ -19,6 +19,7 @@ import shutil
 import urllib.parse
 import time
 import osint_tools as _osint_tools
+import guard_center as _guard_center
 
 try:
     from akinator.async_client import AsyncAkinator as _AsyncAkinator
@@ -5763,6 +5764,7 @@ def siber_101_klavye() -> InlineKeyboardMarkup:
 def pro_siber_guvenlik_klavye(strings) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("📘 Siber Güvenlik 101", callback_data='siber101')],
+        [InlineKeyboardButton("🛡️ Koruma Merkezi", callback_data='koruma_menu')],
         [InlineKeyboardButton("🔎 OSINT Merkezi", callback_data='osint_menu')],
         [InlineKeyboardButton(strings.get('btn_ip_sorgu', '🌐 IP Sorgu'), callback_data='menu_ip_sorgu'),
          InlineKeyboardButton('📋 TG Kanalı Bilgisi', callback_data='menu_panel')],
@@ -5818,6 +5820,89 @@ async def siber_101_goster(query, konu: str) -> None:
     )
 
 
+def koruma_merkezi_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("✅ Hesap Güvenliği Kontrolü", callback_data='koruma_accounts')],
+        [InlineKeyboardButton("🆘 Acil Siber Yardım", callback_data='koruma_emergency')],
+        [InlineKeyboardButton("🎯 Dolandırıcılığı Tanı Testi", callback_data='koruma_quiz_start')],
+        [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data='pro_siber_guvenlik')],
+    ])
+
+
+def koruma_hesap_secim_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✈️ Telegram", callback_data='koruma_platform_tg'),
+            InlineKeyboardButton("📸 Instagram", callback_data='koruma_platform_instagram'),
+        ],
+        [InlineKeyboardButton("📧 Gmail / Google", callback_data='koruma_platform_gmail')],
+        [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+    ])
+
+
+def koruma_hesap_klavye(platform: str, completed_indices) -> InlineKeyboardMarkup:
+    items = _guard_center.ACCOUNT_CHECKLISTS[platform]["items"]
+    completed = {
+        index for index in completed_indices
+        if isinstance(index, int) and 0 <= index < len(items)
+    }
+    rows = []
+    for index, (title, _details) in enumerate(items):
+        status = "✅" if index in completed else "⬜"
+        rows.append([
+            InlineKeyboardButton(
+                f"{status} {index + 1}. {title}",
+                callback_data=f'koruma_toggle_{platform}_{index}',
+            )
+        ])
+    rows.extend([
+        [InlineKeyboardButton("🔁 Başka hesap seç", callback_data='koruma_accounts')],
+        [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+    ])
+    return InlineKeyboardMarkup(rows)
+
+
+def koruma_acil_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🚨 Hesabıma başkası girdi", callback_data='koruma_emergency_account_hacked')],
+        [InlineKeyboardButton("⚠️ Şüpheli giriş bildirimi", callback_data='koruma_emergency_suspicious_login')],
+        [InlineKeyboardButton("🔗 Linke girdim / kod paylaştım", callback_data='koruma_emergency_shared_secret')],
+        [InlineKeyboardButton("📱 Telefonum kayboldu", callback_data='koruma_emergency_lost_device')],
+        [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+    ])
+
+
+def koruma_acil_sonuc_klavye() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🆘 Başka durum seç", callback_data='koruma_emergency')],
+        [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+    ])
+
+
+def koruma_quiz_klavye(soru_no: int) -> InlineKeyboardMarkup:
+    soru = _guard_center.SCAM_QUIZ[soru_no]
+    rows = [
+        [InlineKeyboardButton(
+            f"{chr(65 + index)}. {option}",
+            callback_data=f'koruma_quiz_answer_{soru_no}_{index}',
+        )]
+        for index, option in enumerate(soru["options"])
+    ]
+    rows.append([InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')])
+    return InlineKeyboardMarkup(rows)
+
+
+def koruma_quiz_sorusu(soru_no: int) -> str:
+    soru = _guard_center.SCAM_QUIZ[soru_no]
+    return (
+        f"🎯 DOLANDIRICILIĞI TANI — {soru_no + 1}/{len(_guard_center.SCAM_QUIZ)}\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "Örnek durum:\n"
+        f"{soru['question']}\n\n"
+        "En güvenli seçeneği seç:"
+    )
+
+
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -5828,6 +5913,11 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ):
         await query.answer("OSINT araçları yalnızca botla özel mesajda kullanılabilir.", show_alert=True)
         return
+    if query.data.startswith("koruma_") and (
+        query.message is None or query.message.chat.type != "private"
+    ):
+        await query.answer("Koruma Merkezi yalnızca botla özel mesajda kullanılabilir.", show_alert=True)
+        return
     # Akinator callback'leri kendi sonuçlarına göre cevap verir; diğerleri
     # burada tek seferde onaylanır.
     if not query.data.startswith(('aki_baslat', 'aki_play_', 'aki_win_', 'mar_')):
@@ -5835,7 +5925,7 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ── Her buton basışını logla ──────────────────────────────
     _SESSIZ_CALLBACKLER = {'noop', 'go_home', 'bot_yazi_tipi', 'menu_lang', 'menu_bot_ayarlari'}
-    if query.data not in _SESSIZ_CALLBACKLER:
+    if query.data not in _SESSIZ_CALLBACKLER and not query.data.startswith("koruma_"):
         try:
             # Callback verisinden okunabilir buton adı üret
             _cb_etiket = {
@@ -7047,6 +7137,150 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("⬅️ Siber Güvenlik Araçları", callback_data='pro_siber_guvenlik')],
             ]),
             parse_mode='Markdown',
+        )
+
+    elif query.data == 'koruma_menu':
+        await query.edit_message_text(
+            "🛡️ **KORUMA MERKEZİ**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Hesaplarını güvene almayı ve dolandırıcılık işaretlerini kolayca öğren.\n\n"
+            "• Şifre veya doğrulama kodu istemiyoruz.\n"
+            "• Kontrol listesi hesabını otomatik taramaz; yalnızca kendi işaretlemendir.\n"
+            "• Bu bölüm botla özel mesajda kullanılır.",
+            reply_markup=koruma_merkezi_klavye(),
+            parse_mode='Markdown',
+        )
+    elif query.data == 'koruma_accounts':
+        await query.edit_message_text(
+            "✅ **HESAP GÜVENLİĞİ KONTROLÜ**\n\n"
+            "Hangi hesabı kontrol etmek istiyorsun? Her maddeye dokunarak kendi durumunu işaretleyebilirsin.",
+            reply_markup=koruma_hesap_secim_klavye(),
+            parse_mode='Markdown',
+        )
+    elif query.data.startswith('koruma_platform_'):
+        platform = query.data.removeprefix('koruma_platform_')
+        if platform not in _guard_center.ACCOUNT_CHECKLISTS:
+            return
+        all_checks = context.user_data.setdefault('koruma_checklists', {})
+        completed = all_checks.get(platform, [])
+        await query.edit_message_text(
+            _guard_center.checklist_report(platform, completed),
+            reply_markup=koruma_hesap_klavye(platform, completed),
+            disable_web_page_preview=True,
+        )
+    elif query.data.startswith('koruma_toggle_'):
+        _prefix, _kind, platform, raw_index = query.data.split('_', 3)
+        if platform not in _guard_center.ACCOUNT_CHECKLISTS or not raw_index.isdigit():
+            return
+        index = int(raw_index)
+        items = _guard_center.ACCOUNT_CHECKLISTS[platform]["items"]
+        if index >= len(items):
+            return
+        all_checks = context.user_data.setdefault('koruma_checklists', {})
+        completed = set(all_checks.get(platform, []))
+        if index in completed:
+            completed.remove(index)
+        else:
+            completed.add(index)
+        all_checks[platform] = sorted(completed)
+        await query.edit_message_text(
+            _guard_center.checklist_report(platform, completed),
+            reply_markup=koruma_hesap_klavye(platform, completed),
+            disable_web_page_preview=True,
+        )
+    elif query.data == 'koruma_emergency':
+        await query.edit_message_text(
+            "🆘 **ACİL SİBER YARDIM**\n\n"
+            "Yaşadığın duruma en yakın seçeneği seç. Adımları sırayla uygula ve yalnızca resmî uygulama/destek kanallarını kullan.",
+            reply_markup=koruma_acil_klavye(),
+            parse_mode='Markdown',
+        )
+    elif query.data.startswith('koruma_emergency_'):
+        guide_id = query.data.removeprefix('koruma_emergency_')
+        if guide_id not in _guard_center.EMERGENCY_GUIDES:
+            return
+        await query.edit_message_text(
+            _guard_center.emergency_report(guide_id),
+            reply_markup=koruma_acil_sonuc_klavye(),
+            disable_web_page_preview=True,
+        )
+    elif query.data == 'koruma_quiz_start':
+        context.user_data['koruma_quiz_state'] = {
+            'index': 0,
+            'score': 0,
+            'answered': False,
+        }
+        await query.edit_message_text(
+            "🎯 **DOLANDIRICILIĞI TANI TESTİ**\n\n"
+            "5 kısa örnek göreceksin. Her soruda en güvenli cevabı seç; sonunda doğru sayını ve açıklamaları göreceksin.\n"
+            "Örnekler eğitim amaçlıdır; gerçek mesaj veya kişisel bilgi gönderme.",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("▶️ Teste başla", callback_data='koruma_quiz_begin')],
+                [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+            ]),
+            parse_mode='Markdown',
+        )
+    elif query.data == 'koruma_quiz_begin':
+        state = context.user_data.get('koruma_quiz_state')
+        if not isinstance(state, dict) or state.get('index') != 0 or state.get('answered'):
+            return
+        await query.edit_message_text(
+            koruma_quiz_sorusu(0),
+            reply_markup=koruma_quiz_klavye(0),
+        )
+    elif query.data == 'koruma_quiz_next':
+        state = context.user_data.get('koruma_quiz_state')
+        if not isinstance(state, dict) or not state.get('answered'):
+            return
+        next_index = state['index'] + 1
+        if next_index >= len(_guard_center.SCAM_QUIZ):
+            score = state['score']
+            total = len(_guard_center.SCAM_QUIZ)
+            context.user_data.pop('koruma_quiz_state', None)
+            await query.edit_message_text(
+                f"🏁 **TEST TAMAMLANDI**\n\n"
+                f"Sonuç: **{score}/{total}** doğru.\n\n"
+                "Bu puan hesabının güvenli olduğunu ölçmez. Şüpheli bir durumda resmi uygulamadan kontrol et ve kodlarını kimseyle paylaşma.",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("🔁 Yeniden oyna", callback_data='koruma_quiz_start')],
+                    [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+                ]),
+                parse_mode='Markdown',
+            )
+        else:
+            state['index'] = next_index
+            state['answered'] = False
+            await query.edit_message_text(
+                koruma_quiz_sorusu(next_index),
+                reply_markup=koruma_quiz_klavye(next_index),
+            )
+    elif query.data.startswith('koruma_quiz_answer_'):
+        parts = query.data.split('_')
+        if len(parts) != 5 or not parts[3].isdigit() or not parts[4].isdigit():
+            return
+        question_index, choice_index = int(parts[3]), int(parts[4])
+        state = context.user_data.get('koruma_quiz_state')
+        if (
+            not isinstance(state, dict)
+            or state.get('index') != question_index
+            or state.get('answered')
+            or question_index >= len(_guard_center.SCAM_QUIZ)
+        ):
+            return
+        question = _guard_center.SCAM_QUIZ[question_index]
+        if choice_index >= len(question["options"]):
+            return
+        correct = choice_index == question["answer"]
+        if correct:
+            state['score'] += 1
+        state['answered'] = True
+        result = "✅ Doğru cevap!" if correct else "🟡 Bu seçenek güvenli değil."
+        await query.edit_message_text(
+            f"{result}\n\n💡 {question['explanation']}",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("➡️ Devam et", callback_data='koruma_quiz_next')],
+                [InlineKeyboardButton("⬅️ Koruma Merkezi", callback_data='koruma_menu')],
+            ]),
         )
 
     elif query.data == 'menu_video_indir':
